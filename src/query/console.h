@@ -1,0 +1,52 @@
+#ifndef __GSQUERY__CONSOLE_H__
+#define __GSQUERY__CONSOLE_H__
+
+#include <glib.h>
+#include <glib-object.h>
+
+G_BEGIN_DECLS
+
+
+#define GSQ_TYPE_CONSOLE			(gsq_console_get_type ())
+#define GSQ_CONSOLE(obj)			(G_TYPE_CHECK_INSTANCE_CAST ((obj), GSQ_TYPE_CONSOLE, GsqConsole))
+#define GSQ_IS_CONSOLE(obj)			(G_TYPE_CHECK_INSTANCE_TYPE ((obj), GSQ_TYPE_CONSOLE))
+#define GSQ_CONSOLE_CLASS(klass)	(G_TYPE_CHECK_CLASS_CAST ((klass), GSQ_TYPE_CONSOLE, GsqConsoleClass))
+#define GSQ_IS_CONSOLE_CLASS(klass)	(G_TYPE_CHECK_CLASS_TYPE ((klass), GSQ_TYPE_CONSOLE))
+#define GSQ_CONSOLE_GET_CLASS(obj)	(G_TYPE_INSTANCE_GET_CLASS ((obj), GSQ_TYPE_CONSOLE, GsqConsoleClass))
+
+typedef struct _GsqConsole			GsqConsole;
+typedef struct _GsqConsolePrivate	GsqConsolePrivate;
+typedef struct _GsqConsoleClass		GsqConsoleClass;
+
+struct _GsqConsole {
+	GObject parent_instance;
+	GsqConsolePrivate *priv;
+};
+
+struct _GsqConsoleClass {
+	GObjectClass parent_class;
+	
+	void (*connect) (GsqConsole *console);
+	void (*disconnect) (GsqConsole *console);
+	void (*respond) (GsqConsole *console, const gchar *msg);
+	void (*error) (GsqConsole *console, const gchar *msg);
+};
+
+GType gsq_console_get_type (void) G_GNUC_CONST;
+GsqConsole* gsq_console_new (const gchar *address);
+
+void gsq_console_connect (GsqConsole *console);
+gboolean gsq_console_is_connected (GsqConsole *console);
+void gsq_console_disconnect (GsqConsole *console);
+
+void gsq_console_set_password (GsqConsole *console, const gchar *password);
+const gchar *gsq_console_get_password (GsqConsole *console);
+
+void gsq_console_set_keep_alive (GsqConsole *console, gboolean keep_alive);
+gboolean gsq_console_get_keep_alive (GsqConsole *console);
+
+void gsq_console_send (GsqConsole *console, const gchar *command);
+
+G_END_DECLS
+
+#endif
