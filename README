@@ -1,0 +1,10 @@
+
+
+Installation:
+  cmake -D CMAKE_BUILD_TYPE=Release CMakeLists.txt
+  make
+  make install
+
+  
+On MinGW:
+  $ cmake -G "MSYS Makefiles" -D CMAKE_BUILT_TYPE=Release CMakeLists.txt

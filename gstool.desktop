@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Game Server Tool
+Comment=A simple game server browser and an administrative tool
+Exec=gstool
+Icon=gstool
+Terminal=false
+Type=Application
+Categories=Network;
+StartupNotify=true
