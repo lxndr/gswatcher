@@ -213,8 +213,10 @@ gui_blist_clicked (GtkTreeView *treeview, GdkEventButton *event, gpointer udata)
 	if (!gtk_tree_view_get_path_at_pos (treeview, event->x, event->y, &path,
 			&column, NULL, NULL))
 		return FALSE;
-	if (strcmp (gtk_tree_view_column_get_title (column), "") != 0)
+	if (strcmp (gtk_tree_view_column_get_title (column), "") != 0) {
+		gtk_tree_path_free (path);
 		return FALSE;
+	}
 	
 	gchar *name;
 	GtkTreeIter iter;
