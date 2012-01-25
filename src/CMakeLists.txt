@@ -11,9 +11,13 @@ else ()
 	set (GS_LIBRARIES m)
 endif ()
 
+set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -DDEBUG")
+
+set (CMAKE_C_FLAGS_PROFILE "${CMAKE_C_FLAGS_DEBUG} -pg")
+set (CMAKE_EXE_LINKER_FLAGS_PROFILE "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -pg")
 
 include_directories (${GTK_INCLUDE_DIRS} ${CANBERRA_INCLUDE_DIRS})
-add_definitions (-Wall
+add_definitions (
 		-DGETTEXT_PACKAGE=\"gstool\"
 		-DGS_VERSION=\"${GS_VERSION}\")
 if (CMAKE_INSTALL_DATADIR)
