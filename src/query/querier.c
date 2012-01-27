@@ -106,7 +106,7 @@ gsq_querier_clear (GsqQuerier *querier)
 	priv->ping = 0;
 	
 	priv->newplayers = NULL;
-	g_signal_emit_by_name (querier, "players-update", 0);
+	gsq_querier_players_updated (querier);
 }
 
 
@@ -142,6 +142,7 @@ gsq_querier_finalize (GObject *object)
 	g_timer_destroy (querier->priv->timer);
 	gsq_querier_clear (querier);
 	gsq_safefree (querier->priv->address);
+	g_hash_table_destroy (querier->priv->extra);
 	
 	if (G_OBJECT_CLASS (gsq_querier_parent_class)->finalize)
 		G_OBJECT_CLASS (gsq_querier_parent_class)->finalize (object);
