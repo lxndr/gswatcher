@@ -594,7 +594,7 @@ gsq_querier_players_updated (GsqQuerier *querier)
 }
 
 
-static gboolean
+static inline gboolean
 gsq_socket_equal (GInetAddress *addr1, GInetAddress *addr2)
 {
 	if (!(addr1 && addr2 && g_inet_address_get_family (addr1) == g_inet_address_get_family (addr2)))
@@ -633,8 +633,8 @@ gsq_socket_recveived (GSocket *socket, GIOCondition condition, gpointer udata)
 	GList *iter = servers;
 	while (iter) {
 		GsqQuerier *querier = iter->data;
-		if (gsq_socket_equal (querier->priv->iaddr, iaddr) &&
-				querier->priv->port == port) {
+		if (querier->priv->port == port &&
+				gsq_socket_equal (querier->priv->iaddr, iaddr)) {
 			gsq_querier_process (querier, data, length);
 			break;
 		}
