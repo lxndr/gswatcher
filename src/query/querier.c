@@ -427,7 +427,8 @@ gsq_querier_resolved (GResolver *resolver, GAsyncResult *result, GsqQuerier *que
 static void
 gsq_querier_resolve (GsqQuerier *querier)
 {
-	GRegex *regex = g_regex_new ("^((?:\\[?(?:[\\da-f]){0,4}(?::[\\da-f]{0,4}){1,7}\\]?)"
+	GRegex *regex = g_regex_new (
+			"^((?:\\[?(?:[\\da-f]){0,4}(?::[\\da-f]{0,4}){1,7}\\]?)"
 			"|(?:(?:\\d{1,3}\\.){3}\\d{1,3})|(?:[\\w.~-]+))(?::(\\d{0,5}))?"
 			"(?::(\\d{0,5}))?$", G_REGEX_CASELESS | G_REGEX_EXTENDED, 0, NULL);
 	gchar **tokens = g_regex_split (regex, querier->priv->address, 0);
@@ -597,7 +598,8 @@ gsq_querier_players_updated (GsqQuerier *querier)
 static inline gboolean
 gsq_socket_equal (GInetAddress *addr1, GInetAddress *addr2)
 {
-	if (!(addr1 && addr2 && g_inet_address_get_family (addr1) == g_inet_address_get_family (addr2)))
+	if (!(addr1 && addr2 && g_inet_address_get_family (addr1) ==
+			g_inet_address_get_family (addr2)))
 		return FALSE;
 	
 	gsize size = g_inet_address_get_native_size (addr1);

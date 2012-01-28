@@ -373,8 +373,9 @@ gsq_source_process (GsqQuerier *querier, const gchar *data, gssize size)
 			priv->reqid = reqid;
 		}
 		
-		g_array_index (priv->packets, Packet, numpacket).length = length;
-		g_array_index (priv->packets, Packet, numpacket).data = g_slice_copy (length, p);
+		Packet *pkt = &g_array_index (priv->packets, Packet, numpacket);
+		pkt->length = length;
+		pkt->data = g_slice_copy (length, p);
 		
 		if (got_all_packets (priv->packets, maxpackets)) {
 			gsize datasize;

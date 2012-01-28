@@ -65,7 +65,8 @@ source_recv_packet (GSocket *socket, gint32 *id, gint32 *type, gchar *buffer,
 		return FALSE;
 	*type = GINT32_FROM_LE (*type);
 	if (!(*type == 0 || *type == 2)) {
-		g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_INVALID_DATA, "The server has sent an incorrect package");
+		g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_INVALID_DATA,
+				"The server has sent an incorrect package");
 		return FALSE;
 	}
 	
