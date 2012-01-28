@@ -93,7 +93,7 @@ gsq_source_query (GsqQuerier *querier)
 }
 
 
-static gint8
+static inline gint8
 get_byte (gchar **p)
 {
 	gint8 v = * (gint8 *) *p;
@@ -101,7 +101,7 @@ get_byte (gchar **p)
 	return v;
 }
 
-static gint16
+static inline gint16
 get_short (gchar **p)
 {
 	gint16 v = * (gint16 *) *p;
@@ -109,7 +109,7 @@ get_short (gchar **p)
 	return GINT16_FROM_LE (v);
 }
 
-static gint32
+static inline gint32
 get_long (gchar **p)
 {
 	gint32 v = * (gint32 *) *p;
@@ -128,7 +128,7 @@ get_longlong (gchar **p)
 }
 */
 
-static gfloat
+static inline gfloat
 get_float (gchar **p)
 {
 	gfloat v = * (gfloat *) *p;
