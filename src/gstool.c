@@ -552,8 +552,7 @@ main (int argc, char **argv)
 	gs_load_preferences ();
 	gs_load_buddy_list ();
 	
-	if (debug)
-		gsq_querier_set_debug_mode (TRUE);
+	gsq_querier_set_debug_mode (debug);
 	
 	if (servers) {
 		add_servers (servers);
