@@ -340,14 +340,27 @@ add_servers (gchar **servers)
 }
 
 
-void
-gs_remove_server (GsClient *client)
+static void
+remove_server (GsClient *client)
 {
 	if (iserver && client == iserver->data)
 		iserver = g_list_next (iserver);
 	servers = g_list_remove (servers, client);
 	g_object_unref (client);
 	update_timer ();
+}
+
+static void
+free_server_list ()
+{
+	while (servers)
+		remove_server (servers->data);
+}
+
+void
+gs_remove_server (GsClient *client)
+{
+	remove_server (client);
 	gs_save_server_list ();
 }
 
@@ -559,6 +572,10 @@ main (int argc, char **argv)
 	gs_save_preferences ();
 	
 	/* let's do it beautifully */
+	free_server_list ();
+	if (timer)
+		g_source_remove (timer);
+	g_hash_table_destroy (buddies);
 	gui_window_destroy ();
 	
 	return 0;

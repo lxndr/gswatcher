@@ -65,6 +65,7 @@ gs_client_finalize (GObject *object)
 		g_free (client->game);
 	if (client->version)
 		g_free (client->version);
+	g_object_unref (client->querier);
 	
 	g_object_unref (client->console_buffer);
 	g_object_unref (client->console_history);
