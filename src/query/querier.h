@@ -90,8 +90,11 @@ glong gsq_querier_get_ping (GsqQuerier *querier);
 GList *gsq_querier_get_players (GsqQuerier *querier);
 GsqPlayer *gsq_querier_find_player (GsqQuerier *querier, const gchar *name);
 
+
 void gsq_querier_set_debug_mode (gboolean enable);
 gboolean gsq_querier_get_debug_mode ();
+guint16 gsq_querier_get_ipv4_socket_port ();
+guint16 gsq_querier_get_ipv6_socket_port ();
 
 
 G_END_DECLS
