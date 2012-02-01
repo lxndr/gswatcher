@@ -230,7 +230,7 @@ get_server_info (GsqQuerier *querier, gchar *p)
 		default: gsq_querier_set_game (querier, ""); break;
 	}
 	
-	g_signal_emit_by_name (querier, "info-update", 0);
+	gsq_querier_emit_info_update (querier);
 }
 
 static void
@@ -271,6 +271,9 @@ get_server_info_gold (GsqQuerier *querier, gchar *p)
 		case 'p': gsq_querier_set_extra (querier, "type", "SourceTV"); break;
 		default:  gsq_querier_set_extra (querier, "type", "");
 	}
+	
+	gsq_querier_set_game (querier, "");
+	gsq_querier_emit_info_update (querier);
 }
 
 static void
@@ -287,7 +290,7 @@ get_player_list (GsqQuerier *querier, gchar *p)
 		gsq_querier_add_player (querier, nickname, kills, time);
 	}
 	
-	g_signal_emit_by_name (querier, "players-update", 0);
+	gsq_querier_emit_player_update (querier);
 }
 
 
@@ -315,7 +318,7 @@ source_process2 (GsqQuerier *querier, gchar *p)
 		get_player_list (querier, p);
 		break;
 	case 'R':
-		g_signal_emit_by_name (querier, "log", 0, p);
+		gsq_querier_emit_log (querier, p);
 		break;
 	default:
 		return FALSE;
