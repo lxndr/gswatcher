@@ -329,6 +329,25 @@ gsq_querier_new (const gchar *address)
 }
 
 
+void
+gsq_querier_emit_info_update (GsqQuerier *querier)
+{
+	g_signal_emit (querier, signals[SIGNAL_INFO_UPDATE], 0);
+}
+
+void
+gsq_querier_emit_player_update (GsqQuerier *querier)
+{
+	g_signal_emit (querier, signals[SIGNAL_PLAYERS_UPDATE], 0);
+}
+
+void
+gsq_querier_emit_log (GsqQuerier *querier, const gchar *msg)
+{
+	g_signal_emit (querier, signals[SIGNAL_LOG], 0, msg);
+}
+
+
 const gchar *
 gsq_querier_get_address (GsqQuerier *querier)
 {

@@ -49,6 +49,10 @@ void gsq_querier_set_version (GsqQuerier *querier, const gchar *value);
 void gsq_querier_set_extra (GsqQuerier *querier, const gchar *key,
 		const gchar *value);
 
+void gsq_querier_emit_info_update (GsqQuerier *querier);
+void gsq_querier_emit_player_update (GsqQuerier *querier);
+void gsq_querier_emit_log (GsqQuerier *querier, const gchar *msg);
+
 
 G_END_DECLS
 
