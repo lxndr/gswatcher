@@ -470,34 +470,16 @@ gsq_querier_resolved (GResolver *resolver, GAsyncResult *result, GsqQuerier *que
 static void
 gsq_querier_resolve (GsqQuerier *querier)
 {
-	GRegex *regex = g_regex_new (
-			"^((?:\\[?(?:[\\da-f]){0,4}(?::[\\da-f]{0,4}){1,7}\\]?)"
-			"|(?:(?:\\d{1,3}\\.){3}\\d{1,3})|(?:[\\w.~-]+))(?::(\\d{0,5}))?"
-			"(?::(\\d{0,5}))?$", G_REGEX_CASELESS | G_REGEX_EXTENDED, 0, NULL);
-	gchar **tokens = g_regex_split (regex, querier->priv->address, 0);
-	if (tokens[1]) {
-		gchar *host, *tmp = tokens[1];
-		gint len = strlen (tmp);
-		if (tmp[0] == '[' && tmp[len - 1] == ']') // if the address has the [] pair
-			host = g_strndup (tmp + 1, len - 2);
-		else
-			host = g_strdup (tmp);
-		
-		GResolver *resolver = g_resolver_get_default ();
-		g_resolver_lookup_by_name_async (resolver, host, querier->priv->cancellable,
-				(GAsyncReadyCallback) gsq_querier_resolved, querier);
-		g_free (host);
-		g_object_unref (resolver);
-		
-		if (tokens[2]) {
-			querier->priv->port = atoi (tokens[2]);
-			if (querier->priv->port == 0)
-				querier->priv->port = 27015;
-		}
-	}
+	guint16 port;
+	gchar *host = gsq_parse_address (querier->priv->address, &port, NULL);
 	
-	g_strfreev (tokens);
-	g_regex_unref (regex);
+	querier->priv->port = port == 0 ? 27015 : port;
+	
+	GResolver *resolver = g_resolver_get_default ();
+	g_resolver_lookup_by_name_async (resolver, host, querier->priv->cancellable,
+			(GAsyncReadyCallback) gsq_querier_resolved, querier);
+	g_free (host);
+	g_object_unref (resolver);
 }
 
 

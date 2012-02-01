@@ -22,6 +22,8 @@
 
 
 
+#include <stdlib.h>
+#include <string.h>
 #include <glib/gprintf.h>
 #include "utils.h"
 
@@ -71,4 +73,57 @@ gsq_print_dump (const gchar *data, gsize length)
 		
 		p += len;
 	}
+}
+
+
+gchar *
+gsq_parse_address (const gchar *addr, guint16 *port, guint16 *port2)
+{
+	g_return_val_if_fail (addr != NULL, NULL);
+	
+	gchar *p = (gchar *) addr, *host = NULL, *f;
+	if (port)
+		*port = 0;
+	if (port2)
+		*port2 = 0;
+	
+	// host name
+	if (*p == '[') {	// most likely IPv6
+		p++;
+		f = strchr (p, ']');
+		if (f) {
+			host = g_strndup (p, f - p);
+			p = f + 1;
+			if (*p == ':')
+				p++;
+		} else {
+			// error: missing ']'
+		}
+	} else {
+		f = strchr (p, ':');
+		if (f) {
+			if (f[1] == ':') {	// '::' looks like IPv6 with no port(s)
+				return g_strdup (addr);
+			} else {			// either Name or IPv4 with port(s)
+				host = g_strndup (p, f - p);
+				p = f + 1;
+			}
+		} else {		// anything with no port(s)
+			return g_strdup (addr);
+		}
+	}
+	
+	// port(s)
+	f = strchr (p, ':');
+	if (f) {	// there is port2
+		if (port)
+			*port = atoi (p);
+		if (port2)
+			*port2 = atoi (f + 1);
+	} else {	// port only
+		if (port)
+			*port = atoi (p);
+	}
+	
+	return host;
 }
