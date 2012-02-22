@@ -347,13 +347,13 @@ gui_window_create ()
 	g_object_ref_sink (console_toolbar);
 	
 /* log */
-/*	GtkWidget *log = gs_log_create ();
+	GtkWidget *log = gui_log_create ();
 	
 	GtkWidget *log_label = gtk_label_new (_("Log"));
 	gtk_widget_show (log_label);
 	
-	log_toolbar = gs_log_create_bar ();
-	g_object_ref_sink (log_toolbar);*/
+	log_toolbar = gui_log_create_bar ();
+	g_object_ref_sink (log_toolbar);
 	
 /* chat */
 	/* TODO */
@@ -362,7 +362,7 @@ gui_window_create ()
 	GtkWidget *tools = gtk_notebook_new ();
 	gtk_notebook_append_page (GTK_NOTEBOOK (tools), infobox, infobox_label);
 	gtk_notebook_append_page (GTK_NOTEBOOK (tools), console, console_label);
-	// gtk_notebook_append_page (GTK_NOTEBOOK (tools), log, log_label);
+	gtk_notebook_append_page (GTK_NOTEBOOK (tools), log, log_label);
 	// gtk_notebook_append_page (GTK_NOTEBOOK (tools), chat, chat_label);
 	gtk_notebook_set_action_widget (GTK_NOTEBOOK (tools), infobox_toolbar,
 			GTK_PACK_END);
@@ -426,7 +426,7 @@ gui_window_destroy ()
 	g_object_unref (trayicon);
 	g_object_unref (infobox_toolbar);
 	g_object_unref (console_toolbar);
-//	g_object_unref (log_toolbar);
-//	g_object_unref (chat_toolbar);
+	g_object_unref (log_toolbar);
+	// g_object_unref (chat_toolbar);
 	gtk_widget_destroy (window);
 }

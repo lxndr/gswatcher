@@ -56,5 +56,9 @@ GsClient* gs_client_new (const gchar *address);
 
 void gs_client_send_command (GsClient* client, const gchar *cmd);
 
+void gs_client_set_logaddress (const gchar *address);
+gchar *gs_client_get_logaddress ();
+void gs_client_enable_log (GsClient *client, gboolean enable);
+
 
 #endif
