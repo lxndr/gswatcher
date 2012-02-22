@@ -21,6 +21,7 @@
 #include "platform.h"
 #include "gui-server-list.h"
 #include "gui-console.h"
+#include "gui-log.h"
 #include "gui-window.h"
 #include "gui-player-list.h"
 #include "gui-info.h"
@@ -199,6 +200,7 @@ gui_slist_selection_changed (GtkTreeSelection *selection, gpointer udata)
 	gui_info_update (selected);
 	gui_plist_update (selected);
 	gs_console_set (selected);
+	gui_log_set (selected);
 }
 
 

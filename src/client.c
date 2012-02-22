@@ -1,15 +1,19 @@
 #include <GeoIP.h>
+#include "query/utils.h"
 #include "gui-console.h"
+#include "gui-log.h"
 #include "client.h"
 
 
 static GeoIP *geoip;
 static GHashTable *gamelist;
+static gchar *logaddress;
 
 
 static void gs_client_finalize (GObject *object);
 static void gs_client_querier_resolved (GsqQuerier *querier, GsClient *client);
 static void gs_client_querier_info_updated (GsqQuerier *querier, GsClient *client);
+static void gs_client_querier_log (GsqQuerier *querier, const gchar *msg, GsClient *client);
 static void gs_client_console_connect (GsqConsole *console, GsClient *client);
 static void gs_client_console_disconnect (GsqConsole *console, GsClient *client);
 static void gs_client_console_respond (GsqConsole *console, const gchar *msg, GsClient *client);
@@ -67,9 +71,12 @@ gs_client_finalize (GObject *object)
 		g_free (client->version);
 	g_object_unref (client->querier);
 	
+	// gs_client_enable_log (client, FALSE);
 	g_object_unref (client->console_buffer);
 	g_object_unref (client->console_history);
 	g_object_unref (client->console);
+	
+	g_object_unref (client->log_buffer);
 	
 	G_OBJECT_CLASS (gs_client_parent_class)->finalize (object);
 }
@@ -86,6 +93,9 @@ gs_client_new (const gchar *address)
 			G_CALLBACK (gs_client_querier_resolved), client);
 	g_signal_connect (client->querier, "info-update",
 			G_CALLBACK (gs_client_querier_info_updated), client);
+	g_signal_connect (client->querier, "log",
+			G_CALLBACK (gs_client_querier_log), client);
+	gui_log_init (client);
 	
 	client->console = gsq_console_new (address);
 	g_signal_connect (client->console, "connect",
@@ -151,6 +161,13 @@ gs_client_querier_info_updated (GsqQuerier *querier, GsClient *client)
 
 
 static void
+gs_client_querier_log (GsqQuerier *querier, const gchar *msg, GsClient *client)
+{
+	gui_log_print (client, msg);
+}
+
+
+static void
 gs_client_console_connect (GsqConsole *console, GsClient* client)
 {
 	gs_console_log (client, GS_CONSOLE_INFO, "Connected");
@@ -199,4 +216,41 @@ gs_client_send_command (GsClient* client, const gchar *cmd)
 			gs_console_log (client, GS_CONSOLE_ERROR, "Please set a password");
 		}
 	}
+}
+
+
+
+void
+gs_client_set_logaddress (const gchar *address)
+{
+	if (logaddress)
+		g_free (logaddress);
+	logaddress = g_strdup (address);
+}
+
+gchar *
+gs_client_get_logaddress ()
+{
+	return logaddress;
+}
+
+void
+gs_client_enable_log (GsClient *client, gboolean enable)
+{
+	guint16 port;
+	gchar *host = gsq_parse_address (logaddress, &port, NULL);
+	
+	if (enable) {
+		gchar *cmd = g_strdup_printf ("logaddress_add %s:%d\n", host,
+				gsq_querier_get_ipv4_socket_port (client->querier));
+		gsq_console_send (client->console, cmd);
+		g_free (cmd);
+	} else {
+		gchar *cmd = g_strdup_printf ("logaddress_del %s:%d\n", host,
+				gsq_querier_get_ipv4_socket_port (client->querier));
+		gsq_console_send (client->console, cmd);
+		g_free (cmd);
+	}
+	
+	g_free (host);
 }

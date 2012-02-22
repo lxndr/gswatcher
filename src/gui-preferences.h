@@ -35,6 +35,7 @@ void gui_prefs_set_enable_notifications (gboolean enable);
 void gui_prefs_set_notification_sound (const gchar *filename);
 void gui_prefs_set_use_system_font (gboolean use);
 void gui_prefs_set_font (const gchar *fontname);
+void gui_prefs_set_logaddress (const gchar *address);
 
 
 #endif

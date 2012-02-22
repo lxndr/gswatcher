@@ -9,7 +9,7 @@
 
 static GtkAdjustment *ctl_urate;
 static GtkWidget *ctl_nenable, *ctl_game_column, *ctl_nsound, *ctl_sysfont,
-		*ctl_fontlabel, *ctl_font;
+		*ctl_fontlabel, *ctl_font, *ctl_logaddress;
 
 
 static void
@@ -69,6 +69,15 @@ gui_prefs_font_changed (GtkFontButton *widget, gpointer udata)
 }
 
 
+static void
+gui_prefs_logaddress_changed (GtkEntry *entry, gpointer user_data)
+{
+	const gchar *address = gtk_entry_get_text (entry);
+	gs_client_set_logaddress (address);
+	gs_save_preferences ();
+}
+
+														
 GtkWidget *
 gs_prefs_create ()
 {
@@ -220,6 +229,23 @@ gs_prefs_create ()
 			NULL);
 	gtk_grid_attach (GTK_GRID (grid), ctl_fontlabel, 0, 8, 1, 1);
 	
+	// Log address
+	ctl_logaddress = gtk_entry_new ();
+	g_object_set (G_OBJECT (ctl_logaddress),
+			"hexpand", TRUE,
+			NULL);
+	g_signal_connect (ctl_logaddress, "changed", G_CALLBACK (gui_prefs_logaddress_changed), NULL);
+	gtk_grid_attach (GTK_GRID (grid), ctl_logaddress, 1, 9, 1, 1);
+	
+	label = gtk_label_new (_("_Log address:"));
+	g_object_set (G_OBJECT (label),
+			"use-underline", TRUE,
+			"mnemonic-widget", ctl_logaddress,
+			"margin-left", 8,
+			"halign", GTK_ALIGN_START,
+			NULL);
+	gtk_grid_attach (GTK_GRID (grid), label, 0, 9, 1, 1);
+	
 	pango_attr_list_unref (bold);
 	gtk_widget_show_all (grid);
 	return grid;
@@ -275,4 +301,12 @@ gui_prefs_set_font (const gchar *fontname)
 	gtk_font_chooser_set_font (GTK_FONT_CHOOSER (ctl_font),
 			fontname ? fontname : GS_DEFAULT_MONOSPACE_FONT);
 	g_signal_handlers_unblock_by_func (ctl_font, gui_prefs_font_changed, NULL);
+}
+
+void
+gui_prefs_set_logaddress (const gchar *address)
+{
+	g_signal_handlers_block_by_func (ctl_font, gui_prefs_logaddress_changed, NULL);
+	gtk_entry_set_text (GTK_ENTRY (ctl_logaddress), address);
+	g_signal_handlers_unblock_by_func (ctl_font, gui_prefs_logaddress_changed, NULL);
 }
