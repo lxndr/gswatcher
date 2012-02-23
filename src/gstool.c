@@ -449,6 +449,9 @@ gs_load_preferences ()
 		if (g_json_object_has (node, "font"))
 			gui_console_set_font (g_json_object_get_string (node, "font"));
 		
+		if (g_json_object_has (node, "log-address"))
+			gs_client_set_logaddress (g_json_object_get_string (node, "log-address"));
+		
 		GJsonNode *geometry = g_json_object_get (node, "geometry");
 		if (geometry)
 			gui_window_load_geometry (geometry);
@@ -466,6 +469,7 @@ gs_load_preferences ()
 	gui_prefs_set_notification_sound (gs_notification_get_sound ());
 	gui_prefs_set_use_system_font (gui_console_get_use_system_font ());
 	gui_prefs_set_font (gui_console_get_font ());
+	gui_prefs_set_logaddress (gs_client_get_logaddress ());
 }
 
 void
@@ -487,6 +491,9 @@ gs_save_preferences ()
 			gui_console_get_use_system_font ());
 	g_json_object_set_string (node, "font",
 			gui_console_get_font ());
+	
+	g_json_object_set_string (node, "log-address",
+			gs_client_get_logaddress ());
 	
 	GJsonNode *geometry = gui_window_save_geometry ();
 	g_json_object_set (node, "geometry", geometry);
