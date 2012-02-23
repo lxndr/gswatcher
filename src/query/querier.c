@@ -675,14 +675,14 @@ gsq_socket_recveived (GSocket *socket, GIOCondition condition, gpointer udata)
 
 
 guint16
-gsq_querier_get_ipv4_socket_port ()
+gsq_querier_get_ipv4_local_port ()
 {
 	GSocketAddress *addr = g_socket_get_local_address (ip4sock, NULL);
 	return g_inet_socket_address_get_port (G_INET_SOCKET_ADDRESS (addr));
 }
 
 guint16
-gsq_querier_get_ipv6_socket_port ()
+gsq_querier_get_ipv6_local_port ()
 {
 	GSocketAddress *addr = g_socket_get_local_address (ip6sock, NULL);
 	return g_inet_socket_address_get_port (G_INET_SOCKET_ADDRESS (addr));
