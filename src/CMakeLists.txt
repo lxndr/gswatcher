@@ -31,7 +31,6 @@ add_executable (gstool
 		query/querier.c
 		query/console.c
 		query/proto-source.c
-		query/proto-source-console.c
 		query/utils.c
 		platform.c
 		client.c

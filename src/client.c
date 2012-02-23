@@ -16,8 +16,8 @@ static void gs_client_querier_info_updated (GsqQuerier *querier, GsClient *clien
 static void gs_client_querier_log (GsqQuerier *querier, const gchar *msg, GsClient *client);
 static void gs_client_console_connect (GsqConsole *console, GsClient *client);
 static void gs_client_console_disconnect (GsqConsole *console, GsClient *client);
-static void gs_client_console_respond (GsqConsole *console, const gchar *msg, GsClient *client);
-static void gs_client_console_error (GsqConsole *console, const gchar *msg, GsClient *client);
+/* static void gs_client_console_respond (GsqConsole *console, const gchar *msg, GsClient *client);
+static void gs_client_console_error (GsqConsole *console, const gchar *msg, GsClient *client); */
 
 
 G_DEFINE_TYPE (GsClient, gs_client, G_TYPE_OBJECT);
@@ -71,7 +71,7 @@ gs_client_finalize (GObject *object)
 		g_free (client->version);
 	g_object_unref (client->querier);
 	
-	// gs_client_enable_log (client, FALSE);
+	gs_client_enable_log (client, FALSE);
 	g_object_unref (client->console_buffer);
 	g_object_unref (client->console_history);
 	g_object_unref (client->console);
@@ -102,10 +102,10 @@ gs_client_new (const gchar *address)
 			G_CALLBACK (gs_client_console_connect), client);
 	g_signal_connect (client->console, "disconnect",
 			G_CALLBACK (gs_client_console_disconnect), client);
-	g_signal_connect (client->console, "respond",
+/*	g_signal_connect (client->console, "respond",
 			G_CALLBACK (gs_client_console_respond), client);
 	g_signal_connect (client->console, "error",
-			G_CALLBACK (gs_client_console_error), client);
+			G_CALLBACK (gs_client_console_error), client);*/
 	gs_console_init (client);
 	
 	return client;
@@ -171,40 +171,52 @@ static void
 gs_client_console_connect (GsqConsole *console, GsClient* client)
 {
 	gs_console_log (client, GS_CONSOLE_INFO, "Connected");
-	while (client->commands) {
+/*	while (client->commands) {
 		gchar *command = client->commands->data;
 		gsq_console_send (client->console, command);
 		g_free (command);
 		client->commands = g_list_delete_link (client->commands, client->commands);
-	}
+	}*/
 }
 
 static void
 gs_client_console_disconnect (GsqConsole *console, GsClient* client)
 {
-	while (client->commands) {
+/*	while (client->commands) {
 		gchar *command = client->commands->data;
 		g_free (command);
 		client->commands = g_list_delete_link (client->commands, client->commands);
-	}
+	}*/
 	gs_console_log (client, GS_CONSOLE_INFO, "Disconnected");
 }
 
+//static void
+//gs_client_console_respond (GsqConsole *console, const gchar *msg, GsClient* client)
 static void
-gs_client_console_respond (GsqConsole *console, const gchar *msg, GsClient* client)
+command_callback (GsqConsole *console, GAsyncResult *result, GsClient *client)
 {
-	gs_console_log (client, GS_CONSOLE_RESPOND, msg);
+	GError *error = NULL;
+	gchar *output = gsq_console_send_finish (console, result, &error);
+	if (output)
+		gs_console_log (client, GS_CONSOLE_RESPOND, output);
+	else
+		gs_console_log (client, GS_CONSOLE_ERROR, error->message);
 }
 
+/*
 static void
 gs_client_console_error (GsqConsole *console, const gchar *msg, GsClient* client)
 {
 	gs_console_log (client, GS_CONSOLE_ERROR, msg);
 }
+*/
 
 void
 gs_client_send_command (GsClient* client, const gchar *cmd)
 {
+	gsq_console_send (client->console, cmd,
+			(GAsyncReadyCallback) command_callback, client);
+/*
 	if (gsq_console_is_connected (client->console)) {
 		gsq_console_send (client->console, cmd);
 	} else {
@@ -216,6 +228,7 @@ gs_client_send_command (GsClient* client, const gchar *cmd)
 			gs_console_log (client, GS_CONSOLE_ERROR, "Please set a password");
 		}
 	}
+*/
 }
 
 
@@ -234,23 +247,48 @@ gs_client_get_logaddress ()
 	return logaddress;
 }
 
+
+static void
+log_command_callback (GsqConsole *console, GAsyncResult *result, GsClient *client)
+{
+	GError *error = NULL;
+	gchar *output = gsq_console_send_finish (console, result, &error);
+	if (output)
+		gs_console_log (client, GS_CONSOLE_RESPOND, output);
+	else
+		gs_console_log (client, GS_CONSOLE_ERROR, error->message);
+}
+
 void
 gs_client_enable_log (GsClient *client, gboolean enable)
 {
-	guint16 port;
-	gchar *host = gsq_parse_address (logaddress, &port, NULL);
-	
 	if (enable) {
-		gchar *cmd = g_strdup_printf ("logaddress_add %s:%d\n", host,
-				gsq_querier_get_ipv4_socket_port (client->querier));
-		gsq_console_send (client->console, cmd);
+		guint16 userport;
+		gchar *userhost = gsq_parse_address (logaddress, &userport, NULL);
+		if (!userhost) {
+			gs_console_log (client, GS_CONSOLE_ERROR,
+					"You have to provide a log address");
+			return;
+		}
+		
+		if (client->logaddress)
+			g_free (client->logaddress);
+		guint16 port = gsq_querier_get_ipv4_local_port (client->querier);
+		client->logaddress = g_strdup_printf ("%s:%d", userhost, port);
+		
+		gchar *cmd = g_strdup_printf ("logaddress_add %s;log on", client->logaddress);
+		gsq_console_send (client->console, cmd,
+				(GAsyncReadyCallback) log_command_callback, client);
 		g_free (cmd);
 	} else {
-		gchar *cmd = g_strdup_printf ("logaddress_del %s:%d\n", host,
-				gsq_querier_get_ipv4_socket_port (client->querier));
-		gsq_console_send (client->console, cmd);
-		g_free (cmd);
+		if (client->logaddress) {
+			gchar *cmd = g_strdup_printf ("logaddress_del %s;log off", client->logaddress);
+			gsq_console_send (client->console, cmd,
+					(GAsyncReadyCallback) log_command_callback, client);
+			g_free (cmd);
+			
+			g_free (client->logaddress);
+			client->logaddress = NULL;
+		}
 	}
-	
-	g_free (host);
 }

@@ -38,11 +38,12 @@ struct _GsClient {
 	
 	// console
 	GsqConsole *console;
-	GList *commands;
+/*	GList *commands;*/
 	GtkTextBuffer *console_buffer;
 	GtkListStore *console_history;
 	
 	// log
+	gchar *logaddress;
 	GtkTextBuffer *log_buffer;
 };
 
