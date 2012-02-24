@@ -31,6 +31,7 @@
 
 
 GtkWidget *window = NULL;
+static GtkWidget *notebook;
 static GtkWidget *infobox_toolbar = NULL;
 static GtkWidget *console_toolbar = NULL;
 static GtkWidget *log_toolbar = NULL;
@@ -95,6 +96,15 @@ gs_window_tools_switched (GtkNotebook *notebook, GtkWidget *page, guint pagenum,
 
 
 static void
+tab_button_toggled (GtkToggleButton *button, gpointer udata)
+{
+	if (gtk_toggle_button_get_active (button))
+		gtk_notebook_set_current_page (GTK_NOTEBOOK (notebook),
+				GPOINTER_TO_INT (udata));
+}
+
+
+static void
 gs_window_about_clicked (GtkButton *button)
 {
 	const gchar *authors[] = {
@@ -110,7 +120,7 @@ gs_window_about_clicked (GtkButton *button)
 #endif
 			"logo-icon-name", "gstool",
 			"version", GS_VERSION,
-			"website", "http://gswtool.sourceforge.net",
+			"website", "http://gstool.sourceforge.net",
 			"website-label", _("Offical Web Page"),
 			NULL);
 }
@@ -294,34 +304,110 @@ gui_window_create ()
 	gtk_menu_shell_append (GTK_MENU_SHELL (traymenu), trayquit);
 	gtk_widget_show_all (traymenu);
 	
-/* controls */
+/* toolbar */
+	GtkStyleContext *context;
+	GtkWidget *image;
+	
+	GtkWidget *slist_button = gtk_radio_button_new_with_label (
+			NULL, _("Server list"));
+	image = gtk_image_new_from_stock (GTK_STOCK_CONNECT, GTK_ICON_SIZE_MENU);
+	gtk_button_set_image (GTK_BUTTON (slist_button), image);
+	gtk_toggle_button_set_mode (GTK_TOGGLE_BUTTON (slist_button), FALSE);
+	context = gtk_widget_get_style_context (GTK_WIDGET (slist_button));
+	gtk_style_context_add_class (context, "raised");
+	g_signal_connect (slist_button, "toggled",
+			G_CALLBACK (tab_button_toggled), GINT_TO_POINTER (0));
+	
+	GtkWidget *blist_button = gtk_radio_button_new_with_label_from_widget (
+			GTK_RADIO_BUTTON (slist_button), _("Buddy list"));
+	image = gtk_image_new_from_stock (GTK_STOCK_ORIENTATION_PORTRAIT, GTK_ICON_SIZE_MENU);
+	gtk_button_set_image (GTK_BUTTON (blist_button), image);
+	gtk_toggle_button_set_mode (GTK_TOGGLE_BUTTON (blist_button), FALSE);
+	context = gtk_widget_get_style_context (GTK_WIDGET (blist_button));
+	gtk_style_context_add_class (context, "raised");
+	g_signal_connect (blist_button, "toggled",
+			G_CALLBACK (tab_button_toggled), GINT_TO_POINTER (1));
+	
+	GtkWidget *prefs_button = gtk_radio_button_new_with_label_from_widget (
+			GTK_RADIO_BUTTON (slist_button), _("Preferences"));
+	image = gtk_image_new_from_stock (GTK_STOCK_PREFERENCES, GTK_ICON_SIZE_MENU);
+	gtk_button_set_image (GTK_BUTTON (prefs_button), image);
+	gtk_toggle_button_set_mode (GTK_TOGGLE_BUTTON (prefs_button), FALSE);
+	context = gtk_widget_get_style_context (GTK_WIDGET (prefs_button));
+	gtk_style_context_add_class (context, "raised");
+	g_signal_connect (prefs_button, "toggled",
+			G_CALLBACK (tab_button_toggled), GINT_TO_POINTER (2));
+	
+	GtkWidget *tab_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+	gtk_box_set_homogeneous (GTK_BOX (tab_box), TRUE);
+	gtk_box_pack_start (GTK_BOX (tab_box), slist_button, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (tab_box), blist_button, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (tab_box), prefs_button, FALSE, TRUE, 0);
+	
 	layout_button = gtk_toggle_button_new_with_label (_("_Layout"));
-	g_object_set (G_OBJECT (layout_button), "use-underline", TRUE, NULL);
+	g_object_set (G_OBJECT (layout_button),
+			"use-underline", TRUE,
+			NULL);
+	context = gtk_widget_get_style_context (GTK_WIDGET (layout_button));
+	gtk_style_context_add_class (context, "raised");
 	g_signal_connect (layout_button, "toggled",
 			G_CALLBACK (gs_window_layout_toggled), NULL);
 	
-	GtkWidget *pause_icon = gtk_image_new_from_stock (GTK_STOCK_MEDIA_PAUSE,
-			GTK_ICON_SIZE_MENU);
 	pause_button = gtk_toggle_button_new_with_label (_("_Pause"));
+	image = gtk_image_new_from_stock (GTK_STOCK_MEDIA_PAUSE, GTK_ICON_SIZE_MENU);
 	g_object_set (G_OBJECT (pause_button),
 			"use-underline", TRUE,
-			"image", pause_icon,
+			"image", image,
 			NULL);
+	context = gtk_widget_get_style_context (GTK_WIDGET (pause_button));
+	gtk_style_context_add_class (context, "raised");
 	g_signal_connect (pause_button, "toggled",
 			G_CALLBACK (gs_window_pause_toggled), NULL);
 	
-	GtkWidget *about = gtk_button_new_from_stock (GTK_STOCK_ABOUT);
-	g_signal_connect (about, "clicked", G_CALLBACK (gs_window_about_clicked), NULL);
+	GtkWidget *about_button = gtk_button_new_with_label (_("About"));
+	image = gtk_image_new_from_stock (GTK_STOCK_ABOUT, GTK_ICON_SIZE_MENU);
+	g_object_set (G_OBJECT (about_button),
+			"image", image,
+			NULL);
+	context = gtk_widget_get_style_context (GTK_WIDGET (about_button));
+	gtk_style_context_add_class (context, "raised");
+	g_signal_connect (about_button, "clicked",
+			G_CALLBACK (gs_window_about_clicked), NULL);
 	
-	GtkWidget *quit = gtk_button_new_from_stock (GTK_STOCK_QUIT);
-	g_signal_connect (quit, "clicked", G_CALLBACK (gs_window_quit_clicked), NULL);
+	GtkWidget *quit_button = gtk_button_new_with_label (_("Quit"));
+	image = gtk_image_new_from_stock (GTK_STOCK_QUIT, GTK_ICON_SIZE_MENU);
+	g_object_set (G_OBJECT (quit_button),
+			"image", image,
+			NULL);
+	context = gtk_widget_get_style_context (GTK_WIDGET (quit_button));
+	gtk_style_context_add_class (context, "raised");
+	g_signal_connect (quit_button, "clicked",
+			G_CALLBACK (gs_window_quit_clicked), NULL);
 	
-	GtkWidget *toolbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
-	gtk_box_pack_start (GTK_BOX (toolbox), layout_button, FALSE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), pause_button, FALSE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), about, FALSE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbox), quit, FALSE, TRUE, 0);
-	gtk_widget_show_all (toolbox);
+	GtkWidget *control_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+	gtk_box_set_homogeneous (GTK_BOX (tab_box), TRUE);
+	gtk_box_pack_start (GTK_BOX (control_box), layout_button, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (control_box), pause_button, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (control_box), about_button, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (control_box), quit_button, FALSE, TRUE, 0);
+	
+	GtkWidget *toolbar_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+	g_object_set (G_OBJECT (toolbar_box),
+			"border-width", 4,
+			NULL);
+	gtk_box_pack_start (GTK_BOX (toolbar_box), tab_box, FALSE, TRUE, 0);
+	gtk_box_pack_end (GTK_BOX (toolbar_box), control_box, FALSE, TRUE, 0);
+	
+	GtkToolItem *toolbar_item = gtk_tool_item_new ();
+	gtk_tool_item_set_expand (toolbar_item, TRUE);
+	gtk_container_add (GTK_CONTAINER (toolbar_item), toolbar_box);
+	
+	GtkWidget *toolbar = gtk_toolbar_new ();
+	context = gtk_widget_get_style_context (GTK_WIDGET (toolbar));
+	gtk_style_context_add_class (context, GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
+	gtk_toolbar_insert (GTK_TOOLBAR (toolbar), toolbar_item, 0);
+	
+	gtk_widget_show_all (toolbar);
 	
 /* infobox */
 	GtkWidget *sinfo = gui_info_create ();
@@ -402,12 +488,22 @@ gui_window_create ()
 	GtkWidget *prefs_label = gui_window_create_tablabel (GTK_STOCK_PREFERENCES, _("Preferences"));
 	
 /* notebook */
-	GtkWidget *notebook = gtk_notebook_new ();
+	notebook = gtk_notebook_new ();
+	g_object_set (G_OBJECT (notebook),
+			"show-tabs", FALSE,
+			NULL);
 	gtk_notebook_append_page (GTK_NOTEBOOK (notebook), plist_paned, slist_label);
 	gtk_notebook_append_page (GTK_NOTEBOOK (notebook), blist, blist_label);
 	gtk_notebook_append_page (GTK_NOTEBOOK (notebook), prefs, prefs_label);
-	gtk_notebook_set_action_widget (GTK_NOTEBOOK (notebook), toolbox, GTK_PACK_END);
 	gtk_widget_show (notebook);
+	
+/* window */
+	GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+	g_object_set (G_OBJECT (box),
+			"visible", TRUE,
+			NULL);
+	gtk_box_pack_start (GTK_BOX (box), toolbar, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (box), notebook, TRUE, TRUE, 0);
 	
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	g_object_set (G_OBJECT (window),
@@ -417,7 +513,7 @@ gui_window_create ()
 			"default-height",	600,
 			"visible",			TRUE,
 			NULL);
-	gtk_container_add (GTK_CONTAINER (window), notebook);
+	gtk_container_add (GTK_CONTAINER (window), box);
 	g_signal_connect (window, "delete-event", G_CALLBACK (gs_window_delete_event), NULL);
 	
 	return window;
