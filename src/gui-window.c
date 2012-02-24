@@ -26,6 +26,7 @@
 #include "gui-buddy-list.h"
 #include "gui-console.h"
 #include "gui-log.h"
+#include "gui-chat.h"
 #include "gui-preferences.h"
 
 
@@ -356,14 +357,17 @@ gui_window_create ()
 	g_object_ref_sink (log_toolbar);
 	
 /* chat */
-	/* TODO */
+	GtkWidget *chat = gui_chat_create ();
+	
+	GtkWidget *chat_label = gtk_label_new (_("Chat"));
+	gtk_widget_show (chat_label);
 	
 /* tools */
 	GtkWidget *tools = gtk_notebook_new ();
 	gtk_notebook_append_page (GTK_NOTEBOOK (tools), infobox, infobox_label);
 	gtk_notebook_append_page (GTK_NOTEBOOK (tools), console, console_label);
 	gtk_notebook_append_page (GTK_NOTEBOOK (tools), log, log_label);
-	// gtk_notebook_append_page (GTK_NOTEBOOK (tools), chat, chat_label);
+	gtk_notebook_append_page (GTK_NOTEBOOK (tools), chat, chat_label);
 	gtk_notebook_set_action_widget (GTK_NOTEBOOK (tools), infobox_toolbar,
 			GTK_PACK_END);
 	g_object_set (G_OBJECT (tools),

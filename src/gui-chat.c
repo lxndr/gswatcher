@@ -1,0 +1,135 @@
+#include "platform.h"
+#include "gui-window.h"
+#include "gstool.h"
+#include "gui-server-list.h"
+#include "gui-chat.h"
+
+
+static GtkWidget *logview;
+static GtkWidget *entry;
+
+static GtkTextTagTable *tag_table;
+static GtkTextTag *tags[4] = {NULL};
+
+
+void
+gui_chat_log (GsClient *client, const gchar *name, gint team, const gchar *msg)
+{
+	GtkTextIter iter;
+	gtk_text_buffer_get_end_iter (client->chat_buffer, &iter);
+	gtk_text_buffer_insert_with_tags (client->chat_buffer, &iter,
+			name, -1, tags[team], NULL);
+	gtk_text_buffer_insert (client->chat_buffer, &iter, ": ", -1);
+	gtk_text_buffer_insert (client->chat_buffer, &iter, msg, -1);
+	gtk_text_buffer_insert (client->chat_buffer, &iter, "\n", -1);
+	
+	if (gui_slist_get_selected () == client) {
+		GtkTextMark *mark = gtk_text_buffer_create_mark (client->chat_buffer,
+				NULL, &iter, TRUE);
+		gtk_text_view_scroll_mark_onscreen (GTK_TEXT_VIEW (logview), mark);
+		gtk_text_buffer_delete_mark (client->chat_buffer, mark);
+	}
+}
+
+
+void
+gui_chat_send (GsClient *client, const gchar *msg)
+{
+	gs_client_send_message (client, msg);
+}
+
+
+static void
+gui_chat_entry_activated (GtkEntry *entry, gpointer udata)
+{
+	gui_chat_send (gui_slist_get_selected (), gtk_entry_get_text (entry));
+	gtk_entry_set_text (entry, "");
+}
+
+
+static void
+gui_chat_entry_icon_clicked (GtkEntry *entry, GtkEntryIconPosition icon,
+		GdkEvent *event, gpointer udata)
+{
+	if (icon == GTK_ENTRY_ICON_SECONDARY) {
+		gui_chat_send (gui_slist_get_selected (), gtk_entry_get_text (entry));
+		gtk_entry_set_text (entry, "");
+	}
+}
+
+
+void
+gui_chat_set (GsClient *client)
+{
+	if (client) {
+		GtkTextIter iter;
+		gtk_text_view_set_buffer (GTK_TEXT_VIEW (logview), client->chat_buffer);
+		gtk_text_buffer_get_end_iter (client->chat_buffer, &iter);
+		
+		GtkTextMark *mark = gtk_text_buffer_create_mark (client->chat_buffer, NULL, &iter, TRUE);
+		gtk_text_view_scroll_mark_onscreen (GTK_TEXT_VIEW (logview), mark);
+		gtk_text_buffer_delete_mark (client->chat_buffer, mark);
+	} else {
+		gtk_text_view_set_buffer (GTK_TEXT_VIEW (logview), NULL);
+	}
+}
+
+
+void
+gui_chat_init (GsClient *client)
+{
+	client->chat_buffer = gtk_text_buffer_new (tag_table);
+}
+
+
+GtkWidget *
+gui_chat_create ()
+{
+	/* tag table */
+	tag_table = gtk_text_tag_table_new ();
+	
+	tags[0] = gtk_text_tag_new ("team0");
+	g_object_set (tags[0], "foreground", "orange", NULL);
+	gtk_text_tag_table_add (tag_table, tags[0]);
+	
+	tags[1] = gtk_text_tag_new ("team1");
+	g_object_set (tags[1], "foreground", "dark red", NULL);
+	gtk_text_tag_table_add (tag_table, tags[1]);
+	
+	tags[2] = gtk_text_tag_new ("team2");
+	g_object_set (tags[2], "foreground", "dark blue", NULL);
+	gtk_text_tag_table_add (tag_table, tags[2]);
+	
+	tags[3] = gtk_text_tag_new ("team3");
+	g_object_set (tags[3], "foreground", "dark gray", NULL);
+	gtk_text_tag_table_add (tag_table, tags[3]);
+	
+	/* widgets */
+	logview = gtk_text_view_new ();
+	g_object_set (G_OBJECT (logview),
+			"editable", FALSE,
+			"wrap-mode", GTK_WRAP_WORD,
+			NULL);
+	
+	GtkWidget *scrolled = gtk_scrolled_window_new (NULL, NULL);
+	g_object_set (G_OBJECT (scrolled),
+			"shadow-type", GTK_SHADOW_IN,
+			"hscrollbar-policy", GTK_POLICY_NEVER,
+			"vscrollbar-policy", GTK_POLICY_ALWAYS,
+			NULL);
+	gtk_container_add (GTK_CONTAINER (scrolled), logview);
+	
+	entry = gtk_entry_new ();
+	g_object_set (G_OBJECT (entry),
+			"secondary-icon-stock", GTK_STOCK_MEDIA_PLAY,
+			NULL);
+	g_signal_connect (entry, "activate", G_CALLBACK (gui_chat_entry_activated), NULL);
+	g_signal_connect (entry, "icon-release", G_CALLBACK (gui_chat_entry_icon_clicked), NULL);
+	
+	GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
+	gtk_box_pack_start (GTK_BOX (box), scrolled, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (box), entry, FALSE, TRUE, 0);
+	gtk_widget_show_all (box);
+	
+	return box;
+}
