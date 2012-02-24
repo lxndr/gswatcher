@@ -44,7 +44,8 @@ add_executable (gstool
 		gui-preferences.c
 		gui-window.c
 		gui-notification.c
-		gui-log.c)
+		gui-log.c
+		gui-chat.c)
 target_link_libraries (gstool
 		${GTK_LIBRARIES}
 		${CANBERRA_LIBRARIES}
