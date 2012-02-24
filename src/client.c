@@ -2,12 +2,14 @@
 #include "query/utils.h"
 #include "gui-console.h"
 #include "gui-log.h"
+#include "gui-chat.h"
 #include "client.h"
 
 
 static GeoIP *geoip;
 static GHashTable *gamelist;
 static gchar *logaddress;
+static GRegex *re_say, *re_player;
 
 
 static void gs_client_finalize (GObject *object);
@@ -51,6 +53,11 @@ gs_client_class_init (GsClientClass *class)
 	g_hash_table_insert (gamelist, "ins", "Insurgency");
 	g_hash_table_insert (gamelist, "nd", "Nuclear dawn");
 	g_hash_table_insert (gamelist, "", "Source-based");
+	
+	re_say = g_regex_new ("^L (\\d{2}/\\d{2}/\\d{4}) - (\\d{2}:\\d{2}:\\d{2}): \"(.+)\" (say|say_team) \"(.+)\"$",
+			G_REGEX_OPTIMIZE | G_REGEX_UNGREEDY, 0, NULL);
+	re_player = g_regex_new ("^(.+)<\\d+><STEAM_\\d:\\d:\\d+><(.+)><.*><.+><.+><.+><.+>$",
+			G_REGEX_OPTIMIZE | G_REGEX_UNGREEDY, 0, NULL);
 }
 
 
@@ -77,6 +84,8 @@ gs_client_finalize (GObject *object)
 	g_object_unref (client->console);
 	
 	g_object_unref (client->log_buffer);
+	
+	g_object_unref (client->chat_buffer);
 	
 	G_OBJECT_CLASS (gs_client_parent_class)->finalize (object);
 }
@@ -107,6 +116,8 @@ gs_client_new (const gchar *address)
 	g_signal_connect (client->console, "error",
 			G_CALLBACK (gs_client_console_error), client);*/
 	gs_console_init (client);
+	
+	gui_chat_init (client);
 	
 	return client;
 }
@@ -163,7 +174,29 @@ gs_client_querier_info_updated (GsqQuerier *querier, GsClient *client)
 static void
 gs_client_querier_log (GsqQuerier *querier, const gchar *msg, GsClient *client)
 {
-	gui_log_print (client, msg);
+	gui_log_print (client, msg + 2);
+	
+	gchar **say_parts = g_regex_split (re_say, msg, 0);
+	if (say_parts && !*say_parts[0]) {
+		if (strcmp (say_parts[3], "Console<0>") == 0) {
+			gui_chat_log (client, "Console", 0, say_parts[5]);
+		} else {
+			gchar **player_parts = g_regex_split (re_player, say_parts[3], 0);
+			if (player_parts && !*player_parts[0]) {
+				gint team;
+				if (strcmp (player_parts[2], "Survivor") == 0)
+					team = 2;
+				else if (strcmp (player_parts[2], "Infected") == 0)
+					team = 1;
+				else
+					team = 3;
+				
+				gui_chat_log (client, player_parts[1], team, say_parts[5]);
+				g_strfreev (player_parts);
+			}
+		}
+		g_strfreev (say_parts);
+	}
 }
 
 
@@ -291,4 +324,25 @@ gs_client_enable_log (GsClient *client, gboolean enable)
 			client->logaddress = NULL;
 		}
 	}
+}
+
+
+static void
+chat_message_callback (GsqConsole *console, GAsyncResult *result, GsClient *client)
+{
+	GError *error = NULL;
+	gchar *output = gsq_console_send_finish (console, result, &error);
+	if (output)
+		gs_console_log (client, GS_CONSOLE_RESPOND, output);
+	else
+		gs_console_log (client, GS_CONSOLE_ERROR, error->message);
+}
+
+void
+gs_client_send_message (GsClient *client, const gchar *msg)
+{
+	gchar *cmd = g_strdup_printf ("say %s", msg);
+	gsq_console_send (client->console, cmd,
+			(GAsyncReadyCallback) chat_message_callback, client);
+	g_free (cmd);
 }
