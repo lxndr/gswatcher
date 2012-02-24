@@ -38,9 +38,11 @@ gui_log_print (GsClient *client, const gchar *msg)
 	gtk_text_buffer_get_end_iter (client->log_buffer, &iter);
 	gtk_text_buffer_insert (client->log_buffer, &iter, msg, -1);
 	
-	GtkTextMark *mark = gtk_text_buffer_create_mark (client->log_buffer, NULL, &iter, TRUE);
-	gtk_text_view_scroll_mark_onscreen (GTK_TEXT_VIEW (logview), mark);
-	gtk_text_buffer_delete_mark (client->log_buffer, mark);
+	if (gui_slist_get_selected () == client) {
+		GtkTextMark *mark = gtk_text_buffer_create_mark (client->log_buffer, NULL, &iter, TRUE);
+		gtk_text_view_scroll_mark_onscreen (GTK_TEXT_VIEW (logview), mark);
+		gtk_text_buffer_delete_mark (client->log_buffer, mark);
+	}
 }
 
 
