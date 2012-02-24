@@ -1,6 +1,7 @@
 #include <string.h>
 #include <glib/gprintf.h>
 #include <gio/gio.h>
+#include "utils.h"
 #include "console.h"
 
 
@@ -342,8 +343,9 @@ respond_received (GsqConsole *console)
 	priv->queue = g_list_delete_link (priv->queue, priv->queue);
 	
 	g_free (req->command);
-	gchar *output = g_string_free (req->output, FALSE);
+	gchar *output = gsq_utf8_repair (req->output->str);
 	g_simple_async_result_set_op_res_gpointer (req->result, output, g_free);
+	g_string_free (req->output, TRUE);
 	g_simple_async_result_complete (req->result);
 	g_object_unref (req->result);
 	g_slice_free (Request, req);
