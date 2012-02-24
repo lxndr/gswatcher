@@ -34,6 +34,13 @@ gui_log_set (GsClient *client)
 void
 gui_log_print (GsClient *client, const gchar *msg)
 {
+	if (gtk_text_buffer_get_line_count (client->log_buffer) > 500) {
+		GtkTextIter start, end;
+		gtk_text_buffer_get_start_iter (client->log_buffer, &start);
+		gtk_text_buffer_get_iter_at_line (client->log_buffer, &end, 250);
+		gtk_text_buffer_delete (client->log_buffer, &start, &end);
+	}
+	
 	GtkTextIter iter;
 	gtk_text_buffer_get_end_iter (client->log_buffer, &iter);
 	gtk_text_buffer_insert (client->log_buffer, &iter, msg, -1);
