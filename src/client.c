@@ -177,12 +177,12 @@ gs_client_querier_log (GsqQuerier *querier, const gchar *msg, GsClient *client)
 	gui_log_print (client, msg + 2);
 	
 	gchar **say_parts = g_regex_split (re_say, msg, 0);
-	if (say_parts && !*say_parts[0]) {
+	if (!*say_parts[0]) {
 		if (strcmp (say_parts[3], "Console<0>") == 0) {
 			gui_chat_log (client, "Console", 0, say_parts[5]);
 		} else {
 			gchar **player_parts = g_regex_split (re_player, say_parts[3], 0);
-			if (player_parts && !*player_parts[0]) {
+			if (!*player_parts[0]) {
 				gint team;
 				if (strcmp (player_parts[2], "Survivor") == 0)
 					team = 2;
@@ -192,11 +192,11 @@ gs_client_querier_log (GsqQuerier *querier, const gchar *msg, GsClient *client)
 					team = 3;
 				
 				gui_chat_log (client, player_parts[1], team, say_parts[5]);
-				g_strfreev (player_parts);
 			}
+			g_strfreev (player_parts);
 		}
-		g_strfreev (say_parts);
 	}
+	g_strfreev (say_parts);
 }
 
 
@@ -308,6 +308,7 @@ gs_client_enable_log (GsClient *client, gboolean enable)
 			g_free (client->logaddress);
 		guint16 port = gsq_querier_get_ipv4_local_port (client->querier);
 		client->logaddress = g_strdup_printf ("%s:%d", userhost, port);
+		g_free (userhost);
 		
 		gchar *cmd = g_strdup_printf ("logaddress_add %s;log on", client->logaddress);
 		gsq_console_send (client->console, cmd,
