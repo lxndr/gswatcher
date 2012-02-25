@@ -161,7 +161,7 @@ gsq_console_class_init (GsqConsoleClass *class)
 	
 	g_object_class_install_property (gobject_class, PROP_TIMEOUT,
 			g_param_spec_uint ("timeout", "Timeout", "Timeout",
-			0, 120, 5, G_PARAM_WRITABLE | G_PARAM_READABLE | G_PARAM_CONSTRUCT));
+			0, 120, 10, G_PARAM_WRITABLE | G_PARAM_READABLE | G_PARAM_CONSTRUCT));
 	
 	signals[SIGNAL_CONNECT] = g_signal_new ("connect",
 			G_OBJECT_CLASS_TYPE (class), G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
@@ -231,6 +231,35 @@ gsq_console_is_connected (GsqConsole *console)
 
 
 static void
+close_connection (GsqConsole *console)
+{
+	GsqConsolePrivate *priv = console->priv;
+	
+	if (priv->timer) {
+		g_source_remove (priv->timer);
+		priv->timer = 0;
+	}
+	
+	if (priv->socket) {
+		if (priv->source) {
+			g_source_remove (priv->source);
+			priv->source = 0;
+		}
+		g_socket_close (priv->socket, NULL);
+		g_object_unref (priv->socket);
+		priv->socket = NULL;
+	}
+	
+	priv->working = FALSE;
+	priv->authenticated = FALSE;
+	priv->packet.size = 0;
+	priv->packet.left = 0;
+	
+	if (priv->queue)
+		establish_connection (console);
+}
+
+static void
 throw_error (GsqConsole *console, GError *error)
 {
 	GsqConsolePrivate *priv = console->priv;
@@ -246,24 +275,7 @@ throw_error (GsqConsole *console, GError *error)
 		g_slice_free (Request, req);
 	}
 	
-	if (priv->timer) {
-		g_source_remove (priv->timer);
-		priv->timer = 0;
-	}
-	if (priv->socket) {
-		g_socket_close (priv->socket, NULL);
-		g_object_unref (priv->socket);
-		priv->socket = NULL;
-	}
-	
-	priv->working = FALSE;
-	priv->authenticated = FALSE;
-	priv->source = 0;
-	priv->packet.size = 0;
-	priv->packet.left = 0;
-	
-	if (priv->queue)
-		establish_connection (console);
+	close_connection (console);
 }
 
 
@@ -379,9 +391,7 @@ socket_received (GSocket *socket, GIOCondition cond, GsqConsole *console)
 	
 	gssize size = g_socket_receive (socket, pkt->p, pkt->left, NULL, &error);
 	if (G_UNLIKELY (size == 0)) {			/* disconnect */
-		// TODO this ain't an error
-		g_set_error_literal (&error, GSQ_CONSOLE_ERROR, 0, "Connection closed");
-		throw_error (console, error);
+		close_connection (console);
 		g_signal_emit (console, signals[SIGNAL_DISCONNECT], 0);
 		return FALSE;
 	} else if (G_UNLIKELY (size == -1)) {	/* error */
