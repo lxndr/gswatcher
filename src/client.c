@@ -42,8 +42,6 @@ static void gs_client_querier_info_updated (GsqQuerier *querier, GsClient *clien
 static void gs_client_querier_log (GsqQuerier *querier, const gchar *msg, GsClient *client);
 static void gs_client_console_connect (GsqConsole *console, GsClient *client);
 static void gs_client_console_disconnect (GsqConsole *console, GsClient *client);
-/* static void gs_client_console_respond (GsqConsole *console, const gchar *msg, GsClient *client);
-static void gs_client_console_error (GsqConsole *console, const gchar *msg, GsClient *client); */
 
 
 G_DEFINE_TYPE (GsClient, gs_client, G_TYPE_OBJECT);
@@ -135,10 +133,6 @@ gs_client_new (const gchar *address)
 			G_CALLBACK (gs_client_console_connect), client);
 	g_signal_connect (client->console, "disconnect",
 			G_CALLBACK (gs_client_console_disconnect), client);
-/*	g_signal_connect (client->console, "respond",
-			G_CALLBACK (gs_client_console_respond), client);
-	g_signal_connect (client->console, "error",
-			G_CALLBACK (gs_client_console_error), client);*/
 	gs_console_init (client);
 	
 	gui_chat_init (client);
@@ -228,27 +222,15 @@ static void
 gs_client_console_connect (GsqConsole *console, GsClient* client)
 {
 	gs_console_log (client, GS_CONSOLE_INFO, "Connected");
-/*	while (client->commands) {
-		gchar *command = client->commands->data;
-		gsq_console_send (client->console, command);
-		g_free (command);
-		client->commands = g_list_delete_link (client->commands, client->commands);
-	}*/
 }
 
 static void
 gs_client_console_disconnect (GsqConsole *console, GsClient* client)
 {
-/*	while (client->commands) {
-		gchar *command = client->commands->data;
-		g_free (command);
-		client->commands = g_list_delete_link (client->commands, client->commands);
-	}*/
 	gs_console_log (client, GS_CONSOLE_INFO, "Disconnected");
 }
 
-//static void
-//gs_client_console_respond (GsqConsole *console, const gchar *msg, GsClient* client)
+
 static void
 command_callback (GsqConsole *console, GAsyncResult *result, GsClient *client)
 {
@@ -260,32 +242,12 @@ command_callback (GsqConsole *console, GAsyncResult *result, GsClient *client)
 		gs_console_log (client, GS_CONSOLE_ERROR, error->message);
 }
 
-/*
-static void
-gs_client_console_error (GsqConsole *console, const gchar *msg, GsClient* client)
-{
-	gs_console_log (client, GS_CONSOLE_ERROR, msg);
-}
-*/
 
 void
 gs_client_send_command (GsClient* client, const gchar *cmd)
 {
 	gsq_console_send (client->console, cmd,
 			(GAsyncReadyCallback) command_callback, client);
-/*
-	if (gsq_console_is_connected (client->console)) {
-		gsq_console_send (client->console, cmd);
-	} else {
-		if (gsq_console_get_password (client->console)) {
-			gs_console_log (client, GS_CONSOLE_INFO, "Connecting...");
-			client->commands = g_list_append (client->commands, g_strdup (cmd));
-			gsq_console_connect (client->console);
-		} else {
-			gs_console_log (client, GS_CONSOLE_ERROR, "Please set a password");
-		}
-	}
-*/
 }
 
 
