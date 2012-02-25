@@ -1,4 +1,4 @@
-pkg_check_modules (GTK gtk+-3.0)
+pkg_check_modules (GTK3 REQUIRED gtk+-3.0>=3.2)
 if (UNIX AND NOT APPLE)
 	pkg_check_modules (CANBERRA REQUIRED libcanberra)
 endif ()
@@ -11,12 +11,7 @@ else ()
 	set (GS_LIBRARIES m)
 endif ()
 
-set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -DDEBUG")
-
-set (CMAKE_C_FLAGS_PROFILE "${CMAKE_C_FLAGS_DEBUG} -pg")
-set (CMAKE_EXE_LINKER_FLAGS_PROFILE "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -pg")
-
-include_directories (${GTK_INCLUDE_DIRS} ${CANBERRA_INCLUDE_DIRS})
+include_directories (${GTK3_INCLUDE_DIRS} ${CANBERRA_INCLUDE_DIRS})
 add_definitions (
 		-DGETTEXT_PACKAGE=\"gstool\"
 		-DGS_VERSION=\"${GS_VERSION}\")
@@ -47,7 +42,7 @@ add_executable (gstool
 		gui-log.c
 		gui-chat.c)
 target_link_libraries (gstool
-		${GTK_LIBRARIES}
+		${GTK3_LIBRARIES}
 		${CANBERRA_LIBRARIES}
 		${GEOIP_LIBRARIES}
 		${GS_LIBRARIES})
