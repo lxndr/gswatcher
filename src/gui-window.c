@@ -113,7 +113,7 @@ static void
 gs_window_about_clicked (GtkButton *button)
 {
 	const gchar *authors[] = {
-		"lxndr <lxndr87@users.sourceforge.net>",
+		"Alexander AB <lxndr87@users.sourceforge.net>",
 		NULL
 	};
 	
