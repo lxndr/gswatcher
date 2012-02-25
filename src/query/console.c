@@ -21,7 +21,7 @@ enum {
 
 typedef struct _Request {
 	gchar *command;
-	gchar key[15];		// with this key we can found out if respond is complite
+	gchar key[15];	/* with this key we can found out if respond is complite */
 	GString *output;
 	GSimpleAsyncResult *result;
 } Request;
@@ -410,7 +410,6 @@ socket_received (GSocket *socket, GIOCondition cond, GsqConsole *console)
 		pkt->left -= size;
 		if (pkt->left == 0) {
 			if (pkt->size == 0) {			/* header */
-				// TODO more tests
 				pkt->size = GINT32_FROM_LE (* (gint32 *) (pkt->data + 0));
 				pkt->id = GINT32_FROM_LE (* (gint32 *) (pkt->data + 4));
 				pkt->type = GINT32_FROM_LE (* (gint32 *) (pkt->data + 8));
@@ -453,7 +452,7 @@ socket_received (GSocket *socket, GIOCondition cond, GsqConsole *console)
 					}
 					
 				}
-				// clear everything for next packet
+				/* clear everything for next packet */
 				pkt->size = 0;
 			}
 		}
