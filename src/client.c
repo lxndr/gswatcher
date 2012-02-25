@@ -119,7 +119,7 @@ gs_client_new (const gchar *address)
 	g_return_val_if_fail (address != NULL, NULL);
 	GsClient *client = g_object_new (GS_TYPE_CLIENT, NULL);
 	
-	client->querier = gsq_querier_new (address);
+	client->querier = gsq_watcher_new (address);
 	g_signal_connect (client->querier, "resolve",
 			G_CALLBACK (gs_client_querier_resolved), client);
 	g_signal_connect (client->querier, "info-update",
