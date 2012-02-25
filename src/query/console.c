@@ -21,7 +21,7 @@ enum {
 
 typedef struct _Request {
 	gchar *command;
-	gchar key[15];	/* with this key we can found out if respond is complite */
+	gchar key[14];	/* with this key we can found out if respond is complite */
 	GString *output;
 	GSimpleAsyncResult *result;
 } Request;
@@ -336,12 +336,12 @@ send_command (GsqConsole *console)
 		return;
 	Request *req = priv->queue->data;
 	guint32 key = g_random_int ();
-	g_sprintf (req->key, "\nEND%X \n", key);
+	g_sprintf (req->key, "END%X \n", key);
 	gchar *cmd = g_strdup_printf ("%s;echo END%X", req->command, key);
 	source_send_packet (priv->socket, 0, 2, cmd, NULL, NULL);
 	g_free (cmd);
 	
-	priv->timer = g_timeout_add_seconds (5, (GSourceFunc) socket_timeout, console);
+	priv->timer = g_timeout_add_seconds (priv->timeout, (GSourceFunc) socket_timeout, console);
 	priv->working = TRUE;
 }
 
@@ -441,8 +441,8 @@ socket_received (GSocket *socket, GIOCondition cond, GsqConsole *console)
 					
 					if (priv->authenticated) {
 						gboolean final = FALSE;
-						if (pkt->p - pkt->data >= 16 && strncmp (pkt->p - 16, req->key, 14) == 0) {
-							*(pkt->p - 16) = 0;
+						if (pkt->p - pkt->data >= 15 && strncmp (pkt->p - 15, req->key, 13) == 0) {
+							*(pkt->p - 15) = 0;
 							final = TRUE;
 						}
 						
