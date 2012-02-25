@@ -191,8 +191,8 @@ gui_plist_add_clicked (GtkButton *button, gpointer udata)
 		return;
 	}
 	
-	gtk_tree_model_get (model, &iter, 1, &name, -1);
-	if (!*name) {
+	gtk_tree_model_get (model, &iter, 0, &name, -1);
+	if (name && !*name) {
 		gtk_widget_set_sensitive (add, FALSE);
 		g_free (name);
 		return;
