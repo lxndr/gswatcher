@@ -620,20 +620,6 @@ gsq_querier_players_updated (GsqQuerier *querier)
 }
 
 
-static inline gboolean
-gsq_socket_equal (GInetAddress *addr1, GInetAddress *addr2)
-{
-	if (!(addr1 && addr2 && g_inet_address_get_family (addr1) ==
-			g_inet_address_get_family (addr2)))
-		return FALSE;
-	
-	gsize size = g_inet_address_get_native_size (addr1);
-	const guint8 *bytes1 = g_inet_address_to_bytes (addr1);
-	const guint8 *bytes2 = g_inet_address_to_bytes (addr2);
-	
-	return memcmp (bytes1, bytes2, size) == 0;
-}
-
 static gboolean
 gsq_socket_recveived (GSocket *socket, GIOCondition condition, gpointer udata)
 {
@@ -660,8 +646,8 @@ gsq_socket_recveived (GSocket *socket, GIOCondition condition, gpointer udata)
 	GList *iter = servers;
 	while (iter) {
 		GsqQuerier *querier = iter->data;
-		if (querier->priv->port == port &&
-				gsq_socket_equal (querier->priv->iaddr, iaddr)) {
+		if (querier->priv->port == port && querier->priv->iaddr &&
+				g_inet_address_equal (querier->priv->iaddr, iaddr)) {
 			gsq_querier_process (querier, data, length);
 			break;
 		}
