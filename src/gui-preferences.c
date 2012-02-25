@@ -331,6 +331,6 @@ void
 gui_prefs_set_logaddress (const gchar *address)
 {
 	g_signal_handlers_block_by_func (ctl_font, gui_prefs_logaddress_changed, NULL);
-	gtk_entry_set_text (GTK_ENTRY (ctl_logaddress), address : address ? "");
+	gtk_entry_set_text (GTK_ENTRY (ctl_logaddress), address ? address : "");
 	g_signal_handlers_unblock_by_func (ctl_font, gui_prefs_logaddress_changed, NULL);
 }
