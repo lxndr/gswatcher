@@ -6,6 +6,7 @@ set (GS_VERSION "0.5")
 find_package (PkgConfig)
 
 add_subdirectory (src)
+add_subdirectory (tests)
 
 install (FILES icons/gstool.png
 			DESTINATION share/pixmaps)
