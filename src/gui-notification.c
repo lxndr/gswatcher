@@ -126,7 +126,7 @@ gs_notifier_place ()
 	
 	GdkRectangle area = {0, 0, width, height};
 	
-#if defined (G_OS_UNIX) && !defined (G_OS_MACOSX)
+#if defined (G_WINDOWING_X11)
 	GdkAtom atom = gdk_atom_intern ("_NET_WORKAREA", TRUE);
 	if (atom) {
 		GdkAtom actual_type;
@@ -146,7 +146,7 @@ gs_notifier_place ()
 			g_free (workareas);
 		}
 	}
-#else
+#elif defined (G_WINDOWING_WIN32)
 	APPBARDATA appbar;
 	memset (&appbar, 0, sizeof (APPBARDATA));
 	appbar.cbSize = sizeof (APPBARDATA);
