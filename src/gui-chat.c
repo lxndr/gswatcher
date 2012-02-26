@@ -48,10 +48,17 @@ gui_chat_log (GsClient *client, const gchar *name, gint team, const gchar *msg)
 	gtk_text_buffer_insert (client->chat_buffer, &iter, "\n", -1);
 	
 	if (gui_slist_get_selected () == client) {
-		GtkTextMark *mark = gtk_text_buffer_create_mark (client->chat_buffer,
-				NULL, &iter, TRUE);
-		gtk_text_view_scroll_mark_onscreen (GTK_TEXT_VIEW (logview), mark);
-		gtk_text_buffer_delete_mark (client->chat_buffer, mark);
+		gint pos, end;
+		g_object_get (client->chat_buffer, "cursor-position", &pos, NULL);
+		end = gtk_text_buffer_get_char_count (client->chat_buffer);
+		
+		/* if cursor put at the end */
+		if (pos == end) {
+			GtkTextMark *mark = gtk_text_buffer_create_mark (client->chat_buffer,
+					NULL, &iter, TRUE);
+			gtk_text_view_scroll_mark_onscreen (GTK_TEXT_VIEW (logview), mark);
+			gtk_text_buffer_delete_mark (client->chat_buffer, mark);
+		}
 	}
 }
 
