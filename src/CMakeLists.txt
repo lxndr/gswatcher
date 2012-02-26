@@ -3,6 +3,10 @@ if (UNIX AND NOT APPLE)
 	pkg_check_modules (CANBERRA REQUIRED libcanberra)
 endif ()
 
+if (APPLE)
+	add_definitions (-DG_OS_MAXOSX)
+endif ()
+
 if (WIN32)
 	set (GEOIP_LIBRARIES GeoIP ws2_32)
 	set (GS_LIBRARIES winmm m)
