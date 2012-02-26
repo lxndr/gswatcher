@@ -634,8 +634,8 @@ gsq_socket_recveived (GSocket *socket, GIOCondition condition, gpointer udata)
 		return TRUE;
 	data[length] = 0;
 	
-	GInetAddress *iaddr = g_inet_socket_address_get_address (G_INET_SOCKET_ADDRESS (saddr));
-	guint16 port = g_inet_socket_address_get_port (G_INET_SOCKET_ADDRESS (saddr));
+	GInetAddress *iaddr = g_inet_socket_address_get_address ((GInetSocketAddress *) saddr);
+	guint16 port = g_inet_socket_address_get_port ((GInetSocketAddress *) saddr);
 	
 	if (debug_mode) {
 		gchar *ip = g_inet_address_to_string (iaddr);
