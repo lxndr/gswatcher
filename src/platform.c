@@ -146,7 +146,8 @@ gtk_tree_model_iter_previous (GtkTreeModel *model, GtkTreeIter *iter)
 gchar *
 gs_get_system_font ()
 {
-	// in case if it's gnome 3
+#if defined (G_OS_UNIX) && !defined (G_OS_MACOSX)
+	/* in case if it's gnome 3 */
 	GSettings *sysconfig = g_settings_new ("org.gnome.desktop.interface");
 	gchar *font = g_settings_get_string (sysconfig, "monospace-font-name");
 	if (font) {
@@ -154,6 +155,7 @@ gs_get_system_font ()
 		return font;
 	}
 	g_object_unref (sysconfig);
+#endif
 	
 	return g_strdup (GS_DEFAULT_MONOSPACE_FONT);
 }
