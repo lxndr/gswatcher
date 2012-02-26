@@ -44,7 +44,7 @@ static gchar *fontname = NULL;
 
 
 
-gboolean
+static gboolean
 gui_console_set_font_real (const gchar *name)
 {
 	PangoFontDescription *fontdesc = pango_font_description_from_string (name);
