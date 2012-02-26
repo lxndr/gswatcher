@@ -285,7 +285,8 @@ gsq_querier_class_init (GsqQuerierClass *klass)
 		g_source_attach (source, NULL);
 		g_source_unref (source);
 	} else {
-		g_log (GSQ_LOG_DOMAIN, G_LOG_LEVEL_ERROR, error->message);
+		g_log (GSQ_LOG_DOMAIN, G_LOG_LEVEL_ERROR,
+			"Could not create a IPv4 socket: %s", error->message);
 		g_error_free (error);
 	}
 	
@@ -304,7 +305,8 @@ gsq_querier_class_init (GsqQuerierClass *klass)
 		g_source_attach (source, NULL);
 		g_source_unref (source);
 	} else {
-		g_log (GSQ_LOG_DOMAIN, G_LOG_LEVEL_WARNING, error->message);
+		g_log (GSQ_LOG_DOMAIN, G_LOG_LEVEL_WARNING,
+				"Could not create a IPv6 socket: %s", error->message);
 		g_error_free (error);
 	}
 }
