@@ -297,6 +297,8 @@ get_flag_icon (const gchar *code)
 {
 	if (!(code && *code))
 		return NULL;
+	if (strcmp (code, "--") == 0)
+		return NULL;
 	
 	GError *error = NULL;
 	gchar *path = g_strdup_printf ("flags%s%s.png", G_DIR_SEPARATOR_S, code);
