@@ -99,19 +99,19 @@ gsq_watcher_new (const gchar *address)
 static void
 gsq_watcher_info_updated (GsqQuerier *querier)
 {
-	GsqWatcherPrivate *priv = GSQ_WATCHER (querier)->priv;
-	guint h;
+	GsqWatcherPrivate *priv = ((GsqWatcher *) querier)->priv;
+	guint hash;
 	
-	h = g_str_hash (querier->name);
-	if (priv->name != h) {
+	hash = g_str_hash (querier->name);
+	if (priv->name != hash) {
 		g_signal_emit (querier, signals[SIGNAL_NAME_CHANGE], 0);
-		priv->name = h;
+		priv->name = hash;
 	}
 	
-	h = g_str_hash (querier->map);
-	if (priv->map != h) {
+	hash = g_str_hash (querier->map);
+	if (priv->map != hash) {
 		g_signal_emit (querier, signals[SIGNAL_MAP_CHANGE], 0);
-		priv->map = h;
+		priv->map = hash;
 	}
 	
 	if (GSQ_QUERIER_CLASS (gsq_watcher_parent_class)->info_update)
