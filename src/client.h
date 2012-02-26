@@ -64,6 +64,7 @@ struct _GsClient {
 	// log
 	gchar *logaddress;
 	GtkTextBuffer *log_buffer;
+	gboolean log_auto;
 	
 	/* chat */
 	GtkTextBuffer *chat_buffer;

@@ -28,7 +28,7 @@
 
 
 static GtkWidget *logview;
-static GtkWidget *enable_log, *disable_log;
+static GtkWidget *enable_log, *disable_log, *auto_button;
 
 
 void
@@ -49,8 +49,11 @@ gui_log_set (GsClient *client)
 		GtkTextMark *mark = gtk_text_buffer_create_mark (client->log_buffer, NULL, &iter, TRUE);
 		gtk_text_view_scroll_mark_onscreen (GTK_TEXT_VIEW (logview), mark);
 		gtk_text_buffer_delete_mark (client->log_buffer, mark);
+		
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (auto_button), client->log_auto);
 	} else {
 		gtk_text_view_set_buffer (GTK_TEXT_VIEW (logview), NULL);
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (auto_button), FALSE);
 	}
 }
 
@@ -95,6 +98,15 @@ gui_log_disable_clicked (GtkButton *button, gpointer udata)
 	gs_client_enable_log (client, FALSE);
 }
 
+static void
+gui_log_auto_toggled (GtkButton *button, gpointer udata)
+{
+	GsClient *client = gui_slist_get_selected ();
+	if (!client)
+		return;
+	client->log_auto = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (auto_button));
+}
+
 
 GtkWidget *
 gui_log_create_bar ()
@@ -105,9 +117,13 @@ gui_log_create_bar ()
 	disable_log = gtk_button_new_with_label (_("Disable log"));
 	g_signal_connect (disable_log, "clicked", G_CALLBACK (gui_log_disable_clicked), NULL);
 	
+	auto_button = gtk_check_button_new_with_label (_("Keep on"));
+	g_signal_connect (auto_button, "clicked", G_CALLBACK (gui_log_auto_toggled), NULL);
+	
 	GtkWidget *bar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
 	gtk_box_pack_start (GTK_BOX (bar), enable_log, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (bar), disable_log, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (bar), auto_button, FALSE, TRUE, 0);
 	gtk_widget_show_all (bar);
 	
 	return bar;

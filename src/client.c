@@ -39,6 +39,7 @@ static GRegex *re_say, *re_player;
 static void gs_client_finalize (GObject *object);
 static void gs_client_querier_resolved (GsqQuerier *querier, GsClient *client);
 static void gs_client_querier_info_updated (GsqQuerier *querier, GsClient *client);
+static void gs_client_watcher_map_changed (GsqQuerier *querier, GsClient *client);
 static void gs_client_querier_log (GsqQuerier *querier, const gchar *msg, GsClient *client);
 static void gs_client_console_connect (GsqConsole *console, GsClient *client);
 static void gs_client_console_disconnect (GsqConsole *console, GsClient *client);
@@ -124,6 +125,8 @@ gs_client_new (const gchar *address)
 			G_CALLBACK (gs_client_querier_resolved), client);
 	g_signal_connect (client->querier, "info-update",
 			G_CALLBACK (gs_client_querier_info_updated), client);
+	g_signal_connect (client->querier, "map-change",
+			G_CALLBACK (gs_client_watcher_map_changed), client);
 	g_signal_connect (client->querier, "log",
 			G_CALLBACK (gs_client_querier_log), client);
 	gui_log_init (client);
@@ -186,6 +189,14 @@ gs_client_querier_info_updated (GsqQuerier *querier, GsClient *client)
 	client->version = g_strdup_printf (*type ? "%s (%s, %s, %s)" : "%s (%s, %s)",
 			querier->version, gsq_querier_get_extra (querier, "protocol-version"),
 			gsq_querier_get_extra (querier, "os"), type);
+}
+
+
+static void
+gs_client_watcher_map_changed (GsqQuerier *querier, GsClient *client)
+{
+	if (client->log_auto)
+		gs_client_enable_log (client, TRUE);
 }
 
 
