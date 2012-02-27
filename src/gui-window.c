@@ -398,7 +398,7 @@ gui_window_create ()
 	
 	GtkWidget *toolbar_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
 	g_object_set (G_OBJECT (toolbar_box),
-			"border-width", 4,
+			"border-width", 3,
 			NULL);
 	gtk_box_pack_start (GTK_BOX (toolbar_box), tab_box, FALSE, TRUE, 0);
 	gtk_box_pack_end (GTK_BOX (toolbar_box), control_box, FALSE, TRUE, 0);
@@ -532,6 +532,5 @@ gui_window_destroy ()
 	g_object_unref (infobox_toolbar);
 	g_object_unref (console_toolbar);
 	g_object_unref (log_toolbar);
-	// g_object_unref (chat_toolbar);
 	gtk_widget_destroy (window);
 }

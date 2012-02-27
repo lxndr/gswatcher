@@ -363,6 +363,9 @@ gs_console_create ()
 	g_signal_connect (entry, "key-press-event", G_CALLBACK (gui_console_key_pressed), NULL);
 	
 	GtkWidget *console = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
+	g_object_set (G_OBJECT (console),
+			"border-width", 2,
+			NULL);
 	gtk_box_pack_start (GTK_BOX (console), scrolled, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (console), entry, FALSE, TRUE, 0);
 	gtk_widget_show_all (console);
