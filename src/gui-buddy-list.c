@@ -71,7 +71,7 @@ gui_blist_update_real (GsBuddy *buddy, GtkTreeIter *iter)
 	GtkTreeSelection *sel = gtk_tree_view_get_selection (GTK_TREE_VIEW (listview));
 	if (gtk_tree_selection_iter_is_selected (sel, iter)) {
 		if (buddy->lastseen && buddy->lastaddr) {
-			gchar *time = g_date_time_format (buddy->lastseen, "%c");
+			gchar *time = g_date_time_format (buddy->lastseen, "%x %X");
 			lastseen = g_strdup_printf ("%s\n\t<small>at %s</small>",
 					time, buddy->lastaddr);
 			g_free (time);
@@ -92,7 +92,7 @@ gui_blist_update_real (GsBuddy *buddy, GtkTreeIter *iter)
 		g_string_free (tmp, FALSE);
 	} else {
 		if (buddy->lastseen && buddy->lastaddr)
-			lastseen = g_date_time_format (buddy->lastseen, "%c");
+			lastseen = g_date_time_format (buddy->lastseen, "%x %X");
 		
 		guint count = g_list_length (buddy->servers);
 		if (count > 0) {
