@@ -149,6 +149,7 @@ gui_log_create ()
 	
 	GtkWidget *scrolled = gtk_scrolled_window_new (NULL, NULL);
 	g_object_set (G_OBJECT (scrolled),
+			"border-width", 2,
 			"shadow-type", GTK_SHADOW_IN,
 			"hscrollbar-policy", GTK_POLICY_NEVER,
 			"vscrollbar-policy", GTK_POLICY_ALWAYS,
