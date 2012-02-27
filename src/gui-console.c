@@ -47,6 +47,8 @@ static gchar *fontname = NULL;
 static gboolean
 gui_console_set_font_real (const gchar *name)
 {
+	g_return_val_if_fail (name != NULL, FALSE);
+	
 	PangoFontDescription *fontdesc = pango_font_description_from_string (name);
 	if (!fontdesc)
 		return FALSE;
@@ -80,13 +82,19 @@ gui_console_get_use_system_font ()
 void
 gui_console_set_font (const gchar *name)
 {
-	if (!name)
-		name = GS_DEFAULT_MONOSPACE_FONT;
+	if (name == NULL)
+		name = gs_get_system_font ();
 	
-	if (!sysfont && gui_console_set_font_real (name)) {
+	if (sysfont) {
 		if (fontname)
 			g_free (fontname);
 		fontname = g_strdup (name);
+	} else {
+		if (gui_console_set_font_real (name)) {
+			if (fontname)
+				g_free (fontname);
+			fontname = g_strdup (name);
+		}
 	}
 }
 
