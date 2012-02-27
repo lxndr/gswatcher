@@ -465,13 +465,13 @@ gs_load_preferences ()
 			sound = g_json_object_get_string (node, "notification-sound");
 		gs_notification_set_sound (sound);
 		
+		if (g_json_object_has (node, "font"))
+			gui_console_set_font (g_json_object_get_string (node, "font"));
+		
 		gboolean use_system_font = TRUE;
 		if (g_json_object_has (node, "system-font"))
 			use_system_font = g_json_object_get_boolean (node, "system-font");
 		gui_console_set_use_system_font (use_system_font);
-		
-		if (g_json_object_has (node, "font"))
-			gui_console_set_font (g_json_object_get_string (node, "font"));
 		
 		if (g_json_object_has (node, "log-address"))
 			gs_client_set_logaddress (g_json_object_get_string (node, "log-address"));
