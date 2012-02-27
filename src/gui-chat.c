@@ -158,6 +158,9 @@ gui_chat_create ()
 	g_signal_connect (entry, "icon-release", G_CALLBACK (gui_chat_entry_icon_clicked), NULL);
 	
 	GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
+	g_object_set (G_OBJECT (box),
+			"border-width", 2,
+			NULL);
 	gtk_box_pack_start (GTK_BOX (box), scrolled, TRUE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (box), entry, FALSE, TRUE, 0);
 	gtk_widget_show_all (box);
