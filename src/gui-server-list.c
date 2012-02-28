@@ -363,10 +363,12 @@ server_resolved (GsqQuerier *querier, GsClient *client)
 		gui_info_update (client);
 }
 
-
 static void
 server_info_updated (GsqQuerier *querier, GsClient *client)
 {
+	if (!gtk_widget_get_visible (window))
+		return;
+	
 	gchar players[16];
 	g_snprintf (players, 16, "%d / %d", client->querier->numplayers,
 			client->querier->maxplayers);
