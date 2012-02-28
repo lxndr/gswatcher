@@ -33,6 +33,7 @@ GtkWidget *gs_prefs_create ();
 
 void gui_prefs_set_update_rate (gdouble rate);
 void gui_prefs_set_game_column_mode (GuiGameColumnMode mode);
+void gui_prefs_set_connect_command (const gchar *command);
 void gui_prefs_set_enable_notifications (gboolean enable);
 void gui_prefs_set_notification_sound (const gchar *filename);
 void gui_prefs_set_use_system_font (gboolean use);

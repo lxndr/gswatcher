@@ -255,8 +255,7 @@ gui_slist_clicked (GtkWidget *widget, GdkEventButton *event, gpointer udata)
 		gs_save_server_list ();
 		break;
 	case 2:
-//		if (gs_client_can_connect (client))
-//			gs_client_connect (client);
+		gs_client_connect_to_game (client);
 		break;
 	}
 	
@@ -421,6 +420,7 @@ gui_slist_add (GsClient *client)
 			COLUMN_GAME, client->game,
 			COLUMN_ACTIONS_VISIBLE, TRUE,
 			COLUMN_FAVORITE, client->favorite,
+			COLUMN_CONNECT, TRUE,
 			-1);
 	
 	GtkTreeSelection *sel = gtk_tree_view_get_selection (GTK_TREE_VIEW (listview));
