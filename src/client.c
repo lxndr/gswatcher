@@ -32,8 +32,9 @@
 
 static GeoIP *geoip;
 static GHashTable *gamelist;
-static gchar *logaddress;
+static gchar *logaddress = NULL;
 static GRegex *re_say, *re_player;
+static gchar *connect_command = NULL;
 
 
 static void gs_client_finalize (GObject *object);
@@ -343,4 +344,49 @@ gs_client_send_message (GsClient *client, const gchar *msg)
 	gsq_console_send (client->console, cmd,
 			(GAsyncReadyCallback) chat_message_callback, client);
 	g_free (cmd);
+}
+
+
+void
+gs_client_set_connect_command (const gchar *command)
+{
+	if (connect_command)
+		g_free (connect_command);
+	connect_command = g_strdup (command ? command :
+			"steam://connect/$(address)");
+}
+
+gchar *
+gs_client_get_connect_command ()
+{
+	return connect_command;
+}
+
+static gboolean
+command_eval_callback (const GMatchInfo *minfo, GString *result, GsClient *client)
+{
+	gchar *match = g_match_info_fetch (minfo, 0);
+	if (strcmp (match, "$(address)") == 0)
+		g_string_append (result, gsq_querier_get_address (client->querier));
+	else
+		g_string_append_printf (result, "$(%s)", match);
+	g_free (match);
+	return FALSE;
+}
+
+void
+gs_client_connect_to_game (GsClient *client)
+{
+#ifdef G_OS_WIN32
+	GRegex *reg = g_regex_new ("\\$\\(.+\\)", 0, 0, NULL);
+	gchar *command = g_regex_replace_eval (reg, connect_command, -1, 0, 0,
+			(GRegexEvalCallback) command_eval_callback, client, NULL);
+	g_regex_unref (reg);
+	
+	int ret = (int) ShellExecute (NULL, "open", command, NULL, NULL, SW_SHOWNORMAL);
+	if (ret <= 32)
+		g_warning ("ShellExecute error: code %d", (int) ret);
+	
+	g_free (command);
+#endif
 }
