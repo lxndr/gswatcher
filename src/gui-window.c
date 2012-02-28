@@ -197,6 +197,7 @@ gui_window_show ()
 	gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (trayshow), TRUE);
 	g_signal_handlers_unblock_by_func (trayshow, gs_window_show_toggled, NULL);
 	gtk_widget_show (window);
+	gui_slist_update_all ();
 }
 
 void
