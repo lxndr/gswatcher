@@ -32,8 +32,8 @@
 
 
 static GtkAdjustment *ctl_urate;
-static GtkWidget *ctl_nenable, *ctl_game_column, *ctl_nsound, *ctl_sysfont,
-		*ctl_fontlabel, *ctl_font, *ctl_logaddress;
+static GtkWidget *ctl_game_column, *ctl_nenable, *ctl_nsound, *ctl_sysfont,
+		*ctl_fontlabel, *ctl_font, *ctl_logaddress, *ctl_connect;
 
 
 static void
@@ -98,6 +98,15 @@ gui_prefs_logaddress_changed (GtkEntry *entry, gpointer user_data)
 {
 	const gchar *address = gtk_entry_get_text (entry);
 	gs_client_set_logaddress (address);
+	gs_save_preferences ();
+}
+
+
+static void
+gui_prefs_connect_changed (GtkEntry *entry, gpointer user_data)
+{
+	const gchar *command = gtk_entry_get_text (entry);
+	gs_client_set_connect_command (command);
 	gs_save_preferences ();
 }
 
@@ -171,6 +180,24 @@ gs_prefs_create ()
 			NULL);
 	gtk_grid_attach (GTK_GRID (grid), label, 0, 2, 1, 1);
 	
+	/* Connect command */
+	ctl_connect = gtk_entry_new ();
+	g_object_set (G_OBJECT (ctl_connect),
+			"hexpand", TRUE,
+			NULL);
+	g_signal_connect (ctl_connect, "changed",
+			G_CALLBACK (gui_prefs_connect_changed), NULL);
+	gtk_grid_attach (GTK_GRID (grid), ctl_connect, 1, 3, 1, 1);
+	
+	label = gtk_label_new (_("Connect command:"));
+	g_object_set (G_OBJECT (label),
+			"use-underline", TRUE,
+			"mnemonic-widget", ctl_connect,
+			"margin-left", 8,
+			"halign", GTK_ALIGN_START,
+			NULL);
+	gtk_grid_attach (GTK_GRID (grid), label, 0, 3, 1, 1);
+	
 	// Notifications section
 	label = gtk_label_new (_("Notifications"));
 	gtk_label_set_attributes (GTK_LABEL (label), bold);
@@ -183,7 +210,7 @@ gs_prefs_create ()
 			NULL);
 	gtk_box_pack_start (GTK_BOX (box), label, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (box), tmp, TRUE, TRUE, 0);
-	gtk_grid_attach (GTK_GRID (grid), box, 0, 3, 2, 1);
+	gtk_grid_attach (GTK_GRID (grid), box, 0, 4, 2, 1);
 	
 	// Enable
 	ctl_nenable = gtk_check_button_new_with_label (_("E_nable"));
@@ -192,7 +219,7 @@ gs_prefs_create ()
 			"margin-left", 8,
 			NULL);
 	g_signal_connect (ctl_nenable, "toggled", G_CALLBACK (gui_prefs_enable_toggled), NULL);
-	gtk_grid_attach (GTK_GRID (grid), ctl_nenable, 0, 4, 2, 1);
+	gtk_grid_attach (GTK_GRID (grid), ctl_nenable, 0, 5, 2, 1);
 	
 	// Sound
 	ctl_nsound = gtk_file_chooser_button_new (_("Choose notification sound"),
@@ -201,7 +228,7 @@ gs_prefs_create ()
 			"hexpand", TRUE,
 			NULL);
 	g_signal_connect (ctl_nsound, "file-set", G_CALLBACK (gs_prefs_sound_changed), NULL);
-	gtk_grid_attach (GTK_GRID (grid), ctl_nsound, 1, 5, 1, 1);
+	gtk_grid_attach (GTK_GRID (grid), ctl_nsound, 1, 6, 1, 1);
 	
 	label = gtk_label_new (_("_Sound:"));
 	g_object_set (G_OBJECT (label),
@@ -210,7 +237,7 @@ gs_prefs_create ()
 			"margin-left", 8,
 			"halign", GTK_ALIGN_START,
 			NULL);
-	gtk_grid_attach (GTK_GRID (grid), label, 0, 5, 1, 1);
+	gtk_grid_attach (GTK_GRID (grid), label, 0, 6, 1, 1);
 	
 	// Console section
 	label = gtk_label_new (_("Console"));
@@ -224,7 +251,7 @@ gs_prefs_create ()
 			NULL);
 	gtk_box_pack_start (GTK_BOX (box), label, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (box), tmp, TRUE, TRUE, 0);
-	gtk_grid_attach (GTK_GRID (grid), box, 0, 6, 2, 1);
+	gtk_grid_attach (GTK_GRID (grid), box, 0, 7, 2, 1);
 	
 	// Use system font
 	ctl_sysfont = gtk_check_button_new_with_label (_("Use s_ystem monospace font"));
@@ -234,7 +261,7 @@ gs_prefs_create ()
 			NULL);
 	g_signal_connect (ctl_sysfont, "toggled",
 			G_CALLBACK (gui_prefs_sysfont_toggled), NULL);
-	gtk_grid_attach (GTK_GRID (grid), ctl_sysfont, 0, 7, 2, 1);
+	gtk_grid_attach (GTK_GRID (grid), ctl_sysfont, 0, 8, 2, 1);
 	
 	// Font
 	ctl_font = gtk_font_button_new_with_font (GS_DEFAULT_MONOSPACE_FONT);
@@ -242,7 +269,7 @@ gs_prefs_create ()
 			"hexpand", TRUE,
 			NULL);
 	g_signal_connect (ctl_font, "font-set", G_CALLBACK (gui_prefs_font_changed), NULL);
-	gtk_grid_attach (GTK_GRID (grid), ctl_font, 1, 8, 1, 1);
+	gtk_grid_attach (GTK_GRID (grid), ctl_font, 1, 9, 1, 1);
 	
 	ctl_fontlabel = gtk_label_new (_("_Font:"));
 	g_object_set (G_OBJECT (ctl_fontlabel),
@@ -251,7 +278,7 @@ gs_prefs_create ()
 			"margin-left", 8,
 			"halign", GTK_ALIGN_START,
 			NULL);
-	gtk_grid_attach (GTK_GRID (grid), ctl_fontlabel, 0, 8, 1, 1);
+	gtk_grid_attach (GTK_GRID (grid), ctl_fontlabel, 0, 9, 1, 1);
 	
 	// Log address
 	ctl_logaddress = gtk_entry_new ();
@@ -259,7 +286,7 @@ gs_prefs_create ()
 			"hexpand", TRUE,
 			NULL);
 	g_signal_connect (ctl_logaddress, "changed", G_CALLBACK (gui_prefs_logaddress_changed), NULL);
-	gtk_grid_attach (GTK_GRID (grid), ctl_logaddress, 1, 9, 1, 1);
+	gtk_grid_attach (GTK_GRID (grid), ctl_logaddress, 1, 10, 1, 1);
 	
 	label = gtk_label_new (_("_Log address:"));
 	g_object_set (G_OBJECT (label),
@@ -268,7 +295,7 @@ gs_prefs_create ()
 			"margin-left", 8,
 			"halign", GTK_ALIGN_START,
 			NULL);
-	gtk_grid_attach (GTK_GRID (grid), label, 0, 9, 1, 1);
+	gtk_grid_attach (GTK_GRID (grid), label, 0, 10, 1, 1);
 	
 	pango_attr_list_unref (bold);
 	gtk_widget_show_all (grid);
@@ -333,4 +360,12 @@ gui_prefs_set_logaddress (const gchar *address)
 	g_signal_handlers_block_by_func (ctl_font, gui_prefs_logaddress_changed, NULL);
 	gtk_entry_set_text (GTK_ENTRY (ctl_logaddress), address ? address : "");
 	g_signal_handlers_unblock_by_func (ctl_font, gui_prefs_logaddress_changed, NULL);
+}
+
+void
+gui_prefs_set_connect_command (const gchar *command)
+{
+	g_signal_handlers_block_by_func (ctl_connect, gui_prefs_connect_changed, NULL);
+	gtk_entry_set_text (GTK_ENTRY (ctl_connect), command ? command : "");
+	g_signal_handlers_unblock_by_func (ctl_connect, gui_prefs_connect_changed, NULL);
 }

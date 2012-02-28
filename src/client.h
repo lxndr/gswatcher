@@ -86,5 +86,9 @@ void gs_client_enable_log (GsClient *client, gboolean enable);
 
 void gs_client_send_message (GsClient *client, const gchar *msg);
 
+void gs_client_set_connect_command (const gchar *command);
+gchar *gs_client_get_connect_command ();
+void gs_client_connect_to_game (GsClient *client);
+
 
 #endif
