@@ -4,7 +4,7 @@ if (UNIX AND NOT APPLE)
 endif ()
 
 if (APPLE)
-	add_definitions (-DG_OS_MAXOSX)
+	add_definitions (-DG_OS_MACOSX)
 endif ()
 
 if (WIN32)
