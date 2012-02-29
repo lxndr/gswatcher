@@ -211,7 +211,8 @@ gs_client_querier_log (GsqQuerier *querier, const gchar *msg, GsClient *client)
 		if (strcmp (say_parts[3], "Console<0>") == 0) {
 			gui_chat_log (client, "Console", 0, say_parts[5]);
 		} else {
-			gchar **player_parts = g_regex_split (re_player, say_parts[3], 0);
+			gchar *player = gsq_utf8_repair (say_parts[3]);
+			gchar **player_parts = g_regex_split (re_player, player, 0);
 			if (!*player_parts[0]) {
 				gint team;
 				if (strcmp (player_parts[2], "Survivor") == 0)
@@ -224,6 +225,7 @@ gs_client_querier_log (GsqQuerier *querier, const gchar *msg, GsClient *client)
 				gui_chat_log (client, player_parts[1], team, say_parts[5]);
 			}
 			g_strfreev (player_parts);
+			g_free (player);
 		}
 	}
 	g_strfreev (say_parts);
