@@ -25,6 +25,7 @@
 #include "gui-window.h"
 #include "gui-buddy-list.h"
 #include "gui-player-list.h"
+#include "gui-server-list.h"
 
 
 static GtkWidget *listview, *add, *add_image;
@@ -204,7 +205,10 @@ gui_plist_add_clicked (GtkButton *button, gpointer udata)
 		return;
 	}
 	
-	GsBuddy *buddy = gs_add_buddy (name, 0, NULL, TRUE);
+	GsClient *srv = gui_slist_get_selected ();
+	
+	GsBuddy *buddy = gs_add_buddy (name, time (NULL),
+			gsq_querier_get_address (srv->querier), TRUE);
 	gui_blist_add (buddy);
 	g_free (name);
 	gtk_widget_set_sensitive (add, FALSE);
