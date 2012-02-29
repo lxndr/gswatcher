@@ -91,6 +91,9 @@ GList *gsq_querier_get_players (GsqQuerier *querier);
 GsqPlayer *gsq_querier_find_player (GsqQuerier *querier, const gchar *name);
 
 
+void gsq_querier_set_default_port (guint16 prot);
+guint16 gsq_querier_get_default_port ();
+
 void gsq_querier_set_debug_mode (gboolean enable);
 gboolean gsq_querier_get_debug_mode ();
 guint16 gsq_querier_get_ipv4_local_port ();
