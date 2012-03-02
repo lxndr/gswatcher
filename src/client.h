@@ -48,7 +48,6 @@ struct _GsClient {
 	// querier
 	GsqQuerier *querier;
 	gboolean favorite;
-	gchar *game;
 	gboolean password;
 	gchar *version;
 	const gchar *country_code;
@@ -77,6 +76,8 @@ struct _GsClientClass {
 
 GType gs_client_get_type (void) G_GNUC_CONST;
 GsClient* gs_client_new (const gchar *address);
+
+gchar *gs_client_get_game_name (GsClient* client, gboolean extra);
 
 void gs_client_send_command (GsClient* client, const gchar *cmd);
 
