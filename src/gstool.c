@@ -456,6 +456,10 @@ gs_load_preferences ()
 			gui_slist_set_game_column_mode (
 					g_json_object_get_float (node, "game-column"));
 		
+		if (g_json_object_has (node, "port"))
+			gsq_querier_set_default_port (
+					g_json_object_get_integer (node, "port"));
+		
 		if (g_json_object_has (node, "connect-command"))
 			gs_client_set_connect_command (g_json_object_get_string (node, "connect-command"));
 		
@@ -492,6 +496,7 @@ gs_load_preferences ()
 	
 	gui_prefs_set_update_rate (gs_get_update_rate ());
 	gui_prefs_set_game_column_mode (gui_slist_get_game_column_mode ());
+	gui_prefs_set_port (gsq_querier_get_default_port ());
 	gui_prefs_set_connect_command (gs_client_get_connect_command ());
 	gui_prefs_set_enable_notifications (gs_notification_get_enable ());
 	gui_prefs_set_notification_sound (gs_notification_get_sound ());
@@ -509,6 +514,8 @@ gs_save_preferences ()
 			gs_get_update_rate ());
 	g_json_object_set_integer (node, "game-column",
 			gui_slist_get_game_column_mode ());
+	g_json_object_set_integer (node, "port",
+			gsq_querier_get_default_port ());
 	g_json_object_set_string (node, "connect-command",
 			gs_client_get_connect_command ());
 	

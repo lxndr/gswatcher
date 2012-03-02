@@ -485,7 +485,8 @@ gui_slist_update_all ()
 	GList *servers = gs_get_server_list ();
 	while (servers) {
 		GsClient *client = servers->data;
-		server_info_updated (client->querier, client);
+		if (gsq_querier_get_ping (client->querier) > 0)
+			server_info_updated (client->querier, client);
 		servers = servers->next;
 	}
 }
