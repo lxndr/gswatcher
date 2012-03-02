@@ -96,8 +96,6 @@ gs_client_finalize (GObject *object)
 {
 	GsClient *client = GS_CLIENT (object);
 	
-	if (client->game)
-		g_free (client->game);
 	if (client->version)
 		g_free (client->version);
 	g_object_unref (client->querier);
@@ -145,6 +143,30 @@ gs_client_new (const gchar *address)
 }
 
 
+gchar *
+gs_client_get_game_name (GsClient* client, gboolean extra)
+{
+	GsqQuerier *querier = client->querier;
+	gchar *gamename;
+	
+	if (querier->game) {
+		gchar *name = g_hash_table_lookup (gamelist, querier->game);
+		if (G_UNLIKELY (strcmp (querier->game, "") == 0)) {
+			gamename = g_strdup_printf ("%s (%s)", name,
+					(gchar *) gsq_querier_get_extra (querier, "appid"));
+		} else {
+			gchar *mode = gsq_querier_get_extra (querier, "mode");
+			gamename = g_strdup_printf ((extra && mode && *mode) ?
+					"%s (%s)" : "%s", name, mode);
+		}
+	} else {
+		gamename = g_strdup ("");
+	}
+	
+	return gamename;
+}
+
+
 static void
 gs_client_querier_resolved (GsqQuerier *querier, GsClient *client)
 {
@@ -170,17 +192,6 @@ gs_client_querier_resolved (GsqQuerier *querier, GsClient *client)
 static void
 gs_client_querier_info_updated (GsqQuerier *querier, GsClient *client)
 {
-	if (client->game)
-		g_free (client->game);
-	gchar *gamename = g_hash_table_lookup (gamelist, querier->game);
-	gchar *mode = gsq_querier_get_extra (querier, "mode");
-	if (G_UNLIKELY (strcmp (querier->game, "") == 0))
-			client->game = g_strdup_printf ("%s (%s)", gamename,
-					(gchar *) gsq_querier_get_extra (querier, "appid"));
-	else
-		client->game = g_strdup_printf ((mode && *mode) ?
-				"%s (%s)" : "%s", gamename, mode);
-	
 	gchar *password = gsq_querier_get_extra (querier, "password");
 	client->password = password ? strcmp (password, "true") == 0 : FALSE;
 	
