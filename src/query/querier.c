@@ -65,6 +65,7 @@ struct _GsqQuerierPrivate {
 };
 
 
+static guint16 default_port = 27500;
 static GSocket *ip4sock = NULL, *ip6sock = NULL;
 static GList *servers = NULL;
 static gboolean debug_mode = FALSE;
@@ -273,11 +274,13 @@ gsq_querier_class_init (GsqQuerierClass *klass)
 	ip4sock = g_socket_new (G_SOCKET_FAMILY_IPV4, G_SOCKET_TYPE_DATAGRAM,
 			G_SOCKET_PROTOCOL_UDP, &error);
 	if (ip4sock) {
-		iaddr = g_inet_address_new_any (G_SOCKET_FAMILY_IPV4);
-		saddr = g_inet_socket_address_new (iaddr, 0);
-		g_socket_bind (ip4sock, saddr, FALSE, NULL);
-		g_object_unref (saddr);
-		g_object_unref (iaddr);
+		if (default_port) {
+			iaddr = g_inet_address_new_any (G_SOCKET_FAMILY_IPV4);
+			saddr = g_inet_socket_address_new (iaddr, default_port);
+			g_socket_bind (ip4sock, saddr, FALSE, NULL);
+			g_object_unref (saddr);
+			g_object_unref (iaddr);
+		}
 		
 		source = g_socket_create_source (ip4sock, G_IO_IN, NULL);
 		g_source_set_callback (source, (GSourceFunc) gsq_socket_recveived,
@@ -293,11 +296,13 @@ gsq_querier_class_init (GsqQuerierClass *klass)
 	ip6sock = g_socket_new (G_SOCKET_FAMILY_IPV6, G_SOCKET_TYPE_DATAGRAM,
 			G_SOCKET_PROTOCOL_UDP, &error);
 	if (ip6sock) {
-		iaddr = g_inet_address_new_any (G_SOCKET_FAMILY_IPV6);
-		saddr = g_inet_socket_address_new (iaddr, 0);
-		g_socket_bind (ip6sock, saddr, FALSE, NULL);
-		g_object_unref (saddr);
-		g_object_unref (iaddr);
+		if (default_port) {
+			iaddr = g_inet_address_new_any (G_SOCKET_FAMILY_IPV6);
+			saddr = g_inet_socket_address_new (iaddr, default_port);
+			g_socket_bind (ip6sock, saddr, FALSE, NULL);
+			g_object_unref (saddr);
+			g_object_unref (iaddr);
+		}
 		
 		source = g_socket_create_source (ip6sock, G_IO_IN, NULL);
 		g_source_set_callback (source, (GSourceFunc) gsq_socket_recveived,
@@ -398,6 +403,18 @@ gsq_querier_get_ping (GsqQuerier *querier)
 {
 	g_return_val_if_fail (GSQ_IS_QUERIER (querier), 0);
 	return querier->priv->ping;
+}
+
+void
+gsq_querier_set_default_port (guint16 port)
+{
+	default_port = port;
+}
+
+guint16
+gsq_querier_get_default_port ()
+{
+	return default_port;
 }
 
 void
