@@ -48,6 +48,7 @@ typedef struct _Request {
 	gchar key[14];	/* with this key we can found out if respond is complite */
 	GString *output;
 	GSimpleAsyncResult *result;
+	gint attempts;
 } Request;
 
 typedef struct _Packet {
@@ -289,14 +290,17 @@ throw_error (GsqConsole *console, GError *error)
 	GsqConsolePrivate *priv = console->priv;
 	if (priv->queue) {
 		Request *req = priv->queue->data;
-		priv->queue = g_list_delete_link (priv->queue, priv->queue);
-		
-		g_free (req->command);
-		g_string_free (req->output, TRUE);
-		g_simple_async_result_take_error (req->result, error);
-		g_simple_async_result_complete (req->result);
-		g_object_unref (req->result);
-		g_slice_free (Request, req);
+		req->attempts--;
+		if (req->attempts == 0) {
+			priv->queue = g_list_delete_link (priv->queue, priv->queue);
+			
+			g_free (req->command);
+			g_string_free (req->output, TRUE);
+			g_simple_async_result_take_error (req->result, error);
+			g_simple_async_result_complete (req->result);
+			g_object_unref (req->result);
+			g_slice_free (Request, req);
+		}
 	}
 	
 	close_connection (console);
@@ -595,6 +599,17 @@ gsq_console_send (GsqConsole *console, const gchar *command,
 {
 	g_return_if_fail (GSQ_IS_CONSOLE (console));
 	g_return_if_fail (command != NULL);
+	gsq_console_send_full (console, command, 1, callback, udata);
+}
+
+void
+gsq_console_send_full (GsqConsole *console, const gchar *command,
+		gint attempts,
+		GAsyncReadyCallback callback, gpointer udata)
+{
+	g_return_if_fail (GSQ_IS_CONSOLE (console));
+	g_return_if_fail (command != NULL);
+	g_return_if_fail (attempts > 0);
 	GsqConsolePrivate *priv = console->priv;
 	
 	/* skip empty command */
@@ -607,6 +622,7 @@ gsq_console_send (GsqConsole *console, const gchar *command,
 	req->output = g_string_sized_new (0);
 	req->result = g_simple_async_result_new (G_OBJECT (console), callback,
 			udata, gsq_console_send);
+	req->attempts = attempts;
 	priv->queue = g_list_append (priv->queue, req);
 	
 	if (!priv->working) {
