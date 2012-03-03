@@ -38,6 +38,7 @@ const gchar *gs_get_preferences_path ();
 const gchar *gs_get_locale_dir ();
 const gchar *gs_get_icon_dir ();
 const gchar *gs_get_sound_dir ();
+const gchar *gs_get_pixmap_dir ();
 
 
 #if GTK_MAJOR_VERSION == 2
