@@ -369,6 +369,9 @@ server_info_updated (GsqQuerier *querier, GsClient *client)
 	if (!gtk_widget_get_visible (window))
 		return;
 	
+	gchar *gamename = gs_client_get_game_name (client,
+			game_column_mode == GUI_GAME_COLUMN_FULL);
+	
 	gchar players[16];
 	g_snprintf (players, 16, "%d / %d", client->querier->numplayers,
 			client->querier->maxplayers);
@@ -385,7 +388,7 @@ server_info_updated (GsqQuerier *querier, GsClient *client)
 	gtk_list_store_set (liststore, &client->sliter,
 			COLUMN_NAME, client->querier->name,
 			COLUMN_ICON, get_game_icon (client->querier->game),
-			COLUMN_GAME, client->game,
+			COLUMN_GAME, gamename,
 			COLUMN_MAP, client->querier->map,
 			COLUMN_PLAYERS, players,
 			COLUMN_PLAYERS_COLOR, players_color,
@@ -393,6 +396,8 @@ server_info_updated (GsqQuerier *querier, GsClient *client)
 			COLUMN_PING, ping,
 			COLUMN_PING_COLOR, "black",
 			-1);
+	
+	g_free (gamename);
 	
 	if (client == selected)
 		gui_info_update (client);
@@ -412,6 +417,10 @@ gui_slist_add (GsClient *client)
 {
 	g_return_if_fail (client != NULL);
 	
+
+	gchar *gamename = gs_client_get_game_name (client,
+			game_column_mode == GUI_GAME_COLUMN_FULL);
+	
 	gtk_list_store_append (liststore, &client->sliter);
 	gtk_list_store_set (liststore, &client->sliter,
 			COLUMN_SERVER, client,
@@ -419,11 +428,13 @@ gui_slist_add (GsClient *client)
 			COLUMN_SPACE, TRUE,
 			COLUMN_NAME, client->querier->name,
 			COLUMN_ICON_VISIBLE, game_column_mode == GUI_GAME_COLUMN_ICON,
-			COLUMN_GAME, client->game,
+			COLUMN_GAME, gamename,
 			COLUMN_ACTIONS_VISIBLE, TRUE,
 			COLUMN_FAVORITE, client->favorite,
 			COLUMN_CONNECT, TRUE,
 			-1);
+	
+	g_free (gamename);
 	
 	GtkTreeSelection *sel = gtk_tree_view_get_selection (GTK_TREE_VIEW (listview));
 	if (gtk_tree_selection_count_selected_rows (sel) == 0)
@@ -456,23 +467,9 @@ gui_slist_set_hscrollbar (gboolean hscrollbar)
 void
 gui_slist_set_game_column_mode (GuiGameColumnMode mode)
 {
-	gtk_tree_view_column_set_visible (gamecolumn, mode != GUI_GAME_COLUMN_ICON);
-	
-	GtkTreeIter iter;
-	if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL (liststore), &iter)) {
-		do {
-			int type;
-			gtk_tree_model_get (GTK_TREE_MODEL (liststore), &iter,
-					COLUMN_TYPE, &type,
-					-1);
-			if (type == ROW_FAVORITE || type == ROW_OTHER)
-				gtk_list_store_set (liststore, &iter,
-						COLUMN_ICON_VISIBLE, mode == GUI_GAME_COLUMN_ICON,
-						-1);
-		} while (gtk_tree_model_iter_next (GTK_TREE_MODEL (liststore), &iter));
-	}
-	
+	gtk_tree_view_column_set_visible (gamecolumn, mode != GUI_GAME_COLUMN_ICON);	
 	game_column_mode = mode;
+	gui_slist_update_all ();
 }
 
 GuiGameColumnMode
@@ -488,7 +485,8 @@ gui_slist_update_all ()
 	GList *servers = gs_get_server_list ();
 	while (servers) {
 		GsClient *client = servers->data;
-		server_info_updated (client->querier, client);
+		if (gsq_querier_get_ping (client->querier) > 0)
+			server_info_updated (client->querier, client);
 		servers = servers->next;
 	}
 }
