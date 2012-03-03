@@ -35,6 +35,7 @@ void
 gui_info_update (GsClient *client)
 {
 	gchar tmp[16];
+	gchar *gamename = NULL;
 	
 	if (client)
 		g_snprintf (tmp, 16, "%d / %d",
@@ -42,12 +43,15 @@ gui_info_update (GsClient *client)
 	else
 		g_strlcpy (tmp, _("N/A"), 16);
 	
+	if (client)
+		gamename = gs_client_get_game_name (client, TRUE);
+	
 	gtk_label_set_text (GTK_LABEL (address),
 			client ? gsq_querier_get_address (client->querier) : _("N/A"));
 	gtk_label_set_text (GTK_LABEL (name),
 			client ? client->querier->name : _("N/A"));
 	gtk_label_set_text (GTK_LABEL (game),
-			client ? client->game : _("N/A"));
+			client ? gamename : _("N/A"));
 	gtk_label_set_text (GTK_LABEL (map),
 			client ? client->querier->map : _("N/A"));
 	gtk_label_set_text (GTK_LABEL (numplayers),
@@ -58,6 +62,9 @@ gui_info_update (GsClient *client)
 			client ? client->version : _("N/A"));
 	gtk_label_set_text (GTK_LABEL (location),
 			client ? client->country : _("N/A"));
+	
+	if (client)
+		g_free (gamename);
 }
 
 
