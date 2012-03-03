@@ -589,6 +589,9 @@ main (int argc, char **argv)
 		return EXIT_SUCCESS;
 	}
 	
+	gtk_icon_theme_append_search_path (gtk_icon_theme_get_default (),
+			gs_get_pixmap_dir ());
+	
 	gui_window_create ();
 	gs_notification_init (notifier);
 	

@@ -33,6 +33,7 @@ static gchar *locale_dir = NULL;
 #endif
 static gchar *icon_dir = NULL;
 static gchar *sound_dir = NULL;
+static gchar *pixmap_dir = NULL;
 
 
 void
@@ -63,6 +64,7 @@ gs_initialize_directories (const gchar *exe)
 	
 	icon_dir = g_build_filename (data_dir, "icons", NULL);
 	sound_dir = g_build_filename (data_dir, "sounds", NULL);
+	pixmap_dir = g_build_filename (root_dir, "share", "pixmaps", NULL);
 	
 #ifdef ENABLE_NLS
 #ifdef GS_LOCALEDIR
@@ -116,6 +118,11 @@ gs_get_sound_dir ()
 	return sound_dir;
 }
 
+const gchar *
+gs_get_pixmap_dir ()
+{
+	return pixmap_dir;
+}
 
 
 #if GTK_MAJOR_VERSION == 2
