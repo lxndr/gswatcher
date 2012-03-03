@@ -6,6 +6,9 @@ set (GS_VERSION "0.6")
 find_package (PkgConfig)
 
 
+option (GSTOOL_BUILD_TESTS "Build tests" OFF)
+
+
 set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -DDEBUG")
 
 set (CMAKE_C_FLAGS_PROFILE "${CMAKE_C_FLAGS_DEBUG} -pg")
@@ -13,7 +16,9 @@ set (CMAKE_EXE_LINKER_FLAGS_PROFILE "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -pg")
 
 
 add_subdirectory (src)
-add_subdirectory (tests)
+if (GSTOOL_BUILD_TESTS)
+	add_subdirectory (tests)
+endif ()
 
 
 install (FILES icons/gstool.png
