@@ -22,6 +22,7 @@
 
 
 
+#include <stdlib.h>
 #include <glib/gi18n-lib.h>
 #include <glib/gprintf.h>
 #include "json.h"
@@ -585,7 +586,7 @@ main (int argc, char **argv)
 	
 	if (showversion) {
 		g_print ("Game Server Tool v" GS_VERSION "\n");
-		return 0;
+		return EXIT_SUCCESS;
 	}
 	
 	gui_window_create ();
@@ -621,5 +622,5 @@ main (int argc, char **argv)
 	g_hash_table_destroy (buddies);
 	gui_window_destroy ();
 	
-	return 0;
+	return EXIT_SUCCESS;
 }
