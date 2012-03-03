@@ -311,7 +311,7 @@ gs_client_enable_log (GsClient *client, gboolean enable)
 		g_free (userhost);
 		
 		gchar *cmd = g_strdup_printf ("logaddress_add %s;log on", client->logaddress);
-		gsq_console_send (client->console, cmd,
+		gsq_console_send_full (client->console, cmd, 5,
 				(GAsyncReadyCallback) log_command_callback, client);
 		g_free (cmd);
 	} else {

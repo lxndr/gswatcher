@@ -78,6 +78,9 @@ guint gsq_console_get_timeout (GsqConsole *console);
 
 void gsq_console_send (GsqConsole *console, const gchar *command,
 		GAsyncReadyCallback callback, gpointer udata);
+void gsq_console_send_full (GsqConsole *console, const gchar *command,
+		gint attempts,
+		GAsyncReadyCallback callback, gpointer udata);
 gchar *gsq_console_send_finish (GsqConsole *console, GAsyncResult *result,
 		GError **error);
 
