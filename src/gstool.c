@@ -574,8 +574,10 @@ main (int argc, char **argv)
 				N_("Output all packets into stdout"), NULL},
 		{"server", 's', 0, G_OPTION_ARG_STRING_ARRAY, &servers,
 				N_("Watch only this server"), NULL},
+#ifndef G_OS_WIN32
 		{"notifier", 'n', 0, G_OPTION_ARG_NONE, &notifier,
 				N_("Use internal notifier"), NULL},
+#endif
 		{NULL}
 	};
 	
