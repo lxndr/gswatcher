@@ -157,7 +157,7 @@ gui_blist_selection_changed (GtkTreeSelection *selection, gpointer udata)
 			gtk_tree_model_get (GTK_TREE_MODEL (liststore), &iter, 0, &name, -1);
 			if (gtk_tree_selection_iter_is_selected (selection, &iter))
 				gtk_entry_set_text (GTK_ENTRY (nickname), name);
-			buddy = gs_find_buddy (name);
+			buddy = gs_application_find_buddy (app, name);
 			g_free (name);
 			gui_blist_update_real (buddy, &iter);
 		} while (gtk_tree_model_iter_next (GTK_TREE_MODEL (liststore), &iter));
@@ -171,7 +171,7 @@ static void
 gui_blist_name_activated (GtkEntry *entry, gpointer udata)
 {
 	const gchar *name = gtk_entry_get_text (entry);
-	GsBuddy *buddy = gs_add_buddy (name, 0, NULL, TRUE);
+	GsBuddy *buddy = gs_application_add_buddy (app, name, 0, NULL, TRUE);
 	if (buddy) {
 		gui_blist_add (buddy);
 		gtk_entry_set_icon_sensitive (entry, GTK_ENTRY_ICON_SECONDARY, FALSE);
@@ -185,7 +185,7 @@ gui_blist_name_icon_clicked (GtkEntry *entry, GtkEntryIconPosition icon_pos,
 {
 	if (icon_pos == GTK_ENTRY_ICON_SECONDARY) {
 		const gchar *name = gtk_entry_get_text (GTK_ENTRY (entry));
-		GsBuddy *buddy = gs_add_buddy (name, 0, NULL, TRUE);
+		GsBuddy *buddy = gs_application_add_buddy (app, name, 0, NULL, TRUE);
 		if (buddy) {
 			gui_blist_add (buddy);
 			gtk_entry_set_icon_sensitive (entry, GTK_ENTRY_ICON_SECONDARY, FALSE);
@@ -198,7 +198,7 @@ static void
 gui_blist_name_changed (GtkEntry *entry, gpointer udata)
 {
 	const gchar *name = gtk_entry_get_text (entry);
-	gboolean active = *name && !gs_find_buddy (name);
+	gboolean active = *name && !gs_application_find_buddy (app, name);
 	gtk_entry_set_icon_sensitive (entry, GTK_ENTRY_ICON_SECONDARY, active);
 	gtk_entry_set_icon_activatable (entry, GTK_ENTRY_ICON_SECONDARY, active);
 }
@@ -233,7 +233,7 @@ gui_blist_clicked (GtkTreeView *treeview, GdkEventButton *event, gpointer udata)
 	if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_YES) {
 		//gs_buddylist_select_another (iter);
 		gtk_list_store_remove (liststore, &iter);
-		gs_remove_buddy (name);
+		gs_application_remove_buddy (app, name);
 	}
 	
 	gtk_widget_destroy (dialog);
@@ -261,7 +261,7 @@ gui_blist_notify_toggled (GtkCellRendererToggle *cell, gchar *p, gpointer udata)
 			-1);
 	notify = !notify;
 	gtk_list_store_set (liststore, &iter, COLUMN_NOTIFY, notify, -1);
-	gs_change_buddy (name, notify);
+	gs_application_change_buddy (app, name, notify);
 	g_free (name);
 }
 

@@ -92,7 +92,7 @@ gui_plist_selection_changed (GtkTreeSelection *selection, gpointer udata)
 		goto finish;
 	}
 	
-	if (gs_find_buddy (name)) {
+	if (gs_application_find_buddy (app, name)) {
 		gtk_widget_set_sensitive (add, FALSE);
 		goto finish;
 	}
@@ -199,7 +199,7 @@ gui_plist_add_clicked (GtkButton *button, gpointer udata)
 		return;
 	}
 	
-	if (gs_find_buddy (name)) {
+	if (gs_application_find_buddy (app, name)) {
 		gtk_widget_set_sensitive (add, FALSE);
 		g_free (name);
 		return;
@@ -207,7 +207,7 @@ gui_plist_add_clicked (GtkButton *button, gpointer udata)
 	
 	GsClient *srv = gui_slist_get_selected ();
 	
-	GsBuddy *buddy = gs_add_buddy (name, time (NULL),
+	GsBuddy *buddy = gs_application_add_buddy (app, name, time (NULL),
 			gsq_querier_get_address (srv->querier), TRUE);
 	gui_blist_add (buddy);
 	g_free (name);
