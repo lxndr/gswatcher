@@ -184,7 +184,7 @@ gui_slist_remove (GsClient *client)
 	if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_YES) {
 		gui_slist_select_another (&client->sliter);
 		gtk_list_store_remove (liststore, &client->sliter);
-		gs_remove_server (client);
+		gs_application_remove_server (app, client);
 	}
 	
 	gtk_widget_destroy (dialog);
@@ -252,7 +252,7 @@ gui_slist_clicked (GtkWidget *widget, GdkEventButton *event, gpointer udata)
 				COLUMN_TYPE, client->favorite ? ROW_FAVORITE : ROW_OTHER,
 				COLUMN_FAVORITE, client->favorite,
 				-1);
-		gs_save_server_list ();
+		gs_application_save_server_list (app);
 		break;
 	case 2:
 		gs_client_connect_to_game (client);
@@ -279,7 +279,7 @@ load_icon (const gchar *name, GError **error)
 	if ((pixbuf = g_hash_table_lookup (icons, name)))
 		return pixbuf;
 	
-	gchar *path = g_build_filename (gs_get_icon_dir (), name, NULL);
+	gchar *path = g_build_filename (app->icon_dir, name, NULL);
 	pixbuf = gdk_pixbuf_new_from_file (path, error);
 	if (!pixbuf) {
 		g_free (path);
@@ -482,7 +482,7 @@ gui_slist_get_game_column_mode ()
 void
 gui_slist_update_all ()
 {
-	GList *servers = gs_get_server_list ();
+	GList *servers = app->server_list;
 	while (servers) {
 		GsClient *client = servers->data;
 		if (gsq_querier_get_ping (client->querier) > 0)
@@ -496,7 +496,7 @@ static void
 gs_address_activated (GtkEntry *entry, gpointer udata)
 {
 	const gchar *address = gtk_entry_get_text (entry);
-	gs_add_server (address);
+	gs_application_add_server (app, address);
 }
 
 
@@ -514,7 +514,7 @@ gs_address_icon_clicked (GtkEntry *entry, GtkEntryIconPosition icon,
 	} else {
 		// add new server
 		const gchar *address = gtk_entry_get_text (entry);
-		gs_add_server (address);
+		gs_application_add_server (app, address);
 	}
 }
 
@@ -528,7 +528,7 @@ gs_address_changed (GtkEntry *entry, gpointer udata)
 	gtk_entry_set_icon_sensitive (entry, GTK_ENTRY_ICON_PRIMARY, enabled);
 	gtk_entry_set_icon_activatable (entry, GTK_ENTRY_ICON_PRIMARY, enabled);
 	
-	enabled = *address && !gs_find_server (address);
+	enabled = *address && !gs_application_find_server (app, address);
 	gtk_entry_set_icon_sensitive (entry, GTK_ENTRY_ICON_SECONDARY, enabled);
 	gtk_entry_set_icon_activatable (entry, GTK_ENTRY_ICON_SECONDARY, enabled);
 }

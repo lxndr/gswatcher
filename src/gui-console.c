@@ -251,7 +251,7 @@ gs_console_password_changed (GtkEntry *entry, gpointer udata)
 {
 	GsClient *client = gui_slist_get_selected ();
 	gsq_console_set_password (client->console, gtk_entry_get_text (entry));
-	gs_save_server_list ();
+	gs_application_save_server_list (app);
 }
 
 
