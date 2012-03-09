@@ -134,7 +134,7 @@ gs_window_about_clicked (GtkButton *button)
 static void
 gs_window_quit_clicked (GtkWidget *widget, gpointer udata)
 {
-	gtk_main_quit ();
+	gs_application_shutdown (app);
 }
 
 
@@ -169,8 +169,8 @@ gs_window_show_toggled (GtkCheckMenuItem *menuitem, gpointer udata)
 static void
 gs_window_pause_toggled (GtkWidget *widget, gpointer udata)
 {
-	gboolean pause = !gs_is_pause ();
-	gs_pause (pause);
+	gboolean pause = !gs_application_get_pause (app);
+	gs_application_set_pause (app, pause);
 	
 	g_signal_handlers_block_by_func (traypause, gs_window_pause_toggled, NULL);
 	gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (traypause), pause);
