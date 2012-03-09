@@ -467,9 +467,18 @@ gui_slist_set_hscrollbar (gboolean hscrollbar)
 void
 gui_slist_set_game_column_mode (GuiGameColumnMode mode)
 {
-	gtk_tree_view_column_set_visible (gamecolumn, mode != GUI_GAME_COLUMN_ICON);	
+	gtk_tree_view_column_set_visible (gamecolumn, mode != GUI_GAME_COLUMN_ICON);
 	game_column_mode = mode;
 	gui_slist_update_all ();
+	
+	GList *server_iter = app->server_list;
+	while (server_iter) {
+		GsClient *client = server_iter->data;
+		gtk_list_store_set (liststore, &client->sliter,
+				COLUMN_ICON_VISIBLE, game_column_mode == GUI_GAME_COLUMN_ICON,
+				-1);
+		server_iter = server_iter->next;
+	}
 }
 
 GuiGameColumnMode
