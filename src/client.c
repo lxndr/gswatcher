@@ -100,11 +100,12 @@ gs_client_finalize (GObject *object)
 		g_free (client->version);
 	g_object_unref (client->querier);
 	
-	gs_client_enable_log (client, FALSE);
 	g_object_unref (client->console_buffer);
 	g_object_unref (client->console_history);
 	g_object_unref (client->console);
 	
+	if (client->log_address)
+		g_free (client->log_address);
 	g_object_unref (client->log_buffer);
 	
 	g_object_unref (client->chat_buffer);
@@ -315,25 +316,25 @@ gs_client_enable_log (GsClient *client, gboolean enable)
 			return;
 		}
 		
-		if (client->logaddress)
-			g_free (client->logaddress);
+		if (client->log_address)
+			g_free (client->log_address);
 		guint16 port = gsq_querier_get_ipv4_local_port (client->querier);
-		client->logaddress = g_strdup_printf ("%s:%d", userhost, port);
+		client->log_address = g_strdup_printf ("%s:%d", userhost, port);
 		g_free (userhost);
 		
-		gchar *cmd = g_strdup_printf ("logaddress_add %s;log on", client->logaddress);
+		gchar *cmd = g_strdup_printf ("logaddress_add %s;log on", client->log_address);
 		gsq_console_send_full (client->console, cmd, 5,
 				(GAsyncReadyCallback) log_command_callback, client);
 		g_free (cmd);
 	} else {
-		if (client->logaddress) {
-			gchar *cmd = g_strdup_printf ("logaddress_del %s;log off", client->logaddress);
+		if (client->log_address) {
+			gchar *cmd = g_strdup_printf ("logaddress_del %s;log off", client->log_address);
 			gsq_console_send (client->console, cmd,
 					(GAsyncReadyCallback) log_command_callback, client);
 			g_free (cmd);
 			
-			g_free (client->logaddress);
-			client->logaddress = NULL;
+			g_free (client->log_address);
+			client->log_address = NULL;
 		}
 	}
 }
@@ -375,6 +376,7 @@ gs_client_get_connect_command ()
 	return connect_command;
 }
 
+#ifdef G_OS_WIN32
 static gboolean
 command_eval_callback (const GMatchInfo *minfo, GString *result, GsClient *client)
 {
@@ -386,6 +388,7 @@ command_eval_callback (const GMatchInfo *minfo, GString *result, GsClient *clien
 	g_free (match);
 	return FALSE;
 }
+#endif
 
 void
 gs_client_connect_to_game (GsClient *client)

@@ -144,7 +144,7 @@ gui_log_create ()
 	logview = gtk_text_view_new ();
 	g_object_set (G_OBJECT (logview),
 			"editable", FALSE,
-			"wrap-mode", GTK_WRAP_WORD,
+			"wrap-mode", GTK_WRAP_WORD_CHAR,
 			NULL);
 	
 	GtkWidget *scrolled = gtk_scrolled_window_new (NULL, NULL);

@@ -45,23 +45,22 @@ typedef struct _GsClientClass GsClientClass;
 struct _GsClient {
 	GObject parent_object;
 	
-	// querier
+	/* querier */
 	GsqQuerier *querier;
 	gboolean favorite;
 	gboolean password;
 	gchar *version;
 	const gchar *country_code;
 	const gchar *country;
-	GtkTreeIter sliter;			// server list iterator
+	GtkTreeIter sliter;			/* server list iterator */
 	
-	// console
+	/* console */
 	GsqConsole *console;
-/*	GList *commands;*/
 	GtkTextBuffer *console_buffer;
 	GtkListStore *console_history;
 	
-	// log
-	gchar *logaddress;
+	/* log */
+	gchar *log_address;
 	GtkTextBuffer *log_buffer;
 	gboolean log_auto;
 	
