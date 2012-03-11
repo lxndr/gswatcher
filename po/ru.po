@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.7\n"
 "Report-Msgid-Bugs-To: lxndr87@users.sourceforge.net\n"
-"POT-Creation-Date: 2012-03-11 18:05+0400\n"
+"POT-Creation-Date: 2012-03-11 21:07+0400\n"
 "PO-Revision-Date: 2012-03-11 17:36+0400\n"
 "Last-Translator: Alexander AB\n"
 "Language-Team: Russian\n"
@@ -17,6 +17,18 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: src/client.c:251
+msgid "Connected"
+msgstr "Подключён"
+
+#: src/client.c:257
+msgid "Disconnected"
+msgstr "Отключён"
+
+#: src/client.c:316
+msgid "You have to provide a log address"
+msgstr "Укажите адрес для лога"
 
 #: src/gstool.c:268
 msgid "Show version number and exit"
@@ -205,8 +217,7 @@ msgstr "Ув."
 #: src/gui-console.c:163
 msgid ""
 "This command will shut down the server. Are you sure you want to continue?"
-msgstr ""
-"Эта команда выключит сервер. Вы уверены, что хотите продолжить?"
+msgstr "Эта команда выключит сервер. Вы уверены, что хотите продолжить?"
 
 #: src/gui-console.c:307 src/gui-info.c:148
 msgid "Password:"
