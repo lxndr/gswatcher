@@ -22,6 +22,7 @@
 
 
 
+#include <glib/gi18n-lib.h>
 #include <GeoIP.h>
 #include "query/utils.h"
 #include "gui-console.h"
@@ -247,13 +248,13 @@ gs_client_querier_log (GsqQuerier *querier, const gchar *msg, GsClient *client)
 static void
 gs_client_console_connect (GsqConsole *console, GsClient* client)
 {
-	gs_console_log (client, GS_CONSOLE_INFO, "Connected");
+	gs_console_log (client, GS_CONSOLE_INFO, _("Connected"));
 }
 
 static void
 gs_client_console_disconnect (GsqConsole *console, GsClient* client)
 {
-	gs_console_log (client, GS_CONSOLE_INFO, "Disconnected");
+	gs_console_log (client, GS_CONSOLE_INFO, _("Disconnected"));
 }
 
 
@@ -312,7 +313,7 @@ gs_client_enable_log (GsClient *client, gboolean enable)
 		gchar *userhost = gsq_parse_address (logaddress, &userport, NULL);
 		if (!userhost) {
 			gs_console_log (client, GS_CONSOLE_ERROR,
-					"You have to provide a log address");
+					_("You have to provide a log address"));
 			return;
 		}
 		

@@ -13,6 +13,7 @@ add_custom_command (
 		--keyword=_ --keyword=N_ --keyword=C_:1c,2
 		--directory=${CMAKE_SOURCE_DIR} --from-code=UTF-8
 		--msgid-bugs-address=lxndr87@users.sourceforge.net
+		src/client.c
 		src/gstool.c
 		src/gui-window.c
 		src/gui-server-list.c
@@ -23,6 +24,7 @@ add_custom_command (
 		src/gui-preferences.c
 		src/gui-info.c
 	DEPENDS
+		../src/client.c
 		../src/gstool.c
 		../src/gui-window.c
 		../src/gui-server-list.c
