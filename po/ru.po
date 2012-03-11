@@ -28,35 +28,35 @@ msgstr "Запустить свёрнутым"
 
 #: src/gstool.c:272
 msgid "Output all packets into stdout"
-msgstr ""
+msgstr "Выводить пакеты в стандартный вывод"
 
 #: src/gstool.c:275
 msgid "Watch only this server"
-msgstr ""
+msgstr "Следить только за этим сервером"
 
 #: src/gstool.c:278
 msgid "Use internal notifier"
-msgstr ""
+msgstr "Использовать внутренний уведомитель"
 
 #: src/gstool.c:387
 #, c-format
 msgid "Couldn't save buddy list: %s"
-msgstr ""
+msgstr "Не мог схранить список друзей: %s"
 
 #: src/gstool.c:489
 #, c-format
 msgid "Couldn't load buddy list: %s"
-msgstr ""
+msgstr "Не смог загрузить список друзей: %s"
 
 #: src/gstool.c:536
 #, c-format
 msgid "Couldn't save server list: %s"
-msgstr ""
+msgstr "Не смог сохранить список серверов: %s"
 
 #: src/gstool.c:624
 #, c-format
 msgid "Player %s has connected"
-msgstr ""
+msgstr "Игрок %s подключился"
 
 #: src/gstool.c:625 src/gstool.c:653
 #, c-format
@@ -72,49 +72,49 @@ msgstr ""
 #: src/gstool.c:652
 #, c-format
 msgid "Server with %s has free slot"
-msgstr ""
+msgstr "На сервер с %s есть свободный слот"
 
 #: src/gstool.c:881
 #, c-format
 msgid "Couldn't save preferences to %s: %s"
-msgstr ""
+msgstr "Не смог сохранить настройки"
 
 #: src/gui-server-list.c:182
 #, c-format
 msgid "Are you sure you want to remove \"%s\" ( %s) from the list?"
-msgstr ""
+msgstr "Вы уверены, что хотите удалить \"%s\" (%s) из списка?"
 
 #: src/gui-server-list.c:350
 msgid "Timeout"
-msgstr ""
+msgstr "Таймаут"
 
 #: src/gui-server-list.c:598
 msgid "Favorite servers"
-msgstr ""
+msgstr "Любимые сервера"
 
 #: src/gui-server-list.c:610
 msgid "Other servers"
-msgstr ""
+msgstr "Другие сервера"
 
 #: src/gui-server-list.c:632 src/gui-buddy-list.c:310
 msgid "Name"
-msgstr ""
+msgstr "Имя"
 
 #: src/gui-server-list.c:674
 msgid "Game"
-msgstr ""
+msgstr "Игра"
 
 #: src/gui-server-list.c:694
 msgid "Map"
-msgstr ""
+msgstr "Карта"
 
 #: src/gui-server-list.c:708
 msgid "Players"
-msgstr ""
+msgstr "Игроки"
 
 #: src/gui-server-list.c:723
 msgid "Ping"
-msgstr ""
+msgstr "Пинг"
 
 #: src/gui-buddy-list.c:328
 msgid "Last seen"
@@ -122,15 +122,15 @@ msgstr ""
 
 #: src/gui-buddy-list.c:344
 msgid "Place"
-msgstr ""
+msgstr "Место"
 
 #: src/gui-buddy-list.c:359
 msgid "Notify"
-msgstr ""
+msgstr "Ув."
 
 #: src/gui-preferences.c:141
 msgid "General"
-msgstr ""
+msgstr "Основные"
 
 #: src/gui-preferences.c:161
 msgid "Update _rate:"
@@ -138,15 +138,15 @@ msgstr ""
 
 #: src/gui-preferences.c:173
 msgid "Icon only"
-msgstr ""
+msgstr "Только значки"
 
 #: src/gui-preferences.c:175
 msgid "Game name"
-msgstr ""
+msgstr "Название игры"
 
 #: src/gui-preferences.c:177
 msgid "Game name and game mode if known"
-msgstr ""
+msgstr "Название игры и игровой режим"
 
 #: src/gui-preferences.c:183
 msgid "_Game column:"
@@ -154,19 +154,19 @@ msgstr ""
 
 #: src/gui-preferences.c:204
 msgid "Port:"
-msgstr ""
+msgstr "Порт:"
 
 #: src/gui-preferences.c:222
 msgid "Connect command:"
-msgstr ""
+msgstr "Команда подключения:"
 
 #: src/gui-preferences.c:232
 msgid "Notifications"
-msgstr ""
+msgstr "Уведомления"
 
 #: src/gui-preferences.c:246
 msgid "E_nable"
-msgstr ""
+msgstr "_Включить"
 
 #: src/gui-preferences.c:255
 msgid "Choose notification sound"
@@ -178,7 +178,7 @@ msgstr ""
 
 #: src/gui-preferences.c:273
 msgid "Console"
-msgstr ""
+msgstr "Консоль"
 
 #: src/gui-preferences.c:287
 msgid "Use s_ystem monospace font"
@@ -186,7 +186,7 @@ msgstr ""
 
 #: src/gui-preferences.c:304
 msgid "_Font:"
-msgstr ""
+msgstr "_Шрифт"
 
 #: src/gui-preferences.c:321
 msgid "_Log address:"
@@ -199,40 +199,40 @@ msgstr ""
 
 #: src/gui-info.c:60
 msgid "Yes"
-msgstr ""
+msgstr "Да"
 
 #: src/gui-info.c:60
 msgid "No"
-msgstr ""
+msgstr "Нет"
 
 #: src/gui-info.c:83
 msgid "Name:"
-msgstr ""
+msgstr "Название:"
 
 #: src/gui-info.c:96
 msgid "Address:"
-msgstr ""
+msgstr "Адрес:"
 
 #: src/gui-info.c:109
 msgid "Game:"
-msgstr ""
+msgstr "Игра:"
 
 #: src/gui-info.c:122
 msgid "Map:"
-msgstr ""
+msgstr "Карта:"
 
 #: src/gui-info.c:135
 msgid "Players:"
-msgstr ""
+msgstr "Игроки:"
 
 #: src/gui-info.c:148
 msgid "Password:"
-msgstr ""
+msgstr "Пароль:"
 
 #: src/gui-info.c:161
 msgid "Version:"
-msgstr ""
+msgstr "Версия:"
 
 #: src/gui-info.c:174
 msgid "Location:"
-msgstr ""
+msgstr "Положение:"
