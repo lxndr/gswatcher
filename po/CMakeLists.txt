@@ -9,18 +9,27 @@ add_custom_command (
 	OUTPUT
 		${POT_FILE}
 	COMMAND
-		${XGETTEXT_EXECUTABLE} --output=${POT_FILE} --keyword=_ --keyword=N_
+		${XGETTEXT_EXECUTABLE} --output=${POT_FILE}
+		--keyword=_ --keyword=N_ --keyword=C_:1c,2
 		--directory=${CMAKE_SOURCE_DIR} --from-code=UTF-8
 		--msgid-bugs-address=lxndr87@users.sourceforge.net
 		src/gstool.c
+		src/gui-window.c
 		src/gui-server-list.c
+		src/gui-player-list.c
 		src/gui-buddy-list.c
+		src/gui-console.c
+		src/gui-log.c
 		src/gui-preferences.c
 		src/gui-info.c
 	DEPENDS
 		../src/gstool.c
+		../src/gui-window.c
 		../src/gui-server-list.c
+		../src/gui-player-list.c
 		../src/gui-buddy-list.c
+		../src/gui-console.c
+		../src/gui-log.c
 		../src/gui-preferences.c
 		../src/gui-info.c
 	COMMENT
@@ -36,7 +45,7 @@ foreach (lang ${GS_LANGUAGES})
 		COMMAND ${MSGMERGE_EXECUTABLE} --update --quiet ${PO_FILE} ${POT_FILE}
 		COMMAND ${MSGFMT_EXECUTABLE} --output=${MO_FILE} ${PO_FILE}
 		DEPENDS ${POT_FILE} ${PO_FILE}
-		COMMENT "Compiling $lang locale")
+		COMMENT "Compiling ${lang} locale")
 	
 	install (
 		FILES ${MO_FILE}

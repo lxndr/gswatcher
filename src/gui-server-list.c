@@ -629,7 +629,7 @@ gui_slist_create ()
 /* name column */
 	column = gtk_tree_view_column_new ();
 	g_object_set (G_OBJECT (column),
-			"title", _("Name"),
+			"title", C_("Server", "Name"),
 			"clickable", TRUE,
 			"expand", TRUE,
 			"sort-column-id", COLUMN_NAME,
