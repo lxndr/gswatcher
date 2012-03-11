@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: lxndr87@users.sourceforge.net\n"
-"POT-Creation-Date: 2012-03-11 11:33+0400\n"
+"POT-Creation-Date: 2012-03-11 18:05+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -75,6 +75,62 @@ msgstr ""
 msgid "Couldn't save preferences to %s: %s"
 msgstr ""
 
+#: src/gui-window.c:129
+msgid "Offical Web Page"
+msgstr ""
+
+#: src/gui-window.c:278 src/gui-window.c:279
+msgid "Game Server Tool"
+msgstr ""
+
+#: src/gui-window.c:285
+msgid "_Show"
+msgstr ""
+
+#: src/gui-window.c:292 src/gui-window.c:362
+msgid "_Pause"
+msgstr ""
+
+#: src/gui-window.c:318 src/gui-window.c:484
+msgid "Server list"
+msgstr ""
+
+#: src/gui-window.c:328 src/gui-window.c:489
+msgid "Buddy list"
+msgstr ""
+
+#: src/gui-window.c:338 src/gui-window.c:494
+msgid "Preferences"
+msgstr ""
+
+#: src/gui-window.c:353
+msgid "_Layout"
+msgstr ""
+
+#: src/gui-window.c:373
+msgid "About"
+msgstr ""
+
+#: src/gui-window.c:383
+msgid "Quit"
+msgstr ""
+
+#: src/gui-window.c:427
+msgid "Info"
+msgstr ""
+
+#: src/gui-window.c:436 src/gui-preferences.c:273
+msgid "Console"
+msgstr ""
+
+#: src/gui-window.c:445
+msgid "Log"
+msgstr ""
+
+#: src/gui-window.c:454
+msgid "Chat"
+msgstr ""
+
 #: src/gui-server-list.c:182
 #, c-format
 msgid "Are you sure you want to remove \"%s\" ( %s) from the list?"
@@ -92,7 +148,8 @@ msgstr ""
 msgid "Other servers"
 msgstr ""
 
-#: src/gui-server-list.c:632 src/gui-buddy-list.c:310
+#: src/gui-server-list.c:632
+msgctxt "Server"
 msgid "Name"
 msgstr ""
 
@@ -112,6 +169,23 @@ msgstr ""
 msgid "Ping"
 msgstr ""
 
+#: src/gui-player-list.c:124 src/gui-buddy-list.c:310
+msgctxt "Player"
+msgid "Name"
+msgstr ""
+
+#: src/gui-player-list.c:143
+msgid "Kills"
+msgstr ""
+
+#: src/gui-player-list.c:157
+msgid "Time"
+msgstr ""
+
+#: src/gui-player-list.c:225
+msgid "Add player to your buddy list"
+msgstr ""
+
 #: src/gui-buddy-list.c:328
 msgid "Last seen"
 msgstr ""
@@ -122,6 +196,27 @@ msgstr ""
 
 #: src/gui-buddy-list.c:359
 msgid "Notify"
+msgstr ""
+
+#: src/gui-console.c:163
+msgid ""
+"This command will shut down the server. Are you sure you want to continue?"
+msgstr ""
+
+#: src/gui-console.c:307 src/gui-info.c:148
+msgid "Password:"
+msgstr ""
+
+#: src/gui-log.c:122
+msgid "Enable log"
+msgstr ""
+
+#: src/gui-log.c:125
+msgid "Disable log"
+msgstr ""
+
+#: src/gui-log.c:128
+msgid "Keep on"
 msgstr ""
 
 #: src/gui-preferences.c:141
@@ -172,10 +267,6 @@ msgstr ""
 msgid "_Sound:"
 msgstr ""
 
-#: src/gui-preferences.c:273
-msgid "Console"
-msgstr ""
-
 #: src/gui-preferences.c:287
 msgid "Use s_ystem monospace font"
 msgstr ""
@@ -219,10 +310,6 @@ msgstr ""
 
 #: src/gui-info.c:135
 msgid "Players:"
-msgstr ""
-
-#: src/gui-info.c:148
-msgid "Password:"
 msgstr ""
 
 #: src/gui-info.c:161
