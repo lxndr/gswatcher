@@ -307,7 +307,7 @@ gui_blist_create (GtkBuilder *builder)
 /* "name" column */
 	column = gtk_tree_view_column_new ();
 	g_object_set (G_OBJECT (column),
-			"title", _("Name"),
+			"title", C_("Player", "Name"),
 			"clickable", TRUE,
 			"expand", TRUE,
 			"sort-column-id", COLUMN_NAME,

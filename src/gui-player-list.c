@@ -121,7 +121,7 @@ gui_plist_create ()
 	
 	column = gtk_tree_view_column_new ();
 	g_object_set (G_OBJECT (column),
-			"title", _("Name"),
+			"title", C_("Player", "Name"),
 			"clickable", TRUE,
 			"expand", TRUE,
 			"sizing", GTK_TREE_VIEW_COLUMN_FIXED,
