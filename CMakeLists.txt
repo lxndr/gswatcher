@@ -2,6 +2,7 @@ cmake_minimum_required (VERSION 2.8)
 project (gstool C)
 
 set (GS_VERSION "0.7")
+set (GS_LANGUAGES ru)
 
 find_package (PkgConfig)
 
@@ -16,6 +17,7 @@ set (CMAKE_EXE_LINKER_FLAGS_PROFILE "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -pg")
 
 
 add_subdirectory (src)
+add_subdirectory (po)
 if (GSTOOL_BUILD_TESTS)
 	add_subdirectory (tests)
 endif ()
