@@ -1,0 +1,238 @@
+# Russian translations for PACKAGE package.
+# Copyright (C) 2012 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Automatically generated, 2012.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.7\n"
+"Report-Msgid-Bugs-To: lxndr87@users.sourceforge.net\n"
+"POT-Creation-Date: 2012-03-11 11:33+0400\n"
+"PO-Revision-Date: 2012-03-11 11:33+0400\n"
+"Last-Translator: Alexander AB\n"
+"Language-Team: none\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: src/gstool.c:268
+msgid "Show version number and exit"
+msgstr "Показать версию и выйти"
+
+#: src/gstool.c:270
+msgid "Start minimized in system tray"
+msgstr "Запустить свёрнутым"
+
+#: src/gstool.c:272
+msgid "Output all packets into stdout"
+msgstr ""
+
+#: src/gstool.c:275
+msgid "Watch only this server"
+msgstr ""
+
+#: src/gstool.c:278
+msgid "Use internal notifier"
+msgstr ""
+
+#: src/gstool.c:387
+#, c-format
+msgid "Couldn't save buddy list: %s"
+msgstr ""
+
+#: src/gstool.c:489
+#, c-format
+msgid "Couldn't load buddy list: %s"
+msgstr ""
+
+#: src/gstool.c:536
+#, c-format
+msgid "Couldn't save server list: %s"
+msgstr ""
+
+#: src/gstool.c:624
+#, c-format
+msgid "Player %s has connected"
+msgstr ""
+
+#: src/gstool.c:625 src/gstool.c:653
+#, c-format
+msgid ""
+"Address: %s\n"
+"Server: %s\n"
+"Players: %d / %d"
+msgstr ""
+"Адрес: %s\n"
+"Сервер: %s\n"
+"Игроки: %d / %d"
+
+#: src/gstool.c:652
+#, c-format
+msgid "Server with %s has free slot"
+msgstr ""
+
+#: src/gstool.c:881
+#, c-format
+msgid "Couldn't save preferences to %s: %s"
+msgstr ""
+
+#: src/gui-server-list.c:182
+#, c-format
+msgid "Are you sure you want to remove \"%s\" ( %s) from the list?"
+msgstr ""
+
+#: src/gui-server-list.c:350
+msgid "Timeout"
+msgstr ""
+
+#: src/gui-server-list.c:598
+msgid "Favorite servers"
+msgstr ""
+
+#: src/gui-server-list.c:610
+msgid "Other servers"
+msgstr ""
+
+#: src/gui-server-list.c:632 src/gui-buddy-list.c:310
+msgid "Name"
+msgstr ""
+
+#: src/gui-server-list.c:674
+msgid "Game"
+msgstr ""
+
+#: src/gui-server-list.c:694
+msgid "Map"
+msgstr ""
+
+#: src/gui-server-list.c:708
+msgid "Players"
+msgstr ""
+
+#: src/gui-server-list.c:723
+msgid "Ping"
+msgstr ""
+
+#: src/gui-buddy-list.c:328
+msgid "Last seen"
+msgstr ""
+
+#: src/gui-buddy-list.c:344
+msgid "Place"
+msgstr ""
+
+#: src/gui-buddy-list.c:359
+msgid "Notify"
+msgstr ""
+
+#: src/gui-preferences.c:141
+msgid "General"
+msgstr ""
+
+#: src/gui-preferences.c:161
+msgid "Update _rate:"
+msgstr ""
+
+#: src/gui-preferences.c:173
+msgid "Icon only"
+msgstr ""
+
+#: src/gui-preferences.c:175
+msgid "Game name"
+msgstr ""
+
+#: src/gui-preferences.c:177
+msgid "Game name and game mode if known"
+msgstr ""
+
+#: src/gui-preferences.c:183
+msgid "_Game column:"
+msgstr ""
+
+#: src/gui-preferences.c:204
+msgid "Port:"
+msgstr ""
+
+#: src/gui-preferences.c:222
+msgid "Connect command:"
+msgstr ""
+
+#: src/gui-preferences.c:232
+msgid "Notifications"
+msgstr ""
+
+#: src/gui-preferences.c:246
+msgid "E_nable"
+msgstr ""
+
+#: src/gui-preferences.c:255
+msgid "Choose notification sound"
+msgstr ""
+
+#: src/gui-preferences.c:263
+msgid "_Sound:"
+msgstr ""
+
+#: src/gui-preferences.c:273
+msgid "Console"
+msgstr ""
+
+#: src/gui-preferences.c:287
+msgid "Use s_ystem monospace font"
+msgstr ""
+
+#: src/gui-preferences.c:304
+msgid "_Font:"
+msgstr ""
+
+#: src/gui-preferences.c:321
+msgid "_Log address:"
+msgstr ""
+
+#: src/gui-info.c:44 src/gui-info.c:50 src/gui-info.c:52 src/gui-info.c:54
+#: src/gui-info.c:56 src/gui-info.c:60 src/gui-info.c:62 src/gui-info.c:64
+msgid "N/A"
+msgstr ""
+
+#: src/gui-info.c:60
+msgid "Yes"
+msgstr ""
+
+#: src/gui-info.c:60
+msgid "No"
+msgstr ""
+
+#: src/gui-info.c:83
+msgid "Name:"
+msgstr ""
+
+#: src/gui-info.c:96
+msgid "Address:"
+msgstr ""
+
+#: src/gui-info.c:109
+msgid "Game:"
+msgstr ""
+
+#: src/gui-info.c:122
+msgid "Map:"
+msgstr ""
+
+#: src/gui-info.c:135
+msgid "Players:"
+msgstr ""
+
+#: src/gui-info.c:148
+msgid "Password:"
+msgstr ""
+
+#: src/gui-info.c:161
+msgid "Version:"
+msgstr ""
+
+#: src/gui-info.c:174
+msgid "Location:"
+msgstr ""
