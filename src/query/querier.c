@@ -60,6 +60,7 @@ struct _GsqQuerierPrivate {
 	GInetAddress *iaddr;
 	guint16 port;
 	gpointer pdata;
+	GArray *fields;
 	GList *players;
 	GList *newplayers;
 };
@@ -103,6 +104,15 @@ gsq_querier_free_players (GList *players)
 	}
 }
 
+static void
+gsq_querier_free_fields (GArray *fields)
+{
+	guint i;
+	for (i = 0; i < fields->len; i++)
+		g_free (g_array_index (fields, GsqField, i).name);
+	g_array_set_size (fields, 0);
+}
+
 
 static void
 gsq_querier_clear (GsqQuerier *querier)
@@ -116,6 +126,7 @@ gsq_querier_clear (GsqQuerier *querier)
 	querier->maxplayers = 0;
 	gsq_safefree (querier->version);
 	g_hash_table_remove_all (priv->extra);
+	gsq_querier_free_fields (priv->fields);
 	
 	if (priv->iaddr) {
 		g_object_unref (priv->iaddr);
@@ -168,6 +179,7 @@ gsq_querier_finalize (GObject *object)
 	gsq_querier_clear (querier);
 	gsq_safefree (querier->priv->address);
 	g_hash_table_destroy (querier->priv->extra);
+	g_array_free (querier->priv->fields, TRUE);
 	
 	if (G_OBJECT_CLASS (gsq_querier_parent_class)->finalize)
 		G_OBJECT_CLASS (gsq_querier_parent_class)->finalize (object);
@@ -325,6 +337,7 @@ gsq_querier_init (GsqQuerier *querier)
 			NULL, g_free);
 	querier->priv->cancellable = g_cancellable_new ();
 	querier->priv->timer = g_timer_new ();
+	querier->priv->fields = g_array_new (FALSE, FALSE, sizeof (GsqField));
 	servers = g_list_append (servers, querier);
 }
 
@@ -552,6 +565,16 @@ gsq_querier_process (GsqQuerier *querier, const gchar *data, gssize size)
 {
 	if (!gsq_source_process (querier, data, size))
 		gsq_querier_clear (querier);
+}
+
+
+void
+gsq_querier_add_field (GsqQuerier *querier, const gchar *name, GType type)
+{
+	GsqField field;
+	field.name = g_strdup (name);
+	field.type = type;
+	g_array_append_val (querier->priv->fields, field);
 }
 
 

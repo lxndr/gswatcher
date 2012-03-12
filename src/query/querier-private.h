@@ -39,6 +39,7 @@ gpointer gsq_querier_get_pdata (GsqQuerier *querier);
 
 void gsq_querier_send (GsqQuerier *querier, guint16 port, const gchar *data,
 		gsize length);
+void gsq_querier_add_field (GsqQuerier *querier, const gchar *name, GType type);
 void gsq_querier_add_player (GsqQuerier *querier, const gchar *name, gint kills,
 		const gchar *time);
 

@@ -42,6 +42,7 @@ G_BEGIN_DECLS
 typedef struct _GsqQuerier			GsqQuerier;
 typedef struct _GsqQuerierPrivate	GsqQuerierPrivate;
 typedef struct _GsqQuerierClass	GsqQuerierClass;
+typedef struct _GsqField			GsqField;
 typedef struct _GsqPlayer			GsqPlayer;
 
 struct _GsqQuerier {
@@ -69,6 +70,11 @@ struct _GsqQuerierClass {
 	void (*player_offline) (GsqQuerier *querier, GsqPlayer *player);
 };
 
+struct _GsqField {
+	gchar *name;
+	GType type;
+};
+
 struct _GsqPlayer {
 	gchar *name;
 	gint kills;
@@ -87,6 +93,7 @@ guint16 gsq_querier_get_port (GsqQuerier *querier);
 gchar *gsq_querier_get_extra (GsqQuerier *querier, const gchar *key);
 glong gsq_querier_get_ping (GsqQuerier *querier);
 
+GList *gsq_querier_get_fields (GsqQuerier *quereir);
 GList *gsq_querier_get_players (GsqQuerier *querier);
 GsqPlayer *gsq_querier_find_player (GsqQuerier *querier, const gchar *name);
 
