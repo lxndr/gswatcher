@@ -40,6 +40,8 @@ gui_plist_update (GsClient *client)
 	GtkTreeIter iter;
 	gchar *selected = NULL;
 	GList *iplayer;
+	GArray *fields;
+	guint i;
 	
 	// store selected player
 	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (listview));
@@ -51,16 +53,16 @@ gui_plist_update (GsClient *client)
 	if (!client)
 		goto finish;
 	
+	fields = gsq_querier_get_fields (client->querier);
 	iplayer = gsq_querier_get_players (client->querier);
 	while (iplayer) {
 		GsqPlayer *player = iplayer->data;
 		
 		gtk_list_store_append (liststore, &iter);
-		gtk_list_store_set (liststore, &iter,
-				0, player->name,
-				1, player->kills,
-				2, player->time,
-				-1);
+		gtk_list_store_set (liststore, &iter, 0, player->name, -1);
+		
+		for (i = 0; i < fields->len; i++)
+			gtk_list_store_set_value (liststore, &iter, i + 1, &player->values[i]);
 		
 		// restore selected player
 		if (selected && strcmp (selected, player->name) == 0)

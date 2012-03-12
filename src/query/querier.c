@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <glib/gprintf.h>
+#include <gobject/gvaluecollector.h>
 #include "proto-source.h"
 #include "querier.h"
 #include "querier-private.h"
@@ -87,19 +88,21 @@ G_DEFINE_TYPE (GsqQuerier, gsq_querier, G_TYPE_OBJECT);
 
 
 static void
-gsq_querier_free_player (GsqPlayer *player)
+gsq_querier_free_player (GsqQuerier *querier, GsqPlayer *player)
 {
+	gint i;
 	g_free (player->name);
-	g_free (player->time);
+	for (i = 0; i < querier->priv->fields->len; i++)
+		g_value_unset (&player->values[i]);
 	g_slice_free (GsqPlayer, player);
 }
 
 
 static void
-gsq_querier_free_players (GList *players)
+gsq_querier_free_players (GsqQuerier *querier, GList *players)
 {
 	while (players) {
-		gsq_querier_free_player (players->data);
+		gsq_querier_free_player (querier, players->data);
 		players = g_list_delete_link (players, players);
 	}
 }
@@ -339,6 +342,10 @@ gsq_querier_init (GsqQuerier *querier)
 	querier->priv->timer = g_timer_new ();
 	querier->priv->fields = g_array_new (FALSE, FALSE, sizeof (GsqField));
 	servers = g_list_append (servers, querier);
+	
+	/* temp */
+	gsq_querier_add_field (querier, "Scores", G_TYPE_INT);
+	gsq_querier_add_field (querier, "Time", G_TYPE_STRING);
 }
 
 
@@ -586,14 +593,25 @@ gsq_querier_add_field (GsqQuerier *querier, const gchar *name, GType type)
 
 
 void
-gsq_querier_add_player (GsqQuerier *querier, const gchar *name, gint kills,
-		const gchar *time)
+gsq_querier_add_player (GsqQuerier *querier, const gchar *name, ...)
 {
+	guint i;
+	va_list va;
+	gchar *error = NULL;
+	GsqQuerierPrivate *priv = querier->priv;
+	
 	GsqPlayer *player = g_slice_new (GsqPlayer);
 	player->name = g_strdup (name);
-	player->kills = kills;
-	player->time = g_strdup (time);
-	querier->priv->newplayers = g_list_prepend (querier->priv->newplayers, player);
+	player->values = g_slice_alloc0 (sizeof (GValue) * priv->fields->len);
+	
+	va_start (va, name);
+	for (i = 0; i < priv->fields->len; i++) {
+		GType type = g_array_index (priv->fields, GsqField, i).type;
+		G_VALUE_COLLECT_INIT (&player->values[i], type, va, 0, &error);
+	}
+	va_end (va);
+	
+	priv->newplayers = g_list_prepend (priv->newplayers, player);
 }
 
 
@@ -627,7 +645,8 @@ gsq_querier_find_player (GsqQuerier *querier, const gchar *name)
 
 
 static inline gboolean
-gsq_querier_remove_player_by_name (GList **players, const gchar *name)
+gsq_querier_remove_player_by_name (GsqQuerier *querier, GList **players,
+		const gchar *name)
 {
 	GList *iter = *players;
 	
@@ -635,7 +654,7 @@ gsq_querier_remove_player_by_name (GList **players, const gchar *name)
 		GsqPlayer *player = iter->data;
 		if (strcmp (player->name, name) == 0) {
 			*players = g_list_delete_link (*players, iter);
-			gsq_querier_free_player (player);
+			gsq_querier_free_player (querier, player);
 			return TRUE;
 		}
 	}
@@ -656,7 +675,7 @@ gsq_querier_players_updated (GsqQuerier *querier)
 	
 	for (iter = querier->priv->players; iter; iter = iter->next) {
 		player = iter->data;
-		if (!gsq_querier_remove_player_by_name (&oldlist, player->name))
+		if (!gsq_querier_remove_player_by_name (querier, &oldlist, player->name))
 			g_signal_emit (querier, signals[SIGNAL_PLAYER_ONLINE], 0, player);
 	}
 	
@@ -665,7 +684,7 @@ gsq_querier_players_updated (GsqQuerier *querier)
 		g_signal_emit (querier, signals[SIGNAL_PLAYER_OFFLINE], 0, player);
 	}
 	
-	gsq_querier_free_players (oldlist);
+	gsq_querier_free_players (querier, oldlist);
 }
 
 
