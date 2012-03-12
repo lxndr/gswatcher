@@ -77,8 +77,7 @@ struct _GsqField {
 
 struct _GsqPlayer {
 	gchar *name;
-	gint kills;
-	gchar *time;
+	GValue *values;
 };
 
 
