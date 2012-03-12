@@ -93,7 +93,7 @@ guint16 gsq_querier_get_port (GsqQuerier *querier);
 gchar *gsq_querier_get_extra (GsqQuerier *querier, const gchar *key);
 glong gsq_querier_get_ping (GsqQuerier *querier);
 
-GList *gsq_querier_get_fields (GsqQuerier *quereir);
+GArray *gsq_querier_get_fields (GsqQuerier *querier);
 GList *gsq_querier_get_players (GsqQuerier *querier);
 GsqPlayer *gsq_querier_find_player (GsqQuerier *querier, const gchar *name);
 

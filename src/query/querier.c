@@ -463,6 +463,13 @@ gsq_querier_get_port (GsqQuerier *querier)
 	return querier->priv->port;
 }
 
+GArray *
+gsq_querier_get_fields (GsqQuerier *querier)
+{
+	g_return_val_if_fail (GSQ_IS_QUERIER (querier), NULL);
+	return querier->priv->fields;
+}
+
 GList *
 gsq_querier_get_players (GsqQuerier *querier)
 {
