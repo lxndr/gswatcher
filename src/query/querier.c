@@ -40,6 +40,7 @@ enum {
 
 enum {
 	SIGNAL_RESOLVE,
+	SIGNAL_DETECT,
 	SIGNAL_INFO_UPDATE,
 	SIGNAL_PLAYERS_UPDATE,
 	SIGNAL_LOG,
@@ -50,8 +51,21 @@ enum {
 	LAST_SIGNAL
 };
 
+typedef void (*GsqProtocolQuery) (GsqQuerier *querier);
+typedef gboolean (*GsqProtocolProcess) (GsqQuerier *querier, guint16 qport,
+		const gchar *data, gssize size);
+typedef void (*GsqProtocolFree) (GsqQuerier *querier);
+
+typedef struct _GsqProtocol {
+	gchar *name;
+	GsqProtocolQuery query;
+	GsqProtocolProcess process;
+	GsqProtocolFree free;
+} GsqProtocol;
+
 struct _GsqQuerierPrivate {
 	gchar *address;
+	GsqProtocol *protocol;
 	glong ping;
 	GHashTable *extra;
 	
@@ -70,6 +84,7 @@ struct _GsqQuerierPrivate {
 static guint16 default_port = 27500;
 static GSocket *ip4sock = NULL, *ip6sock = NULL;
 static GList *servers = NULL;
+static GList *protocols = NULL;
 static gboolean debug_mode = FALSE;
 static guint signals[LAST_SIGNAL] = { 0 };
 
@@ -77,10 +92,10 @@ static void gsq_querier_resolve (GsqQuerier *querier);
 static void gsq_querier_query (GsqQuerier *querier);
 static void gsq_querier_players_updated (GsqQuerier *querier);
 static void gsq_querier_info_updated (GsqQuerier *querier);
-static gboolean gsq_socket_recveived (GSocket *socket, GIOCondition condition,
-		gpointer udata);
-
-
+static gboolean gsq_socket_recveived (GSocket *socket,
+		GIOCondition condition, gpointer udata);
+void gsq_querier_add_protocol (const gchar *name, GsqProtocolQuery query_fn,
+		GsqProtocolProcess process_fn, GsqProtocolFree free_fn);
 #define gsq_safefree(ptr) if (ptr) {g_free (ptr); (ptr) = NULL;}
 
 
@@ -138,7 +153,7 @@ gsq_querier_clear (GsqQuerier *querier)
 	priv->port = 0;
 	
 	if (priv->pdata) {
-		gsq_source_free (querier);
+		priv->protocol->free (querier);
 		priv->pdata = NULL;
 	}
 	priv->working = FALSE;
@@ -241,6 +256,11 @@ gsq_querier_class_init (GsqQuerierClass *klass)
 			G_STRUCT_OFFSET (GsqQuerierClass, resolve), NULL, NULL,
 			g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
 	
+	signals[SIGNAL_DETECT] = g_signal_new ("detect",
+			G_OBJECT_CLASS_TYPE (klass), G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+			G_STRUCT_OFFSET (GsqQuerierClass, detect), NULL, NULL,
+			g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
+	
 	signals[SIGNAL_INFO_UPDATE] = g_signal_new ("info-update",
 			G_OBJECT_CLASS_TYPE (klass), G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
 			G_STRUCT_OFFSET (GsqQuerierClass, info_update), NULL, NULL,
@@ -329,6 +349,9 @@ gsq_querier_class_init (GsqQuerierClass *klass)
 				"Could not create a IPv6 socket: %s", error->message);
 		g_error_free (error);
 	}
+	
+	gsq_querier_add_protocol ("source",
+			gsq_source_query, gsq_source_process, gsq_source_free);
 }
 
 static void
@@ -380,6 +403,13 @@ gsq_querier_get_address (GsqQuerier *querier)
 {
 	g_return_val_if_fail (GSQ_IS_QUERIER (querier), NULL);
 	return querier->priv->address;
+}
+
+const gchar *
+gsq_querier_get_protocol (GsqQuerier *querier)
+{
+	g_return_val_if_fail (GSQ_IS_QUERIER (querier), NULL);
+	return querier->priv->protocol ? querier->priv->protocol->name : NULL;
 }
 
 GInetAddress *
@@ -552,7 +582,18 @@ gsq_querier_send (GsqQuerier *querier, guint16 port, const gchar *data, gsize le
 static void
 gsq_querier_query (GsqQuerier *querier)
 {
-	gsq_source_query (querier);
+	GsqQuerierPrivate *priv = querier->priv;
+	
+	if (priv->protocol) {
+		priv->protocol->query (querier);
+	} else {
+		GList *proto_iter = protocols;
+		while (proto_iter) {
+			GsqProtocol *proto = proto_iter->data;
+			proto->query (querier);
+			proto_iter = g_list_next (proto_iter);
+		}
+	}
 }
 
 void
@@ -577,8 +618,24 @@ gsq_querier_update (GsqQuerier *querier)
 void
 gsq_querier_process (GsqQuerier *querier, const gchar *data, gssize size)
 {
-	if (!gsq_source_process (querier, data, size))
-		gsq_querier_clear (querier);
+	GsqQuerierPrivate *priv = querier->priv;
+	
+	if (priv->protocol) {
+		if (!priv->protocol->process (querier, 0, data, size))
+			gsq_querier_clear (querier);
+	} else {
+		GList *proto_iter = protocols;
+		while (proto_iter) {
+			GsqProtocol *protocol = proto_iter->data;
+			if (protocol->process (querier, 0, data, size)) {
+				priv->protocol = protocol;
+			} else {
+				if (priv->pdata)
+					protocol->free (querier);
+			}
+			proto_iter = g_list_next (proto_iter);
+		}
+	}
 }
 
 
@@ -740,4 +797,17 @@ gsq_querier_get_ipv6_local_port ()
 {
 	GSocketAddress *addr = g_socket_get_local_address (ip6sock, NULL);
 	return g_inet_socket_address_get_port (G_INET_SOCKET_ADDRESS (addr));
+}
+
+
+void
+gsq_querier_add_protocol (const gchar *name, GsqProtocolQuery query_fn,
+		GsqProtocolProcess process_fn, GsqProtocolFree free_fn)
+{
+	GsqProtocol *proto = g_slice_new (GsqProtocol);
+	proto->name = g_strdup (name);
+	proto->query = query_fn;
+	proto->process = process_fn;
+	proto->free = free_fn;
+	protocols = g_list_append (protocols, proto);
 }

@@ -365,7 +365,8 @@ assemble_packets (GArray *packets, gsize *datasize)
 
 
 gboolean
-gsq_source_process (GsqQuerier *querier, const gchar *data, gssize size)
+gsq_source_process (GsqQuerier *querier, guint16 qport,
+		const gchar *data, gssize size)
 {
 	Private *priv = gsq_querier_get_pdata (querier);
 	if (!priv) {
