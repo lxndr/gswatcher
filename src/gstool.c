@@ -303,6 +303,12 @@ gs_application_command_line (GApplication *app, GApplicationCommandLine *cmdline
 	gs_notification_init (notifier);
 	gsq_querier_set_debug_mode (debug);
 	
+	GsApplication *gsapp = GS_APPLICATION (app);
+	if (gsapp->specific_servers)
+		add_servers (gsapp, gsapp->specific_servers);
+	else
+		load_server_list (gsapp);
+	
 	if (!minimized)
 		gui_window_show ();
 	
@@ -335,11 +341,6 @@ gs_application_startup (GApplication *app)
 	
 	load_preferences (gsapp);
 	load_buddy_list (gsapp);
-	
-	if (gsapp->specific_servers)
-		add_servers (GS_APPLICATION (app), gsapp->specific_servers);
-	else
-		load_server_list (gsapp);
 }
 
 
