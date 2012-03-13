@@ -28,7 +28,8 @@
 #include "querier.h"
 
 void gsq_source_query (GsqQuerier *querier);
-gboolean gsq_source_process (GsqQuerier *querier, const gchar *data, gssize size);
+gboolean gsq_source_process (GsqQuerier *querier, guint16 qport,
+		const gchar *data, gssize size);
 void gsq_source_free (GsqQuerier *querier);
 
 #endif

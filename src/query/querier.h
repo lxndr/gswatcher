@@ -61,6 +61,7 @@ struct _GsqQuerierClass {
 	GObjectClass parent_class;
 	
 	void (*resolve) (GsqQuerier *querier);
+	void (*detect) (GsqQuerier *querier);
 	void (*info_update) (GsqQuerier *querier);
 	void (*players_update) (GsqQuerier *querier);
 	void (*log) (GsqQuerier *querier, const gchar *msg);
@@ -88,6 +89,7 @@ GInetAddress *gsq_querier_get_iaddr (GsqQuerier *querier);
 void gsq_querier_update (GsqQuerier *querier);
 
 const gchar *gsq_querier_get_address (GsqQuerier *querier);
+const gchar *gsq_querier_get_protocol (GsqQuerier *querier);
 guint16 gsq_querier_get_port (GsqQuerier *querier);
 gchar *gsq_querier_get_extra (GsqQuerier *querier, const gchar *key);
 glong gsq_querier_get_ping (GsqQuerier *querier);
@@ -95,7 +97,6 @@ glong gsq_querier_get_ping (GsqQuerier *querier);
 GArray *gsq_querier_get_fields (GsqQuerier *querier);
 GList *gsq_querier_get_players (GsqQuerier *querier);
 GsqPlayer *gsq_querier_find_player (GsqQuerier *querier, const gchar *name);
-
 
 void gsq_querier_set_default_port (guint16 prot);
 guint16 gsq_querier_get_default_port ();
