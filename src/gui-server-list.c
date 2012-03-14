@@ -204,6 +204,7 @@ gui_slist_selection_changed (GtkTreeSelection *selection, gpointer udata)
 	const gchar *addr = selected ? gsq_querier_get_address (selected->querier) : "";
 	gtk_entry_set_text (GTK_ENTRY (entry), addr);
 	gui_info_update (selected);
+	gui_plist_setup (selected);
 	gui_plist_update (selected);
 	gs_console_set (selected);
 	gui_log_set (selected);
@@ -364,6 +365,17 @@ server_resolved (GsqQuerier *querier, GsClient *client)
 }
 
 static void
+server_detected (GsqQuerier *querier, GsClient *client)
+{
+	gtk_list_store_set (liststore, &client->sliter,
+			COLUMN_ICON, get_game_icon (client->querier->game),
+			-1);
+	
+	if (client == selected)
+		gui_plist_setup (client);
+}
+
+static void
 server_info_updated (GsqQuerier *querier, GsClient *client)
 {
 	if (!gtk_widget_get_visible (window))
@@ -387,7 +399,6 @@ server_info_updated (GsqQuerier *querier, GsClient *client)
 	
 	gtk_list_store_set (liststore, &client->sliter,
 			COLUMN_NAME, client->querier->name,
-			COLUMN_ICON, get_game_icon (client->querier->game),
 			COLUMN_GAME, gamename,
 			COLUMN_MAP, client->querier->map,
 			COLUMN_PLAYERS, players,
@@ -443,6 +454,7 @@ gui_slist_add (GsClient *client)
 	g_signal_connect (client->querier, "error", G_CALLBACK (server_error), client);
 	g_signal_connect (client->querier, "timeout", G_CALLBACK (server_timed_out), client);
 	g_signal_connect (client->querier, "resolve", G_CALLBACK (server_resolved), client);
+	g_signal_connect (client->querier, "detect", G_CALLBACK (server_detected), client);
 	g_signal_connect (client->querier, "info-update", G_CALLBACK (server_info_updated), client);
 	g_signal_connect (client->querier, "players-update", G_CALLBACK (server_players_updated), client);
 }
