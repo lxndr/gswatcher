@@ -32,6 +32,51 @@ static GtkWidget *listview, *add, *add_image;
 
 
 void
+gui_plist_setup (GsClient *client)
+{
+	GtkTreeViewColumn *column;
+	
+	/* remove columns */
+	GList *columns = gtk_tree_view_get_columns (GTK_TREE_VIEW (listview));
+	GList *icolumn = g_list_next (columns); /* skip name column */
+	while (icolumn) {
+		gtk_tree_view_remove_column (GTK_TREE_VIEW (listview), icolumn->data);
+		icolumn = g_list_next (icolumn);
+	}
+	g_list_free (columns);
+	
+	/* remove players */
+	gtk_tree_view_set_model (GTK_TREE_VIEW (listview), NULL);
+	
+	if (!client)
+		return;
+	
+	gint i;
+	GtkCellRenderer *cell;
+	GsqField *field;
+	GArray *fields = gsq_querier_get_fields (client->querier);
+	
+	GType *types = g_new (GType, fields->len + 1);
+	types[0] = G_TYPE_STRING;
+	
+	for (i = 0; i < fields->len; i++) {
+		field = &g_array_index (fields, GsqField, i);
+		cell = gtk_cell_renderer_text_new ();
+		column = gtk_tree_view_column_new_with_attributes (
+				gettext (field->name), cell, "text", i + 1, NULL);
+		gtk_tree_view_column_set_sort_column_id (column, i + 1);
+		gtk_tree_view_append_column (GTK_TREE_VIEW (listview), column);
+		types[i + 1] = field->type;
+	}
+	
+	GtkListStore *store = gtk_list_store_newv (fields->len + 1, types);
+	gtk_tree_view_set_model (GTK_TREE_VIEW (listview), GTK_TREE_MODEL (store));
+	g_object_unref (store);
+	g_free (types);
+}
+
+
+void
 gui_plist_update (GsClient *client)
 {
 	GtkTreeSelection *selection;
@@ -43,7 +88,7 @@ gui_plist_update (GsClient *client)
 	GArray *fields;
 	guint i;
 	
-	// store selected player
+	/* store selected player */
 	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (listview));
 	if (gtk_tree_selection_get_selected (selection, &model, &iter))
 		gtk_tree_model_get (model, &iter, 0, &selected, -1);
@@ -64,7 +109,7 @@ gui_plist_update (GsClient *client)
 		for (i = 0; i < fields->len; i++)
 			gtk_list_store_set_value (liststore, &iter, i + 1, &player->values[i]);
 		
-		// restore selected player
+		/* restore selected player */
 		if (selected && strcmp (selected, player->name) == 0)
 			gtk_tree_selection_select_iter (selection, &iter);
 		iplayer = iplayer->next;
@@ -137,34 +182,6 @@ gui_plist_create ()
 	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (column), cell, TRUE);
 	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (column), cell,
 			"text", 0,
-			NULL);
-	gtk_tree_view_append_column (GTK_TREE_VIEW (listview), column);
-	
-	column = gtk_tree_view_column_new ();
-	g_object_set (G_OBJECT (column),
-			"title", _("Kills"),
-			"clickable", TRUE,
-			"sort-column-id", 1,
-			"sort-indicator", FALSE,
-			NULL);
-	cell = gtk_cell_renderer_text_new ();
-	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (column), cell, TRUE);
-	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (column), cell,
-			"text", 1,
-			NULL);
-	gtk_tree_view_append_column (GTK_TREE_VIEW (listview), column);
-	
-	column = gtk_tree_view_column_new ();
-	g_object_set (G_OBJECT (column),
-			"title", _("Time"),
-			"clickable", TRUE,
-			"sort-column-id", 2,
-			"sort-indicator", FALSE,
-			NULL);
-	cell = gtk_cell_renderer_text_new ();
-	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (column), cell, TRUE);
-	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (column), cell,
-			"text", 2,
 			NULL);
 	gtk_tree_view_append_column (GTK_TREE_VIEW (listview), column);
 	
