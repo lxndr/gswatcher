@@ -77,6 +77,7 @@ gs_client_class_init (GsClientClass *class)
 	g_hash_table_insert (gamelist, "syn", "Synergy");
 	g_hash_table_insert (gamelist, "ins", "Insurgency");
 	g_hash_table_insert (gamelist, "nd", "Nuclear dawn");
+	g_hash_table_insert (gamelist, "kf", "Killing Floor");
 	g_hash_table_insert (gamelist, "", "Source-based");
 	
 	re_say = g_regex_new ("^L (\\d{2}/\\d{2}/\\d{4}) - (\\d{2}:\\d{2}:\\d{2}): \"(.+)\" (say|say_team) \"(.+)\"$",
@@ -199,10 +200,15 @@ gs_client_querier_info_updated (GsqQuerier *querier, GsClient *client)
 	
 	if (client->version)
 		g_free (client->version);
-	gchar *type = gsq_querier_get_extra (querier, "type");
-	client->version = g_strdup_printf (*type ? "%s (%s, %s, %s)" : "%s (%s, %s)",
-			querier->version, gsq_querier_get_extra (querier, "protocol-version"),
-			gsq_querier_get_extra (querier, "os"), type);
+	
+	if (strcmp (querier->game, "kf") == 0) {
+		client->version = g_strdup (querier->version);
+	} else {
+		gchar *type = gsq_querier_get_extra (querier, "type");
+		client->version = g_strdup_printf (*type ? "%s (%s, %s, %s)" : "%s (%s, %s)",
+				querier->version, gsq_querier_get_extra (querier, "protocol-version"),
+				gsq_querier_get_extra (querier, "os"), type);
+	}
 }
 
 

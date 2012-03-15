@@ -29,6 +29,7 @@ endif ()
 add_executable (gstool
 		query/querier.c
 		query/watcher.c
+		query/proto-gamespy.c
 		query/proto-source.c
 		query/console.c
 		query/utils.c
