@@ -27,6 +27,7 @@
 #include <math.h>
 #include <glib/gprintf.h>
 #include <gobject/gvaluecollector.h>
+#include "proto-gamespy.h"
 #include "proto-source.h"
 #include "querier.h"
 #include "querier-private.h"
@@ -73,7 +74,8 @@ struct _GsqQuerierPrivate {
 	GTimer *timer;
 	GCancellable *cancellable;
 	GInetAddress *iaddr;
-	guint16 port;
+	guint16 gport;
+	guint16 qport;
 	gpointer pdata;
 	GArray *fields;
 	GList *players;
@@ -150,7 +152,8 @@ gsq_querier_clear (GsqQuerier *querier)
 		g_object_unref (priv->iaddr);
 		priv->iaddr = NULL;
 	}
-	priv->port = 0;
+	priv->gport = 0;
+	priv->qport = 0;
 	
 	if (priv->pdata) {
 		priv->protocol->free (querier);
@@ -352,6 +355,8 @@ gsq_querier_class_init (GsqQuerierClass *klass)
 	
 	gsq_querier_add_protocol ("source",
 			gsq_source_query, gsq_source_process, gsq_source_free);
+	gsq_querier_add_protocol ("gamespy",
+			gsq_gamespy_query, gsq_gamespy_process, gsq_gamespy_free);
 }
 
 static void
@@ -365,10 +370,6 @@ gsq_querier_init (GsqQuerier *querier)
 	querier->priv->timer = g_timer_new ();
 	querier->priv->fields = g_array_new (FALSE, FALSE, sizeof (GsqField));
 	servers = g_list_append (servers, querier);
-	
-	/* temp */
-	gsq_querier_add_field (querier, "Scores", G_TYPE_INT);
-	gsq_querier_add_field (querier, "Time", G_TYPE_STRING);
 }
 
 
@@ -494,10 +495,17 @@ gsq_querier_get_pdata (GsqQuerier *querier)
 }
 
 guint16
-gsq_querier_get_port (GsqQuerier *querier)
+gsq_querier_get_gport (GsqQuerier *querier)
 {
 	g_return_val_if_fail (GSQ_IS_QUERIER (querier), 0);
-	return querier->priv->port;
+	return querier->priv->gport;
+}
+
+guint16
+gsq_querier_get_qport (GsqQuerier *querier)
+{
+	g_return_val_if_fail (GSQ_IS_QUERIER (querier), 0);
+	return querier->priv->qport;
 }
 
 GArray *
@@ -546,10 +554,8 @@ gsq_querier_resolved (GResolver *resolver, GAsyncResult *result, GsqQuerier *que
 static void
 gsq_querier_resolve (GsqQuerier *querier)
 {
-	guint16 port;
-	gchar *host = gsq_parse_address (querier->priv->address, &port, NULL);
-	
-	querier->priv->port = port == 0 ? 27015 : port;
+	GsqQuerierPrivate *priv = querier->priv;
+	gchar *host = gsq_parse_address (priv->address, &priv->gport, &priv->qport);
 	
 	GResolver *resolver = g_resolver_get_default ();
 	g_resolver_lookup_by_name_async (resolver, host, querier->priv->cancellable,
@@ -611,30 +617,6 @@ gsq_querier_update (GsqQuerier *querier)
 	} else {
 		querier->priv->working = TRUE;
 		gsq_querier_resolve (querier);
-	}
-}
-
-
-void
-gsq_querier_process (GsqQuerier *querier, const gchar *data, gssize size)
-{
-	GsqQuerierPrivate *priv = querier->priv;
-	
-	if (priv->protocol) {
-		if (!priv->protocol->process (querier, 0, data, size))
-			gsq_querier_clear (querier);
-	} else {
-		GList *proto_iter = protocols;
-		while (proto_iter) {
-			GsqProtocol *protocol = proto_iter->data;
-			if (protocol->process (querier, 0, data, size)) {
-				priv->protocol = protocol;
-			} else {
-				if (priv->pdata)
-					protocol->free (querier);
-			}
-			proto_iter = g_list_next (proto_iter);
-		}
 	}
 }
 
@@ -746,6 +728,38 @@ gsq_querier_players_updated (GsqQuerier *querier)
 
 
 static gboolean
+gsq_querier_process (GsqQuerier *querier, guint16 qport,
+		const gchar *data, gssize size)
+{
+	GsqQuerierPrivate *priv = querier->priv;
+	
+	if (priv->protocol) {
+		if (!priv->protocol->process (querier, qport, data, size))
+			gsq_querier_clear (querier);
+	} else {
+		GList *proto_iter = protocols;
+		while (proto_iter) {
+			GsqProtocol *protocol = proto_iter->data;
+			if (protocol->process (querier, qport, data, size)) {
+				priv->protocol = protocol;
+				priv->qport = qport;
+				g_signal_emit (querier, signals[SIGNAL_DETECT], 0);
+				break;
+			} else {
+				if (priv->pdata) {
+					protocol->free (querier);
+					priv->pdata = NULL;
+				}
+			}
+			proto_iter = g_list_next (proto_iter);
+		}
+	}
+	
+	return TRUE;
+}
+
+
+static gboolean
 gsq_socket_recveived (GSocket *socket, GIOCondition condition, gpointer udata)
 {
 	gssize length;
@@ -771,10 +785,10 @@ gsq_socket_recveived (GSocket *socket, GIOCondition condition, gpointer udata)
 	GList *iter = servers;
 	while (iter) {
 		GsqQuerier *querier = iter->data;
-		if (querier->priv->port == port && querier->priv->iaddr &&
-				g_inet_address_equal (querier->priv->iaddr, iaddr)) {
-			gsq_querier_process (querier, data, length);
-			break;
+		if ((querier->priv->qport == 0 || querier->priv->qport == port) &&
+				querier->priv->iaddr && g_inet_address_equal (querier->priv->iaddr, iaddr)) {
+			if (gsq_querier_process (querier, port, data, length))
+				break;
 		}
 		iter = iter->next;
 	}
