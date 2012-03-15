@@ -81,7 +81,7 @@ gsq_source_query (GsqQuerier *querier)
 {
 	Private *priv = gsq_querier_get_pdata (querier);
 	
-	guint32 port = gsq_querier_get_port (querier);
+	guint32 port = gsq_querier_get_gport (querier);
 	if (port == 0) port = 27015;
 	
 	gsq_querier_send (querier, port, sinfo_query, 25);
@@ -375,8 +375,10 @@ gsq_source_process (GsqQuerier *querier, guint16 qport,
 		gsq_querier_set_pdata (querier, priv);
 	}
 	
-	guint16 port = gsq_querier_get_port (querier);
-	if (port == 0) port = 27015;
+	/* check if this packet belongs to the querier */
+	guint16 port = gsq_querier_get_gport (querier);
+	if (!(port == qport || (port == 0 && qport == 27015)))
+		return FALSE;
 	
 	gchar *p = (gchar *) data;
 	gint format = get_long (&p);

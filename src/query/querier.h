@@ -89,8 +89,9 @@ GInetAddress *gsq_querier_get_iaddr (GsqQuerier *querier);
 void gsq_querier_update (GsqQuerier *querier);
 
 const gchar *gsq_querier_get_address (GsqQuerier *querier);
+guint16 gsq_querier_get_gport (GsqQuerier *querier);
+guint16 gsq_querier_get_qport (GsqQuerier *querier);
 const gchar *gsq_querier_get_protocol (GsqQuerier *querier);
-guint16 gsq_querier_get_port (GsqQuerier *querier);
 gchar *gsq_querier_get_extra (GsqQuerier *querier, const gchar *key);
 glong gsq_querier_get_ping (GsqQuerier *querier);
 
