@@ -384,7 +384,8 @@ gsq_source_process (GsqQuerier *querier, guint16 qport,
 	gint format = get_long (&p);
 	
 	if (format == -1) {
-		return source_process2 (querier, p);
+		if (!source_process2 (querier, p))
+			return FALSE;
 	} else if (format == -2) {
 		gint reqid = get_long (&p);
 		gboolean compressed = reqid >= 0x10000000;
@@ -392,10 +393,16 @@ gsq_source_process (GsqQuerier *querier, guint16 qport,
 		gint numpacket = get_byte (&p);
 		gint length = get_short (&p);
 		
+		/* perform some checks */
 		if (compressed) {
 			g_warning ("Compressed split packets are not supported");
 			return FALSE;
 		}
+		
+		if (maxpackets < 2)
+			return FALSE;
+		if (length > 1248)
+			return FALSE;
 		
 		if (priv->reqid != reqid) {
 			free_packets (priv->packets);
@@ -416,9 +423,12 @@ gsq_source_process (GsqQuerier *querier, guint16 qport,
 			priv->reqid = 0;
 			return ret;
 		}
-		
-		return TRUE;
 	}
 	
-	return FALSE;
+	if (gsq_querier_get_fields (querier)->len == 0) {
+		gsq_querier_add_field (querier, "Kills", G_TYPE_INT);
+		gsq_querier_add_field (querier, "Time", G_TYPE_STRING);
+	}
+	
+	return TRUE;
 }
