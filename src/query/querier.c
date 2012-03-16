@@ -147,6 +147,16 @@ gsq_querier_clear (GsqQuerier *querier)
 	gsq_safefree (querier->version);
 	g_hash_table_remove_all (priv->extra);
 	gsq_querier_free_fields (priv->fields);
+}
+
+
+/* clears all the data.
+	called on error, timeout, finalization */
+static void
+gsq_querier_reset (GsqQuerier *querier)
+{
+	GsqQuerierPrivate *priv = querier->priv;
+	gsq_querier_clear (querier);
 	
 	if (priv->iaddr) {
 		g_object_unref (priv->iaddr);
@@ -177,7 +187,7 @@ gsq_querier_check_timeout (gpointer udata)
 			gdouble time = g_timer_elapsed (querier->priv->timer, NULL);
 			if (time >= 10) {
 				g_signal_emit (querier, signals[SIGNAL_TIMEOUT], 0);
-				gsq_querier_clear (querier);
+				gsq_querier_reset (querier);
 			} else if (time >= 3) {
 				gsq_querier_query (querier);
 			}
@@ -197,7 +207,7 @@ gsq_querier_finalize (GObject *object)
 	g_cancellable_cancel (querier->priv->cancellable);
 	g_object_unref (querier->priv->cancellable);
 	g_timer_destroy (querier->priv->timer);
-	gsq_querier_clear (querier);
+	gsq_querier_reset (querier);
 	gsq_safefree (querier->priv->address);
 	g_hash_table_destroy (querier->priv->extra);
 	g_array_free (querier->priv->fields, TRUE);
@@ -734,8 +744,10 @@ gsq_querier_process (GsqQuerier *querier, guint16 qport,
 	GsqQuerierPrivate *priv = querier->priv;
 	
 	if (priv->protocol) {
+		/* if querier suddenly receives an odd packet,
+			consider it as an error. perhaprs it may be too harsh */
 		if (!priv->protocol->process (querier, qport, data, size))
-			gsq_querier_clear (querier);
+			gsq_querier_reset (querier);
 	} else {
 		GList *proto_iter = protocols;
 		while (proto_iter) {
@@ -746,6 +758,9 @@ gsq_querier_process (GsqQuerier *querier, guint16 qport,
 				g_signal_emit (querier, signals[SIGNAL_DETECT], 0);
 				break;
 			} else {
+				/* protocol does not recognize this packet
+					we have to clean all the variables */
+				gsq_querier_clear (querier);
 				if (priv->pdata) {
 					protocol->free (querier);
 					priv->pdata = NULL;
