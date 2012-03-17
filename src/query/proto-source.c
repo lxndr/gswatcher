@@ -79,17 +79,16 @@ gsq_source_free (GsqQuerier *querier)
 void
 gsq_source_query (GsqQuerier *querier)
 {
-	Private *priv = gsq_querier_get_pdata (querier);
-	
 	guint32 port = gsq_querier_get_gport (querier);
-	if (port == 0) port = 27015;
+	if (port == 0)
+		port = 27015;
 	
 	gsq_querier_send (querier, port, sinfo_query, 25);
 	
-	if (priv && *priv->plist_query)
-		gsq_querier_send (querier, port, priv->plist_query, 9);
-	else
-		gsq_querier_send (querier, port, plist_query, 9);
+	Private *priv = gsq_querier_get_pdata (querier);
+	const gchar *query = priv && *priv->plist_query ?
+			priv->plist_query : plist_query;
+	gsq_querier_send (querier, port, query, 9);
 }
 
 
@@ -301,11 +300,16 @@ source_process2 (GsqQuerier *querier, gchar *p)
 	gint type = get_byte (&p);
 	
 	switch (type) {
-	case 'A':
+	case 'A': {
 		memcpy (priv->plist_query, "\xFF\xFF\xFF\xFF\x55", 5);
 		memcpy (priv->plist_query + 5, p, 4);
-		gsq_source_query (querier);
-		break;
+		
+		/* request player list right away */
+		guint32 port = gsq_querier_get_gport (querier);
+		if (port == 0)
+			port = 27015;
+		gsq_querier_send (querier, port, priv->plist_query, 9);
+		} break;
 	case 'I':
 		get_server_info (querier, p);
 		priv->newprotocol = TRUE;
