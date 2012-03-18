@@ -43,7 +43,7 @@ enum {
 	SIGNAL_RESOLVE,
 	SIGNAL_DETECT,
 	SIGNAL_INFO_UPDATE,
-	SIGNAL_PLAYERS_UPDATE,
+	SIGNAL_PLAYER_UPDATE,
 	SIGNAL_LOG,
 	SIGNAL_TIMEOUT,
 	SIGNAL_ERROR,
@@ -77,6 +77,8 @@ struct _GsqQuerierPrivate {
 	guint16 gport;
 	guint16 qport;
 	gpointer pdata;
+	gboolean update_sinfo;
+	gboolean update_plist;
 	GArray *fields;
 	GList *players;
 	GList *newplayers;
@@ -279,7 +281,7 @@ gsq_querier_class_init (GsqQuerierClass *klass)
 			G_STRUCT_OFFSET (GsqQuerierClass, info_update), NULL, NULL,
 			g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
 	
-	signals[SIGNAL_PLAYERS_UPDATE] = g_signal_new ("players-update",
+	signals[SIGNAL_PLAYER_UPDATE] = g_signal_new ("players-update",
 			G_OBJECT_CLASS_TYPE (klass), G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
 			G_STRUCT_OFFSET (GsqQuerierClass, players_update), NULL, NULL,
 			g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
@@ -393,13 +395,13 @@ gsq_querier_new (const gchar *address)
 void
 gsq_querier_emit_info_update (GsqQuerier *querier)
 {
-	g_signal_emit (querier, signals[SIGNAL_INFO_UPDATE], 0);
+	querier->priv->update_sinfo = TRUE;
 }
 
 void
 gsq_querier_emit_player_update (GsqQuerier *querier)
 {
-	g_signal_emit (querier, signals[SIGNAL_PLAYERS_UPDATE], 0);
+	querier->priv->update_plist = TRUE;
 }
 
 void
@@ -737,7 +739,7 @@ gsq_querier_players_updated (GsqQuerier *querier)
 }
 
 
-static gboolean
+static GsqProtocol *
 gsq_querier_detect (GsqQuerier *querier, guint16 qport,
 		const gchar *data, gssize size)
 {
@@ -750,7 +752,7 @@ gsq_querier_detect (GsqQuerier *querier, guint16 qport,
 			priv->protocol = protocol;
 			priv->qport = qport;
 			g_signal_emit (querier, signals[SIGNAL_DETECT], 0);
-			return TRUE;
+			return protocol;
 		} else {
 			/* protocol does not recognize this packet
 				we have to clean all the variables
@@ -764,7 +766,7 @@ gsq_querier_detect (GsqQuerier *querier, guint16 qport,
 		proto_iter = proto_iter->next;
 	}
 	
-	return FALSE;
+	return NULL;
 }
 
 
@@ -797,16 +799,26 @@ gsq_socket_recveived (GSocket *socket, GIOCondition condition, gpointer udata)
 		GsqQuerierPrivate *priv = querier->priv;
 		if (priv->iaddr && (priv->qport == 0 || priv->qport == port) &&
 				g_inet_address_equal (priv->iaddr, iaddr)) {
-			GsqProtocol *protocol = querier->priv->protocol;
-			if (protocol) {
+			priv->update_sinfo = FALSE;
+			priv->update_plist = FALSE;
+			
+			if (priv->protocol) {
 				/* if server starts messing around and sends an odd packet,
 					consider it as an error. perhaprs it might be too harsh */
-				if (!protocol->process (querier, port, data, length))
+				if (!priv->protocol->process (querier, port, data, length))
 					gsq_querier_reset (querier);
-				break;
 			} else {
-				if (gsq_querier_detect (querier, port, data, length))
-					break;
+				/* this function sets priv->protocol,
+					that's how we know if it succeeds */
+				gsq_querier_detect (querier, port, data, length);
+			}
+			
+			if (priv->protocol) {
+				if (priv->update_sinfo)
+					g_signal_emit (querier, signals[SIGNAL_INFO_UPDATE], 0);
+				if (priv->update_plist)
+					g_signal_emit (querier, signals[SIGNAL_PLAYER_UPDATE], 0);
+				break;
 			}
 		}
 		iter = iter->next;
