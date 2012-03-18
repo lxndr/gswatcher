@@ -33,7 +33,7 @@
 
 typedef struct _Packet {
 	gchar *data;
-	gsize length;
+	guint16 length;
 } Packet;
 
 typedef struct _Private {
@@ -92,18 +92,18 @@ gsq_source_query (GsqQuerier *querier)
 }
 
 
-static inline gint8
+static inline guint8
 get_byte (gchar **p)
 {
-	gint8 v = * (gint8 *) *p;
+	gint8 v = * (guint8 *) *p;
 	*p += 1;
 	return v;
 }
 
-static inline gint16
+static inline guint16
 get_short (gchar **p)
 {
-	gint16 v = * (gint16 *) *p;
+	gint16 v = * (guint16 *) *p;
 	*p += 2;
 	return GINT16_FROM_LE (v);
 }
@@ -116,8 +116,6 @@ get_long (gchar **p)
 	return GINT32_FROM_LE (v);
 }
 
-/* it may be usefull in the future */
-/*
 static guint64
 get_longlong (gchar **p)
 {
@@ -125,7 +123,6 @@ get_longlong (gchar **p)
 	*p += 8;
 	return GUINT64_FROM_LE (v);
 }
-*/
 
 static inline gfloat
 get_float (gchar **p)
@@ -162,16 +159,16 @@ format_time (gchar *dst, gsize maxlen, gfloat time)
 static void
 get_server_info (GsqQuerier *querier, gchar *p)
 {
-	gchar desc[128], dir[128], ver[128], tmp[128];
+	gchar desc[128], dir[128], ver[128], tmp[128], tags[256];
 	
-	gint8 pver = get_byte (&p);				// Protocol version
+	guint8 pver = get_byte (&p);			// Protocol version
 	get_string (&p, tmp, 128);				// Server name
 	gsq_querier_set_name (querier, tmp);
 	get_string (&p, tmp, 128);				// Map name
 	gsq_querier_set_map (querier, tmp);
 	get_string (&p, dir, 128);				// Game folder
 	get_string (&p, desc, 128);				// Game description
-	gint16 appid = get_short (&p);			// Application ID
+	guint16 appid = get_short (&p);			// Application ID
 	querier->numplayers = get_byte (&p);	// Number of players
 	querier->maxplayers = get_byte (&p);	// Maximum players
 	get_byte (&p);							// Number of bots
@@ -181,6 +178,19 @@ get_server_info (GsqQuerier *querier, gchar *p)
 	gboolean secure = get_byte (&p);		// Secure
 	get_string (&p, ver, 128);				// Game version
 	gsq_querier_set_version (querier, ver);
+	guint8 edf = get_byte (&p);				// extra data field
+	if (edf & 0x80)
+		get_short (&p);						// server's game port
+	if (edf & 0x10)
+		get_longlong (&p);					// server's SteamID
+	if (edf & 0x40) {
+		get_short (&p);						// spectator port
+		get_string (&p, NULL, 0);			// spectator name
+	}
+	if (edf & 0x20)
+		get_string (&p, tags, 256);			// tags
+	if (edf & 0x01)
+		get_longlong (&p);					// server's Game ID
 	
 	g_snprintf (tmp, 128, "%d", pver);
 	gsq_querier_set_extra (querier, "protocol-version", tmp);
@@ -220,7 +230,24 @@ get_server_info (GsqQuerier *querier, gchar *p)
 			gsq_querier_set_game (querier, "l4d");
 			gsq_querier_set_extra (querier, "mode", desc + 6);
 			break;
-		case 550: gsq_querier_set_game (querier, "l4d2"); break;
+		case 550: {
+			gchar *mode;
+			gsq_querier_set_game (querier, "l4d2");
+			if (strstr (tags, "coop"))
+				mode = "Co-op";
+			else if (strstr (tags, "realism"))
+				mode = "Realism";
+			else if (strstr (tags, "survival"))
+				mode = "Survival";
+			else if (strstr (tags, "versus"))
+				mode = "Versus";
+			else if (strstr (tags, "scavenge"))
+				mode = "Scavenge";
+			else
+				mode = NULL;
+			if (mode)
+				gsq_querier_set_extra (querier, "mode", mode);
+			} break;
 		case 630: gsq_querier_set_game (querier, "as"); break;
 		case 17500: gsq_querier_set_game (querier, "zp"); break;
 		case 17520: gsq_querier_set_game (querier, "syn"); break;
@@ -246,7 +273,7 @@ get_server_info_gold (GsqQuerier *querier, gchar *p)
 	get_string (&p, NULL, 0);				// Game description
 	querier->numplayers = get_byte (&p);	// Number of players
 	querier->maxplayers = get_byte (&p);	// Maximum players
-	gint8 pver = get_byte (&p);				// Network version
+	guint8 pver = get_byte (&p);			// Network version
 	gchar dedicated = get_byte (&p);		// Dedicated
 	gchar os = get_byte (&p);				// OS
 	gboolean pass = get_byte (&p);			// Password
@@ -395,7 +422,7 @@ gsq_source_process (GsqQuerier *querier, guint16 qport,
 		gboolean compressed = reqid >= 0x10000000;
 		gint maxpackets = get_byte (&p);
 		gint numpacket = get_byte (&p);
-		gint length = get_short (&p);
+		guint16 length = get_short (&p);
 		
 		/* perform some checks */
 		if (compressed) {
