@@ -738,39 +738,33 @@ gsq_querier_players_updated (GsqQuerier *querier)
 
 
 static gboolean
-gsq_querier_process (GsqQuerier *querier, guint16 qport,
+gsq_querier_detect (GsqQuerier *querier, guint16 qport,
 		const gchar *data, gssize size)
 {
 	GsqQuerierPrivate *priv = querier->priv;
 	
-	if (priv->protocol) {
-		/* if querier suddenly receives an odd packet,
-			consider it as an error. perhaprs it may be too harsh */
-		if (!priv->protocol->process (querier, qport, data, size))
-			gsq_querier_reset (querier);
-	} else {
-		GList *proto_iter = protocols;
-		while (proto_iter) {
-			GsqProtocol *protocol = proto_iter->data;
-			if (protocol->process (querier, qport, data, size)) {
-				priv->protocol = protocol;
-				priv->qport = qport;
-				g_signal_emit (querier, signals[SIGNAL_DETECT], 0);
-				break;
-			} else {
-				/* protocol does not recognize this packet
-					we have to clean all the variables */
-				gsq_querier_clear (querier);
-				if (priv->pdata) {
-					protocol->free (querier);
-					priv->pdata = NULL;
-				}
+	GList *proto_iter = protocols;
+	while (proto_iter) {
+		GsqProtocol *protocol = proto_iter->data;
+		if (protocol->process (querier, qport, data, size)) {
+			priv->protocol = protocol;
+			priv->qport = qport;
+			g_signal_emit (querier, signals[SIGNAL_DETECT], 0);
+			return TRUE;
+		} else {
+			/* protocol does not recognize this packet
+				we have to clean all the variables
+				protocol functions are able to change */
+			gsq_querier_clear (querier);
+			if (priv->pdata) {
+				protocol->free (querier);
+				priv->pdata = NULL;
 			}
-			proto_iter = g_list_next (proto_iter);
 		}
+		proto_iter = proto_iter->next;
 	}
 	
-	return TRUE;
+	return FALSE;
 }
 
 
@@ -800,10 +794,20 @@ gsq_socket_recveived (GSocket *socket, GIOCondition condition, gpointer udata)
 	GList *iter = servers;
 	while (iter) {
 		GsqQuerier *querier = iter->data;
-		if ((querier->priv->qport == 0 || querier->priv->qport == port) &&
-				querier->priv->iaddr && g_inet_address_equal (querier->priv->iaddr, iaddr)) {
-			if (gsq_querier_process (querier, port, data, length))
+		GsqQuerierPrivate *priv = querier->priv;
+		if (priv->iaddr && (priv->qport == 0 || priv->qport == port) &&
+				g_inet_address_equal (priv->iaddr, iaddr)) {
+			GsqProtocol *protocol = querier->priv->protocol;
+			if (protocol) {
+				/* if server starts messing around and sends an odd packet,
+					consider it as an error. perhaprs it might be too harsh */
+				if (!protocol->process (querier, port, data, length))
+					gsq_querier_reset (querier);
 				break;
+			} else {
+				if (gsq_querier_detect (querier, port, data, length))
+					break;
+			}
 		}
 		iter = iter->next;
 	}
