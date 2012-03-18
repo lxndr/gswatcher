@@ -201,13 +201,13 @@ gs_client_querier_info_updated (GsqQuerier *querier, GsClient *client)
 	if (client->version)
 		g_free (client->version);
 	
-	if (strcmp (querier->game, "kf") == 0) {
-		client->version = g_strdup (querier->version);
-	} else {
+	if (strcmp (gsq_querier_get_protocol (querier), "source") == 0) {
 		gchar *type = gsq_querier_get_extra (querier, "type");
 		client->version = g_strdup_printf (*type ? "%s (%s, %s, %s)" : "%s (%s, %s)",
 				querier->version, gsq_querier_get_extra (querier, "protocol-version"),
 				gsq_querier_get_extra (querier, "os"), type);
+	} else {
+		client->version = g_strdup (querier->version);
 	}
 }
 
