@@ -723,7 +723,7 @@ void
 gs_application_remove_server (GsApplication *app, GsClient *client)
 {
 	g_return_if_fail (GS_IS_APPLICATION (app));
-	g_return_if_fail (GS_IS_CLIENT (app));
+	g_return_if_fail (GS_IS_CLIENT (client));
 	
 	remove_server (app, client);
 	gs_application_save_server_list (app);
@@ -733,6 +733,9 @@ gs_application_remove_server (GsApplication *app, GsClient *client)
 GsClient *
 gs_application_find_server (GsApplication *app, const gchar *address)
 {
+	g_return_val_if_fail (GS_IS_APPLICATION (app), NULL);
+	g_return_val_if_fail (address != NULL, NULL);
+	
 	GList *iter = app->server_list;
 	GsClient *client;
 	
