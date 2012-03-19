@@ -83,13 +83,16 @@ gui_info_create ()
 	label = gtk_label_new (_("Name:"));
 	g_object_set (G_OBJECT (label),
 			"xalign", 0.0f,
+			"yalign", 0.0f,
 			NULL);
 	gtk_grid_attach (GTK_GRID (grid), label, 0, 0, 1, 1);
 	
 	name = gtk_label_new (NULL);
 	g_object_set (G_OBJECT (name),
 			"xalign", 0.0f,
+			"yalign", 0.0f,
 			"hexpand", TRUE,
+			"wrap", TRUE,
 			NULL);
 	gtk_grid_attach (GTK_GRID (grid), name, 1, 0, 1, 1);
 	
