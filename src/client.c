@@ -77,8 +77,11 @@ gs_client_class_init (GsClientClass *class)
 	g_hash_table_insert (gamelist, "syn", "Synergy");
 	g_hash_table_insert (gamelist, "ins", "Insurgency");
 	g_hash_table_insert (gamelist, "nd", "Nuclear dawn");
+	g_hash_table_insert (gamelist, "source", "Source-based");
 	g_hash_table_insert (gamelist, "kf", "Killing Floor");
-	g_hash_table_insert (gamelist, "", "Source-based");
+	g_hash_table_insert (gamelist, "bf1942", "Battlefield 1942");
+	g_hash_table_insert (gamelist, "ut", "Unreal Tournament");
+	g_hash_table_insert (gamelist, "to-aot", "Tactical Ops: Assault on Terror");
 	
 	re_say = g_regex_new ("^L (\\d{2}/\\d{2}/\\d{4}) - (\\d{2}:\\d{2}:\\d{2}): \"(.+)\" (say|say_team) \"(.+)\"$",
 			G_REGEX_OPTIMIZE | G_REGEX_UNGREEDY, 0, NULL);
@@ -154,13 +157,17 @@ gs_client_get_game_name (GsClient* client, gboolean extra)
 	
 	if (querier->game) {
 		gchar *name = g_hash_table_lookup (gamelist, querier->game);
-		if (G_UNLIKELY (strcmp (querier->game, "") == 0)) {
-			gamename = g_strdup_printf ("%s (%s)", name,
-					(gchar *) gsq_querier_get_extra (querier, "appid"));
+		if (name) {
+			if (G_UNLIKELY (strcmp (querier->game, "source") == 0)) {
+				gamename = g_strdup_printf ("%s (%s)", name,
+						(gchar *) gsq_querier_get_extra (querier, "appid"));
+			} else {
+				gchar *mode = gsq_querier_get_extra (querier, "mode");
+				gamename = g_strdup_printf ((extra && mode && *mode) ?
+						"%s (%s)" : "%s", name, mode);
+			}
 		} else {
-			gchar *mode = gsq_querier_get_extra (querier, "mode");
-			gamename = g_strdup_printf ((extra && mode && *mode) ?
-					"%s (%s)" : "%s", name, mode);
+			gamename = g_strdup (querier->game);
 		}
 	} else {
 		gamename = g_strdup ("");
