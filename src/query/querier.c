@@ -141,12 +141,12 @@ gsq_querier_clear (GsqQuerier *querier)
 {
 	GsqQuerierPrivate *priv = querier->priv;
 	
-	gsq_safefree (querier->name);
-	gsq_safefree (querier->game);
-	gsq_safefree (querier->map);
+	*querier->name = 0;
+	*querier->game = 0;
+	*querier->map = 0;
+	*querier->version = 0;
 	querier->numplayers = 0;
 	querier->maxplayers = 0;
-	gsq_safefree (querier->version);
 	g_hash_table_remove_all (priv->extra);
 	gsq_querier_free_fields (priv->fields);
 }
@@ -210,6 +210,10 @@ gsq_querier_finalize (GObject *object)
 	g_object_unref (querier->priv->cancellable);
 	g_timer_destroy (querier->priv->timer);
 	gsq_querier_reset (querier);
+	g_free (querier->name);
+	g_free (querier->game);
+	g_free (querier->map);
+	g_free (querier->version);
 	gsq_safefree (querier->priv->address);
 	g_hash_table_destroy (querier->priv->extra);
 	g_array_free (querier->priv->fields, TRUE);
@@ -376,6 +380,10 @@ gsq_querier_init (GsqQuerier *querier)
 {
 	querier->priv = G_TYPE_INSTANCE_GET_PRIVATE (querier, GSQ_TYPE_QUERIER,
 			GsqQuerierPrivate);
+	querier->name = g_strdup ("");
+	querier->game = g_strdup ("");
+	querier->map = g_strdup ("");
+	querier->version = g_strdup ("");
 	querier->priv->extra = g_hash_table_new_full (g_str_hash, g_str_equal,
 			NULL, g_free);
 	querier->priv->cancellable = g_cancellable_new ();
@@ -435,29 +443,29 @@ gsq_querier_get_iaddr (GsqQuerier *querier)
 void
 gsq_querier_set_name (GsqQuerier *querier, const gchar *value)
 {
-	gsq_safefree (querier->name);
-	querier->name = g_strdup (value);
+	g_free (querier->name);
+	querier->name = g_strdup (value ? value : "");
 }
 
 void
 gsq_querier_set_game (GsqQuerier *querier, const gchar *value)
 {
-	gsq_safefree (querier->game);
-	querier->game = g_strdup (value);
+	g_free (querier->game);
+	querier->game = g_strdup (value ? value : "");
 }
 
 void
 gsq_querier_set_map (GsqQuerier *querier, const gchar *value)
 {
-	gsq_safefree (querier->map);
-	querier->map = g_strdup (value);
+	g_free (querier->map);
+	querier->map = g_strdup (value ? value : "");
 }
 
 void
 gsq_querier_set_version (GsqQuerier *querier, const gchar *value)
 {
-	gsq_safefree (querier->version);
-	querier->version = g_strdup (value);
+	g_free (querier->version);
+	querier->version = g_strdup (value ? value : "");
 }
 
 

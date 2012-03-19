@@ -671,7 +671,8 @@ add_server (GsApplication *app, const gchar *address, const gchar *name,
 		return NULL;
 	
 	GsClient *client = gs_client_new (address);
-	client->querier->name = g_strdup (name);
+	g_free (client->querier->name);
+	client->querier->name = g_strdup (name ? name : "");
 	client->favorite = favorite;
 	gsq_console_set_password (client->console, rcon_password);
 	g_signal_connect (client->querier, "player-online",
