@@ -149,9 +149,11 @@ gsq_lookup_value (GHashTable *values, ...)
 
 gboolean gsq_str2bool (const gchar *str)
 {
-	str = g_ascii_strdown (str);
-	gboolean ret = strcmp (str, "true") == 0 || strcmp (str, "1") == 0 ||
-			strcmp (str, "yes") == 0 || strcmp (str, "on") == 0;
-	g_free (str);
+	if (!str)
+		return FALSE;
+	gchar *s = g_ascii_strdown (str, -1);
+	gboolean ret = strcmp (s, "true") == 0 || strcmp (s, "1") == 0 ||
+			strcmp (s, "yes") == 0 || strcmp (s, "on") == 0;
+	g_free (s);
 	return ret;
 }
