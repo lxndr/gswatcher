@@ -127,3 +127,21 @@ gsq_parse_address (const gchar *addr, guint16 *port, guint16 *port2)
 	
 	return host;
 }
+
+
+gchar *
+gsq_lookup_value (GHashTable *values, ...)
+{
+	va_list va;
+	va_start (va, values);
+	
+	gchar *key, *value = NULL;
+	while ((key = va_arg (va, gchar *))) {
+		value = g_hash_table_lookup (values, key);
+		if (value)
+			break;
+	}
+	
+	va_end (va);
+	return value;
+}
