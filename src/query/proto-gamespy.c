@@ -35,6 +35,7 @@
 #include <glib/gi18n.h>
 #include "querier-private.h"
 #include "proto-gamespy.h"
+#include "utils.h"
 
 
 typedef struct _Packet {
@@ -137,30 +138,12 @@ get_team_name_to (gint num)
 }
 
 
-static gchar *
-lookup_value (GHashTable *values, ...)
-{
-	va_list va;
-	va_start (va, values);
-	
-	gchar *key, *value = NULL;
-	while ((key = va_arg (va, gchar *))) {
-		value = g_hash_table_lookup (values, key);
-		if (value)
-			break;
-	}
-	
-	va_end (va);
-	return value;
-}
-
-
 static void
 gamespy_fill (GsqQuerier *querier, GHashTable *values)
 {
 	/* server info */
 	gsq_querier_set_name (querier, g_hash_table_lookup (values, "hostname"));
-	gsq_querier_set_map (querier, lookup_value (values, "maptitle", "mapname", NULL));
+	gsq_querier_set_map (querier, gsq_lookup_value (values, "maptitle", "mapname", NULL));
 	gsq_querier_set_version (querier, g_hash_table_lookup (values, "gamever"));
 	querier->numplayers = atoi (g_hash_table_lookup (values, "numplayers"));
 	querier->maxplayers = atoi (g_hash_table_lookup (values, "maxplayers"));
@@ -172,13 +155,13 @@ gamespy_fill (GsqQuerier *querier, GHashTable *values)
 	for (i = 0;; i++) {
 		g_sprintf (key, "player_%d", i);
 		g_sprintf (key2, "playername_%d", i);
-		gchar *player = lookup_value (values, key, key2, NULL);
+		gchar *player = gsq_lookup_value (values, key, key2, NULL);
 		if (!player)
 			break;
 		
 		g_sprintf (key, "frags_%d", i);
 		g_sprintf (key2, "kills_%d", i);
-		gchar *frags = lookup_value (values, key, key2, NULL);
+		gchar *frags = gsq_lookup_value (values, key, key2, NULL);
 		if (!frags)
 			break;
 		
