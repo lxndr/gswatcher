@@ -34,6 +34,7 @@ gchar *gsq_utf8_repair (const gchar *text);
 void gsq_print_dump (const gchar *data, gsize length);
 gchar *gsq_parse_address (const gchar *addr, guint16 *port, guint16 *port2);
 gchar *gsq_lookup_value (GHashTable *values, ...) G_GNUC_NULL_TERMINATED;
+gboolean gsq_str2bool (const gchar *str);
 
 
 /* Float endianness conversion macros */

@@ -145,3 +145,13 @@ gsq_lookup_value (GHashTable *values, ...)
 	va_end (va);
 	return value;
 }
+
+
+gboolean gsq_str2bool (const gchar *str)
+{
+	str = g_ascii_strdown (str);
+	gboolean ret = strcmp (str, "true") == 0 || strcmp (str, "1") == 0 ||
+			strcmp (str, "yes") == 0 || strcmp (str, "on") == 0;
+	g_free (str);
+	return ret;
+}
