@@ -159,7 +159,6 @@ static void
 gsq_querier_reset (GsqQuerier *querier)
 {
 	GsqQuerierPrivate *priv = querier->priv;
-	gsq_querier_clear (querier);
 	
 	if (priv->iaddr) {
 		g_object_unref (priv->iaddr);
@@ -169,14 +168,20 @@ gsq_querier_reset (GsqQuerier *querier)
 	priv->qport = 0;
 	
 	if (priv->pdata) {
-		priv->protocol->free (querier);
+		if (priv->protocol->free)
+			priv->protocol->free (querier);
 		priv->pdata = NULL;
 	}
+	priv->protocol =NULL;
 	priv->working = FALSE;
 	priv->ping = 0;
 	
 	priv->newplayers = NULL;
 	gsq_querier_players_updated (querier);
+	
+	/* this is called last because gsq_querier_free_player needs to know
+		number of fields, gsq_querier_clear deletes it */
+	gsq_querier_clear (querier);
 }
 
 
