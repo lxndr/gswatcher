@@ -98,6 +98,29 @@ find_spec (const gchar *id)
 	return NULL;
 }
 
+
+static void
+clear_name (gchar *name)
+{
+	gchar *s = name;
+	gchar *d = name;
+	
+	while (TRUE) {
+		if (*s == '^') {
+			if (s[1] != 0x00)
+				s++;
+		} else if (*s >= 0x20 || *s == 0x0b || *s == 0x00) {
+			*d = *s;
+			if (*s == 0x00)
+				break;
+			d++;
+		}
+		
+		s++;
+	}
+}
+
+
 static gboolean
 get_sinfo (GsqQuerier *querier, gchar *data, gsize length, guint16 qport)
 {
@@ -135,6 +158,7 @@ get_sinfo (GsqQuerier *querier, gchar *data, gsize length, guint16 qport)
 	
 	/* filling */
 	gchar *name = gsq_lookup_value (values, "sv_hostname", "hostname", NULL);
+	clear_name (name);
 	gsq_querier_set_name (querier, name);
 	gchar *map = g_hash_table_lookup (values, "mapname");
 	gsq_querier_set_map (querier, map);
@@ -186,6 +210,7 @@ get_plist (GsqQuerier *querier, gchar *p, gssize len)
 		gchar *score = g_match_info_fetch (minfo, 1);
 		gchar *ping = g_match_info_fetch (minfo, 2);
 		gchar *name = g_match_info_fetch (minfo, 3);
+		clear_name (name);
 		gsq_querier_add_player (querier, name, atoi (score), atoi (ping));
 		g_free (score);
 		g_free (ping);
