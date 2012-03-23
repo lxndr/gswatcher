@@ -50,7 +50,9 @@ struct _GsqQuerier {
 	GsqQuerierPrivate *priv;
 	
 	gchar *name;
+	gchar *id;
 	gchar *game;
+	gchar *mode;
 	gchar *map;
 	gint numplayers;
 	gint maxplayers;
