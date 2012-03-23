@@ -41,7 +41,6 @@ typedef struct _Q3Game {
 	guint16 port;
 } Q3Game;
 
-
 static const Q3Game games[] = {
 	{"baseq3",                     "q3",      "Quake 3",                        NULL,         27960},
 	{"osp",                        "q3osp",   "Quake3: OSP",                    NULL,         27960},
@@ -57,12 +56,6 @@ static const Q3Game games[] = {
 	{NULL,                         NULL,      NULL,                             NULL,             0}
 };
 
-
-
-void
-gsq_quake3_free (GsqQuerier *querier)
-{
-}
 
 
 void
@@ -156,23 +149,17 @@ get_sinfo (GsqQuerier *querier, gchar *data, gsize length, guint16 qport)
 			break;
 	}
 	
-	/* filling */
-	gchar *name = gsq_lookup_value (values, "sv_hostname", "hostname", NULL);
-	clear_name (name);
-	gsq_querier_set_name (querier, name);
-	gchar *map = g_hash_table_lookup (values, "mapname");
-	gsq_querier_set_map (querier, map);
-	gchar *maxplayers = g_hash_table_lookup (values, "sv_maxclients");
-	querier->maxplayers = atoi (maxplayers);
-	gchar *version = gsq_lookup_value (values, "version", "gameversion", "shortversion", NULL);
-	gsq_querier_set_version (querier, version);
-	gchar *password = gsq_lookup_value (values, "pswrd", "g_needpass", NULL);
-	gsq_querier_set_extra (querier, "password", password);
-	
+	/* check port */
 	if (!*querier->game) {
 		gchar *id = g_hash_table_lookup (values, "gamename");
 		const Q3Game *spec = find_spec (id);
-		gsq_querier_set_game (querier, spec ? spec->id : id);
+		if (spec) {
+			gsq_querier_set_id (querier, spec->id);
+			gsq_querier_set_game (querier, spec->name);
+		} else {
+			gsq_querier_set_id (querier, id);
+			gsq_querier_set_game (querier, id);
+		}
 		
 		guint16 port = gsq_querier_get_gport (querier);
 		if ((port > 0 && port != qport) || (spec && spec->port != qport)) {
@@ -184,6 +171,24 @@ get_sinfo (GsqQuerier *querier, gchar *data, gsize length, guint16 qport)
 		gsq_querier_add_field (querier, _("Score"), G_TYPE_INT);
 		gsq_querier_add_field (querier, _("Ping"), G_TYPE_INT);
 	}
+	
+	/* server name */
+	gchar *name = gsq_lookup_value (values, "sv_hostname", "hostname", NULL);
+	clear_name (name);
+	gsq_querier_set_name (querier, name);
+	/* map name */
+	gchar *map = g_hash_table_lookup (values, "mapname");
+	gsq_querier_set_map (querier, map);
+	/* maximum players */
+	gchar *maxplayers = g_hash_table_lookup (values, "sv_maxclients");
+	querier->maxplayers = atoi (maxplayers);
+	/* game version */
+	gchar *version = gsq_lookup_value (values, "version", "gameversion",
+			"shortversion", NULL);
+	gsq_querier_set_version (querier, version);
+	/* password */
+	gchar *password = gsq_lookup_value (values, "pswrd", "g_needpass", NULL);
+	gsq_querier_set_extra (querier, "password", password);
 	
 	g_hash_table_destroy (values);
 	gsq_querier_emit_info_update (querier);

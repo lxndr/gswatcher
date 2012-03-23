@@ -368,7 +368,7 @@ static void
 server_detected (GsqQuerier *querier, GsClient *client)
 {
 	gtk_list_store_set (liststore, &client->sliter,
-			COLUMN_ICON, get_game_icon (client->querier->game),
+			COLUMN_ICON, get_game_icon (client->querier->id),
 			-1);
 	
 	if (client == selected)

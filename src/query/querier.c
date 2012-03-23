@@ -143,7 +143,9 @@ gsq_querier_clear (GsqQuerier *querier)
 	GsqQuerierPrivate *priv = querier->priv;
 	
 	*querier->name = 0;
+	*querier->id = 0;
 	*querier->game = 0;
+	*querier->mode = 0;
 	*querier->map = 0;
 	*querier->version = 0;
 	querier->numplayers = 0;
@@ -217,7 +219,9 @@ gsq_querier_finalize (GObject *object)
 	g_timer_destroy (querier->priv->timer);
 	gsq_querier_reset (querier);
 	g_free (querier->name);
+	g_free (querier->id);
 	g_free (querier->game);
+	g_free (querier->mode);
 	g_free (querier->map);
 	g_free (querier->version);
 	gsq_safefree (querier->priv->address);
@@ -378,7 +382,7 @@ gsq_querier_class_init (GsqQuerierClass *klass)
 	gsq_querier_add_protocol ("source",
 			gsq_source_query, gsq_source_process, gsq_source_free);
 	gsq_querier_add_protocol ("quake3",
-			gsq_quake3_query, gsq_quake3_process, gsq_quake3_free);
+			gsq_quake3_query, gsq_quake3_process, NULL);
 	gsq_querier_add_protocol ("gamespy",
 			gsq_gamespy_query, gsq_gamespy_process, gsq_gamespy_free);
 }
@@ -389,7 +393,9 @@ gsq_querier_init (GsqQuerier *querier)
 	querier->priv = G_TYPE_INSTANCE_GET_PRIVATE (querier, GSQ_TYPE_QUERIER,
 			GsqQuerierPrivate);
 	querier->name = g_strdup ("");
+	querier->id = g_strdup ("");
 	querier->game = g_strdup ("");
+	querier->mode = g_strdup ("");
 	querier->map = g_strdup ("");
 	querier->version = g_strdup ("");
 	querier->priv->extra = g_hash_table_new_full (g_str_hash, g_str_equal,
@@ -456,10 +462,24 @@ gsq_querier_set_name (GsqQuerier *querier, const gchar *value)
 }
 
 void
+gsq_querier_set_id (GsqQuerier *querier, const gchar *value)
+{
+	g_free (querier->id);
+	querier->id = g_strdup (value ? value : "");
+}
+
+void
 gsq_querier_set_game (GsqQuerier *querier, const gchar *value)
 {
 	g_free (querier->game);
 	querier->game = g_strdup (value ? value : "");
+}
+
+void
+gsq_querier_set_mode (GsqQuerier *querier, const gchar *value)
+{
+	g_free (querier->mode);
+	querier->mode = g_strdup (value ? value : "");
 }
 
 void
