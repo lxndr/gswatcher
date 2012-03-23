@@ -160,6 +160,7 @@ static void
 get_server_info (GsqQuerier *querier, gchar *p)
 {
 	gchar desc[128], dir[128], ver[128], tmp[128], tags[256];
+	gchar *server_os, *server_type;
 	
 	guint8 pver = get_byte (&p);			// Protocol version
 	get_string (&p, tmp, 128);				// Server name
@@ -192,6 +193,21 @@ get_server_info (GsqQuerier *querier, gchar *p)
 	if (edf & 0x01)
 		get_longlong (&p);					// server's Game ID
 	
+	switch (os) {
+		case 'l': server_os = "Linux"; break;
+		case 'w': server_os = "Windows"; break;
+		default:  server_os = "Unknown";
+	}
+	
+	switch (dedicated) {
+		case 'd': server_type = "Dedicated"; break;
+		case 'l': server_type = "Listen"; break;
+		case 'p': server_type = "SourceTV"; break;
+		default:  server_type = "";
+	}
+	
+	gsq_querier_set_extra (querier, "os", server_os);
+	gsq_querier_set_extra (querier, "type", server_type);
 	g_snprintf (tmp, 128, "%d", pver);
 	gsq_querier_set_extra (querier, "protocol-version", tmp);
 	g_snprintf (tmp, 128, "%d", appid);
@@ -199,28 +215,15 @@ get_server_info (GsqQuerier *querier, gchar *p)
 	gsq_querier_set_extra (querier, "password", pass ? "true" : "false");
 	gsq_querier_set_extra (querier, "secure", secure ? "true" : "false");
 	
-	switch (os) {
-		case 'l': gsq_querier_set_extra (querier, "os", "Linux"); break;
-		case 'w': gsq_querier_set_extra (querier, "os", "Windows"); break;
-		default:  gsq_querier_set_extra (querier, "os", "Unknown");
-	}
-	
-	switch (dedicated) {
-		case 'd': gsq_querier_set_extra (querier, "type", "Dedicated"); break;
-		case 'l': gsq_querier_set_extra (querier, "type", "Listen"); break;
-		case 'p': gsq_querier_set_extra (querier, "type", "SourceTV"); break;
-		default:  gsq_querier_set_extra (querier, "type", "");
-	}
-	
 	gchar *game_id = NULL, *game_name = desc, *game_mode = NULL;
 	switch (appid) {
 		case 10:
-			if (strcmp (dir, "valve") == 0) {
-				game_id = "hl";
-				game_name = "Half-Life";
-			} else {
+			if (strcmp (dir, "cstrike") == 0) {
 				game_id = "cs";
 				game_name = "Counter-Strike";
+			} else {
+				game_id = "hl";
+				game_name = "Half-Life";
 			}
 			break;
 		case 20:
@@ -301,14 +304,14 @@ get_server_info (GsqQuerier *querier, gchar *p)
 static void
 get_server_info_gold (GsqQuerier *querier, gchar *p)
 {
-	gchar tmp[128];
+	gchar dir[64], tmp[64];
 	
 	get_string (&p, NULL, 0);				// Game server IP and port
-	get_string (&p, tmp, 128);				// Server name
+	get_string (&p, tmp, 64);				// Server name
 	gsq_querier_set_name (querier, tmp);
-	get_string (&p, tmp, 128);				// Map name
+	get_string (&p, tmp, 64);				// Map name
 	gsq_querier_set_map (querier, tmp);
-	get_string (&p, NULL, 0);				// Game directory
+	get_string (&p, dir, 64);				// Game directory
 	get_string (&p, NULL, 0);				// Game description
 	querier->numplayers = get_byte (&p);	// Number of players
 	querier->maxplayers = get_byte (&p);	// Maximum players
@@ -319,25 +322,34 @@ get_server_info_gold (GsqQuerier *querier, gchar *p)
 	get_byte (&p);							// IsMod
 	gboolean secure = get_byte (&p);		// Secure
 	
-	g_snprintf (tmp, 128, "%d", pver);
+	if (strcmp (dir, "cstrike") == 0) {
+		gsq_querier_set_id (querier, "cs");
+		gsq_querier_set_game (querier, "Counter-Strike");
+	}
+	
+	g_snprintf (tmp, 64, "%d", pver);
 	gsq_querier_set_extra (querier, "protocol-version", tmp);
 	gsq_querier_set_extra (querier, "password", pass ? "true" : "false");
 	gsq_querier_set_extra (querier, "secure", secure ? "true" : "false");
 	
+	gchar *server_os, *server_type;
+	
 	switch (os) {
-		case 'l': gsq_querier_set_extra (querier, "os", "Linux"); break;
-		case 'w': gsq_querier_set_extra (querier, "os", "Windows"); break;
-		default:  gsq_querier_set_extra (querier, "os", "Unknown");
+		case 'l': server_os = "Linux"; break;
+		case 'w': server_os = "Windows"; break;
+		default:  server_os = "Unknown";
 	}
 	
 	switch (dedicated) {
-		case 'd': gsq_querier_set_extra (querier, "type", "Dedicated"); break;
-		case 'l': gsq_querier_set_extra (querier, "type", "Listen"); break;
-		case 'p': gsq_querier_set_extra (querier, "type", "SourceTV"); break;
-		default:  gsq_querier_set_extra (querier, "type", "");
+		case 'd': server_type = "Dedicated"; break;
+		case 'l': server_type = "Listen"; break;
+		case 'p': server_type = "SourceTV"; break;
+		default:  server_type = "";
 	}
 	
-	gsq_querier_set_game (querier, "");
+	gsq_querier_set_extra (querier, "os", server_os);
+	gsq_querier_set_extra (querier, "type", server_type);
+	
 	gsq_querier_emit_info_update (querier);
 }
 
