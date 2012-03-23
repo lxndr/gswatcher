@@ -212,50 +212,89 @@ get_server_info (GsqQuerier *querier, gchar *p)
 		default:  gsq_querier_set_extra (querier, "type", "");
 	}
 	
+	gchar *game_id = NULL, *game_name = desc, *game_mode = NULL;
 	switch (appid) {
 		case 10:
-			if (strcmp (dir, "valve") == 0)
-				gsq_querier_set_game (querier, "hl");
-			else
-				gsq_querier_set_game (querier, "cs");
+			if (strcmp (dir, "valve") == 0) {
+				game_id = "hl";
+				game_name = "Half-Life";
+			} else {
+				game_id = "cs";
+				game_name = "Counter-Strike";
+			}
 			break;
-		case 20: gsq_querier_set_game (querier, "tf"); break;
-		case 30: gsq_querier_set_game (querier, "dod"); break;
-		case 80: gsq_querier_set_game (querier, "czero"); break;
-		case 240: gsq_querier_set_game (querier, "css"); break;
-		case 300: gsq_querier_set_game (querier, "dods"); break;
-		case 320: gsq_querier_set_game (querier, "hl2dm"); break;
-		case 440: gsq_querier_set_game (querier, "tf2"); break;
+		case 20:
+			game_id = "tf";
+			game_name = "Team Fortress";
+			break;
+		case 30:
+			game_id = "dod";
+			game_name = "Day of Defeat";
+			break;
+		case 80:
+			game_id = "czero";
+			game_name = "Counter-Strike: Condition Zero";
+			break;
+		case 240:
+			game_id = "css";
+			game_name = "Counter-Strike: Source";
+			break;
+		case 300:
+			game_id = "dods";
+			game_name = "Day of Defeat: Source";
+			break;
+		case 320:
+			game_id = "hl2dm";
+			game_name = "Half-Life 2: Deathmatch";
+			break;
+		case 440:
+			game_id = "tf2";
+			game_name = "Team Fortress 2";
+			break;
 		case 500:
-			gsq_querier_set_game (querier, "l4d");
-			gsq_querier_set_extra (querier, "mode", desc + 6);
+			game_id = "l4d";
+			game_name = "Left 4 Dead";
+			game_mode = desc + 6;
 			break;
-		case 550: {
-			gchar *mode;
-			gsq_querier_set_game (querier, "l4d2");
+		case 550:
+			game_id = "l4d2";
+			game_name = "Left 4 Dead 2";
 			if (strstr (tags, "coop"))
-				mode = "Co-op";
+				game_mode = "Co-op";
 			else if (strstr (tags, "realism"))
-				mode = "Realism";
+				game_mode = "Realism";
 			else if (strstr (tags, "survival"))
-				mode = "Survival";
+				game_mode = "Survival";
 			else if (strstr (tags, "versus"))
-				mode = "Versus";
+				game_mode = "Versus";
 			else if (strstr (tags, "scavenge"))
-				mode = "Scavenge";
-			else
-				mode = NULL;
-			if (mode)
-				gsq_querier_set_extra (querier, "mode", mode);
-			} break;
-		case 630: gsq_querier_set_game (querier, "as"); break;
-		case 17500: gsq_querier_set_game (querier, "zp"); break;
-		case 17520: gsq_querier_set_game (querier, "syn"); break;
-		case 17700: gsq_querier_set_game (querier, "ins"); break;
-		case 17710: gsq_querier_set_game (querier, "nd"); break;
-		default: gsq_querier_set_game (querier, ""); break;
+				game_mode = "Scavenge";
+			break;
+		case 630:
+			game_id = "as";
+			game_name = "Alien Swarm";
+			break;
+		case 17500:
+			game_id = "zp";
+			game_name = "Zombie Panic!";
+			break;
+		case 17520:
+			game_id = "syn";
+			game_name = "Synergy";
+			break;
+		case 17700:
+			game_id = "ins";
+			game_name = "Insurgency";
+			break;
+		case 17710:
+			game_id = "nd";
+			game_name = "Nuclear dawn";
+			break;
 	}
 	
+	gsq_querier_set_id (querier, game_id);
+	gsq_querier_set_game (querier, game_name);
+	gsq_querier_set_mode (querier, game_mode);
 	gsq_querier_emit_info_update (querier);
 }
 
