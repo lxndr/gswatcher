@@ -42,10 +42,12 @@ typedef struct _Q3Game {
 } Q3Game;
 
 static const Q3Game games[] = {
+	{"base",                       "q3",      "Quake 3",                        NULL,         27960},
 	{"baseq3",                     "q3",      "Quake 3",                        NULL,         27960},
 	{"osp",                        "q3osp",   "Quake3: OSP",                    NULL,         27960},
 	{"q3ut4",                      "urt",     "Urban Terror",                   NULL,         27960},
 	{"baseoa",                     "oarena",  "Open Arena",                     NULL,         27960},
+	{"ZEQ2",                       "zeq2",    "ZEQ2",                           NULL,         27960},
 	{"Nexuiz",                     "nexuiz",  "Nexuiz",                         NULL,         26000},
 	{"Warsow",                     "warsow",  "Warsow",                         "gametype",   44400},
 	{"Call of Duty",               "cod",     "Call of Duty",                   "g_gametype", 28960},
@@ -70,7 +72,7 @@ gsq_quake3_query (GsqQuerier *querier)
 		gint i, prev = 0;
 		for (i = 0; games[i].proto_id; i++) {
 			if (games[i].port != prev) {
-				gsq_querier_send (querier, port, query, 14);
+				gsq_querier_send (querier, games[i].port, query, 14);
 				prev = games[i].port;
 			}
 		}
@@ -150,7 +152,7 @@ get_sinfo (GsqQuerier *querier, gchar *data, gsize length, guint16 qport)
 	}
 	
 	/* check game port */
-	if (!*querier->game) {
+	if (!*querier->id) {
 		gchar *id = g_hash_table_lookup (values, "gamename");
 		const Q3Game *spec = find_spec (id);
 		if (spec) {
@@ -162,7 +164,7 @@ get_sinfo (GsqQuerier *querier, gchar *data, gsize length, guint16 qport)
 		}
 		
 		guint16 port = gsq_querier_get_gport (querier);
-		if ((port > 0 && port != qport) || (spec && spec->port != qport)) {
+		if ((port > 0 && port != qport) && (spec && spec->port != qport)) {
 			g_hash_table_destroy (values);
 			g_free (data);
 			return FALSE;
@@ -188,7 +190,8 @@ get_sinfo (GsqQuerier *querier, gchar *data, gsize length, guint16 qport)
 	gsq_querier_set_version (querier, version);
 	/* password */
 	gchar *password = gsq_lookup_value (values, "pswrd", "g_needpass", NULL);
-	gsq_querier_set_extra (querier, "password", password);
+	gsq_querier_set_extra (querier, "password",
+			gsq_str2bool (password) ? "true" : "false");
 	
 	g_hash_table_destroy (values);
 	gsq_querier_emit_info_update (querier);
