@@ -56,8 +56,6 @@ static void gs_application_finalize (GObject *object);
 static void gs_application_activate (GApplication *app);
 static gboolean gs_application_local_command_line (GApplication *app,
 		gchar ***argumnets, int *exit_status);
-static int gs_application_command_line (GApplication *app,
-		GApplicationCommandLine *cmdline);
 static void gs_application_startup (GApplication *app);
 
 static void load_server_list (GsApplication *app);
@@ -84,7 +82,6 @@ gs_application_class_init (GsApplicationClass *class)
 	app_class->startup = gs_application_startup;
 	app_class->activate = gs_application_activate;
 	app_class->local_command_line = gs_application_local_command_line;
-	app_class->command_line = gs_application_command_line;
 	
 	g_object_class_install_property (object_class, PROP_UPDATE_RATE,
 			g_param_spec_double ("update-rate", "Update rate", "Update rate",
@@ -185,7 +182,7 @@ GsApplication *
 gs_application_new ()
 {
 	return g_object_new (GS_TYPE_APPLICATION, "application-id", "org.gstool",
-			"flags", G_APPLICATION_HANDLES_COMMAND_LINE, NULL);
+			"flags", G_APPLICATION_FLAGS_NONE, NULL);
 }
 
 
@@ -246,32 +243,31 @@ static gboolean
 gs_application_local_command_line (GApplication *app, gchar ***argumnets,
 		int *exit_status)
 {
-	initialize_paths (GS_APPLICATION (app), **argumnets);
-	return G_APPLICATION_CLASS (gs_application_parent_class)->
-			local_command_line (app, argumnets, exit_status);
-}
-
-static int
-gs_application_command_line (GApplication *app, GApplicationCommandLine *cmdline)
-{
+	/* count number of arguments */
+	gchar **argv = *argumnets;
+	gint argc = 0;
+	
+	while (argv[argc])
+		argc++;
+	
+	/*  */
+	GsApplication *gsapp = GS_APPLICATION (app);
+	initialize_paths (gsapp, *argv);
+	
 	gboolean version = FALSE;
-	gboolean minimized = FALSE;
 	gboolean debug = FALSE;
 	gboolean notifier = FALSE;
 	
-	gchar **argv;
-	gint argc;
 	GError *error = NULL;
 	GOptionContext *context;
 	GOptionEntry options[] = {
 		{"version", 'v', 0, G_OPTION_ARG_NONE, &version,
 				N_("Show version number and exit"), NULL},
-		{"minimized", 'm', 0, G_OPTION_ARG_NONE, &minimized,
+		{"minimized", 'm', 0, G_OPTION_ARG_NONE, &gsapp->minimized,
 				N_("Start minimized in system tray"), NULL},
 		{"debug", 'd', 0, G_OPTION_ARG_NONE, &debug,
 				N_("Output all packets into stdout"), NULL},
-		{"server", 's', 0, G_OPTION_ARG_STRING_ARRAY,
-				&GS_APPLICATION (app)->specific_servers,
+		{"server", 's', 0, G_OPTION_ARG_STRING_ARRAY, &gsapp->specific_servers,
 				N_("Watch only this server"), NULL},
 #ifndef G_OS_WIN32
 		{"notifier", 'n', 0, G_OPTION_ARG_NONE, &notifier,
@@ -280,44 +276,28 @@ gs_application_command_line (GApplication *app, GApplicationCommandLine *cmdline
 		{NULL}
 	};
 	
-	argv = g_application_command_line_get_arguments (cmdline, &argc);
-	
 	context = g_option_context_new (NULL);
-	/* g_option_context_set_help_enabled (context, FALSE); */
 	g_option_context_add_group (context, gtk_get_option_group (TRUE));
 	g_option_context_add_main_entries (context, options, NULL);
 	
 	if (!g_option_context_parse (context, &argc, &argv, &error)) {
-		g_application_command_line_printerr (cmdline, "%s\n", error->message);
-		g_error_free (error);
-		g_application_command_line_set_exit_status (cmdline, EXIT_FAILURE);
-		goto finish;
+		g_printerr (error->message);
+		exit (EXIT_FAILURE);
 	}
 	
 	if (version) {
-		g_application_command_line_print (cmdline, "Game Server Tool v" GS_VERSION "\n");
-		g_application_command_line_set_exit_status (cmdline, EXIT_SUCCESS);
-		goto finish;
+		g_print ("Game Server Tool v" GS_VERSION "\n");
+		exit (EXIT_SUCCESS);
 	}
 	
 	gs_notification_init (notifier);
 	gsq_querier_set_debug_mode (debug);
 	
-	GsApplication *gsapp = GS_APPLICATION (app);
-	if (gsapp->specific_servers)
-		add_servers (gsapp, gsapp->specific_servers);
-	else
-		load_server_list (gsapp);
-	
-	if (!minimized)
-		gui_window_show ();
-	
-finish:
-	g_strfreev (argv);
 	g_option_context_free (context);
-	
-	return 0;
+	return G_APPLICATION_CLASS (gs_application_parent_class)->
+			local_command_line (app, argumnets, exit_status);
 }
+
 
 static void
 gs_application_startup (GApplication *app)
@@ -341,12 +321,21 @@ gs_application_startup (GApplication *app)
 	
 	load_preferences (gsapp);
 	load_buddy_list (gsapp);
+	
+	if (gsapp->specific_servers)
+		add_servers (gsapp, gsapp->specific_servers);
+	else
+		load_server_list (gsapp);
+	
+	if (!gsapp->minimized)
+		gui_window_show ();
 }
 
 
 static gboolean
 gs_application_shutdown_shot (GsApplication *app)
 {
+	gs_application_save_preferences (app);
 	while (app->server_list)
 		remove_server (app, app->server_list->data);
 	if (app->timer)

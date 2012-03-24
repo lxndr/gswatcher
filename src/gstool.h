@@ -62,7 +62,10 @@ struct _GsApplication {
 	guint timer;
 	GList *server_list;
 	GList *server_iter;
+	
+	/* startup variables */
 	gchar **specific_servers;
+	gboolean minimized;
 };
 
 struct _GsApplicationClass {
