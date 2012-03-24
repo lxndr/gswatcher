@@ -220,16 +220,16 @@ gui_window_load_geometry (GJsonNode *geometry)
 				g_json_object_get_integer (geometry, "height"));
 	}
 	
+	if (g_json_object_has (geometry, "layout"))
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (layout_button),
+				g_json_object_get_integer (geometry, "layout"));
+	
 	if (g_json_object_has (geometry, "slist-size"))
 		gtk_paned_set_position (GTK_PANED (slist_paned),
 				g_json_object_get_integer (geometry, "slist-size"));
 	if (g_json_object_has (geometry, "plist-size"))
 		gtk_paned_set_position (GTK_PANED (plist_paned),
 				g_json_object_get_integer (geometry, "plist-size"));
-	
-	if (g_json_object_has (geometry, "layout"))
-		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (layout_button),
-				g_json_object_get_integer (geometry, "layout"));
 }
 
 GJsonNode *
@@ -517,7 +517,6 @@ gui_window_create ()
 			"icon-name",		"gstool",
 			"default-width",	800,
 			"default-height",	600,
-			"visible",			TRUE,
 			NULL);
 	gtk_container_add (GTK_CONTAINER (window), box);
 	g_signal_connect (window, "delete-event", G_CALLBACK (gs_window_delete_event), NULL);
