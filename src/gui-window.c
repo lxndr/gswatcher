@@ -36,6 +36,8 @@
 
 
 GtkWidget *window = NULL;
+static gint win_left = 0, win_top = 0, win_width = 800, win_height = 600;
+static gboolean win_maximized = FALSE;
 static GtkWidget *notebook;
 static GtkWidget *infobox_toolbar = NULL;
 static GtkWidget *console_toolbar = NULL;
@@ -189,6 +191,19 @@ gs_window_delete_event (GtkWidget *widget, GdkEvent *event, gpointer udata)
 	return TRUE;
 }
 
+static void
+gs_window_size_allocated (GtkWidget *gtk_window, GtkAllocation *alloc, gpointer gdata)
+{
+	GdkWindow *gdk_window = gtk_widget_get_window (gtk_window);
+	win_maximized = gdk_window != NULL &&
+			(gdk_window_get_state (gdk_window) & GDK_WINDOW_STATE_MAXIMIZED);
+	
+    if (!win_maximized) {
+		gtk_window_get_position (GTK_WINDOW (gtk_window), &win_left, &win_top);
+		gtk_window_get_size (GTK_WINDOW (gtk_window), &win_width, &win_height);
+	}
+}
+
 
 void
 gui_window_show ()
@@ -197,6 +212,11 @@ gui_window_show ()
 	gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (trayshow), TRUE);
 	g_signal_handlers_unblock_by_func (trayshow, gs_window_show_toggled, NULL);
 	gui_slist_update_all ();
+	
+	if (!gtk_widget_get_visible( GTK_WIDGET (window))) {
+		gtk_window_resize (GTK_WINDOW (window), win_width, win_height);
+		gtk_window_move (GTK_WINDOW (window), win_left, win_top);
+	}
 	gtk_window_present_with_time (GTK_WINDOW (window), gtk_get_current_event_time ());
 }
 
@@ -213,12 +233,22 @@ gui_window_hide ()
 void
 gui_window_load_geometry (GJsonNode *geometry)
 {
-	if (g_json_object_has (geometry, "width") &&
-			g_json_object_has (geometry, "height")) {
-		gtk_window_resize (GTK_WINDOW (window),
-				g_json_object_get_integer (geometry, "width"),
-				g_json_object_get_integer (geometry, "height"));
-	}
+	if (g_json_object_has (geometry, "left"))
+		win_left = g_json_object_get_integer (geometry, "left");
+	if (g_json_object_has (geometry, "top"))
+		win_top = g_json_object_get_integer (geometry, "top");
+	gtk_window_move (GTK_WINDOW (window), win_left, win_top);
+	
+	if (g_json_object_has (geometry, "width"))
+		win_width = g_json_object_get_integer (geometry, "width");
+	if (g_json_object_has (geometry, "height"))
+		win_height = g_json_object_get_integer (geometry, "height");
+	gtk_window_resize (GTK_WINDOW (window), win_width, win_height);
+	
+	if (g_json_object_has (geometry, "maximized"))
+		win_maximized = g_json_object_get_integer (geometry, "maximized");
+	if (win_maximized)
+		gtk_window_maximize (GTK_WINDOW (window));
 	
 	if (g_json_object_has (geometry, "layout"))
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (layout_button),
@@ -237,20 +267,21 @@ gui_window_save_geometry ()
 {
 	GJsonNode *node = g_json_object_new ();
 	
-	gint width, height;
-	gtk_window_get_size (GTK_WINDOW (window), &width, &height);
-	g_json_object_set_integer (node, "width", width);
-	g_json_object_set_integer (node, "height", height);
+	g_json_object_set_integer (node, "left", win_left);
+	g_json_object_set_integer (node, "top", win_top);
+	g_json_object_set_integer (node, "width", win_width);
+	g_json_object_set_integer (node, "height", win_height);
+	g_json_object_set_integer (node, "maximized", win_maximized);
+	
+	gboolean layout = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (layout_button));
+	g_json_object_set_integer (node, "layout", layout);
 	
 	gint slist_size = gtk_paned_get_position (GTK_PANED (slist_paned));
 	g_json_object_set_integer (node, "slist-size", slist_size);
 	
 	gint plist_size = gtk_paned_get_position (GTK_PANED (plist_paned));
 	g_json_object_set_integer (node, "plist-size", plist_size);
-	
-	gboolean layout = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (layout_button));
-	g_json_object_set_integer (node, "layout", layout);
-	
+
 	return node;
 }
 
@@ -515,11 +546,12 @@ gui_window_create ()
 	g_object_set (G_OBJECT (window),
 			"title",			"Game Server Tool",
 			"icon-name",		"gstool",
-			"default-width",	800,
-			"default-height",	600,
+			"default-width",	win_width,
+			"default-height",	win_height,
 			NULL);
 	gtk_container_add (GTK_CONTAINER (window), box);
 	g_signal_connect (window, "delete-event", G_CALLBACK (gs_window_delete_event), NULL);
+	g_signal_connect (window, "size-allocate", G_CALLBACK (gs_window_size_allocated), NULL);
 	
 	return window;
 }
