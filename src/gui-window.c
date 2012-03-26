@@ -191,8 +191,8 @@ gs_window_delete_event (GtkWidget *widget, GdkEvent *event, gpointer udata)
 	return TRUE;
 }
 
-static void
-gs_window_size_allocated (GtkWidget *gtk_window, GtkAllocation *alloc, gpointer gdata)
+static gboolean
+gs_window_configure_event (GtkWidget *gtk_window, GdkEvent *event, gpointer udata)
 {
 	GdkWindow *gdk_window = gtk_widget_get_window (gtk_window);
 	win_maximized = gdk_window != NULL &&
@@ -202,6 +202,8 @@ gs_window_size_allocated (GtkWidget *gtk_window, GtkAllocation *alloc, gpointer 
 		gtk_window_get_position (GTK_WINDOW (gtk_window), &win_left, &win_top);
 		gtk_window_get_size (GTK_WINDOW (gtk_window), &win_width, &win_height);
 	}
+	
+	return FALSE;
 }
 
 
@@ -551,7 +553,7 @@ gui_window_create ()
 			NULL);
 	gtk_container_add (GTK_CONTAINER (window), box);
 	g_signal_connect (window, "delete-event", G_CALLBACK (gs_window_delete_event), NULL);
-	g_signal_connect (window, "size-allocate", G_CALLBACK (gs_window_size_allocated), NULL);
+	g_signal_connect (window, "configure-event", G_CALLBACK (gs_window_configure_event), NULL);
 	
 	return window;
 }
