@@ -194,6 +194,9 @@ gs_window_delete_event (GtkWidget *widget, GdkEvent *event, gpointer udata)
 static gboolean
 gs_window_configure_event (GtkWidget *gtk_window, GdkEvent *event, gpointer udata)
 {
+	if (!gtk_widget_get_visible (gtk_window))
+		return FALSE;
+	
 	GdkWindow *gdk_window = gtk_widget_get_window (gtk_window);
 	win_maximized = gdk_window != NULL &&
 			(gdk_window_get_state (gdk_window) & GDK_WINDOW_STATE_MAXIMIZED);
