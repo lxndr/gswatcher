@@ -59,7 +59,6 @@ enum {
 	COLUMN_PING_COLOR,
 	COLUMN_ACTIONS_VISIBLE,
 	COLUMN_FAVORITE,
-	COLUMN_CONNECT,
 	COLUMN_NUMBER
 };
 
@@ -241,7 +240,7 @@ gui_slist_clicked (GtkWidget *widget, GdkEventButton *event, gpointer udata)
 	if (!client)
 		return FALSE;
 	
-	gint n = (event->x - rect.x) / (rect.width / 3);
+	gint n = (event->x - rect.x) / (rect.width / 2);
 	
 	switch (n) {
 	case 0:
@@ -254,9 +253,6 @@ gui_slist_clicked (GtkWidget *widget, GdkEventButton *event, gpointer udata)
 				COLUMN_FAVORITE, client->favorite,
 				-1);
 		gs_application_save_server_list (app);
-		break;
-	case 2:
-		gs_client_connect_to_game (client);
 		break;
 	}
 	
@@ -442,7 +438,6 @@ gui_slist_add (GsClient *client)
 			COLUMN_GAME, gamename,
 			COLUMN_ACTIONS_VISIBLE, TRUE,
 			COLUMN_FAVORITE, client->favorite,
-			COLUMN_CONNECT, TRUE,
 			-1);
 	
 	g_free (gamename);
@@ -766,15 +761,6 @@ gui_slist_create ()
 	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (actioncolumn), cell,
 			"visible", COLUMN_ACTIONS_VISIBLE,
 			"sensitive", COLUMN_FAVORITE,
-			NULL);
-	cell = gtk_cell_renderer_pixbuf_new ();
-	g_object_set (G_OBJECT (cell),
-			"stock-id", GTK_STOCK_CONNECT,
-			NULL);
-	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (actioncolumn), cell, FALSE);
-	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (actioncolumn), cell,
-			"visible", COLUMN_ACTIONS_VISIBLE,
-			"sensitive", COLUMN_CONNECT,
 			NULL);
 	gtk_tree_view_insert_column (GTK_TREE_VIEW (listview), actioncolumn, -1);
 	

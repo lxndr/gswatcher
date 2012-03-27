@@ -900,9 +900,12 @@ g_json_iter_next_array (GJsonIter *iter, GJsonNode **child)
 	g_return_val_if_fail (iter->node->type == JSON_TYPE_ARRAY, FALSE);
 	g_return_val_if_fail (child != NULL, FALSE);
 	
+	if (iter->index >= iter->node->a->len)
+		return FALSE;
+	
 	*child = g_ptr_array_index (iter->node->a, iter->index);
 	iter->index++;
-	return iter->index <= iter->node->a->len;
+	return TRUE;
 }
 
 
