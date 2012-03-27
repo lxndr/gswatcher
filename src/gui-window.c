@@ -460,10 +460,10 @@ gui_window_create ()
 	gtk_box_pack_start (GTK_BOX (infobox), plist, TRUE, TRUE, 0);
 	gtk_widget_show (infobox);
 	
-	GtkWidget *infobox_label = gtk_label_new (_("Info"));
+	GtkWidget *infobox_label = gtk_label_new (_("Information"));
 	gtk_widget_show (infobox_label);
 	
-	infobox_toolbar = gui_plist_create_bar ();
+	infobox_toolbar = gui_info_create_bar ();
 	g_object_ref_sink (infobox_toolbar);
 	
 /* console */
