@@ -96,6 +96,7 @@ gboolean gs_application_get_pause (GsApplication *app);
 
 GsClient *gs_application_add_server (GsApplication *app, const gchar *address);
 void gs_application_remove_server (GsApplication *app, GsClient *client);
+void gs_application_remove_server_ask (GsApplication *app, GsClient *client);
 GsClient *gs_application_find_server (GsApplication *app, const gchar *address);
 GList *gs_application_server_list (GsApplication *app);
 void gs_application_save_server_list (GsApplication *app);

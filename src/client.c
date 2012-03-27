@@ -145,6 +145,21 @@ gs_client_new (const gchar *address)
 }
 
 
+void
+gs_client_set_favorite (GsClient *client, gboolean favorite)
+{
+	g_return_if_fail (GS_IS_CLIENT (client));
+	client->favorite = favorite;
+}
+
+gboolean
+gs_client_get_favorite (GsClient *client)
+{
+	g_return_val_if_fail (GS_IS_CLIENT (client), FALSE);
+	return client->favorite;
+}
+
+
 gchar *
 gs_client_get_game_name (GsClient* client, gboolean extra)
 {
