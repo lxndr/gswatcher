@@ -57,8 +57,6 @@ enum {
 	COLUMN_PLAYERS_NUMBER,
 	COLUMN_PING,
 	COLUMN_PING_COLOR,
-	COLUMN_ACTIONS_VISIBLE,
-	COLUMN_FAVORITE,
 	COLUMN_NUMBER
 };
 
@@ -67,7 +65,6 @@ static GtkWidget *entry;
 static GtkWidget *scrolled;
 static GtkWidget *listview;
 static GtkTreeViewColumn *gamecolumn;
-static GtkTreeViewColumn *actioncolumn;
 static GtkListStore *liststore;
 static GuiGameColumnMode game_column_mode;
 static GsClient *selected = NULL;
@@ -173,20 +170,11 @@ gui_slist_select_another (GtkTreeIter *iter)
 }
 
 
-static void
+void
 gui_slist_remove (GsClient *client)
 {
-	GtkWidget *dialog = gtk_message_dialog_new (GTK_WINDOW (window),
-			GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO,
-			_("Are you sure you want to remove \"%s\" ( %s) from the list?"),
-			client->querier->name, gsq_querier_get_address (client->querier));
-	if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_YES) {
-		gui_slist_select_another (&client->sliter);
-		gtk_list_store_remove (liststore, &client->sliter);
-		gs_application_remove_server (app, client);
-	}
-	
-	gtk_widget_destroy (dialog);
+	gui_slist_select_another (&client->sliter);
+	gtk_list_store_remove (liststore, &client->sliter);
 }
 
 
@@ -207,55 +195,6 @@ gui_slist_selection_changed (GtkTreeSelection *selection, gpointer udata)
 	gs_console_set (selected);
 	gui_log_set (selected);
 	gui_chat_set (selected);
-}
-
-
-static gboolean
-gui_slist_clicked (GtkWidget *widget, GdkEventButton *event, gpointer udata)
-{
-	if (!(event->type == GDK_BUTTON_RELEASE && event->button == 1))
-		return FALSE;
-	
-	GtkTreePath *path = NULL;
-	GtkTreeViewColumn *column = NULL;
-	if (!(gtk_tree_view_get_path_at_pos (GTK_TREE_VIEW (widget), event->x,
-			event->y, &path, &column, NULL, NULL) && column == actioncolumn)) {
-		if (path)
-			gtk_tree_path_free (path);
-		return FALSE;
-	}
-	
-	GsClient *client;
-	GtkTreeIter iter;
-	gtk_tree_model_get_iter (GTK_TREE_MODEL (liststore), &iter, path);
-	gtk_tree_model_get (GTK_TREE_MODEL (liststore), &iter,
-			COLUMN_SERVER, &client,
-			-1);
-	
-	GdkRectangle rect;
-	gtk_tree_view_get_cell_area (GTK_TREE_VIEW (widget), path, column, &rect);
-	gtk_tree_path_free (path);
-	
-	if (!client)
-		return FALSE;
-	
-	gint n = (event->x - rect.x) / (rect.width / 2);
-	
-	switch (n) {
-	case 0:
-		gui_slist_remove (client);
-		break;
-	case 1:
-		client->favorite = !client->favorite;
-		gtk_list_store_set (liststore, &iter,
-				COLUMN_TYPE, client->favorite ? ROW_FAVORITE : ROW_OTHER,
-				COLUMN_FAVORITE, client->favorite,
-				-1);
-		gs_application_save_server_list (app);
-		break;
-	}
-	
-	return FALSE;
 }
 
 
@@ -425,8 +364,6 @@ gui_slist_add (GsClient *client)
 			COLUMN_NAME, client->querier->name,
 			COLUMN_ICON_VISIBLE, game_column_mode == GUI_GAME_COLUMN_ICON,
 			COLUMN_GAME, gamename,
-			COLUMN_ACTIONS_VISIBLE, TRUE,
-			COLUMN_FAVORITE, client->favorite,
 			-1);
 	
 	g_free (gamename);
@@ -456,6 +393,15 @@ gui_slist_set_hscrollbar (gboolean hscrollbar)
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled),
 			hscrollbar ? GTK_POLICY_AUTOMATIC : GTK_POLICY_NEVER,
 			GTK_POLICY_AUTOMATIC);
+}
+
+
+void
+gui_slist_set_favorite (GsClient *client, gboolean favorite)
+{
+	gtk_list_store_set (liststore, &client->sliter,
+			COLUMN_TYPE, client->favorite ? ROW_FAVORITE : ROW_OTHER,
+			-1);
 }
 
 
@@ -568,9 +514,7 @@ gui_slist_create ()
 			// players, color, number
 			G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT,
 			// ping, ping color
-			G_TYPE_STRING, G_TYPE_STRING,
-			// actions visible, favorite, connect
-			G_TYPE_BOOLEAN, G_TYPE_BOOLEAN, G_TYPE_BOOLEAN);
+			G_TYPE_STRING, G_TYPE_STRING);
 	gtk_tree_sortable_set_sort_func (GTK_TREE_SORTABLE (liststore),
 			COLUMN_NAME, gui_slist_sort_string_func, NULL, NULL);
 	gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (liststore),
@@ -592,7 +536,6 @@ gui_slist_create ()
 			COLUMN_SPACE, FALSE,
 			COLUMN_NAME, _("Favorite servers"),
 			COLUMN_NAME_WEIGHT, PANGO_WEIGHT_BOLD,
-			COLUMN_ACTIONS_VISIBLE, FALSE,
 			-1);
 	gtk_list_store_append (liststore, &iter);
 	gtk_list_store_set (liststore, &iter,
@@ -604,7 +547,6 @@ gui_slist_create ()
 			COLUMN_SPACE, FALSE,
 			COLUMN_NAME, _("Other servers"),
 			COLUMN_NAME_WEIGHT, PANGO_WEIGHT_BOLD,
-			COLUMN_ACTIONS_VISIBLE, FALSE,
 			-1);
 	
 /* server list view */
@@ -615,8 +557,6 @@ gui_slist_create ()
 			NULL);
 	gtk_tree_view_set_row_separator_func (GTK_TREE_VIEW (listview),
 			(GtkTreeViewRowSeparatorFunc) gui_slist_separator_func, NULL, NULL);
-	g_signal_connect (listview, "button-release-event",
-			G_CALLBACK (gui_slist_clicked), NULL);
 	
 	GtkTreeViewColumn *column;
 	GtkCellRenderer *cell;
@@ -725,32 +665,7 @@ gui_slist_create ()
 			"text", COLUMN_PING,
 			"foreground", COLUMN_PING_COLOR,
 			NULL);
-	gtk_tree_view_insert_column (GTK_TREE_VIEW (listview), column, -1);
-	
-/* actions */
-	actioncolumn = gtk_tree_view_column_new ();
-	g_object_set (G_OBJECT (actioncolumn),
-			"clickable", TRUE,
-			"sort-column-id", COLUMN_PING,
-			NULL);
-	cell = gtk_cell_renderer_pixbuf_new ();
-	g_object_set (G_OBJECT (cell),
-			"stock-id", GTK_STOCK_REMOVE,
-			NULL);
-	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (actioncolumn), cell, FALSE);
-	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (actioncolumn), cell,
-			"visible", COLUMN_ACTIONS_VISIBLE,
-			NULL);
-	cell = gtk_cell_renderer_pixbuf_new ();
-	g_object_set (G_OBJECT (cell),
-			"icon-name", "emblem-favorite",
-			NULL);
-	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (actioncolumn), cell, FALSE);
-	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (actioncolumn), cell,
-			"visible", COLUMN_ACTIONS_VISIBLE,
-			"sensitive", COLUMN_FAVORITE,
-			NULL);
-	gtk_tree_view_insert_column (GTK_TREE_VIEW (listview), actioncolumn, -1);
+	gtk_tree_view_insert_column (GTK_TREE_VIEW (listview), column, -1);	
 	
 	
 	GtkTreeSelection *sel = gtk_tree_view_get_selection (GTK_TREE_VIEW (listview));

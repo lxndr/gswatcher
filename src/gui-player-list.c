@@ -214,6 +214,7 @@ gui_plist_add_clicked (GtkButton *button, gpointer udata)
 	gtk_widget_set_sensitive (add, FALSE);
 }
 
+
 GtkWidget *
 gui_plist_create_bar ()
 {
@@ -227,8 +228,5 @@ gui_plist_create_bar ()
 			NULL);
 	g_signal_connect (add, "clicked", G_CALLBACK (gui_plist_add_clicked), NULL);
 	
-	GtkWidget *bar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
-	gtk_box_pack_start (GTK_BOX (bar), add, FALSE, TRUE, 0);
-	gtk_widget_show_all (bar);
-	return bar;
+	return add;
 }
