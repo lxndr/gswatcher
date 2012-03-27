@@ -76,6 +76,9 @@ struct _GsClientClass {
 GType gs_client_get_type (void) G_GNUC_CONST;
 GsClient* gs_client_new (const gchar *address);
 
+void gs_client_set_favorite (GsClient *client, gboolean favorite);
+gboolean gs_client_get_favorite (GsClient *client);
+
 gchar *gs_client_get_game_name (GsClient* client, gboolean extra);
 
 void gs_client_send_command (GsClient* client, const gchar *cmd);

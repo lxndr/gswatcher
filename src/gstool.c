@@ -720,6 +720,25 @@ gs_application_remove_server (GsApplication *app, GsClient *client)
 }
 
 
+void
+gs_application_remove_server_ask (GsApplication *app, GsClient *client)
+{
+	g_return_if_fail (GS_IS_APPLICATION (app));
+	g_return_if_fail (GS_IS_CLIENT (client));
+	
+	GtkWidget *dialog = gtk_message_dialog_new (GTK_WINDOW (window),
+			GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO,
+			_("Are you sure you want to remove \"%s\" ( %s) from the list?"),
+			client->querier->name, gsq_querier_get_address (client->querier));
+	if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_YES) {
+		gui_slist_remove (client);
+		gs_application_remove_server (app, client);
+	}
+	
+	gtk_widget_destroy (dialog);
+}
+
+
 GsClient *
 gs_application_find_server (GsApplication *app, const gchar *address)
 {

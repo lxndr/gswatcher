@@ -25,10 +25,17 @@
 #include <GeoIP.h>
 #include <glib/gprintf.h>
 #include "gui-window.h"
+#include "gui-server-list.h"
+#include "gui-player-list.h"
 
 
+static GtkWidget *toolbar;
 static GtkWidget *address, *name, *game, *map, *numplayers, *password,
 		*version, *location;
+static GtkWidget *ctl_remove, *ctl_favorite, *ctl_connect;
+
+
+static void favorite_toggled (GtkToggleButton *button, gpointer udata);
 
 
 void
@@ -65,6 +72,17 @@ gui_info_update (GsClient *client)
 	
 	if (client)
 		g_free (gamename);
+	
+	/* update controls */
+	if (client) {
+		gtk_widget_set_sensitive (toolbar, TRUE);
+		g_signal_handlers_block_by_func (ctl_favorite, favorite_toggled, NULL);
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ctl_favorite),
+				gs_client_get_favorite (client));
+		g_signal_handlers_unblock_by_func (ctl_favorite, favorite_toggled, NULL);
+	} else {
+		gtk_widget_set_sensitive (toolbar, FALSE);
+	}
 }
 
 
@@ -189,4 +207,76 @@ gui_info_create ()
 	
 	gtk_widget_show_all (grid);
 	return grid;
+}
+
+
+static void
+remove_clicked (GtkButton *button, gpointer udata)
+{
+	GsClient *client = gui_slist_get_selected ();
+	gs_application_remove_server_ask (app, client);
+}
+
+static void
+favorite_toggled (GtkToggleButton *button, gpointer udata)
+{
+	GsClient *client = gui_slist_get_selected ();
+	gboolean favorite = gtk_toggle_button_get_active (button);
+	gs_client_set_favorite (client, favorite);
+	gui_slist_set_favorite (client, favorite);
+	gs_application_save_server_list (app);
+}
+
+static void
+connect_clicked (GtkButton *button, gpointer udata)
+{
+	GsClient *client = gui_slist_get_selected ();
+	gs_client_connect_to_game (client);
+}
+
+
+GtkWidget *
+gui_info_create_bar ()
+{
+	GtkWidget *image;
+	
+	image = gtk_image_new_from_stock (GTK_STOCK_REMOVE, GTK_ICON_SIZE_MENU);
+	ctl_remove = gtk_button_new ();
+	g_object_set (G_OBJECT (ctl_remove),
+			"tooltip-text", _("Remove selected server"),
+			"image", image,
+			NULL);
+	g_signal_connect (ctl_remove, "clicked", G_CALLBACK (remove_clicked), NULL);
+	
+	image = gtk_image_new_from_icon_name ("emblem-favorite", GTK_ICON_SIZE_MENU);
+	ctl_favorite = gtk_toggle_button_new ();
+	g_object_set (G_OBJECT (ctl_favorite),
+			"tooltip-text", _("Favor selected server"),
+			"image", image,
+			NULL);
+	g_signal_connect (ctl_favorite, "toggled", G_CALLBACK (favorite_toggled), NULL);
+	
+	image = gtk_image_new_from_stock (GTK_STOCK_MEDIA_PLAY, GTK_ICON_SIZE_MENU);
+	ctl_connect = gtk_button_new_with_label (_("Connect"));
+	g_object_set (G_OBJECT (ctl_connect),
+			"tooltip-text", _("Connect to selected server"),
+			"image", image,
+			NULL);
+	g_signal_connect (ctl_connect, "clicked", G_CALLBACK (connect_clicked), NULL);
+	
+	GtkWidget *sep = gtk_separator_new (GTK_ORIENTATION_VERTICAL);
+	
+	GtkWidget *add = gui_plist_create_bar ();
+	
+	toolbar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+	g_object_set (G_OBJECT (toolbar),
+			"sensitive", FALSE,
+			NULL);
+	gtk_box_pack_start (GTK_BOX (toolbar), ctl_remove, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbar), ctl_favorite, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbar), ctl_connect, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbar), sep, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbar), add, FALSE, TRUE, 0);
+	gtk_widget_show_all (toolbar);
+	return toolbar;
 }

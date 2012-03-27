@@ -39,6 +39,8 @@ typedef enum _GuiGameColumnMode {
 GtkWidget * gui_slist_create ();
 GsClient *gui_slist_get_selected ();
 void gui_slist_add (GsClient *client);
+void gui_slist_remove (GsClient *client);
+void gui_slist_set_favorite (GsClient *client, gboolean favorite);
 void gui_slist_set_hscrollbar (gboolean hscrollbar);
 void gui_slist_update_all ();
 
