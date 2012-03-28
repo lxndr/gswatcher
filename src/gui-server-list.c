@@ -190,12 +190,13 @@ gui_slist_selection_changed (GtkTreeSelection *selection, gpointer udata)
 	
 	const gchar *addr = selected ? gsq_querier_get_address (selected->querier) : "";
 	gtk_entry_set_text (GTK_ENTRY (entry), addr);
+	gui_info_setup (selected);
 	gui_info_update (selected);
 	gui_plist_setup (selected);
 	gui_plist_update (selected);
-	gs_console_set (selected);
-	gui_log_set (selected);
-	gui_chat_set (selected);
+	gui_console_setup (selected);
+	gui_log_setup (selected);
+	gui_chat_setup (selected);
 }
 
 

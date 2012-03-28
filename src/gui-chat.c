@@ -29,8 +29,7 @@
 #include "gui-chat.h"
 
 
-static GtkWidget *logview;
-static GtkWidget *entry;
+static GtkWidget *page, *logview, *entry;
 
 static GtkTextTagTable *tag_table;
 static GtkTextTag *tags[4] = {NULL};
@@ -90,9 +89,11 @@ gui_chat_entry_icon_clicked (GtkEntry *entry, GtkEntryIconPosition icon,
 
 
 void
-gui_chat_set (GsClient *client)
+gui_chat_setup (GsClient *client)
 {
 	if (client) {
+		gtk_widget_set_sensitive (page, TRUE);
+		
 		GtkTextIter iter;
 		gtk_text_view_set_buffer (GTK_TEXT_VIEW (logview), client->chat_buffer);
 		gtk_text_buffer_get_end_iter (client->chat_buffer, &iter);
@@ -101,6 +102,8 @@ gui_chat_set (GsClient *client)
 		gtk_text_view_scroll_mark_onscreen (GTK_TEXT_VIEW (logview), mark);
 		gtk_text_buffer_delete_mark (client->chat_buffer, mark);
 	} else {
+		gtk_widget_set_sensitive (page, FALSE);
+		
 		gtk_text_view_set_buffer (GTK_TEXT_VIEW (logview), NULL);
 	}
 }
@@ -157,13 +160,14 @@ gui_chat_create ()
 	g_signal_connect (entry, "activate", G_CALLBACK (gui_chat_entry_activated), NULL);
 	g_signal_connect (entry, "icon-release", G_CALLBACK (gui_chat_entry_icon_clicked), NULL);
 	
-	GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
-	g_object_set (G_OBJECT (box),
+	page = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
+	g_object_set (G_OBJECT (page),
 			"border-width", 2,
+			"sensitive", FALSE,
 			NULL);
-	gtk_box_pack_start (GTK_BOX (box), scrolled, TRUE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (box), entry, FALSE, TRUE, 0);
-	gtk_widget_show_all (box);
+	gtk_box_pack_start (GTK_BOX (page), scrolled, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (page), entry, FALSE, TRUE, 0);
+	gtk_widget_show_all (page);
 	
-	return box;
+	return page;
 }
