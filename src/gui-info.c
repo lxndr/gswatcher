@@ -29,59 +29,59 @@
 #include "gui-player-list.h"
 
 
-static GtkWidget *toolbar;
-static GtkWidget *address, *name, *game, *map, *numplayers, *password,
-		*version, *location;
-static GtkWidget *ctl_remove, *ctl_favorite, *ctl_connect;
+static GtkWidget *grid, *ctl_address, *ctl_name, *ctl_game, *ctl_map,
+		*ctl_players, *ctl_password, *ctl_version, *ctl_location;
+static GtkWidget *toolbar, *ctl_remove, *ctl_favorite, *ctl_connect;
 
 
 static void favorite_toggled (GtkToggleButton *button, gpointer udata);
 
 
 void
-gui_info_update (GsClient *client)
+gui_info_setup (GsClient *client)
 {
-	gchar tmp[16];
-	gchar *gamename = NULL;
-	
-	if (client)
-		g_snprintf (tmp, 16, "%d / %d",
-				client->querier->numplayers, client->querier->maxplayers);
-	else
-		g_strlcpy (tmp, _("N/A"), 16);
-	
-	if (client)
-		gamename = gs_client_get_game_name (client, TRUE);
-	
-	gtk_label_set_text (GTK_LABEL (address),
-			client ? gsq_querier_get_address (client->querier) : _("N/A"));
-	gtk_label_set_text (GTK_LABEL (name),
-			client ? client->querier->name : _("N/A"));
-	gtk_label_set_text (GTK_LABEL (game),
-			client ? gamename : _("N/A"));
-	gtk_label_set_text (GTK_LABEL (map),
-			client ? client->querier->map : _("N/A"));
-	gtk_label_set_text (GTK_LABEL (numplayers),
-			tmp);
-	gtk_label_set_text (GTK_LABEL (password),
-			client ? (client->password ? _("Yes") : _("No")) : _("N/A"));
-	gtk_label_set_text (GTK_LABEL (version),
-			client ? client->version : _("N/A"));
-	gtk_label_set_text (GTK_LABEL (location),
-			client ? client->country : _("N/A"));
-	
-	if (client)
-		g_free (gamename);
-	
-	/* update controls */
 	if (client) {
 		gtk_widget_set_sensitive (toolbar, TRUE);
+		gtk_widget_set_sensitive (grid, TRUE);
+		
 		g_signal_handlers_block_by_func (ctl_favorite, favorite_toggled, NULL);
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ctl_favorite),
 				gs_client_get_favorite (client));
 		g_signal_handlers_unblock_by_func (ctl_favorite, favorite_toggled, NULL);
 	} else {
 		gtk_widget_set_sensitive (toolbar, FALSE);
+		gtk_widget_set_sensitive (grid, FALSE);
+	}
+}
+
+void
+gui_info_update (GsClient *client)
+{
+	if (client) {
+		gchar *players = g_strdup_printf ("%d / %d",
+				client->querier->numplayers, client->querier->maxplayers);
+		gchar *gamename = gs_client_get_game_name (client, TRUE);
+		
+		gtk_label_set_text (GTK_LABEL (ctl_address), gsq_querier_get_address (client->querier));
+		gtk_label_set_text (GTK_LABEL (ctl_name), client->querier->name);
+		gtk_label_set_text (GTK_LABEL (ctl_game), gamename);
+		gtk_label_set_text (GTK_LABEL (ctl_map), client->querier->map);
+		gtk_label_set_text (GTK_LABEL (ctl_players), players);
+		gtk_label_set_text (GTK_LABEL (ctl_password), client->password ? _("Yes") : _("No"));
+		gtk_label_set_text (GTK_LABEL (ctl_version), client->version);
+		gtk_label_set_text (GTK_LABEL (ctl_location), client->country);
+		
+		g_free (players);
+		g_free (gamename);
+	} else {
+		gtk_label_set_text (GTK_LABEL (ctl_address), "");
+		gtk_label_set_text (GTK_LABEL (ctl_name), "");
+		gtk_label_set_text (GTK_LABEL (ctl_game), "");
+		gtk_label_set_text (GTK_LABEL (ctl_map), "");
+		gtk_label_set_text (GTK_LABEL (ctl_players), "");
+		gtk_label_set_text (GTK_LABEL (ctl_password), "");
+		gtk_label_set_text (GTK_LABEL (ctl_version), "");
+		gtk_label_set_text (GTK_LABEL (ctl_location), "");
 	}
 }
 
@@ -91,11 +91,12 @@ gui_info_create ()
 {
 	GtkWidget *label;
 	
-	GtkWidget *grid = gtk_grid_new ();
+	grid = gtk_grid_new ();
 	g_object_set (G_OBJECT (grid),
 			"column-spacing", 8,
 			"row-spacing", 4,
 			"border-width", 4,
+			"sensitive", FALSE,
 			NULL);
 	
 	label = gtk_label_new (_("Name:"));
@@ -105,14 +106,14 @@ gui_info_create ()
 			NULL);
 	gtk_grid_attach (GTK_GRID (grid), label, 0, 0, 1, 1);
 	
-	name = gtk_label_new (NULL);
-	g_object_set (G_OBJECT (name),
+	ctl_name = gtk_label_new (NULL);
+	g_object_set (G_OBJECT (ctl_name),
 			"xalign", 0.0f,
 			"yalign", 0.0f,
 			"hexpand", TRUE,
 			"wrap", TRUE,
 			NULL);
-	gtk_grid_attach (GTK_GRID (grid), name, 1, 0, 1, 1);
+	gtk_grid_attach (GTK_GRID (grid), ctl_name, 1, 0, 1, 1);
 	
 	label = gtk_label_new (_("Address:"));
 	g_object_set (G_OBJECT (label),
@@ -120,12 +121,12 @@ gui_info_create ()
 			NULL);
 	gtk_grid_attach (GTK_GRID (grid), label, 0, 1, 1, 1);
 	
-	address = gtk_label_new (NULL);
-	g_object_set (G_OBJECT (address),
+	ctl_address = gtk_label_new (NULL);
+	g_object_set (G_OBJECT (ctl_address),
 			"xalign", 0.0f,
 			"hexpand", TRUE,
 			NULL);
-	gtk_grid_attach (GTK_GRID (grid), address, 1, 1, 1, 1);
+	gtk_grid_attach (GTK_GRID (grid), ctl_address, 1, 1, 1, 1);
 	
 	label = gtk_label_new (_("Game:"));
 	g_object_set (G_OBJECT (label),
@@ -133,12 +134,12 @@ gui_info_create ()
 			NULL);
 	gtk_grid_attach (GTK_GRID (grid), label, 0, 2, 1, 1);
 	
-	game = gtk_label_new (NULL);
-	g_object_set (G_OBJECT (game),
+	ctl_game = gtk_label_new (NULL);
+	g_object_set (G_OBJECT (ctl_game),
 			"xalign", 0.0f,
 			"hexpand", TRUE,
 			NULL);
-	gtk_grid_attach (GTK_GRID (grid), game, 1, 2, 1, 1);
+	gtk_grid_attach (GTK_GRID (grid), ctl_game, 1, 2, 1, 1);
 	
 	label = gtk_label_new (_("Map:"));
 	g_object_set (G_OBJECT (label),
@@ -146,12 +147,12 @@ gui_info_create ()
 			NULL);
 	gtk_grid_attach (GTK_GRID (grid), label, 0, 3, 1, 1);
 	
-	map = gtk_label_new (NULL);
-	g_object_set (G_OBJECT (map),
+	ctl_map = gtk_label_new (NULL);
+	g_object_set (G_OBJECT (ctl_map),
 			"xalign", 0.0f,
 			"hexpand", TRUE,
 			NULL);
-	gtk_grid_attach (GTK_GRID (grid), map, 1, 3, 1, 1);
+	gtk_grid_attach (GTK_GRID (grid), ctl_map, 1, 3, 1, 1);
 	
 	label = gtk_label_new (_("Players:"));
 	g_object_set (G_OBJECT (label),
@@ -159,12 +160,12 @@ gui_info_create ()
 			NULL);
 	gtk_grid_attach (GTK_GRID (grid), label, 0, 4, 1, 1);
 	
-	numplayers = gtk_label_new (NULL);
-	g_object_set (G_OBJECT (numplayers),
+	ctl_players = gtk_label_new (NULL);
+	g_object_set (G_OBJECT (ctl_players),
 			"xalign", 0.0f,
 			"hexpand", TRUE,
 			NULL);
-	gtk_grid_attach (GTK_GRID (grid), numplayers, 1, 4, 1, 1);
+	gtk_grid_attach (GTK_GRID (grid), ctl_players, 1, 4, 1, 1);
 	
 	label = gtk_label_new (_("Password:"));
 	g_object_set (G_OBJECT (label),
@@ -172,12 +173,12 @@ gui_info_create ()
 			NULL);
 	gtk_grid_attach (GTK_GRID (grid), label, 0, 5, 1, 1);
 	
-	password = gtk_label_new (NULL);
-	g_object_set (G_OBJECT (password),
+	ctl_password = gtk_label_new (NULL);
+	g_object_set (G_OBJECT (ctl_password),
 			"xalign", 0.0f,
 			"hexpand", TRUE,
 			NULL);
-	gtk_grid_attach (GTK_GRID (grid), password, 1, 5, 1, 1);
+	gtk_grid_attach (GTK_GRID (grid), ctl_password, 1, 5, 1, 1);
 	
 	label = gtk_label_new (_("Version:"));
 	g_object_set (G_OBJECT (label),
@@ -185,12 +186,12 @@ gui_info_create ()
 			NULL);
 	gtk_grid_attach (GTK_GRID (grid), label, 0, 6, 1, 1);
 	
-	version = gtk_label_new (NULL);
-	g_object_set (G_OBJECT (version),
+	ctl_version = gtk_label_new (NULL);
+	g_object_set (G_OBJECT (ctl_version),
 			"xalign", 0.0f,
 			"hexpand", TRUE,
 			NULL);
-	gtk_grid_attach (GTK_GRID (grid), version, 1, 6, 1, 1);
+	gtk_grid_attach (GTK_GRID (grid), ctl_version, 1, 6, 1, 1);
 	
 	label = gtk_label_new (_("Location:"));
 	g_object_set (G_OBJECT (label),
@@ -198,12 +199,12 @@ gui_info_create ()
 			NULL);
 	gtk_grid_attach (GTK_GRID (grid), label, 0, 7, 1, 1);
 	
-	location = gtk_label_new (NULL);
-	g_object_set (G_OBJECT (location),
+	ctl_location = gtk_label_new (NULL);
+	g_object_set (G_OBJECT (ctl_location),
 			"xalign", 0.0f,
 			"hexpand", TRUE,
 			NULL);
-	gtk_grid_attach (GTK_GRID (grid), location, 1, 7, 1, 1);
+	gtk_grid_attach (GTK_GRID (grid), ctl_location, 1, 7, 1, 1);
 	
 	gtk_widget_show_all (grid);
 	return grid;
