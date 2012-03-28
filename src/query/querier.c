@@ -110,10 +110,11 @@ G_DEFINE_TYPE (GsqQuerier, gsq_querier, G_TYPE_OBJECT);
 static void
 gsq_querier_free_player (GsqQuerier *querier, GsqPlayer *player)
 {
-	gint i;
+	gint i, count = querier->priv->fields->len;
 	g_free (player->name);
-	for (i = 0; i < querier->priv->fields->len; i++)
+	for (i = 0; i < count; i++)
 		g_value_unset (&player->values[i]);
+	g_slice_free1 (count * sizeof (GValue), player->values);
 	g_slice_free (GsqPlayer, player);
 }
 
