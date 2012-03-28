@@ -31,6 +31,7 @@
 
 GtkWidget *gui_info_create ();
 GtkWidget *gui_info_create_bar ();
+void gui_info_setup (GsClient *client);
 void gui_info_update (GsClient *client);
 
 

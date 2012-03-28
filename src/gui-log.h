@@ -30,7 +30,7 @@
 GtkWidget *gui_log_create ();
 GtkWidget *gui_log_create_bar ();
 void gui_log_init (GsClient *client);
-void gui_log_set (GsClient *client);
+void gui_log_setup (GsClient *client);
 void gui_log_print (GsClient *client, const gchar *msg);
 
 #endif

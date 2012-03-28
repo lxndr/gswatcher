@@ -27,8 +27,8 @@
 #include "gui-log.h"
 
 
-static GtkWidget *logview;
-static GtkWidget *enable_log, *disable_log, *auto_button;
+static GtkWidget *page, *logview;
+static GtkWidget *toolbar, *enable_log, *disable_log, *auto_button;
 
 
 void
@@ -39,9 +39,12 @@ gui_log_init (GsClient *client)
 
 
 void
-gui_log_set (GsClient *client)
+gui_log_setup (GsClient *client)
 {
 	if (client) {
+		gtk_widget_set_sensitive (page, TRUE);
+		gtk_widget_set_sensitive (toolbar, TRUE);
+		
 		GtkTextIter iter;
 		gtk_text_view_set_buffer (GTK_TEXT_VIEW (logview), client->log_buffer);
 		gtk_text_buffer_get_end_iter (client->log_buffer, &iter);
@@ -52,6 +55,9 @@ gui_log_set (GsClient *client)
 		
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (auto_button), client->log_auto);
 	} else {
+		gtk_widget_set_sensitive (page, FALSE);
+		gtk_widget_set_sensitive (toolbar, FALSE);
+		
 		gtk_text_view_set_buffer (GTK_TEXT_VIEW (logview), NULL);
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (auto_button), FALSE);
 	}
@@ -128,13 +134,16 @@ gui_log_create_bar ()
 	auto_button = gtk_check_button_new_with_label (_("Keep on"));
 	g_signal_connect (auto_button, "clicked", G_CALLBACK (gui_log_auto_toggled), NULL);
 	
-	GtkWidget *bar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
-	gtk_box_pack_start (GTK_BOX (bar), enable_log, FALSE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (bar), disable_log, FALSE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (bar), auto_button, FALSE, TRUE, 0);
-	gtk_widget_show_all (bar);
+	toolbar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+	g_object_set (G_OBJECT (toolbar),
+			"sensitive", FALSE,
+			NULL);
+	gtk_box_pack_start (GTK_BOX (toolbar), enable_log, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbar), disable_log, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbar), auto_button, FALSE, TRUE, 0);
+	gtk_widget_show_all (toolbar);
 	
-	return bar;
+	return toolbar;
 }
 
 
@@ -147,15 +156,16 @@ gui_log_create ()
 			"wrap-mode", GTK_WRAP_WORD_CHAR,
 			NULL);
 	
-	GtkWidget *scrolled = gtk_scrolled_window_new (NULL, NULL);
-	g_object_set (G_OBJECT (scrolled),
+	page = gtk_scrolled_window_new (NULL, NULL);
+	g_object_set (G_OBJECT (page),
 			"border-width", 2,
 			"shadow-type", GTK_SHADOW_IN,
 			"hscrollbar-policy", GTK_POLICY_NEVER,
 			"vscrollbar-policy", GTK_POLICY_ALWAYS,
+			"sensitive", FALSE,
 			NULL);
-	gtk_container_add (GTK_CONTAINER (scrolled), logview);
-	gtk_widget_show_all (scrolled);
+	gtk_container_add (GTK_CONTAINER (page), logview);
+	gtk_widget_show_all (page);
 	
-	return scrolled;
+	return page;
 }
