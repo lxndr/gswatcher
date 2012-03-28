@@ -41,7 +41,7 @@ GtkWidget *gs_console_create ();
 GtkWidget *gs_console_create_bar ();
 void gs_console_init (GsClient *client);
 void gs_console_free (GsClient *client);
-void gs_console_set (GsClient *client);
+void gui_console_setup (GsClient *client);
 void gs_console_send (GsClient *client, const gchar *cmd);
 void gs_console_log (GsClient *client, GsLogType type, const gchar *msg);
 

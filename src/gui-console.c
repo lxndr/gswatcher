@@ -29,12 +29,11 @@
 #include "gui-console.h"
 
 
-static GtkWidget *logview;
-static GtkWidget *entry;
+static GtkWidget *page, *logview, *entry;
 static GtkEntryCompletion *history;
 static GtkTreeIter history_iter;
 static gboolean history_end;
-static GtkWidget *password;
+static GtkWidget *toolbar, *password;
 
 static GtkTextTagTable *tag_table;
 static GtkTextTag *tags[4] = {NULL};
@@ -256,7 +255,7 @@ gs_console_password_changed (GtkEntry *entry, gpointer udata)
 
 
 static void
-gs_console_set_password (const gchar *pass)
+gui_console_set_password (const gchar *pass)
 {
 	g_signal_handlers_block_by_func (password, gs_console_password_changed, NULL);
 	gtk_entry_set_text (GTK_ENTRY (password), pass ? pass : "");
@@ -265,9 +264,12 @@ gs_console_set_password (const gchar *pass)
 
 
 void
-gs_console_set (GsClient *client)
+gui_console_setup (GsClient *client)
 {
 	if (client) {
+		gtk_widget_set_sensitive (page, TRUE);
+		gtk_widget_set_sensitive (toolbar, TRUE);
+		
 		GtkTextIter iter;
 		gtk_text_view_set_buffer (GTK_TEXT_VIEW (logview), client->console_buffer);
 		gtk_text_buffer_get_end_iter (client->console_buffer, &iter);
@@ -278,17 +280,15 @@ gs_console_set (GsClient *client)
 		
 		history_end = TRUE;
 		
-		gtk_entry_completion_set_model (history, GTK_TREE_MODEL (client->console_history));
-//		gint n = gtk_tree_model_iter_n_children (GTK_TREE_MODEL (client->console_history), NULL);
-//		if (n != 0)
-//			gtk_tree_model_iter_nth_child (GTK_TREE_MODEL (client->console_history),
-//					&history_iter, NULL, n - 1);
-		
-		gs_console_set_password (gsq_console_get_password (client->console));
+		gtk_entry_completion_set_model (history, GTK_TREE_MODEL (client->console_history));		
+		gui_console_set_password (gsq_console_get_password (client->console));
 	} else {
+		gtk_widget_set_sensitive (page, FALSE);
+		gtk_widget_set_sensitive (toolbar, FALSE);
+		
 		gtk_text_view_set_buffer (GTK_TEXT_VIEW (logview), NULL);
 		gtk_entry_completion_set_model (history, NULL);
-		gs_console_set_password (NULL);
+		gui_console_set_password (NULL);
 	}
 }
 
@@ -317,11 +317,14 @@ gs_console_create_bar ()
 	g_signal_connect (password, "changed", G_CALLBACK (gs_console_password_changed),
 			NULL);
 	
-	GtkWidget *bar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
-	gtk_box_pack_start (GTK_BOX (bar), password_label, FALSE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (bar), password, TRUE, TRUE, 0);
-	gtk_widget_show_all (bar);
-	return bar;
+	toolbar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+	g_object_set (G_OBJECT (toolbar),
+			"sensitive", FALSE,
+			NULL);
+	gtk_box_pack_start (GTK_BOX (toolbar), password_label, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbar), password, TRUE, TRUE, 0);
+	gtk_widget_show_all (toolbar);
+	return toolbar;
 }
 
 
@@ -370,13 +373,14 @@ gs_console_create ()
 	g_signal_connect (entry, "icon-release", G_CALLBACK (gs_console_entry_icon_clicked), NULL);
 	g_signal_connect (entry, "key-press-event", G_CALLBACK (gui_console_key_pressed), NULL);
 	
-	GtkWidget *console = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
-	g_object_set (G_OBJECT (console),
+	page = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
+	g_object_set (G_OBJECT (page),
 			"border-width", 2,
+			"sensitive", FALSE,
 			NULL);
-	gtk_box_pack_start (GTK_BOX (console), scrolled, TRUE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (console), entry, FALSE, TRUE, 0);
-	gtk_widget_show_all (console);
+	gtk_box_pack_start (GTK_BOX (page), scrolled, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (page), entry, FALSE, TRUE, 0);
+	gtk_widget_show_all (page);
 	
-	return console;
+	return page;
 }
