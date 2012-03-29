@@ -553,6 +553,7 @@ gui_window_create ()
 			"icon-name",		"gstool",
 			"default-width",	win_width,
 			"default-height",	win_height,
+			"hide-titlebar-when-maximized", TRUE,
 			NULL);
 	gtk_container_add (GTK_CONTAINER (window), box);
 	g_signal_connect (window, "delete-event", G_CALLBACK (gs_window_delete_event), NULL);
