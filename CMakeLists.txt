@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.8)
 project (gstool C)
 
-set (GS_VERSION "0.7")
+set (GS_VERSION "0.8")
 set (GS_LANGUAGES ru)
 
 find_package (PkgConfig)
