@@ -103,11 +103,24 @@ gs_window_tools_switched (GtkNotebook *notebook, GtkWidget *page, guint pagenum,
 
 
 static void
+check_slist_visibility ()
+{
+	gint tab_page = gtk_notebook_get_current_page (GTK_NOTEBOOK (notebook));
+	GdkWindow *gdk_window = gtk_widget_get_window (window);
+	gboolean iconified = gdk_window != NULL &&
+			(gdk_window_get_state (gdk_window) & GDK_WINDOW_STATE_ICONIFIED);
+	gboolean visible = gtk_widget_get_visible (window);
+	gui_slist_set_visible (tab_page == 0 && !iconified && visible);
+}
+
+
+static void
 tab_button_toggled (GtkToggleButton *button, gpointer udata)
 {
 	if (gtk_toggle_button_get_active (button))
 		gtk_notebook_set_current_page (GTK_NOTEBOOK (notebook),
 				GPOINTER_TO_INT (udata));
+	check_slist_visibility ();
 }
 
 
@@ -209,6 +222,16 @@ gs_window_configure_event (GtkWidget *gtk_window, GdkEvent *event, gpointer udat
 	return FALSE;
 }
 
+static gboolean
+gs_window_state_event (GtkWidget *widget, GdkEvent *event, gpointer udata)
+{
+	GdkEventWindowState *e = (GdkEventWindowState *) event;
+	GdkWindowState mask = GDK_WINDOW_STATE_WITHDRAWN | GDK_WINDOW_STATE_ICONIFIED;
+	if ((e->changed_mask & mask) != (e->new_window_state & mask))
+		check_slist_visibility ();
+	return FALSE;
+}
+
 
 void
 gui_window_show ()
@@ -216,7 +239,6 @@ gui_window_show ()
 	g_signal_handlers_block_by_func (trayshow, gs_window_show_toggled, NULL);
 	gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (trayshow), TRUE);
 	g_signal_handlers_unblock_by_func (trayshow, gs_window_show_toggled, NULL);
-	gui_slist_update_all ();
 	
 	if (!gtk_widget_get_visible( GTK_WIDGET (window))) {
 		gtk_window_resize (GTK_WINDOW (window), win_width, win_height);
@@ -557,6 +579,7 @@ gui_window_create ()
 	gtk_container_add (GTK_CONTAINER (window), box);
 	g_signal_connect (window, "delete-event", G_CALLBACK (gs_window_delete_event), NULL);
 	g_signal_connect (window, "configure-event", G_CALLBACK (gs_window_configure_event), NULL);
+	g_signal_connect (window, "window-state-event", G_CALLBACK (gs_window_state_event), NULL);
 	
 	return window;
 }
