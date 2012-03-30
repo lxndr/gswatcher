@@ -31,16 +31,16 @@
 #include "platform.h"
 
 
-static GtkAdjustment *ctl_urate, *ctl_port;
+static GtkAdjustment *ctl_interval, *ctl_port;
 static GtkWidget *ctl_game_column, *ctl_nenable, *ctl_nsound, *ctl_sysfont,
 		*ctl_fontlabel, *ctl_font, *ctl_logaddress, *ctl_connect;
 
 
 static void
-gui_prefs_updaterate_changed (GtkAdjustment *adjustment, gpointer udata)
+gui_prefs_interval_changed (GtkAdjustment *adjustment, gpointer udata)
 {
 	gdouble value = gtk_adjustment_get_value (adjustment);
-	gs_application_set_update_rate (app, value);
+	gs_application_set_interval (app, value);
 	gs_application_save_preferences (app);
 }
 
@@ -148,17 +148,17 @@ gs_prefs_create ()
 	gtk_box_pack_start (GTK_BOX (box), tmp, TRUE, TRUE, 0);
 	gtk_grid_attach (GTK_GRID (grid), box, 0, 0, 2, 1);
 	
-	// Update rate
+	// Update interval
 	GtkWidget *spin = gtk_spin_button_new_with_range (0.5, 15.0, 0.5);
 	g_object_set (G_OBJECT (spin),
 			"hexpand", TRUE,
 			NULL);
-	ctl_urate = gtk_spin_button_get_adjustment (GTK_SPIN_BUTTON (spin));
-	g_signal_connect (ctl_urate, "value-changed",
-			G_CALLBACK (gui_prefs_updaterate_changed), NULL);
+	ctl_interval = gtk_spin_button_get_adjustment (GTK_SPIN_BUTTON (spin));
+	g_signal_connect (ctl_interval, "value-changed",
+			G_CALLBACK (gui_prefs_interval_changed), NULL);
 	gtk_grid_attach (GTK_GRID (grid), spin, 1, 1, 1, 1);
 	
-	label = gtk_label_new (_("Update _rate:"));
+	label = gtk_label_new (_("Update _interval:"));
 	g_object_set (G_OBJECT (label),
 			"use-underline", TRUE,
 			"mnemonic-widget", spin,
@@ -334,11 +334,11 @@ gs_prefs_create ()
 
 
 void
-gui_prefs_set_update_rate (gdouble rate)
+gui_prefs_set_interval (gdouble interval)
 {
-	g_signal_handlers_block_by_func (ctl_urate, gui_prefs_updaterate_changed, NULL);
-	gtk_adjustment_set_value (ctl_urate, rate);
-	g_signal_handlers_unblock_by_func (ctl_urate, gui_prefs_updaterate_changed, NULL);
+	g_signal_handlers_block_by_func (ctl_interval, gui_prefs_interval_changed, NULL);
+	gtk_adjustment_set_value (ctl_interval, interval);
+	g_signal_handlers_unblock_by_func (ctl_interval, gui_prefs_interval_changed, NULL);
 }
 
 void
