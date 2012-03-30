@@ -68,6 +68,7 @@ static GtkTreeViewColumn *gamecolumn;
 static GtkListStore *liststore;
 static GuiGameColumnMode game_column_mode;
 static GsClient *selected = NULL;
+static gboolean visible = FALSE;
 
 
 static gint
@@ -302,7 +303,7 @@ server_resolved (GsqQuerier *querier, GsClient *client)
 static void
 server_info_updated (GsqQuerier *querier, GsClient *client)
 {
-	if (!gtk_widget_get_visible (window))
+	if (!visible)
 		return;
 	
 	gchar *gamename = gs_client_get_game_name (client,
@@ -427,6 +428,15 @@ GuiGameColumnMode
 gui_slist_get_game_column_mode ()
 {
 	return game_column_mode;
+}
+
+
+void
+gui_slist_set_visible (gboolean seen)
+{
+	if (seen && !visible)
+		gui_slist_update_all ();
+	visible = seen;
 }
 
 
