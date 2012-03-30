@@ -80,7 +80,7 @@ gsq_gamespy_free (GsqQuerier *querier)
 {
 	gint i;
 	Private *priv = gsq_querier_get_pdata (querier);
-	g_hash_table_remove_all (priv->values);
+	g_hash_table_destroy (priv->values);
 	for (i = 0; i < priv->packets->len; i++) {
 		Packet *pkt = &g_array_index (priv->packets, Packet, i);
 		g_slice_free1 (pkt->length, pkt->data);
