@@ -38,7 +38,7 @@
 
 enum {
 	PROP_0,
-	PROP_UPDATE_RATE,
+	PROP_INTERVAL,
 	PROP_PAUSE
 };
 
@@ -83,8 +83,8 @@ gs_application_class_init (GsApplicationClass *class)
 	app_class->activate = gs_application_activate;
 	app_class->local_command_line = gs_application_local_command_line;
 	
-	g_object_class_install_property (object_class, PROP_UPDATE_RATE,
-			g_param_spec_double ("update-rate", "Update rate", "Update rate",
+	g_object_class_install_property (object_class, PROP_INTERVAL,
+			g_param_spec_double ("interval", "Interval", "Update interval",
 			0.5, 30.0, 2.5, G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT));
 	
 	g_object_class_install_property (object_class, PROP_PAUSE,
@@ -146,8 +146,8 @@ gs_application_set_property (GObject *object, guint prop_id, const GValue *value
 	GsApplication *app = GS_APPLICATION (object);
 	
 	switch (prop_id) {
-	case PROP_UPDATE_RATE:
-		app->update_rate = g_value_get_double (value);
+	case PROP_INTERVAL:
+		app->interval = g_value_get_double (value);
 		break;
 	case PROP_PAUSE:
 		app->pause = g_value_get_boolean (value);
@@ -165,8 +165,8 @@ gs_application_get_property (GObject *object, guint prop_id, GValue *value,
 	GsApplication *app = GS_APPLICATION (object);
 	
 	switch (prop_id) {
-	case PROP_UPDATE_RATE:
-		g_value_set_double (value, app->update_rate);
+	case PROP_INTERVAL:
+		g_value_set_double (value, app->interval);
 		break;
 	case PROP_PAUSE:
 		g_value_set_boolean (value, app->pause);
@@ -555,28 +555,28 @@ update_timer (GsApplication *app)
 	
 	guint count = g_list_length (app->server_list);
 	if (count > 0) {
-		glong update_rate = (glong) (app->update_rate * 1000);
-		app->timer = g_timeout_add (update_rate / count,
+		glong interval = (glong) (app->interval * 1000);
+		app->timer = g_timeout_add (interval / count,
 				(GSourceFunc) updater_func, app);
 	}
 }
 
 
 void
-gs_application_set_update_rate (GsApplication *app, gdouble rate)
+gs_application_set_interval (GsApplication *app, gdouble interval)
 {
 	g_return_if_fail (GS_IS_APPLICATION (app));
 	
-	rate = CLAMP (rate, 0.5, 30.0);
-	app->update_rate = rate;
+	interval = CLAMP (interval, 0.5, 30.0);
+	app->interval = interval;
 	update_timer (app);
 }
 
 gdouble
-gs_application_get_update_rate (GsApplication *app)
+gs_application_get_interval (GsApplication *app)
 {
-	g_return_val_if_fail (GS_IS_APPLICATION (app), 0.0);
-	return app->update_rate;
+	g_return_val_if_fail (GS_IS_APPLICATION (app), 0);
+	return app->interval;
 }
 
 
@@ -801,9 +801,9 @@ load_preferences (GsApplication *app)
 	GError *error = NULL;
 	
 	if ((node = g_json_read_from_file (app->preferences_path, &error))) {
-		if (g_json_object_has (node, "update-rate"))
-			gs_application_set_update_rate (app,
-					g_json_object_get_float (node, "update-rate"));
+		if (g_json_object_has (node, "interval"))
+			gs_application_set_interval (app,
+					g_json_object_get_float (node, "interval"));
 		
 		if (g_json_object_has (node, "game-column"))
 			gui_slist_set_game_column_mode (
@@ -847,7 +847,7 @@ load_preferences (GsApplication *app)
 		g_error_free (error);
 	}
 	
-	gui_prefs_set_update_rate (gs_application_get_update_rate (app));
+	gui_prefs_set_interval (gs_application_get_interval (app));
 	gui_prefs_set_game_column_mode (gui_slist_get_game_column_mode ());
 	gui_prefs_set_port (gsq_querier_get_default_port ());
 	gui_prefs_set_connect_command (gs_client_get_connect_command ());
@@ -864,8 +864,8 @@ gs_application_save_preferences (GsApplication *app)
 {
 	GJsonNode *node = g_json_object_new ();
 	
-	g_json_object_set_float (node, "update-rate",
-			gs_application_get_update_rate (app));
+	g_json_object_set_float (node, "interval",
+			gs_application_get_interval (app));
 	g_json_object_set_integer (node, "game-column",
 			gui_slist_get_game_column_mode ());
 	g_json_object_set_integer (node, "port",
