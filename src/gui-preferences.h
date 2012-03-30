@@ -31,7 +31,7 @@
 
 GtkWidget *gs_prefs_create ();
 
-void gui_prefs_set_update_rate (gdouble rate);
+void gui_prefs_set_interval (gdouble interval);
 void gui_prefs_set_game_column_mode (GuiGameColumnMode mode);
 void gui_prefs_set_port (guint16 port);
 void gui_prefs_set_connect_command (const gchar *command);
