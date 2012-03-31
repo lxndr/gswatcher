@@ -815,8 +815,13 @@ gsq_socket_recveived (GSocket *socket, GIOCondition condition, gpointer udata)
 	GSocketAddress *saddr = NULL;
 	
 	length = g_socket_receive_from (socket, &saddr, data, 4095, NULL, NULL);
-	if (length == -1)
-		return TRUE;
+	/* certain servers may send very short spammy messages.
+			such messages can never have useful information */
+	if (length < 5) {
+		if (saddr)
+			g_object_unref (saddr);
+		return G_SOURCE_CONTINUE;
+	}
 	data[length] = 0;
 	
 	GInetAddress *iaddr = g_inet_socket_address_get_address ((GInetSocketAddress *) saddr);
@@ -863,7 +868,7 @@ gsq_socket_recveived (GSocket *socket, GIOCondition condition, gpointer udata)
 	
 	g_object_unref (saddr);
 	
-	return TRUE;
+	return G_SOURCE_CONTINUE;
 }
 
 
