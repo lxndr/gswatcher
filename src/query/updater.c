@@ -27,7 +27,7 @@
 
 enum {
 	PROP_0,
-	PROP_RATE,
+	PROP_INTERVAL,
 	PROP_PAUSE,
 };
 
@@ -35,7 +35,7 @@ struct _GsqUpdaterPrivate {
 	GList *queriers;
 	GList *iter;
 	guint timer;
-	gfloat rate;
+	gfloat interval;
 	gboolean paused;
 };
 
@@ -65,8 +65,8 @@ gsq_updater_set_property (GObject *object, guint prop_id, const GValue *value,
 	GsqUpdater *updater = GSQ_UPDATER (object);
 	
 	switch (prop_id) {
-	case PROP_RATE:
-		gsq_updater_set_rate (updater, g_value_get_float (value));
+	case PROP_INTERVAL:
+		gsq_updater_set_interval (updater, g_value_get_float (value));
 		break;
 	case PROP_PAUSE:
 		gsq_updater_set_pause (updater, g_value_get_boolean (value));
@@ -84,8 +84,8 @@ gsq_updater_get_property (GObject *object, guint prop_id, GValue *value,
 	GsqUpdater *updater = GSQ_UPDATER (object);
 	
 	switch (prop_id) {
-	case PROP_RATE:
-		g_value_set_float (value, gsq_updater_get_rate (updater));
+	case PROP_INTERVAL:
+		g_value_set_float (value, gsq_updater_get_interval (updater));
 		break;
 	case PROP_PAUSE:
 		g_value_set_boolean (value, gsq_updater_get_pause (updater));
@@ -106,12 +106,12 @@ gsq_updater_class_init (GsqUpdaterClass *class)
 	
 	g_type_class_add_private (gobject_class, sizeof (GsqUpdaterPrivate));
 	
-	g_object_class_install_property (gobject_class, PROP_RATE,
-			g_param_spec_float ("rate", "Update rate", "Update rate", 0.5f, 30.0f, 2.5f,
-			G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT));
+	g_object_class_install_property (gobject_class, PROP_INTERVAL,
+			g_param_spec_float ("interval", "Interval", "Update interval",
+			0.5f, 30.0f, 2.5f, G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT));
 	
 	g_object_class_install_property (gobject_class, PROP_PAUSE,
-			g_param_spec_boolean ("pause", "Pause", "Pause", FALSE,
+			g_param_spec_boolean ("pause", "Pause", "Update pause", FALSE,
 			G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT));
 }
 
@@ -158,24 +158,24 @@ update_timer (GsqUpdater *updater)
 	
 	guint count = g_list_length (priv->queriers);
 	if (count > 0)
-		priv->timer = g_timeout_add (priv->rate * 1000 / count,
+		priv->timer = g_timeout_add (priv->interval * 1000 / count,
 				(GSourceFunc) timer_tick, updater);
 }
 
 void
-gsq_updater_set_rate (GsqUpdater *updater, gfloat rate)
+gsq_updater_set_interval (GsqUpdater *updater, gfloat interval)
 {
 	g_return_if_fail (GSQ_IS_UPDATER (updater));
-	updater->priv->rate = rate;
+	updater->priv->interval = interval;
 	update_timer (updater);
-	g_object_notify (G_OBJECT (updater), "rate");
+	g_object_notify (G_OBJECT (updater), "interval");
 }
 
 gfloat
-gsq_updater_get_rate (GsqUpdater *updater)
+gsq_updater_get_interval (GsqUpdater *updater)
 {
 	g_return_val_if_fail (GSQ_IS_UPDATER (updater), 0.f);
-	return updater->priv->rate;
+	return updater->priv->interval;
 }
 
 void

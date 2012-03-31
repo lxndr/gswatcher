@@ -60,8 +60,8 @@ void gsq_updater_take (GsqUpdater *updater, GsqQuerier *querier);
 void gsq_updater_remove (GsqUpdater *updater, GsqQuerier *querier);
 GList *gsq_updater_list (GsqUpdater *updater);
 
-void gsq_updater_set_rate (GsqUpdater *updater, gfloat rate);
-gfloat gsq_updater_get_rate (GsqUpdater *updater);
+void gsq_updater_set_interval (GsqUpdater *updater, gfloat interval);
+gfloat gsq_updater_get_interval (GsqUpdater *updater);
 
 void gsq_updater_set_pause (GsqUpdater *updater, gboolean pause);
 gboolean gsq_updater_get_pause (GsqUpdater *updater);
