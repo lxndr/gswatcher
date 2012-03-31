@@ -31,12 +31,22 @@
 #include "client.h"
 
 
+enum {
+	PROP_0,
+	PROP_FAVORITE,
+};
+
+
 static GeoIP *geoip;
 static gchar *logaddress = NULL;
 static GRegex *re_say, *re_player;
 static gchar *connect_command = NULL;
 
 
+static void gs_client_set_property (GObject *object, guint prop_id,
+		const GValue *value, GParamSpec *pspec);
+static void gs_client_get_property (GObject *object, guint prop_id,
+		GValue *value, GParamSpec *pspec);
 static void gs_client_finalize (GObject *object);
 static void gs_client_querier_resolved (GsqQuerier *querier, GsClient *client);
 static void gs_client_querier_info_updated (GsqQuerier *querier, GsClient *client);
@@ -52,8 +62,10 @@ G_DEFINE_TYPE (GsClient, gs_client, G_TYPE_OBJECT);
 static void
 gs_client_class_init (GsClientClass *class)
 {
-	GObjectClass *gobject_class = G_OBJECT_CLASS (class);
-	gobject_class->finalize = gs_client_finalize;
+	GObjectClass *object_class = G_OBJECT_CLASS (class);
+	object_class->set_property = gs_client_set_property;
+	object_class->get_property = gs_client_get_property;
+	object_class->finalize = gs_client_finalize;
 	
 	geoip = GeoIP_new (GEOIP_STANDARD);
 	if (!geoip)
@@ -63,6 +75,10 @@ gs_client_class_init (GsClientClass *class)
 			G_REGEX_OPTIMIZE | G_REGEX_UNGREEDY, 0, NULL);
 	re_player = g_regex_new ("^(.+)<\\d+><STEAM_\\d:\\d:\\d+><(.+)><.*><.+><.+><.+><.+>$",
 			G_REGEX_OPTIMIZE | G_REGEX_UNGREEDY, 0, NULL);
+	
+	g_object_class_install_property (object_class, PROP_FAVORITE,
+			g_param_spec_boolean ("favorite", "Favorite", "Favorite server",
+			FALSE, G_PARAM_READABLE | G_PARAM_WRITABLE));
 }
 
 
@@ -92,6 +108,39 @@ gs_client_finalize (GObject *object)
 	g_object_unref (client->chat_buffer);
 	
 	G_OBJECT_CLASS (gs_client_parent_class)->finalize (object);
+}
+
+
+static void
+gs_client_set_property (GObject *object, guint prop_id, const GValue *value,
+		GParamSpec *pspec)
+{
+	GsClient *client = GS_CLIENT (object);
+	
+	switch (prop_id) {
+	case PROP_FAVORITE:
+		client->favorite = g_value_get_boolean (value);
+		break;
+	default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+		break;
+	}
+}
+
+static void
+gs_client_get_property (GObject *object, guint prop_id, GValue *value,
+		GParamSpec *pspec)
+{
+	GsClient *client = GS_CLIENT (object);
+	
+	switch (prop_id) {
+	case PROP_FAVORITE:
+		g_value_set_boolean (value, client->favorite);
+		break;
+	default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+		break;
+    }
 }
 
 
@@ -130,6 +179,7 @@ gs_client_set_favorite (GsClient *client, gboolean favorite)
 {
 	g_return_if_fail (GS_IS_CLIENT (client));
 	client->favorite = favorite;
+	g_object_notify (G_OBJECT (client), "favorite");
 }
 
 gboolean

@@ -57,7 +57,7 @@ struct _GsApplication {
 #endif
 	
 	GHashTable *buddy_list;
-	gdouble update_rate;
+	gdouble interval;
 	gboolean pause;
 	guint timer;
 	GList *server_list;
@@ -88,8 +88,8 @@ GType gs_application_get_type (void) G_GNUC_CONST;
 GsApplication* gs_application_new ();
 void gs_application_shutdown (GsApplication *app);
 
-void gs_application_set_update_rate (GsApplication *app, gdouble rate);
-gdouble gs_application_get_update_rate (GsApplication *app);
+void gs_application_set_interval (GsApplication *app, gdouble interval);
+gdouble gs_application_get_interval (GsApplication *app);
 
 void gs_application_set_pause (GsApplication *app, gboolean pause);
 gboolean gs_application_get_pause (GsApplication *app);
