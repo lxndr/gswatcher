@@ -141,12 +141,16 @@ get_team_name_to (gint num)
 static void
 gamespy_fill (GsqQuerier *querier, GHashTable *values)
 {
+	gchar *tmp;
+	
 	/* server info */
 	gsq_querier_set_name (querier, g_hash_table_lookup (values, "hostname"));
 	gsq_querier_set_map (querier, gsq_lookup_value (values, "maptitle", "mapname", NULL));
 	gsq_querier_set_version (querier, g_hash_table_lookup (values, "gamever"));
-	querier->numplayers = atoi (g_hash_table_lookup (values, "numplayers"));
-	querier->maxplayers = atoi (g_hash_table_lookup (values, "maxplayers"));
+	tmp = g_hash_table_lookup (values, "numplayers");
+	querier->numplayers = atoi (tmp ? tmp : 0);
+	tmp = g_hash_table_lookup (values, "maxplayers");
+	querier->maxplayers = atoi (tmp ? tmp : 0);
 	gsq_querier_emit_info_update (querier);
 	
 	/* player list */
@@ -232,31 +236,30 @@ gsq_gamespy_process (GsqQuerier *querier, guint16 qport,
 	g_hash_table_remove (priv->values, "final");
 	
 	/* parse data */
-	gchar *f, *k = pkt.data, *v;
-	if (*k++ == '\\') {
-		while (TRUE) {
-			/* key */
-			f = strchr (k, '\\');
-			if (f)
-				*f = '\0';
-			else
-				break;
-			
-			/* value */
-			v = f + 1;
-			f = strchr (v, '\\');
-			if (f)
-				*f = '\0';
-			
-			g_hash_table_replace (priv->values, k, v);
-			
-			if (f)
-				k = f + 1;
-			else
-				break;
-		}
-	} else {
+	gchar *f, *v, *k = pkt.data;
+	if (*k++ != '\\')
 		goto error;
+	
+	while (TRUE) {
+		/* key */
+		f = strchr (k, '\\');
+		if (f)
+			*f = '\0';
+		else
+			break;
+		
+		/* value */
+		v = f + 1;
+		f = strchr (v, '\\');
+		if (f)
+			*f = '\0';
+		
+		g_hash_table_replace (priv->values, k, v);
+		
+		if (f)
+			k = f + 1;
+		else
+			break;
 	}
 	
 	/* found out if this is a new packet set */
