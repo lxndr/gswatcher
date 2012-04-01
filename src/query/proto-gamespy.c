@@ -308,14 +308,18 @@ gsq_gamespy_process (GsqQuerier *querier, guint16 qport,
 			} else {
 				/* Unreal Tournament */
 				gsq_querier_set_id (querier, "ut");
+				gsq_querier_set_game (querier, "Unreal Tournament");
 				gsq_querier_set_extra (querier, "mode", gametype);
 			}
-		} else if (gamename && strcmp (gamename, "bfield1942") == 0) {
+		} else if (gamename && (strcmp (gamename, "bfield1942") == 0 ||
+				strcmp (gamename, "bfield1942d") == 0)) {
 			/* Battlefield 1942 */
 			gsq_querier_set_id (querier, "bf1942");
+			gsq_querier_set_game (querier, "Battlefield 1942");
 		} else {
 			/* Something else */
 			gsq_querier_set_id (querier, gamename);
+			gsq_querier_set_game (querier, gamename);
 		}
 		
 		gamespy_add_fields (querier);
