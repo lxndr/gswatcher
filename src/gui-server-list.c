@@ -652,6 +652,7 @@ gui_slist_create ()
 			"title", _("Map"),
 			"clickable", TRUE,
 			"sort-column-id", COLUMN_MAP,
+			"max-width", 225,
 			NULL);
 	cell = gtk_cell_renderer_text_new ();
 	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (column), cell, TRUE);
