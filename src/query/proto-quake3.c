@@ -48,6 +48,7 @@ static const Q3Game games[] = {
 	{"q3ut4",                      "urt",     "Urban Terror",                   NULL,         27960},
 	{"baseoa",                     "oarena",  "Open Arena",                     NULL,         27960},
 	{"ZEQ2",                       "zeq2",    "ZEQ2",                           NULL,         27960},
+	{"excessiveplus",              "e+",      "Quake 3 (E+)",                   NULL,         27960},
 	{"Nexuiz",                     "nexuiz",  "Nexuiz",                         NULL,         26000},
 	{"Warsow",                     "warsow",  "Warsow",                         "gametype",   44400},
 	{"Call of Duty",               "cod",     "Call of Duty",                   "g_gametype", 28960},
