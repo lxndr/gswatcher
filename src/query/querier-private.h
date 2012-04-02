@@ -42,12 +42,6 @@ void gsq_querier_send (GsqQuerier *querier, guint16 port, const gchar *data,
 void gsq_querier_add_field (GsqQuerier *querier, const gchar *name, GType type);
 void gsq_querier_add_player (GsqQuerier *querier, const gchar *name, ...);
 
-void gsq_querier_set_name (GsqQuerier *querier, const gchar *value);
-void gsq_querier_set_id (GsqQuerier *querier, const gchar *value);
-void gsq_querier_set_game (GsqQuerier *querier, const gchar *value);
-void gsq_querier_set_mode (GsqQuerier *querier, const gchar *value);
-void gsq_querier_set_map (GsqQuerier *querier, const gchar *value);
-void gsq_querier_set_version (GsqQuerier *querier, const gchar *value);
 void gsq_querier_set_extra (GsqQuerier *querier, const gchar *key,
 		const gchar *value);
 

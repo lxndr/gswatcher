@@ -194,11 +194,13 @@ gchar *
 gs_client_get_game_name (GsClient* client, gboolean extra)
 {
 	GsqQuerier *querier = client->querier;
+	gchar *game = gsq_querier_get_game (querier);
+	gchar *mode = gsq_querier_get_mode (querier);
 	
-	if (*querier->mode && extra)
-		return g_strdup_printf ("%s (%s)", querier->game, querier->mode);
+	if (*mode && extra)
+		return g_strdup_printf ("%s (%s)", game, mode);
 	else
-		return g_strdup (querier->game);
+		return g_strdup (game);
 }
 
 
@@ -233,13 +235,15 @@ gs_client_querier_info_updated (GsqQuerier *querier, GsClient *client)
 	if (client->version)
 		g_free (client->version);
 	
+	gchar *version = gsq_querier_get_version (querier);
+	
 	if (strcmp (gsq_querier_get_protocol (querier), "source") == 0) {
 		gchar *type = gsq_querier_get_extra (querier, "type");
 		client->version = g_strdup_printf (*type ? "%s (%s, %s, %s)" : "%s (%s, %s)",
-				querier->version, gsq_querier_get_extra (querier, "protocol-version"),
+				version, gsq_querier_get_extra (querier, "protocol-version"),
 				gsq_querier_get_extra (querier, "os"), type);
 	} else {
-		client->version = g_strdup (querier->version);
+		client->version = g_strdup (version);
 	}
 }
 
