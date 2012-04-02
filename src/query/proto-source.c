@@ -162,36 +162,36 @@ get_server_info (GsqQuerier *querier, gchar *p)
 	gchar desc[128], dir[128], ver[128], tmp[128], tags[256];
 	gchar *server_os, *server_type;
 	
-	guint8 pver = get_byte (&p);			// Protocol version
-	get_string (&p, tmp, 128);				// Server name
+	guint8 pver = get_byte (&p);						// Protocol version
+	get_string (&p, tmp, 128);							// Server name
 	gsq_querier_set_name (querier, tmp);
-	get_string (&p, tmp, 128);				// Map name
+	get_string (&p, tmp, 128);							// Map name
 	gsq_querier_set_map (querier, tmp);
-	get_string (&p, dir, 128);				// Game folder
-	get_string (&p, desc, 128);				// Game description
-	guint16 appid = get_short (&p);			// Application ID
-	querier->numplayers = get_byte (&p);	// Number of players
-	querier->maxplayers = get_byte (&p);	// Maximum players
-	get_byte (&p);							// Number of bots
-	gchar dedicated = get_byte (&p);		// Dedicated
-	gchar os = get_byte (&p);				// OS
-	gboolean pass = get_byte (&p);			// Password
-	gboolean secure = get_byte (&p);		// Secure
-	get_string (&p, ver, 128);				// Game version
+	get_string (&p, dir, 128);							// Game folder
+	get_string (&p, desc, 128);							// Game description
+	guint16 appid = get_short (&p);						// Application ID
+	gsq_querier_set_numplayers (querier, get_byte (&p));// Number of players
+	gsq_querier_set_maxplayers (querier, get_byte (&p));// Maximum players
+	get_byte (&p);										// Number of bots
+	gchar dedicated = get_byte (&p);					// Dedicated
+	gchar os = get_byte (&p);							// OS
+	gboolean pass = get_byte (&p);						// Password
+	gboolean secure = get_byte (&p);					// Secure
+	get_string (&p, ver, 128);							// Game version
 	gsq_querier_set_version (querier, ver);
-	guint8 edf = get_byte (&p);				// extra data field
+	guint8 edf = get_byte (&p);							// extra data field
 	if (edf & 0x80)
-		get_short (&p);						// server's game port
+		get_short (&p);									// server's game port
 	if (edf & 0x10)
-		get_longlong (&p);					// server's SteamID
+		get_longlong (&p);								// server's SteamID
 	if (edf & 0x40) {
-		get_short (&p);						// spectator port
-		get_string (&p, NULL, 0);			// spectator name
+		get_short (&p);									// spectator port
+		get_string (&p, NULL, 0);						// spectator name
 	}
 	if (edf & 0x20)
-		get_string (&p, tags, 256);			// tags
+		get_string (&p, tags, 256);						// tags
 	if (edf & 0x01)
-		get_longlong (&p);					// server's Game ID
+		get_longlong (&p);								// server's Game ID
 	
 	switch (os) {
 		case 'l': server_os = "Linux"; break;
@@ -306,21 +306,21 @@ get_server_info_gold (GsqQuerier *querier, gchar *p)
 {
 	gchar dir[64], tmp[64];
 	
-	get_string (&p, NULL, 0);				// Game server IP and port
-	get_string (&p, tmp, 64);				// Server name
+	get_string (&p, NULL, 0);							// Game server IP and port
+	get_string (&p, tmp, 64);							// Server name
 	gsq_querier_set_name (querier, tmp);
-	get_string (&p, tmp, 64);				// Map name
+	get_string (&p, tmp, 64);							// Map name
 	gsq_querier_set_map (querier, tmp);
-	get_string (&p, dir, 64);				// Game directory
-	get_string (&p, NULL, 0);				// Game description
-	querier->numplayers = get_byte (&p);	// Number of players
-	querier->maxplayers = get_byte (&p);	// Maximum players
-	guint8 pver = get_byte (&p);			// Network version
-	gchar dedicated = get_byte (&p);		// Dedicated
-	gchar os = get_byte (&p);				// OS
-	gboolean pass = get_byte (&p);			// Password
-	get_byte (&p);							// IsMod
-	gboolean secure = get_byte (&p);		// Secure
+	get_string (&p, dir, 64);							// Game directory
+	get_string (&p, NULL, 0);							// Game description
+	gsq_querier_set_numplayers (querier, get_byte (&p));// Number of players
+	gsq_querier_set_maxplayers (querier, get_byte (&p));// Maximum players
+	guint8 pver = get_byte (&p);						// Network version
+	gchar dedicated = get_byte (&p);					// Dedicated
+	gchar os = get_byte (&p);							// OS
+	gboolean pass = get_byte (&p);						// Password
+	get_byte (&p);										// IsMod
+	gboolean secure = get_byte (&p);					// Secure
 	
 	if (strcmp (dir, "cstrike") == 0) {
 		gsq_querier_set_id (querier, "cs");

@@ -82,7 +82,7 @@ gui_blist_update_real (GsBuddy *buddy, GtkTreeIter *iter)
 		while (isrv) {
 			GsClient *client = isrv->data;
 			g_string_append_printf (tmp, "%s\n<small>\t%s</small>",
-					client->querier->name,
+					gsq_querier_get_name (client->querier),
 					gsq_querier_get_address (client->querier));
 			if (isrv->next)
 				g_string_append_c (tmp, '\n');
@@ -96,7 +96,7 @@ gui_blist_update_real (GsBuddy *buddy, GtkTreeIter *iter)
 		
 		guint count = g_list_length (buddy->servers);
 		if (count > 0) {
-			gchar *srvname = ((GsClient *) buddy->servers->data)->querier->name;
+			gchar *srvname = gsq_querier_get_name (((GsClient *) buddy->servers->data)->querier);
 			if (count == 1) {
 				place = g_strdup (srvname);
 			} else if (count > 1) {
