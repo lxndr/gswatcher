@@ -153,7 +153,7 @@ get_sinfo (GsqQuerier *querier, gchar *data, gsize length, guint16 qport)
 	}
 	
 	/* check game port */
-	if (!*querier->id) {
+	if (!*gsq_querier_get_id (querier)) {
 		gchar *id = g_hash_table_lookup (values, "gamename");
 		const Q3Game *spec = find_spec (id);
 		if (spec) {
@@ -184,7 +184,7 @@ get_sinfo (GsqQuerier *querier, gchar *data, gsize length, guint16 qport)
 	gsq_querier_set_map (querier, map);
 	/* maximum players */
 	gchar *maxplayers = g_hash_table_lookup (values, "sv_maxclients");
-	querier->maxplayers = atoi (maxplayers);
+	gsq_querier_set_maxplayers (querier, atoi (maxplayers));
 	/* game version */
 	gchar *version = gsq_lookup_value (values, "version", "gameversion",
 			"shortversion", NULL);
@@ -213,7 +213,7 @@ get_plist (GsqQuerier *querier, gchar *p, gssize len)
 	}
 	
 	GMatchInfo *minfo;
-	querier->numplayers = 0;
+	gint numplayers = 0;
 	g_regex_match_full (re, p, len, 0, 0, &minfo, &error);
 	while (g_match_info_matches (minfo)) {
 		gchar *score = g_match_info_fetch (minfo, 1);
@@ -225,7 +225,7 @@ get_plist (GsqQuerier *querier, gchar *p, gssize len)
 		g_free (ping);
 		g_free (name);
 		
-		querier->numplayers++;
+		numplayers++;
 		g_match_info_next (minfo, &error);
 	}
 	g_match_info_free (minfo);
@@ -235,6 +235,7 @@ get_plist (GsqQuerier *querier, gchar *p, gssize len)
 		g_error_free (error);
 	}
 	
+	gsq_querier_set_numplayers (querier, numplayers);
 	gsq_querier_emit_player_update (querier);
 	return TRUE;
 }

@@ -108,17 +108,17 @@ gamespy_reset (Private *priv)
 static void
 gamespy_add_fields (GsqQuerier *querier)
 {
-	gsq_querier_add_field (querier, N_("Frags"), G_TYPE_INT);
+	gchar *id = gsq_querier_get_id (querier);
 	
-	if (strcmp (querier->id, "kf") == 0) {
+	gsq_querier_add_field (querier, N_("Frags"), G_TYPE_INT);	
+	if (strcmp (id, "kf") == 0) {
 		gsq_querier_add_field (querier, N_("Ping"), G_TYPE_INT);
-	} else if (strcmp (querier->id, "bf1942") == 0) {
+	} else if (strcmp (id, "bf1942") == 0) {
 		gsq_querier_add_field (querier, N_("Deaths"), G_TYPE_INT);
 		gsq_querier_add_field (querier, N_("Score"), G_TYPE_INT);
 		gsq_querier_add_field (querier, N_("Ping"), G_TYPE_INT);
 		gsq_querier_add_field (querier, N_("Team"), G_TYPE_STRING);
-	} else if (strcmp (querier->id, "ut") == 0 ||
-			strcmp (querier->id, "to-aot") == 0) {
+	} else if (strcmp (id, "ut") == 0 || strcmp (id, "to-aot") == 0) {
 		gsq_querier_add_field (querier, N_("Ping"), G_TYPE_INT);
 		gsq_querier_add_field (querier, N_("Team"), G_TYPE_STRING);
 	} else {
@@ -148,9 +148,9 @@ gamespy_fill (GsqQuerier *querier, GHashTable *values)
 	gsq_querier_set_map (querier, gsq_lookup_value (values, "maptitle", "mapname", NULL));
 	gsq_querier_set_version (querier, g_hash_table_lookup (values, "gamever"));
 	tmp = g_hash_table_lookup (values, "numplayers");
-	querier->numplayers = atoi (tmp ? tmp : 0);
+	gsq_querier_set_numplayers (querier, atoi (tmp ? tmp : 0));
 	tmp = g_hash_table_lookup (values, "maxplayers");
-	querier->maxplayers = atoi (tmp ? tmp : 0);
+	gsq_querier_set_maxplayers (querier, atoi (tmp ? tmp : 0));
 	gsq_querier_emit_info_update (querier);
 	
 	/* player list */
@@ -174,9 +174,9 @@ gamespy_fill (GsqQuerier *querier, GHashTable *values)
 		if (!ping)
 			break;
 		
-		if (strcmp (querier->id, "kf") == 0) {
+		if (strcmp (gsq_querier_get_id (querier), "kf") == 0) {
 			gsq_querier_add_player (querier, player, atoi (frags), atoi (ping));
-		} else if (strcmp (querier->id, "bf1942") == 0) {
+		} else if (strcmp (gsq_querier_get_id (querier), "bf1942") == 0) {
 			g_sprintf (key, "deaths_%d", i);
 			gchar *deaths = g_hash_table_lookup (values, key);
 			if (!deaths)
@@ -194,8 +194,8 @@ gamespy_fill (GsqQuerier *querier, GHashTable *values)
 			
 			gsq_querier_add_player (querier, player, atoi (frags), atoi (deaths),
 					atoi (score), atoi (ping), team);
-		} else if (strcmp (querier->id, "ut") == 0 ||
-				strcmp (querier->id, "to-aot") == 0) {
+		} else if (strcmp (gsq_querier_get_id (querier), "ut") == 0 ||
+				strcmp (gsq_querier_get_id (querier), "to-aot") == 0) {
 			g_sprintf (key, "team_%d", i);
 			gchar *team = g_hash_table_lookup (values, key);
 			if (!team)
@@ -281,7 +281,7 @@ gsq_gamespy_process (GsqQuerier *querier, guint16 qport,
 	if (g_hash_table_lookup (priv->values, "final"))
 		priv->max = num;
 	
-	if (!*querier->id) {
+	if (!*gsq_querier_get_id (querier)) {
 		/* while protocol is being detected, we only need the first packet */
 		if (num != 1)
 			goto error;
@@ -334,10 +334,10 @@ gsq_gamespy_process (GsqQuerier *querier, guint16 qport,
 			if (gport != port)
 				goto error;
 		} else {
-			if (!((strcmp (querier->id, "kf") == 0 && port == 7707) ||
-					(strcmp (querier->id, "to-aot") == 0 && port == 7777) ||
-					(strcmp (querier->id, "ut") == 0 && port == 7777) ||
-					(strcmp (querier->id, "bf1942") == 0 && port == 14567)))
+			if (!((strcmp (gsq_querier_get_id (querier), "kf") == 0 && port == 7707) ||
+					(strcmp (gsq_querier_get_id (querier), "to-aot") == 0 && port == 7777) ||
+					(strcmp (gsq_querier_get_id (querier), "ut") == 0 && port == 7777) ||
+					(strcmp (gsq_querier_get_id (querier), "bf1942") == 0 && port == 14567)))
 				goto error;
 		}
 	}

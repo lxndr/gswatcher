@@ -48,15 +48,6 @@ typedef struct _GsqPlayer			GsqPlayer;
 struct _GsqQuerier {
 	GObject parent_instance;
 	GsqQuerierPrivate *priv;
-	
-	gchar *name;
-	gchar *id;
-	gchar *game;
-	gchar *mode;
-	gchar *map;
-	gint numplayers;
-	gint maxplayers;
-	gchar *version;
 };
 
 struct _GsqQuerierClass {
@@ -86,6 +77,25 @@ struct _GsqPlayer {
 
 GType gsq_querier_get_type (void) G_GNUC_CONST;
 GsqQuerier* gsq_querier_new (const gchar *address);
+
+void gsq_querier_set_name (GsqQuerier *querier, const gchar *name);
+gchar *gsq_querier_get_name (GsqQuerier *querier);
+void gsq_querier_set_id (GsqQuerier *querier, const gchar *id);
+gchar *gsq_querier_get_id (GsqQuerier *querier);
+void gsq_querier_set_game (GsqQuerier *querier, const gchar *game);
+gchar *gsq_querier_get_game (GsqQuerier *querier);
+void gsq_querier_set_mode (GsqQuerier *querier, const gchar *mode);
+gchar *gsq_querier_get_mode (GsqQuerier *querier);
+void gsq_querier_set_map (GsqQuerier *querier, const gchar *map);
+gchar *gsq_querier_get_map (GsqQuerier *querier);
+void gsq_querier_set_version (GsqQuerier *querier, const gchar *version);
+gchar *gsq_querier_get_version (GsqQuerier *querier);
+void gsq_querier_set_numplayers (GsqQuerier *querier, gint numplayers);
+gint gsq_querier_get_numplayers (GsqQuerier *querier);
+void gsq_querier_set_maxplayers (GsqQuerier *querier, gint maxplayers);
+gint gsq_querier_get_maxplayers (GsqQuerier *querier);
+void gsq_querier_set_password (GsqQuerier *querier, gboolean password);
+gboolean gsq_querier_get_password (GsqQuerier *querier);
 
 GInetAddress *gsq_querier_get_iaddr (GsqQuerier *querier);
 void gsq_querier_update (GsqQuerier *querier);
