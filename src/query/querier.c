@@ -805,6 +805,10 @@ gsq_querier_add_player (GsqQuerier *querier, const gchar *name, ...)
 	for (i = 0; i < priv->fields->len; i++) {
 		GType type = g_array_index (priv->fields, GsqField, i).type;
 		G_VALUE_COLLECT_INIT (&player->values[i], type, va, 0, &error);
+		if (error) {
+			g_error ("Error while collecting a value: %s", error);
+			g_free (error);
+		}
 	}
 	va_end (va);
 	
