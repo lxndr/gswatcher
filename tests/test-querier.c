@@ -9,7 +9,8 @@ static void
 resolved (GsqQuerier *querier, gpointer udata)
 {
 	g_print (">> %s RESOLVED :: %s\n",
-			gsq_querier_get_address (querier), querier->name);
+			gsq_querier_get_address (querier),
+			gsq_querier_get_name (querier));
 }
 
 static void
@@ -23,15 +24,21 @@ detected (GsqQuerier *querier, gpointer udata)
 static void
 info_updated (GsqQuerier *querier, gpointer udata)
 {
-	g_print (">> %s, %s, %s, %d / %d, %ld\n", querier->name, querier->game,
-			querier->map, querier->numplayers, querier->maxplayers,
+	g_print (">> %s, %s, %s, %d / %d, %ld\n",
+			gsq_querier_get_name (querier),
+			gsq_querier_get_game (querier),
+			gsq_querier_get_map (querier),
+			gsq_querier_get_numplayers (querier),
+			gsq_querier_get_maxplayers (querier),
 			gsq_querier_get_ping (querier));
 }
 
 static void
 player_updated (GsqQuerier *querier, gpointer udata)
 {
-	g_print (">> Players %d / %d\n", querier->numplayers, querier->maxplayers);
+	g_print (">> Players %d / %d\n",
+			gsq_querier_get_numplayers (querier),
+			gsq_querier_get_maxplayers (querier));
 }
 
 static void
@@ -84,7 +91,7 @@ main (int argc, char **argv)
 	loop = g_main_loop_new (NULL, TRUE);
 	
 	updater = gsq_updater_new ();
-	gsq_updater_set_rate (updater, 5.0);
+	gsq_updater_set_interval (updater, 5.0);
 	for (i = 1; i < argc; i++) {
 		if (strcmp (argv[i], "-d") == 0)
 			gsq_querier_set_debug_mode (TRUE);
