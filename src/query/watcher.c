@@ -102,13 +102,13 @@ gsq_watcher_info_updated (GsqQuerier *querier)
 	GsqWatcherPrivate *priv = ((GsqWatcher *) querier)->priv;
 	guint hash;
 	
-	hash = g_str_hash (querier->name);
+	hash = g_str_hash (gsq_querier_get_name (querier));
 	if (priv->name != hash) {
 		g_signal_emit (querier, signals[SIGNAL_NAME_CHANGE], 0);
 		priv->name = hash;
 	}
 	
-	hash = g_str_hash (querier->map);
+	hash = g_str_hash (gsq_querier_get_map (querier));
 	if (priv->map != hash) {
 		g_signal_emit (querier, signals[SIGNAL_MAP_CHANGE], 0);
 		priv->map = hash;

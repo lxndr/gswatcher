@@ -79,17 +79,16 @@ gsq_source_free (GsqQuerier *querier)
 void
 gsq_source_query (GsqQuerier *querier)
 {
-	Private *priv = gsq_querier_get_pdata (querier);
-	
-	guint32 port = gsq_querier_get_port (querier);
-	if (port == 0) port = 27015;
+	guint32 port = gsq_querier_get_gport (querier);
+	if (port == 0)
+		port = 27015;
 	
 	gsq_querier_send (querier, port, sinfo_query, 25);
 	
-	if (priv && *priv->plist_query)
-		gsq_querier_send (querier, port, priv->plist_query, 9);
-	else
-		gsq_querier_send (querier, port, plist_query, 9);
+	Private *priv = gsq_querier_get_pdata (querier);
+	const gchar *query = priv && *priv->plist_query ?
+			priv->plist_query : plist_query;
+	gsq_querier_send (querier, port, query, 9);
 }
 
 
@@ -133,14 +132,11 @@ get_float (gchar **p)
 	return GFLOAT_FROM_LE (v);
 }
 
-static char *
-get_string (gchar **p, gchar *buf, gsize maxlen)
+static inline gchar *
+get_string (gchar **p)
 {
 	gchar *s = *p;
-	if (buf)
-		*p += g_strlcpy (buf, s, maxlen);
-	else
-		*p += strlen (s);
+	*p += strlen (s);
 	(*p)++;
 	return s;
 }
@@ -160,146 +156,190 @@ format_time (gchar *dst, gsize maxlen, gfloat time)
 static void
 get_server_info (GsqQuerier *querier, gchar *p)
 {
-	gchar desc[128], dir[128], ver[128], tmp[128], tags[256];
+	gchar *dir, *desc, *tags, tmp[256];
+	gchar *server_os, *server_type;
 	
-	guint8 pver = get_byte (&p);			// Protocol version
-	get_string (&p, tmp, 128);				// Server name
-	gsq_querier_set_name (querier, tmp);
-	get_string (&p, tmp, 128);				// Map name
-	gsq_querier_set_map (querier, tmp);
-	get_string (&p, dir, 128);				// Game folder
-	get_string (&p, desc, 128);				// Game description
-	guint16 appid = get_short (&p);			// Application ID
-	querier->numplayers = get_byte (&p);	// Number of players
-	querier->maxplayers = get_byte (&p);	// Maximum players
-	get_byte (&p);							// Number of bots
-	gchar dedicated = get_byte (&p);		// Dedicated
-	gchar os = get_byte (&p);				// OS
-	gboolean pass = get_byte (&p);			// Password
-	gboolean secure = get_byte (&p);		// Secure
-	get_string (&p, ver, 128);				// Game version
-	gsq_querier_set_version (querier, ver);
-	guint8 edf = get_byte (&p);				// extra data field
+	guint8 pver = get_byte (&p);						// Protocol version
+	gsq_querier_set_name (querier, get_string (&p));	// Server name
+	gsq_querier_set_map (querier, get_string (&p));		// Map name
+	dir = get_string (&p);								// Game folder
+	desc = get_string (&p);								// Game description
+	guint16 appid = get_short (&p);						// Application ID
+	gsq_querier_set_numplayers (querier, get_byte (&p));// Number of players
+	gsq_querier_set_maxplayers (querier, get_byte (&p));// Maximum players
+	get_byte (&p);										// Number of bots
+	gchar dedicated = get_byte (&p);					// Dedicated
+	gchar os = get_byte (&p);							// OS
+	gsq_querier_set_password (querier, get_byte (&p));	// Password
+	gboolean secure = get_byte (&p);					// Secure
+	gsq_querier_set_version (querier, get_string (&p));	// Game version
+	guint8 edf = get_byte (&p);							// extra data field
 	if (edf & 0x80)
-		get_short (&p);						// server's game port
+		get_short (&p);									// server's game port
 	if (edf & 0x10)
-		get_longlong (&p);					// server's SteamID
+		get_longlong (&p);								// server's SteamID
 	if (edf & 0x40) {
-		get_short (&p);						// spectator port
-		get_string (&p, NULL, 0);			// spectator name
+		get_short (&p);									// spectator port
+		get_string (&p);								// spectator name
 	}
 	if (edf & 0x20)
-		get_string (&p, tags, 256);			// tags
+		tags = get_string (&p);							// tags
 	if (edf & 0x01)
-		get_longlong (&p);					// server's Game ID
+		get_longlong (&p);								// server's Game ID
 	
+	switch (os) {
+		case 'l': server_os = "Linux"; break;
+		case 'w': server_os = "Windows"; break;
+		default:  server_os = "Unknown";
+	}
+	
+	switch (dedicated) {
+		case 'd': server_type = "Dedicated"; break;
+		case 'l': server_type = "Listen"; break;
+		case 'p': server_type = "SourceTV"; break;
+		default:  server_type = "";
+	}
+	
+	gsq_querier_set_extra (querier, "os", server_os);
+	gsq_querier_set_extra (querier, "type", server_type);
 	g_snprintf (tmp, 128, "%d", pver);
 	gsq_querier_set_extra (querier, "protocol-version", tmp);
 	g_snprintf (tmp, 128, "%d", appid);
 	gsq_querier_set_extra (querier, "appid", tmp);
-	gsq_querier_set_extra (querier, "password", pass ? "true" : "false");
 	gsq_querier_set_extra (querier, "secure", secure ? "true" : "false");
 	
-	switch (os) {
-		case 'l': gsq_querier_set_extra (querier, "os", "Linux"); break;
-		case 'w': gsq_querier_set_extra (querier, "os", "Windows"); break;
-		default:  gsq_querier_set_extra (querier, "os", "Unknown");
-	}
-	
-	switch (dedicated) {
-		case 'd': gsq_querier_set_extra (querier, "type", "Dedicated"); break;
-		case 'l': gsq_querier_set_extra (querier, "type", "Listen"); break;
-		case 'p': gsq_querier_set_extra (querier, "type", "SourceTV"); break;
-		default:  gsq_querier_set_extra (querier, "type", "");
-	}
-	
+	gchar *game_id = NULL, *game_name = desc, *game_mode = NULL;
 	switch (appid) {
 		case 10:
-			if (strcmp (dir, "valve") == 0)
-				gsq_querier_set_game (querier, "hl");
-			else
-				gsq_querier_set_game (querier, "cs");
+			if (strcmp (dir, "cstrike") == 0) {
+				game_id = "cs";
+				game_name = "Counter-Strike";
+			} else {
+				game_id = "hl";
+				game_name = "Half-Life";
+			}
 			break;
-		case 20: gsq_querier_set_game (querier, "tf"); break;
-		case 30: gsq_querier_set_game (querier, "dod"); break;
-		case 80: gsq_querier_set_game (querier, "czero"); break;
-		case 240: gsq_querier_set_game (querier, "css"); break;
-		case 300: gsq_querier_set_game (querier, "dods"); break;
-		case 320: gsq_querier_set_game (querier, "hl2dm"); break;
-		case 440: gsq_querier_set_game (querier, "tf2"); break;
+		case 20:
+			game_id = "tf";
+			game_name = "Team Fortress";
+			break;
+		case 30:
+			game_id = "dod";
+			game_name = "Day of Defeat";
+			break;
+		case 80:
+			game_id = "czero";
+			game_name = "Counter-Strike: Condition Zero";
+			break;
+		case 240:
+			game_id = "css";
+			game_name = "Counter-Strike: Source";
+			break;
+		case 300:
+			game_id = "dods";
+			game_name = "Day of Defeat: Source";
+			break;
+		case 320:
+			game_id = "hl2dm";
+			game_name = "Half-Life 2: Deathmatch";
+			break;
+		case 440:
+			game_id = "tf2";
+			game_name = "Team Fortress 2";
+			break;
 		case 500:
-			gsq_querier_set_game (querier, "l4d");
-			gsq_querier_set_extra (querier, "mode", desc + 6);
+			game_id = "l4d";
+			game_name = "Left 4 Dead";
+			game_mode = desc + 6;
 			break;
-		case 550: {
-			gchar *mode;
-			gsq_querier_set_game (querier, "l4d2");
+		case 550:
+			game_id = "l4d2";
+			game_name = "Left 4 Dead 2";
 			if (strstr (tags, "coop"))
-				mode = "Co-op";
+				game_mode = "Co-op";
 			else if (strstr (tags, "realism"))
-				mode = "Realism";
+				game_mode = "Realism";
 			else if (strstr (tags, "survival"))
-				mode = "Survival";
+				game_mode = "Survival";
 			else if (strstr (tags, "versus"))
-				mode = "Versus";
+				game_mode = "Versus";
 			else if (strstr (tags, "scavenge"))
-				mode = "Scavenge";
-			else
-				mode = NULL;
-			if (mode)
-				gsq_querier_set_extra (querier, "mode", mode);
-			} break;
-		case 630: gsq_querier_set_game (querier, "as"); break;
-		case 17500: gsq_querier_set_game (querier, "zp"); break;
-		case 17520: gsq_querier_set_game (querier, "syn"); break;
-		case 17700: gsq_querier_set_game (querier, "ins"); break;
-		case 17710: gsq_querier_set_game (querier, "nd"); break;
-		default: gsq_querier_set_game (querier, ""); break;
+				game_mode = "Scavenge";
+			break;
+		case 630:
+			game_id = "as";
+			game_name = "Alien Swarm";
+			break;
+		case 17500:
+			game_id = "zp";
+			game_name = "Zombie Panic!";
+			break;
+		case 17520:
+			game_id = "syn";
+			game_name = "Synergy";
+			break;
+		case 17700:
+			game_id = "ins";
+			game_name = "Insurgency";
+			break;
+		case 17710:
+			game_id = "nd";
+			game_name = "Nuclear dawn";
+			break;
 	}
 	
+	gsq_querier_set_id (querier, game_id);
+	gsq_querier_set_game (querier, game_name);
+	gsq_querier_set_mode (querier, game_mode);
 	gsq_querier_emit_info_update (querier);
 }
 
 static void
 get_server_info_gold (GsqQuerier *querier, gchar *p)
 {
-	gchar tmp[128];
+	gchar *dir, tmp[64];
 	
-	get_string (&p, NULL, 0);				// Game server IP and port
-	get_string (&p, tmp, 128);				// Server name
-	gsq_querier_set_name (querier, tmp);
-	get_string (&p, tmp, 128);				// Map name
-	gsq_querier_set_map (querier, tmp);
-	get_string (&p, NULL, 0);				// Game directory
-	get_string (&p, NULL, 0);				// Game description
-	querier->numplayers = get_byte (&p);	// Number of players
-	querier->maxplayers = get_byte (&p);	// Maximum players
-	guint8 pver = get_byte (&p);			// Network version
-	gchar dedicated = get_byte (&p);		// Dedicated
-	gchar os = get_byte (&p);				// OS
-	gboolean pass = get_byte (&p);			// Password
-	get_byte (&p);							// IsMod
-	gboolean secure = get_byte (&p);		// Secure
+	get_string (&p);									// Game server IP and port
+	gsq_querier_set_name (querier, get_string (&p));	// Server name
+	gsq_querier_set_map (querier, get_string (&p));		// Map name
+	dir = get_string (&p);								// Game directory
+	get_string (&p);									// Game description
+	gsq_querier_set_numplayers (querier, get_byte (&p));// Number of players
+	gsq_querier_set_maxplayers (querier, get_byte (&p));// Maximum players
+	guint8 pver = get_byte (&p);						// Network version
+	gchar dedicated = get_byte (&p);					// Dedicated
+	gchar os = get_byte (&p);							// OS
+	gsq_querier_set_password (querier, get_byte (&p));	// Password
+	get_byte (&p);										// IsMod
+	gboolean secure = get_byte (&p);					// Secure
 	
-	g_snprintf (tmp, 128, "%d", pver);
+	if (strcmp (dir, "cstrike") == 0) {
+		gsq_querier_set_id (querier, "cs");
+		gsq_querier_set_game (querier, "Counter-Strike");
+	}
+	
+	g_snprintf (tmp, 64, "%d", pver);
 	gsq_querier_set_extra (querier, "protocol-version", tmp);
-	gsq_querier_set_extra (querier, "password", pass ? "true" : "false");
 	gsq_querier_set_extra (querier, "secure", secure ? "true" : "false");
 	
+	gchar *server_os, *server_type;
+	
 	switch (os) {
-		case 'l': gsq_querier_set_extra (querier, "os", "Linux"); break;
-		case 'w': gsq_querier_set_extra (querier, "os", "Windows"); break;
-		default:  gsq_querier_set_extra (querier, "os", "Unknown");
+		case 'l': server_os = "Linux"; break;
+		case 'w': server_os = "Windows"; break;
+		default:  server_os = "Unknown";
 	}
 	
 	switch (dedicated) {
-		case 'd': gsq_querier_set_extra (querier, "type", "Dedicated"); break;
-		case 'l': gsq_querier_set_extra (querier, "type", "Listen"); break;
-		case 'p': gsq_querier_set_extra (querier, "type", "SourceTV"); break;
-		default:  gsq_querier_set_extra (querier, "type", "");
+		case 'd': server_type = "Dedicated"; break;
+		case 'l': server_type = "Listen"; break;
+		case 'p': server_type = "SourceTV"; break;
+		default:  server_type = "";
 	}
 	
-	gsq_querier_set_game (querier, "");
+	gsq_querier_set_extra (querier, "os", server_os);
+	gsq_querier_set_extra (querier, "type", server_type);
+	
 	gsq_querier_emit_info_update (querier);
 }
 
@@ -311,9 +351,9 @@ get_player_list (GsqQuerier *querier, gchar *p)
 	
 	for (i = 0; i < count; i++) {
 		get_byte (&p);
-		gchar *nickname = get_string (&p, NULL, 0);		// Nickname
-		gint kills = get_long (&p);						// Kills
-		format_time (time, 16, get_float (&p));			// Time
+		gchar *nickname = get_string (&p);			// Nickname
+		gint kills = get_long (&p);					// Kills
+		format_time (time, 16, get_float (&p));		// Time
 		gsq_querier_add_player (querier, nickname, kills, time);
 	}
 	
@@ -328,11 +368,16 @@ source_process2 (GsqQuerier *querier, gchar *p)
 	gint type = get_byte (&p);
 	
 	switch (type) {
-	case 'A':
+	case 'A': {
 		memcpy (priv->plist_query, "\xFF\xFF\xFF\xFF\x55", 5);
 		memcpy (priv->plist_query + 5, p, 4);
-		gsq_source_query (querier);
-		break;
+		
+		/* request player list right away */
+		guint32 port = gsq_querier_get_gport (querier);
+		if (port == 0)
+			port = 27015;
+		gsq_querier_send (querier, port, priv->plist_query, 9);
+		} break;
 	case 'I':
 		get_server_info (querier, p);
 		priv->newprotocol = TRUE;
@@ -341,9 +386,11 @@ source_process2 (GsqQuerier *querier, gchar *p)
 		if (!priv->newprotocol)
 			get_server_info_gold (querier, p);
 		break;
-	case 'D':
-		get_player_list (querier, p);
-		break;
+	case 'D': {
+		gchar *game_id = gsq_querier_get_id (querier);
+		if (*game_id)
+			get_player_list (querier, p);
+		} break;
 	case 'R':
 		gsq_querier_emit_log (querier, p);
 		break;
@@ -392,7 +439,8 @@ assemble_packets (GArray *packets, gsize *datasize)
 
 
 gboolean
-gsq_source_process (GsqQuerier *querier, const gchar *data, gssize size)
+gsq_source_process (GsqQuerier *querier, guint16 qport,
+		const gchar *data, gssize size)
 {
 	Private *priv = gsq_querier_get_pdata (querier);
 	if (!priv) {
@@ -401,14 +449,17 @@ gsq_source_process (GsqQuerier *querier, const gchar *data, gssize size)
 		gsq_querier_set_pdata (querier, priv);
 	}
 	
-	guint16 port = gsq_querier_get_port (querier);
-	if (port == 0) port = 27015;
+	/* check if this packet belongs to the querier */
+	guint16 port = gsq_querier_get_gport (querier);
+	if (!(port == qport || (port == 0 && qport == 27015)))
+		return FALSE;
 	
 	gchar *p = (gchar *) data;
 	gint format = get_long (&p);
 	
 	if (format == -1) {
-		return source_process2 (querier, p);
+		if (!source_process2 (querier, p))
+			return FALSE;
 	} else if (format == -2) {
 		gint reqid = get_long (&p);
 		gboolean compressed = reqid >= 0x10000000;
@@ -416,10 +467,16 @@ gsq_source_process (GsqQuerier *querier, const gchar *data, gssize size)
 		gint numpacket = get_byte (&p);
 		guint16 length = get_short (&p);
 		
+		/* perform some checks */
 		if (compressed) {
 			g_warning ("Compressed split packets are not supported");
 			return FALSE;
 		}
+		
+		if (maxpackets < 2)
+			return FALSE;
+		if (length > 1248)
+			return FALSE;
 		
 		if (priv->reqid != reqid) {
 			free_packets (priv->packets);
@@ -440,9 +497,12 @@ gsq_source_process (GsqQuerier *querier, const gchar *data, gssize size)
 			priv->reqid = 0;
 			return ret;
 		}
-		
-		return TRUE;
 	}
 	
-	return FALSE;
+	if (gsq_querier_get_fields (querier)->len == 0) {
+		gsq_querier_add_field (querier, "Kills", G_TYPE_INT);
+		gsq_querier_add_field (querier, "Time", G_TYPE_STRING);
+	}
+	
+	return TRUE;
 }

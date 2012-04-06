@@ -1,5 +1,5 @@
 /* 
- * proto-source.h: Source Engine(TM) query protocol implementation
+ * proto-unreal2.h: Unreal 2 query protocol implementation
  * 
  * Copyright (C) 2011-2012 GSTool Developer(s)
  * 
@@ -22,14 +22,14 @@
 
 
 
-#ifndef __GSQUERY__PROTO_SOURCE_H__
-#define __GSQUERY__PROTO_SOURCE_H__
+#ifndef __GSQUERY__PROTO_GAMESPY_H__
+#define __GSQUERY__PROTO_GAMESPY_H__
 
 #include "querier.h"
 
-void gsq_source_query (GsqQuerier *querier);
-gboolean gsq_source_process (GsqQuerier *querier, guint16 qport,
+void gsq_gamespy_query (GsqQuerier *querier);
+gboolean gsq_gamespy_process (GsqQuerier *querier, guint16 qport,
 		const gchar *data, gssize size);
-void gsq_source_free (GsqQuerier *querier);
+void gsq_gamespy_free (GsqQuerier *querier);
 
 #endif

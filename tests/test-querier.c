@@ -1,3 +1,4 @@
+#include <string.h>
 #include "../src/query/querier.h"
 #include "../src/query/updater.h"
 
@@ -5,17 +6,39 @@ GMainLoop *loop;
 
 
 static void
+resolved (GsqQuerier *querier, gpointer udata)
+{
+	g_print (">> %s RESOLVED :: %s\n",
+			gsq_querier_get_address (querier),
+			gsq_querier_get_name (querier));
+}
+
+static void
+detected (GsqQuerier *querier, gpointer udata)
+{
+	g_print (">> %s DETECTED :: %s\n",
+			gsq_querier_get_address (querier),
+			gsq_querier_get_protocol (querier));
+}
+
+static void
 info_updated (GsqQuerier *querier, gpointer udata)
 {
-	g_print (">> %s, %s, %s, %d / %d, %ld\n", querier->name, querier->game,
-			querier->map, querier->numplayers, querier->maxplayers,
+	g_print (">> %s, %s, %s, %d / %d, %ld\n",
+			gsq_querier_get_name (querier),
+			gsq_querier_get_game (querier),
+			gsq_querier_get_map (querier),
+			gsq_querier_get_numplayers (querier),
+			gsq_querier_get_maxplayers (querier),
 			gsq_querier_get_ping (querier));
 }
 
 static void
 player_updated (GsqQuerier *querier, gpointer udata)
 {
-	g_print (">> Players %d / %d\n", querier->numplayers, querier->maxplayers);
+	g_print (">> Players %d / %d\n",
+			gsq_querier_get_numplayers (querier),
+			gsq_querier_get_maxplayers (querier));
 }
 
 static void
@@ -42,6 +65,8 @@ static GsqQuerier *
 add_server (GsqUpdater *updater, const gchar *address)
 {
 	GsqQuerier *querier = gsq_querier_new (address);
+	g_signal_connect (querier, "resolve", G_CALLBACK (resolved), NULL);
+	g_signal_connect (querier, "detect", G_CALLBACK (detected), NULL);
 	g_signal_connect (querier, "info-update", G_CALLBACK (info_updated), NULL);
 	g_signal_connect (querier, "players-update", G_CALLBACK (player_updated), NULL);
 	g_signal_connect (querier, "timeout", G_CALLBACK (timed_out), NULL);
@@ -66,8 +91,13 @@ main (int argc, char **argv)
 	loop = g_main_loop_new (NULL, TRUE);
 	
 	updater = gsq_updater_new ();
-	for (i = 1; i < argc; i++)
-		add_server (updater, argv[i]);
+	gsq_updater_set_interval (updater, 5.0);
+	for (i = 1; i < argc; i++) {
+		if (strcmp (argv[i], "-d") == 0)
+			gsq_querier_set_debug_mode (TRUE);
+		else
+			add_server (updater, argv[i]);
+	}
 	
 	g_main_loop_run (loop);
 	
