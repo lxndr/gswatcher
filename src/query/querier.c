@@ -39,6 +39,7 @@
 enum {
 	PROP_0,
 	PROP_ADDRESS,
+	PROP_RESET_ADDRESS
 };
 
 enum {
@@ -89,6 +90,7 @@ struct _GsqQuerierPrivate {
 	guint16 gport;
 	guint16 qport;
 	gpointer pdata;
+	gboolean reset_address;
 	gboolean update_sinfo;
 	gboolean update_plist;
 	GArray *fields;
@@ -174,19 +176,21 @@ gsq_querier_reset (GsqQuerier *querier)
 {
 	GsqQuerierPrivate *priv = querier->priv;
 	
-	if (priv->iaddr) {
-		g_object_unref (priv->iaddr);
-		priv->iaddr = NULL;
+	if (priv->reset_address) {
+		if (priv->iaddr) {
+			g_object_unref (priv->iaddr);
+			priv->iaddr = NULL;
+		}
+		priv->gport = 0;
+		priv->qport = 0;
 	}
-	priv->gport = 0;
-	priv->qport = 0;
 	
 	if (priv->pdata) {
 		if (priv->protocol->free)
 			priv->protocol->free (querier);
 		priv->pdata = NULL;
 	}
-	priv->protocol =NULL;
+	priv->protocol = NULL;
 	priv->working = FALSE;
 	priv->ping = 0;
 	
@@ -251,10 +255,16 @@ gsq_querier_set_property (GObject *object, guint prop_id, const GValue *value,
 		GParamSpec *pspec)
 {
 	GsqQuerier *querier = GSQ_QUERIER (object);
+	GsqQuerierPrivate *priv = querier->priv;
 	
 	switch (prop_id) {
 	case PROP_ADDRESS:
-		querier->priv->address = g_strdup (g_value_get_string (value));
+		if (priv->address)
+			g_free (priv->address);
+		priv->address = g_strdup (g_value_get_string (value));
+		break;
+	case PROP_RESET_ADDRESS:
+		priv->reset_address = g_value_get_boolean (value);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -267,10 +277,14 @@ gsq_querier_get_property (GObject *object, guint prop_id, GValue *value,
 		GParamSpec *pspec)
 {
 	GsqQuerier *querier = GSQ_QUERIER (object);
+	GsqQuerierPrivate *priv = querier->priv;
 	
 	switch (prop_id) {
 	case PROP_ADDRESS:
-		g_value_set_string (value, querier->priv->address);
+		g_value_set_string (value, priv->address);
+		break;
+	case PROP_RESET_ADDRESS:
+		g_value_set_boolean (value, priv->reset_address);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -292,6 +306,11 @@ gsq_querier_class_init (GsqQuerierClass *klass)
 	g_object_class_install_property (object_class, PROP_ADDRESS,
 			g_param_spec_string ("address", "Address", "Host and port of the server",
 			NULL, G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
+	
+	g_object_class_install_property (object_class, PROP_ADDRESS,
+			g_param_spec_boolean ("reset-address", "Reset address",
+			"Resolve address again on querier reset",
+			FALSE, G_PARAM_READABLE | G_PARAM_WRITABLE));
 	
 	signals[SIGNAL_RESOLVE] = g_signal_new ("resolve",
 			G_OBJECT_CLASS_TYPE (klass), G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,

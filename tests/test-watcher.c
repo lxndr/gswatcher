@@ -7,14 +7,18 @@ GMainLoop *loop;
 static void
 name_changed (GsqQuerier *querier, gpointer udata)
 {
-	g_print (">> Name changed. %s :: %s. Ping %ld\n", querier->name, querier->map,
+	g_print (">> Name changed. %s :: %s. Ping %ld\n",
+			gsq_querier_get_name (querier),
+			gsq_querier_get_map (querier),
 			gsq_querier_get_ping (querier));
 }
 
 static void
 map_changed (GsqQuerier *querier, gpointer udata)
 {
-	g_print (">> Map changed. %s :: %s. Ping %ld\n", querier->name, querier->map,
+	g_print (">> Map changed. %s :: %s. Ping %ld\n",
+			gsq_querier_get_name (querier),
+			gsq_querier_get_map (querier),
 			gsq_querier_get_ping (querier));
 }
 
