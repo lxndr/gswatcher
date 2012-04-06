@@ -20,6 +20,7 @@
  * 
  * 
  * Supported games:  --------------------+- def. port  ---+- query port  ---
+ *   - Red Orchestra                     |          7757  |     gport + 10
  *   - Killing Floor                     |          7707  |     gport + 10
  *   - Unreal Tournament                 |          7777  |     gport +  1
  *   - Tactical Ops: Assault on Terror   |          7777  |     gport +  1
@@ -69,6 +70,7 @@ gsq_gamespy_query (GsqQuerier *querier)
 		} else {
 			gsq_querier_send (querier, 7778, query, query_length);
 			gsq_querier_send (querier, 7717, query, query_length);
+			gsq_querier_send (querier, 7767, query, query_length);
 		}
 		gsq_querier_send (querier, 23000, query, query_length);
 	}
@@ -108,17 +110,18 @@ gamespy_reset (Private *priv)
 static void
 gamespy_add_fields (GsqQuerier *querier)
 {
-	gsq_querier_add_field (querier, N_("Frags"), G_TYPE_INT);
+	gchar *game_id = gsq_querier_get_id (querier);
 	
-	if (strcmp (querier->id, "kf") == 0) {
+	gsq_querier_add_field (querier, N_("Frags"), G_TYPE_INT);
+	if (strcmp (game_id, "kf") == 0) {
 		gsq_querier_add_field (querier, N_("Ping"), G_TYPE_INT);
-	} else if (strcmp (querier->id, "bf1942") == 0) {
+	} else if (strcmp (game_id, "bf1942") == 0) {
 		gsq_querier_add_field (querier, N_("Deaths"), G_TYPE_INT);
 		gsq_querier_add_field (querier, N_("Score"), G_TYPE_INT);
 		gsq_querier_add_field (querier, N_("Ping"), G_TYPE_INT);
 		gsq_querier_add_field (querier, N_("Team"), G_TYPE_STRING);
-	} else if (strcmp (querier->id, "ut") == 0 ||
-			strcmp (querier->id, "to-aot") == 0) {
+	} else if (strcmp (game_id, "ut") == 0 || strcmp (game_id, "to-aot") == 0 ||
+			strcmp (game_id, "ro") == 0) {
 		gsq_querier_add_field (querier, N_("Ping"), G_TYPE_INT);
 		gsq_querier_add_field (querier, N_("Team"), G_TYPE_STRING);
 	} else {
@@ -141,16 +144,19 @@ get_team_name_to (gint num)
 static void
 gamespy_fill (GsqQuerier *querier, GHashTable *values)
 {
-	gchar *tmp;
+	gchar *game_id = gsq_querier_get_id (querier);
 	
 	/* server info */
-	gsq_querier_set_name (querier, g_hash_table_lookup (values, "hostname"));
-	gsq_querier_set_map (querier, gsq_lookup_value (values, "maptitle", "mapname", NULL));
-	gsq_querier_set_version (querier, g_hash_table_lookup (values, "gamever"));
-	tmp = g_hash_table_lookup (values, "numplayers");
-	querier->numplayers = atoi (tmp ? tmp : 0);
-	tmp = g_hash_table_lookup (values, "maxplayers");
-	querier->maxplayers = atoi (tmp ? tmp : 0);
+	gsq_querier_set_name (querier,
+			g_hash_table_lookup (values, "hostname"));
+	gsq_querier_set_map (querier,
+			gsq_lookup_value (values, "maptitle", "mapname", NULL));
+	gsq_querier_set_version (querier,
+			g_hash_table_lookup (values, "gamever"));
+	gsq_querier_set_numplayers (querier, gsq_str2int (
+			g_hash_table_lookup (values, "numplayers")));
+	gsq_querier_set_maxplayers (querier, gsq_str2int (
+			g_hash_table_lookup (values, "maxplayers")));
 	gsq_querier_emit_info_update (querier);
 	
 	/* player list */
@@ -174,9 +180,9 @@ gamespy_fill (GsqQuerier *querier, GHashTable *values)
 		if (!ping)
 			break;
 		
-		if (strcmp (querier->id, "kf") == 0) {
+		if (strcmp (game_id, "kf") == 0) {
 			gsq_querier_add_player (querier, player, atoi (frags), atoi (ping));
-		} else if (strcmp (querier->id, "bf1942") == 0) {
+		} else if (strcmp (game_id, "bf1942") == 0) {
 			g_sprintf (key, "deaths_%d", i);
 			gchar *deaths = g_hash_table_lookup (values, key);
 			if (!deaths)
@@ -194,8 +200,8 @@ gamespy_fill (GsqQuerier *querier, GHashTable *values)
 			
 			gsq_querier_add_player (querier, player, atoi (frags), atoi (deaths),
 					atoi (score), atoi (ping), team);
-		} else if (strcmp (querier->id, "ut") == 0 ||
-				strcmp (querier->id, "to-aot") == 0) {
+		} else if (strcmp (game_id, "ut") == 0 || strcmp (game_id, "to-aot") == 0 ||
+				strcmp (game_id, "ro") == 0) {
 			g_sprintf (key, "team_%d", i);
 			gchar *team = g_hash_table_lookup (values, key);
 			if (!team)
@@ -281,7 +287,8 @@ gsq_gamespy_process (GsqQuerier *querier, guint16 qport,
 	if (g_hash_table_lookup (priv->values, "final"))
 		priv->max = num;
 	
-	if (!*querier->id) {
+	gchar *game_id = gsq_querier_get_id (querier);
+	if (!*game_id) {
 		/* while protocol is being detected, we only need the first packet */
 		if (num != 1)
 			goto error;
@@ -290,12 +297,19 @@ gsq_gamespy_process (GsqQuerier *querier, guint16 qport,
 		gchar *gamename = g_hash_table_lookup (priv->values, "gamename");
 		gchar *gametype = g_hash_table_lookup (priv->values, "gametype");
 		
-		if (gamename && strcmp (gamename, "redorchestra") == 0  &&
-				gametype && (strcmp (gametype, "KFGameType") == 0 ||
-				strcmp (gametype, "SRGameType") == 0)) {
-			/* Killing Floor */
-			gsq_querier_set_id (querier, "kf");
-			gsq_querier_set_game (querier, "Killing Floor");
+		if (gamename && strcmp (gamename, "redorchestra") == 0) {
+			if (gametype && (strcmp (gametype, "KFGameType") == 0 ||
+					strcmp (gametype, "SRGameType") == 0)) {
+				/* Killing Floor */
+				gsq_querier_set_id (querier, "kf");
+				gsq_querier_set_game (querier, "Killing Floor");
+			} else {
+				/* Red Orchestra OR game based on it */
+				gsq_querier_set_id (querier, "ro");
+				gsq_querier_set_game (querier, "Red Orchestra");
+				if (gametype)
+					gsq_querier_set_mode (querier, gametype);
+			}
 		} else if (gamename && strcmp (gamename, "ut") == 0) {
 			if (gametype && strncmp (gametype, "TO", 2) == 0) {
 				/* Tactical Ops */
@@ -309,7 +323,7 @@ gsq_gamespy_process (GsqQuerier *querier, guint16 qport,
 				/* Unreal Tournament */
 				gsq_querier_set_id (querier, "ut");
 				gsq_querier_set_game (querier, "Unreal Tournament");
-				gsq_querier_set_extra (querier, "mode", gametype);
+				gsq_querier_set_mode (querier, gametype);
 			}
 		} else if (gamename && (strcmp (gamename, "bfield1942") == 0 ||
 				strcmp (gamename, "bfield1942d") == 0)) {
@@ -334,10 +348,12 @@ gsq_gamespy_process (GsqQuerier *querier, guint16 qport,
 			if (gport != port)
 				goto error;
 		} else {
-			if (!((strcmp (querier->id, "kf") == 0 && port == 7707) ||
-					(strcmp (querier->id, "to-aot") == 0 && port == 7777) ||
-					(strcmp (querier->id, "ut") == 0 && port == 7777) ||
-					(strcmp (querier->id, "bf1942") == 0 && port == 14567)))
+			game_id = gsq_querier_get_id (querier);
+			if (!((strcmp (game_id, "kf") == 0 && port == 7707) ||
+					(strcmp (game_id, "ro") == 0 && port == 7757) ||
+					(strcmp (game_id, "to-aot") == 0 && port == 7777) ||
+					(strcmp (game_id, "ut") == 0 && port == 7777) ||
+					(strcmp (game_id, "bf1942") == 0 && port == 14567)))
 				goto error;
 		}
 	}
