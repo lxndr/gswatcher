@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.7\n"
 "Report-Msgid-Bugs-To: lxndr87@users.sourceforge.net\n"
-"POT-Creation-Date: 2012-03-11 21:07+0400\n"
+"POT-Creation-Date: 2012-03-13 02:39+0400\n"
 "PO-Revision-Date: 2012-03-11 17:36+0400\n"
 "Last-Translator: Alexander AB\n"
 "Language-Team: Russian\n"
@@ -185,20 +185,20 @@ msgstr "Игроки"
 msgid "Ping"
 msgstr "Пинг"
 
-#: src/gui-player-list.c:124 src/gui-buddy-list.c:310
+#: src/gui-player-list.c:126 src/gui-buddy-list.c:310
 msgctxt "Player"
 msgid "Name"
 msgstr "Имя"
 
-#: src/gui-player-list.c:143
+#: src/gui-player-list.c:145
 msgid "Kills"
 msgstr "Очки"
 
-#: src/gui-player-list.c:157
+#: src/gui-player-list.c:159
 msgid "Time"
 msgstr "Время"
 
-#: src/gui-player-list.c:225
+#: src/gui-player-list.c:227
 msgid "Add player to your buddy list"
 msgstr "Добавить игрока в список друзей"
 
