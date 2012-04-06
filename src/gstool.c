@@ -502,10 +502,12 @@ static void
 save_server_list_func (GsClient *client, GJsonNode *root)
 {
 	GJsonNode *node = g_json_object_new ();
-	g_json_object_set_string (node, "name", client->querier->name);
+	g_json_object_set_string (node, "name",
+			gsq_querier_get_name (client->querier));
 	g_json_object_set_string (node, "address",
 			gsq_querier_get_address (client->querier));
-	g_json_object_set_boolean (node, "favorite", client->favorite);
+	g_json_object_set_boolean (node, "favorite",
+			client->favorite);
 	g_json_object_set_string (node, "rcon-password",
 			gsq_console_get_password (client->console));
 	g_json_array_add (root, node);
@@ -613,13 +615,14 @@ player_online (GsqQuerier *querier, GsqPlayer *player, GsApplication *app)
 		if (buddy->notify) {
 			gchar *title = g_strdup_printf (_("Player %s has connected"), buddy->name);
 			gchar *text = g_strdup_printf (_("Address: %s\nServer: %s\nPlayers: %d / %d"),
-					gsq_querier_get_address (querier), querier->name,
-					querier->numplayers, querier->maxplayers);
+					gsq_querier_get_address (querier),
+					gsq_querier_get_name (querier),
+					gsq_querier_get_numplayers (querier),
+					gsq_querier_get_maxplayers (querier));
 			gs_notification_message (title, text);
 			g_free (title);
 			g_free (text);
 		}
-		
 	}
 }
 
@@ -638,11 +641,14 @@ player_offline (GsqQuerier *querier, GsqPlayer *player, GsApplication *app)
 		GsqPlayer *pl = l->data;
 		buddy = gs_application_find_buddy (app, pl->name);
 		
-		if (buddy && buddy->notify && querier->maxplayers - querier->numplayers == 1) {
+		if (buddy && buddy->notify &&
+				gsq_querier_get_maxplayers (querier) - gsq_querier_get_numplayers (querier) == 1) {
 			gchar *title = g_strdup_printf (_("Server with %s has free slot"), buddy->name);
 			gchar *text = g_strdup_printf (_("Address: %s\nServer: %s\nPlayers: %d / %d"),
-					gsq_querier_get_address (querier), querier->name,
-					querier->numplayers, querier->maxplayers);
+					gsq_querier_get_address (querier),
+					gsq_querier_get_name (querier),
+					gsq_querier_get_numplayers (querier),
+					gsq_querier_get_maxplayers (querier));
 			gs_notification_message (title, text);
 			g_free (title);
 			g_free (text);
@@ -660,8 +666,7 @@ add_server (GsApplication *app, const gchar *address, const gchar *name,
 		return NULL;
 	
 	GsClient *client = gs_client_new (address);
-	g_free (client->querier->name);
-	client->querier->name = g_strdup (name ? name : "");
+	gsq_querier_set_name (client->querier, name);
 	client->favorite = favorite;
 	gsq_console_set_password (client->console, rcon_password);
 	g_signal_connect (client->querier, "player-online",
@@ -729,7 +734,8 @@ gs_application_remove_server_ask (GsApplication *app, GsClient *client)
 	GtkWidget *dialog = gtk_message_dialog_new (GTK_WINDOW (window),
 			GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO,
 			_("Are you sure you want to remove \"%s\" ( %s) from the list?"),
-			client->querier->name, gsq_querier_get_address (client->querier));
+			gsq_querier_get_name (client->querier),
+			gsq_querier_get_address (client->querier));
 	if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_YES) {
 		gui_slist_remove (client);
 		gs_application_remove_server (app, client);
