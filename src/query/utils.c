@@ -127,3 +127,41 @@ gsq_parse_address (const gchar *addr, guint16 *port, guint16 *port2)
 	
 	return host;
 }
+
+
+gchar *
+gsq_lookup_value (GHashTable *values, ...)
+{
+	va_list va;
+	va_start (va, values);
+	
+	gchar *key, *value = NULL;
+	while ((key = va_arg (va, gchar *))) {
+		value = g_hash_table_lookup (values, key);
+		if (value)
+			break;
+	}
+	
+	va_end (va);
+	return value;
+}
+
+
+gint
+gsq_str2int (const gchar *str)
+{
+	return str ? atoi (str) : 0;
+}
+
+
+gboolean
+gsq_str2bool (const gchar *str)
+{
+	if (!str)
+		return FALSE;
+	gchar *s = g_ascii_strdown (str, -1);
+	gboolean ret = strcmp (s, "true") == 0 || strcmp (s, "1") == 0 ||
+			strcmp (s, "yes") == 0 || strcmp (s, "on") == 0;
+	g_free (s);
+	return ret;
+}

@@ -193,6 +193,7 @@ gui_slist_selection_changed (GtkTreeSelection *selection, gpointer udata)
 	gtk_entry_set_text (GTK_ENTRY (entry), addr);
 	gui_info_setup (selected);
 	gui_info_update (selected);
+	gui_plist_setup (selected);
 	gui_plist_update (selected);
 	gui_console_setup (selected);
 	gui_log_setup (selected);
@@ -301,6 +302,17 @@ server_resolved (GsqQuerier *querier, GsClient *client)
 }
 
 static void
+server_detected (GsqQuerier *querier, GsClient *client)
+{
+	gtk_list_store_set (liststore, &client->sliter,
+			COLUMN_ICON, get_game_icon (gsq_querier_get_id (client->querier)),
+			-1);
+	
+	if (client == selected)
+		gui_plist_setup (client);
+}
+
+static void
 server_info_updated (GsqQuerier *querier, GsClient *client)
 {
 	if (!visible)
@@ -310,26 +322,26 @@ server_info_updated (GsqQuerier *querier, GsClient *client)
 			game_column_mode == GUI_GAME_COLUMN_FULL);
 	
 	gchar players[16];
-	g_snprintf (players, 16, "%d / %d", client->querier->numplayers,
-			client->querier->maxplayers);
+	g_snprintf (players, 16, "%d / %d",
+			gsq_querier_get_numplayers (client->querier),
+			gsq_querier_get_maxplayers (client->querier));
 	
 	gchar *players_color = "dark green";
-	if (client->querier->numplayers >= client->querier->maxplayers)
+	if (gsq_querier_get_numplayers (client->querier) >= gsq_querier_get_maxplayers (client->querier))
 		players_color = "dark red";
-	else if (client->querier->numplayers == 0)
+	else if (gsq_querier_get_numplayers (client->querier) == 0)
 		players_color = "black";
 	
 	gchar ping[16];
 	g_snprintf (ping, 16, "%ld", gsq_querier_get_ping (client->querier));
 	
 	gtk_list_store_set (liststore, &client->sliter,
-			COLUMN_NAME, client->querier->name,
-			COLUMN_ICON, get_game_icon (client->querier->game),
+			COLUMN_NAME, gsq_querier_get_name (client->querier),
 			COLUMN_GAME, gamename,
-			COLUMN_MAP, client->querier->map,
+			COLUMN_MAP, gsq_querier_get_map (client->querier),
 			COLUMN_PLAYERS, players,
 			COLUMN_PLAYERS_COLOR, players_color,
-			COLUMN_PLAYERS_NUMBER, client->querier->numplayers,
+			COLUMN_PLAYERS_NUMBER, gsq_querier_get_numplayers (client->querier),
 			COLUMN_PING, ping,
 			COLUMN_PING_COLOR, "black",
 			-1);
@@ -363,7 +375,7 @@ gui_slist_add (GsClient *client)
 			COLUMN_SERVER, client,
 			COLUMN_TYPE, client->favorite ? ROW_FAVORITE : ROW_OTHER,
 			COLUMN_SPACE, TRUE,
-			COLUMN_NAME, client->querier->name,
+			COLUMN_NAME, gsq_querier_get_name (client->querier),
 			COLUMN_ICON_VISIBLE, game_column_mode == GUI_GAME_COLUMN_ICON,
 			COLUMN_GAME, gamename,
 			-1);
@@ -377,6 +389,7 @@ gui_slist_add (GsClient *client)
 	g_signal_connect (client->querier, "error", G_CALLBACK (server_error), client);
 	g_signal_connect (client->querier, "timeout", G_CALLBACK (server_timed_out), client);
 	g_signal_connect (client->querier, "resolve", G_CALLBACK (server_resolved), client);
+	g_signal_connect (client->querier, "detect", G_CALLBACK (server_detected), client);
 	g_signal_connect (client->querier, "info-update", G_CALLBACK (server_info_updated), client);
 	g_signal_connect (client->querier, "players-update", G_CALLBACK (server_players_updated), client);
 }
@@ -640,6 +653,7 @@ gui_slist_create ()
 			"title", _("Map"),
 			"clickable", TRUE,
 			"sort-column-id", COLUMN_MAP,
+			"max-width", 225,
 			NULL);
 	cell = gtk_cell_renderer_text_new ();
 	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (column), cell, TRUE);

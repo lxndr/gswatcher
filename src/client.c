@@ -38,7 +38,6 @@ enum {
 
 
 static GeoIP *geoip;
-static GHashTable *gamelist;
 static gchar *logaddress = NULL;
 static GRegex *re_say, *re_player;
 static gchar *connect_command = NULL;
@@ -71,25 +70,6 @@ gs_client_class_init (GsClientClass *class)
 	geoip = GeoIP_new (GEOIP_STANDARD);
 	if (!geoip)
 		exit (0);
-	
-	gamelist = g_hash_table_new (g_str_hash,  g_str_equal);
-	g_hash_table_insert (gamelist, "hl", "Half-Life: Deathmatch");
-	g_hash_table_insert (gamelist, "cs", "Counter-Strike");
-	g_hash_table_insert (gamelist, "tf", "Team Fortress Classic");
-	g_hash_table_insert (gamelist, "dod", "Day od Defeat");
-	g_hash_table_insert (gamelist, "czero", "Counter-Strike: Condition Zero");
-	g_hash_table_insert (gamelist, "css", "Counter-Strike: Source");
-	g_hash_table_insert (gamelist, "dods", "Day of Defeat: Source");
-	g_hash_table_insert (gamelist, "hl2dm", "Half-Life 2: Deathmatch");
-	g_hash_table_insert (gamelist, "tf2", "Team Fortress 2");
-	g_hash_table_insert (gamelist, "l4d", "Left 4 Dead");
-	g_hash_table_insert (gamelist, "l4d2", "Left 4 Dead 2");
-	g_hash_table_insert (gamelist, "as", "Alien Swarm");
-	g_hash_table_insert (gamelist, "zp", "Zombie Panic!");
-	g_hash_table_insert (gamelist, "syn", "Synergy");
-	g_hash_table_insert (gamelist, "ins", "Insurgency");
-	g_hash_table_insert (gamelist, "nd", "Nuclear dawn");
-	g_hash_table_insert (gamelist, "", "Source-based");
 	
 	re_say = g_regex_new ("^L (\\d{2}/\\d{2}/\\d{4}) - (\\d{2}:\\d{2}:\\d{2}): \"(.+)\" (say|say_team) \"(.+)\"$",
 			G_REGEX_OPTIMIZE | G_REGEX_UNGREEDY, 0, NULL);
@@ -214,23 +194,13 @@ gchar *
 gs_client_get_game_name (GsClient* client, gboolean extra)
 {
 	GsqQuerier *querier = client->querier;
-	gchar *gamename;
+	gchar *game = gsq_querier_get_game (querier);
+	gchar *mode = gsq_querier_get_mode (querier);
 	
-	if (querier->game) {
-		gchar *name = g_hash_table_lookup (gamelist, querier->game);
-		if (G_UNLIKELY (strcmp (querier->game, "") == 0)) {
-			gamename = g_strdup_printf ("%s (%s)", name,
-					(gchar *) gsq_querier_get_extra (querier, "appid"));
-		} else {
-			gchar *mode = gsq_querier_get_extra (querier, "mode");
-			gamename = g_strdup_printf ((extra && mode && *mode) ?
-					"%s (%s)" : "%s", name, mode);
-		}
-	} else {
-		gamename = g_strdup ("");
-	}
-	
-	return gamename;
+	if (*mode && extra)
+		return g_strdup_printf ("%s (%s)", game, mode);
+	else
+		return g_strdup (game);
 }
 
 
@@ -264,10 +234,17 @@ gs_client_querier_info_updated (GsqQuerier *querier, GsClient *client)
 	
 	if (client->version)
 		g_free (client->version);
-	gchar *type = gsq_querier_get_extra (querier, "type");
-	client->version = g_strdup_printf (*type ? "%s (%s, %s, %s)" : "%s (%s, %s)",
-			querier->version, gsq_querier_get_extra (querier, "protocol-version"),
-			gsq_querier_get_extra (querier, "os"), type);
+	
+	gchar *version = gsq_querier_get_version (querier);
+	
+	if (strcmp (gsq_querier_get_protocol (querier), "source") == 0) {
+		gchar *type = gsq_querier_get_extra (querier, "type");
+		client->version = g_strdup_printf (*type ? "%s (%s, %s, %s)" : "%s (%s, %s)",
+				version, gsq_querier_get_extra (querier, "protocol-version"),
+				gsq_querier_get_extra (querier, "os"), type);
+	} else {
+		client->version = g_strdup (version);
+	}
 }
 
 

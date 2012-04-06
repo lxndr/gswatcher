@@ -59,13 +59,14 @@ gui_info_update (GsClient *client)
 {
 	if (client) {
 		gchar *players = g_strdup_printf ("%d / %d",
-				client->querier->numplayers, client->querier->maxplayers);
+				gsq_querier_get_numplayers (client->querier),
+				gsq_querier_get_maxplayers (client->querier));
 		gchar *gamename = gs_client_get_game_name (client, TRUE);
 		
 		gtk_label_set_text (GTK_LABEL (ctl_address), gsq_querier_get_address (client->querier));
-		gtk_label_set_text (GTK_LABEL (ctl_name), client->querier->name);
+		gtk_label_set_text (GTK_LABEL (ctl_name), gsq_querier_get_name (client->querier));
 		gtk_label_set_text (GTK_LABEL (ctl_game), gamename);
-		gtk_label_set_text (GTK_LABEL (ctl_map), client->querier->map);
+		gtk_label_set_text (GTK_LABEL (ctl_map), gsq_querier_get_map (client->querier));
 		gtk_label_set_text (GTK_LABEL (ctl_players), players);
 		gtk_label_set_text (GTK_LABEL (ctl_password), client->password ? _("Yes") : _("No"));
 		gtk_label_set_text (GTK_LABEL (ctl_version), client->version);
