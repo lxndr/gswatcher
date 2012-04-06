@@ -28,6 +28,7 @@
 #include <glib/gprintf.h>
 #include <gobject/gvaluecollector.h>
 #include "proto-gamespy.h"
+#include "proto-gamespy3.h"
 #include "proto-quake3.h"
 #include "proto-source.h"
 #include "querier.h"
@@ -397,6 +398,8 @@ gsq_querier_class_init (GsqQuerierClass *klass)
 			gsq_quake3_query, gsq_quake3_process, NULL);
 	gsq_querier_add_protocol ("gamespy",
 			gsq_gamespy_query, gsq_gamespy_process, gsq_gamespy_free);
+	gsq_querier_add_protocol ("gamespy3",
+			gsq_gamespy3_query, gsq_gamespy3_process, gsq_gamespy3_free);
 }
 
 static void
