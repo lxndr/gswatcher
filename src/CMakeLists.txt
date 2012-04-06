@@ -1,4 +1,4 @@
-pkg_check_modules (GTK3 REQUIRED gtk+-3.0>=3.2)
+pkg_check_modules (GTK3 REQUIRED gtk+-3.0>=3.2 gmodule-2.0)
 if (UNIX AND NOT APPLE)
 	pkg_check_modules (CANBERRA REQUIRED libcanberra)
 endif ()
