@@ -56,9 +56,9 @@ gui_prefs_gamecolumn_changed (GtkComboBox *widget, gpointer udata)
 static void
 gui_prefs_port_changed (GtkAdjustment *adjustment, gpointer udata)
 {
-	guint16 value = (guint16) gtk_adjustment_get_value (adjustment);
-	gsq_querier_set_default_port (value);
-	gs_application_save_preferences (app);
+	//guint16 value = (guint16) gtk_adjustment_get_value (adjustment);
+	// gsq_querier_set_default_port (value);
+	//gs_application_save_preferences (app);
 }
 
 

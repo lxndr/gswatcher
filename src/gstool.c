@@ -291,7 +291,9 @@ gs_application_local_command_line (GApplication *app, gchar ***argumnets,
 	}
 	
 	gs_notification_init (notifier);
-	gsq_querier_set_debug_mode (debug);
+	gsq_set_debug_flags (debug ?
+			GSQ_DEBUG_INCOMING_DATA | GSQ_DEBUG_OUTGOING_DATA | GSQ_DEBUG_EVENT :
+			GSQ_DEBUG_NONE);
 	
 	g_option_context_free (context);
 	return G_APPLICATION_CLASS (gs_application_parent_class)->
@@ -321,6 +323,7 @@ gs_application_startup (GApplication *app)
 	
 	load_preferences (gsapp);
 	load_buddy_list (gsapp);
+	gsq_init (gsapp->default_port);
 	
 	if (gsapp->specific_servers)
 		add_servers (gsapp, gsapp->specific_servers);
@@ -816,8 +819,7 @@ load_preferences (GsApplication *app)
 					g_json_object_get_float (node, "game-column"));
 		
 		if (g_json_object_has (node, "port"))
-			gsq_querier_set_default_port (
-					g_json_object_get_integer (node, "port"));
+			app->default_port = g_json_object_get_integer (node, "port");
 		
 		if (g_json_object_has (node, "connect-command"))
 			gs_client_set_connect_command (g_json_object_get_string (node, "connect-command"));
@@ -855,7 +857,7 @@ load_preferences (GsApplication *app)
 	
 	gui_prefs_set_interval (gs_application_get_interval (app));
 	gui_prefs_set_game_column_mode (gui_slist_get_game_column_mode ());
-	gui_prefs_set_port (gsq_querier_get_default_port ());
+	gui_prefs_set_port (app->default_port);
 	gui_prefs_set_connect_command (gs_client_get_connect_command ());
 	gui_prefs_set_enable_notifications (gs_notification_get_enable ());
 	gui_prefs_set_notification_sound (gs_notification_get_sound ());
@@ -875,7 +877,7 @@ gs_application_save_preferences (GsApplication *app)
 	g_json_object_set_integer (node, "game-column",
 			gui_slist_get_game_column_mode ());
 	g_json_object_set_integer (node, "port",
-			gsq_querier_get_default_port ());
+			app->default_port);
 	g_json_object_set_string (node, "connect-command",
 			gs_client_get_connect_command ());
 	
