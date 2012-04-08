@@ -94,7 +94,8 @@ main (int argc, char **argv)
 	gsq_updater_set_interval (updater, 5.0);
 	for (i = 1; i < argc; i++) {
 		if (strcmp (argv[i], "-d") == 0)
-			gsq_querier_set_debug_mode (TRUE);
+			gsq_set_debug_flags (GSQ_DEBUG_OUTGOING_DATA |
+					GSQ_DEBUG_INCOMING_DATA);
 		else
 			add_server (updater, argv[i]);
 	}

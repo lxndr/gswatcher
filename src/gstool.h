@@ -57,6 +57,7 @@ struct _GsApplication {
 #endif
 	
 	GHashTable *buddy_list;
+	guint16 default_port;
 	gdouble interval;
 	gboolean pause;
 	guint timer;
