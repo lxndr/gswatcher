@@ -30,10 +30,7 @@
 G_BEGIN_DECLS
 
 
-#define GSQ_LOG_DOMAIN "GSQuery"
-
-
-// protocol private data
+/* protocol private data */
 void gsq_querier_set_pdata (GsqQuerier *querier, gpointer pdata);
 gpointer gsq_querier_get_pdata (GsqQuerier *querier);
 

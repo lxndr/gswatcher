@@ -32,6 +32,8 @@
 G_BEGIN_DECLS
 
 
+/* Server querier */
+
 #define GSQ_TYPE_QUERIER			(gsq_querier_get_type ())
 #define GSQ_QUERIER(obj)			(G_TYPE_CHECK_INSTANCE_CAST ((obj), GSQ_TYPE_QUERIER, GsqQuerier))
 #define GSQ_IS_QUERIER(obj)			(G_TYPE_CHECK_INSTANCE_TYPE ((obj), GSQ_TYPE_QUERIER))
@@ -111,13 +113,34 @@ GArray *gsq_querier_get_fields (GsqQuerier *querier);
 GList *gsq_querier_get_players (GsqQuerier *querier);
 GsqPlayer *gsq_querier_find_player (GsqQuerier *querier, const gchar *name);
 
-void gsq_querier_set_default_port (guint16 prot);
-guint16 gsq_querier_get_default_port ();
 
-void gsq_querier_set_debug_mode (gboolean enable);
-gboolean gsq_querier_get_debug_mode ();
-guint16 gsq_querier_get_ipv4_local_port ();
-guint16 gsq_querier_get_ipv6_local_port ();
+/* Base functions */
+
+typedef enum _GsqDebugFlag {
+	GSQ_DEBUG_NONE			= 1 << 0,
+	GSQ_DEBUG_INCOMING_DATA	= 1 << 1,
+	GSQ_DEBUG_OUTGOING_DATA	= 1 << 2,
+	GSQ_DEBUG_EVENT			= 1 << 3
+} GsqDebugFlag;
+
+
+gboolean gsq_init (guint16 default_port);
+void gsq_fini ();
+
+guint16 gsq_get_local_ipv4_port ();
+guint16 gsq_get_local_ipv6_port ();
+
+void gsq_set_debug_flags (GsqDebugFlag flags);
+GsqDebugFlag gsq_get_debug_flags ();
+
+typedef void (*GsqQueryFunc) (GsqQuerier *querier);
+typedef gboolean (*GsqProcessFunc) (GsqQuerier *querier, guint16 qport,
+		const gchar *data, gssize size);
+typedef void (*GsqFreeFunc) (GsqQuerier *querier);
+
+void gsq_register_protocol (const gchar *name, GsqQueryFunc query_fn,
+		GsqProcessFunc process_fn, GsqFreeFunc free_fn);
+void gsq_unregister_protocol (const gchar *name);
 
 
 G_END_DECLS

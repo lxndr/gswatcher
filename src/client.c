@@ -361,7 +361,7 @@ gs_client_enable_log (GsClient *client, gboolean enable)
 		
 		if (client->log_address)
 			g_free (client->log_address);
-		guint16 port = gsq_querier_get_ipv4_local_port (client->querier);
+		guint16 port = gsq_get_local_ipv4_port (client->querier);
 		client->log_address = g_strdup_printf ("%s:%d", userhost, port);
 		g_free (userhost);
 		
