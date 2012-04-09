@@ -39,6 +39,7 @@
 enum {
 	PROP_0,
 	PROP_ADDRESS,
+	PROP_PROTOCOL,
 	PROP_RESET_ADDRESS
 };
 
@@ -50,6 +51,8 @@ enum {
 	SIGNAL_LOG,
 	SIGNAL_TIMEOUT,
 	SIGNAL_ERROR,
+	SIGNAL_MAP_CHANGED,
+	SIGNAL_GAMEID_CHANGED,
 	SIGNAL_PLAYER_ONLINE,
 	SIGNAL_PLAYER_OFFLINE,
 	LAST_SIGNAL
@@ -68,7 +71,7 @@ struct _GsqQuerierPrivate {
 	GsqProtocol *protocol;
 	
 	GString *name;
-	GString *id;
+	GString *gameid;
 	GString *game;
 	GString *mode;
 	GString *map;
@@ -78,6 +81,9 @@ struct _GsqQuerierPrivate {
 	gboolean password;
 	glong ping;
 	GHashTable *extra;
+	
+	guint gameid_hash;
+	guint map_hash;
 	
 	gboolean working;
 	GTimer *timer;
@@ -104,10 +110,8 @@ static guint signals[LAST_SIGNAL] = { 0 };
 static void gsq_querier_resolve (GsqQuerier *querier);
 static void gsq_querier_query (GsqQuerier *querier);
 static void gsq_querier_players_updated (GsqQuerier *querier);
-static void gsq_querier_info_updated (GsqQuerier *querier);
 static gboolean gsq_socket_recveived (GSocket *socket,
 		GIOCondition condition, gpointer udata);
-#define gsq_safefree(ptr) if (ptr) {g_free (ptr); (ptr) = NULL;}
 
 
 G_DEFINE_TYPE (GsqQuerier, gsq_querier, G_TYPE_OBJECT);
@@ -149,12 +153,12 @@ gsq_querier_clear (GsqQuerier *querier)
 {
 	GsqQuerierPrivate *priv = querier->priv;
 	
-	g_string_truncate (priv->name, 0);
-	g_string_truncate (priv->id, 0);
-	g_string_truncate (priv->game, 0);
-	g_string_truncate (priv->mode, 0);
-	g_string_truncate (priv->map, 0);
-	g_string_truncate (priv->version, 0);
+	gsq_querier_set_name (querier, NULL);
+	gsq_querier_set_gameid (querier, NULL);
+	gsq_querier_set_game (querier, NULL);
+	gsq_querier_set_mode (querier, NULL);
+	gsq_querier_set_map (querier, NULL);
+	gsq_querier_set_version (querier, NULL);
 	priv->numplayers = 0;
 	priv->maxplayers = 0;
 	g_hash_table_remove_all (priv->extra);
@@ -196,27 +200,6 @@ gsq_querier_reset (GsqQuerier *querier)
 }
 
 
-static gboolean
-gsq_querier_check_timeout (gpointer udata)
-{
-	GList *iter = servers;
-	while (iter) {
-		GsqQuerier *querier = iter->data;
-		if (querier->priv->iaddr && querier->priv->working) {
-			gdouble time = g_timer_elapsed (querier->priv->timer, NULL);
-			if (time >= 10) {
-				g_signal_emit (querier, signals[SIGNAL_TIMEOUT], 0);
-				gsq_querier_reset (querier);
-			} else if (time >= 3) {
-				gsq_querier_query (querier);
-			}
-		}
-		iter = iter->next;
-	}
-	return TRUE;
-}
-
-
 static void
 gsq_querier_finalize (GObject *object)
 {
@@ -229,12 +212,13 @@ gsq_querier_finalize (GObject *object)
 	g_timer_destroy (priv->timer);
 	gsq_querier_reset (querier);
 	g_string_free (priv->name, TRUE);
-	g_string_free (priv->id, TRUE);
+	g_string_free (priv->gameid, TRUE);
 	g_string_free (priv->game, TRUE);
 	g_string_free (priv->mode, TRUE);
 	g_string_free (priv->map, TRUE);
 	g_string_free (priv->version, TRUE);
-	gsq_safefree (priv->address);
+	if (priv->address)
+		g_free (priv->address);
 	g_hash_table_destroy (priv->extra);
 	g_array_free (priv->fields, TRUE);
 	
@@ -276,6 +260,9 @@ gsq_querier_get_property (GObject *object, guint prop_id, GValue *value,
 	case PROP_ADDRESS:
 		g_value_set_string (value, priv->address);
 		break;
+	case PROP_PROTOCOL:
+		g_value_set_string (value, gsq_querier_get_protocol (querier));
+		break;
 	case PROP_RESET_ADDRESS:
 		g_value_set_boolean (value, priv->reset_address);
 		break;
@@ -297,10 +284,16 @@ gsq_querier_class_init (GsqQuerierClass *klass)
 	g_type_class_add_private (object_class, sizeof (GsqQuerierPrivate));
 	
 	g_object_class_install_property (object_class, PROP_ADDRESS,
-			g_param_spec_string ("address", "Address", "Host and port of the server",
+			g_param_spec_string ("address", "Address",
+			"Host and port of the server",
 			NULL, G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
 	
-	g_object_class_install_property (object_class, PROP_ADDRESS,
+	g_object_class_install_property (object_class, PROP_PROTOCOL,
+			g_param_spec_string ("protocol", "Protocol",
+			"A protocol the querier is using",
+			NULL, G_PARAM_READABLE | G_PARAM_WRITABLE));
+	
+	g_object_class_install_property (object_class, PROP_RESET_ADDRESS,
 			g_param_spec_boolean ("reset-address", "Reset address",
 			"Resolve address again on querier reset",
 			FALSE, G_PARAM_READABLE | G_PARAM_WRITABLE));
@@ -340,6 +333,16 @@ gsq_querier_class_init (GsqQuerierClass *klass)
 			G_STRUCT_OFFSET (GsqQuerierClass, error), NULL, NULL,
 			g_cclosure_marshal_VOID__STRING, G_TYPE_NONE, 1, G_TYPE_STRING);
 	
+	signals[SIGNAL_GAMEID_CHANGED] = g_signal_new ("gameid-changed",
+			G_OBJECT_CLASS_TYPE (klass), G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+			G_STRUCT_OFFSET (GsqQuerierClass, gameid_changed), NULL, NULL,
+			g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
+	
+	signals[SIGNAL_MAP_CHANGED] = g_signal_new ("map-changed",
+			G_OBJECT_CLASS_TYPE (klass), G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+			G_STRUCT_OFFSET (GsqQuerierClass, map_changed), NULL, NULL,
+			g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
+	
 	signals[SIGNAL_PLAYER_ONLINE] = g_signal_new ("player-online",
 			G_OBJECT_CLASS_TYPE (klass), G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
 			G_STRUCT_OFFSET (GsqQuerierClass, player_online), NULL, NULL,
@@ -350,7 +353,6 @@ gsq_querier_class_init (GsqQuerierClass *klass)
 			G_STRUCT_OFFSET (GsqQuerierClass, player_offline), NULL, NULL,
 			g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1, G_TYPE_POINTER);
 	
-	klass->info_update = gsq_querier_info_updated;
 	klass->players_update = gsq_querier_players_updated;
 }
 
@@ -362,7 +364,7 @@ gsq_querier_init (GsqQuerier *querier)
 	GsqQuerierPrivate *priv = querier->priv;
 	
 	priv->name = g_string_sized_new (32);
-	priv->id = g_string_sized_new (2);
+	priv->gameid = g_string_sized_new (2);
 	priv->game = g_string_sized_new (8);
 	priv->mode = g_string_sized_new (4);
 	priv->map = g_string_sized_new (16);
@@ -440,19 +442,21 @@ gsq_querier_get_name (GsqQuerier *querier)
 }
 
 void
-gsq_querier_set_id (GsqQuerier *querier, const gchar *id)
+gsq_querier_set_gameid (GsqQuerier *querier, const gchar *gameid)
 {
 	g_return_if_fail (GSQ_IS_QUERIER (querier));
-	g_string_truncate (querier->priv->id, 0);
-	if (id != NULL)
-		g_string_insert_len (querier->priv->id, -1, id, -1);
+	GsqQuerierPrivate *priv = querier->priv;
+	
+	g_string_truncate (priv->gameid, 0);
+	if (gameid != NULL)
+		g_string_insert_len (priv->gameid, -1, gameid, -1);
 }
 
 gchar *
-gsq_querier_get_id (GsqQuerier *querier)
+gsq_querier_get_gameid (GsqQuerier *querier)
 {
 	g_return_val_if_fail (GSQ_IS_QUERIER (querier), NULL);
-	return querier->priv->id->str;
+	return querier->priv->gameid->str;
 }
 
 void
@@ -491,9 +495,11 @@ void
 gsq_querier_set_map (GsqQuerier *querier, const gchar *map)
 {
 	g_return_if_fail (GSQ_IS_QUERIER (querier));
-	g_string_truncate (querier->priv->map, 0);
+	GsqQuerierPrivate *priv = querier->priv;
+	
+	g_string_truncate (priv->map, 0);
 	if (map != NULL)
-		g_string_insert_len (querier->priv->map, -1, map, -1);
+		g_string_insert_len (priv->map, -1, map, -1);
 }
 
 gchar *
@@ -761,15 +767,6 @@ gsq_querier_add_player (GsqQuerier *querier, const gchar *name, ...)
 }
 
 
-static void
-gsq_querier_info_updated (GsqQuerier *querier)
-{
-	gdouble time = g_timer_elapsed (querier->priv->timer, NULL);
-	querier->priv->ping = (glong) floor (time * 1000);
-	querier->priv->working = FALSE;
-}
-
-
 GsqPlayer *
 gsq_querier_find_player (GsqQuerier *querier, const gchar *name)
 {
@@ -906,19 +903,34 @@ gsq_socket_recveived (GSocket *socket, GIOCondition condition, gpointer udata)
 			priv->update_plist = FALSE;
 			
 			if (priv->protocol) {
-				/* if server starts messing around and sends an odd packet,
-					consider it as an error. perhaprs it might be too harsh */
-				if (!priv->protocol->process (querier, port, data, length))
-					gsq_querier_reset (querier);
+				/* server may send odd data, ignore it */
+				priv->protocol->process (querier, port, data, length);
 			} else {
 				/* this function sets priv->protocol,
 					that's how we know if it succeeds */
 				gsq_querier_detect (querier, port, data, length);
 			}
 			
+			gdouble time = g_timer_elapsed (querier->priv->timer, NULL);
+			querier->priv->ping = (glong) floor (time * 1000);
+			querier->priv->working = FALSE;
+			
 			if (priv->protocol) {
-				if (priv->update_sinfo)
+				if (priv->update_sinfo) {
 					g_signal_emit (querier, signals[SIGNAL_INFO_UPDATE], 0);
+					
+					guint hash = g_string_hash (priv->gameid);
+					if (hash != priv->gameid_hash) {
+						g_signal_emit (querier, signals[SIGNAL_GAMEID_CHANGED], 0);
+						priv->gameid_hash = hash;
+					}
+					
+					hash = g_string_hash (priv->map);
+					if (hash != priv->map_hash) {
+						g_signal_emit (querier, signals[SIGNAL_MAP_CHANGED], 0);
+						priv->map_hash = hash;
+					}
+				}
 				if (priv->update_plist)
 					g_signal_emit (querier, signals[SIGNAL_PLAYER_UPDATE], 0);
 				break;
@@ -935,6 +947,27 @@ gsq_socket_recveived (GSocket *socket, GIOCondition condition, gpointer udata)
 
 
 /* Base functions */
+
+static gboolean
+check_timeout (gpointer udata)
+{
+	GList *iter = servers;
+	while (iter) {
+		GsqQuerier *querier = iter->data;
+		if (querier->priv->iaddr && querier->priv->working) {
+			gdouble time = g_timer_elapsed (querier->priv->timer, NULL);
+			if (time >= 10) {
+				g_signal_emit (querier, signals[SIGNAL_TIMEOUT], 0);
+				gsq_querier_reset (querier);
+			} else if (time >= 3) {
+				gsq_querier_query (querier);
+			}
+		}
+		iter = iter->next;
+	}
+	return TRUE;
+}
+
 
 gboolean
 gsq_init (guint16 default_port)
@@ -1003,7 +1036,7 @@ gsq_init (guint16 default_port)
 			gsq_gamespy3_process,
 			gsq_gamespy3_free);
 	
-	g_timeout_add_seconds (1, gsq_querier_check_timeout, NULL);
+	g_timeout_add_seconds (1, check_timeout, NULL);
 	
 	return ip4sock != NULL && ip6sock != NULL;
 }

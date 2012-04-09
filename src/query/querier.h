@@ -62,6 +62,8 @@ struct _GsqQuerierClass {
 	void (*log) (GsqQuerier *querier, const gchar *msg);
 	void (*timeout) (GsqQuerier *querier);
 	void (*error) (GsqQuerier *querier, const gchar *msg);
+	void (*gameid_changed) (GsqQuerier *querier);
+	void (*map_changed) (GsqQuerier *quereir);
 	void (*player_online) (GsqQuerier *querier, GsqPlayer *player);
 	void (*player_offline) (GsqQuerier *querier, GsqPlayer *player);
 };
@@ -82,8 +84,8 @@ GsqQuerier* gsq_querier_new (const gchar *address);
 
 void gsq_querier_set_name (GsqQuerier *querier, const gchar *name);
 gchar *gsq_querier_get_name (GsqQuerier *querier);
-void gsq_querier_set_id (GsqQuerier *querier, const gchar *id);
-gchar *gsq_querier_get_id (GsqQuerier *querier);
+void gsq_querier_set_gameid (GsqQuerier *querier, const gchar *gameid);
+gchar *gsq_querier_get_gameid (GsqQuerier *querier);
 void gsq_querier_set_game (GsqQuerier *querier, const gchar *game);
 gchar *gsq_querier_get_game (GsqQuerier *querier);
 void gsq_querier_set_mode (GsqQuerier *querier, const gchar *mode);
