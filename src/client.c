@@ -150,12 +150,12 @@ gs_client_new (const gchar *address)
 	g_return_val_if_fail (address != NULL, NULL);
 	GsClient *client = g_object_new (GS_TYPE_CLIENT, NULL);
 	
-	client->querier = gsq_watcher_new (address);
+	client->querier = gsq_querier_new (address);
 	g_signal_connect (client->querier, "resolve",
 			G_CALLBACK (gs_client_querier_resolved), client);
 	g_signal_connect (client->querier, "info-update",
 			G_CALLBACK (gs_client_querier_info_updated), client);
-	g_signal_connect (client->querier, "map-change",
+	g_signal_connect (client->querier, "map-changed",
 			G_CALLBACK (gs_client_watcher_map_changed), client);
 	g_signal_connect (client->querier, "log",
 			G_CALLBACK (gs_client_querier_log), client);

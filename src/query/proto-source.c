@@ -288,7 +288,7 @@ get_server_info (GsqQuerier *querier, gchar *p)
 			break;
 	}
 	
-	gsq_querier_set_id (querier, game_id);
+	gsq_querier_set_gameid (querier, game_id);
 	gsq_querier_set_game (querier, game_name);
 	gsq_querier_set_mode (querier, game_mode);
 	gsq_querier_emit_info_update (querier);
@@ -314,7 +314,7 @@ get_server_info_gold (GsqQuerier *querier, gchar *p)
 	gboolean secure = get_byte (&p);					// Secure
 	
 	if (strcmp (dir, "cstrike") == 0) {
-		gsq_querier_set_id (querier, "cs");
+		gsq_querier_set_gameid (querier, "cs");
 		gsq_querier_set_game (querier, "Counter-Strike");
 	}
 	
@@ -386,11 +386,9 @@ source_process2 (GsqQuerier *querier, gchar *p)
 		if (!priv->newprotocol)
 			get_server_info_gold (querier, p);
 		break;
-	case 'D': {
-		gchar *game_id = gsq_querier_get_id (querier);
-		if (*game_id)
-			get_player_list (querier, p);
-		} break;
+	case 'D':
+		get_player_list (querier, p);
+		break;
 	case 'R':
 		gsq_querier_emit_log (querier, p);
 		break;

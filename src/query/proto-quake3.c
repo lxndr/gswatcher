@@ -153,14 +153,14 @@ get_sinfo (GsqQuerier *querier, gchar *data, gsize length, guint16 qport)
 	}
 	
 	/* check game port */
-	if (!*gsq_querier_get_id (querier)) {
+	if (!*gsq_querier_get_gameid (querier)) {
 		gchar *id = g_hash_table_lookup (values, "gamename");
 		const Q3Game *spec = find_spec (id);
 		if (spec) {
-			gsq_querier_set_id (querier, spec->id);
+			gsq_querier_set_gameid (querier, spec->id);
 			gsq_querier_set_game (querier, spec->name);
 		} else {
-			gsq_querier_set_id (querier, id);
+			gsq_querier_set_gameid (querier, id);
 			gsq_querier_set_game (querier, id);
 		}
 		

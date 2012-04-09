@@ -27,7 +27,7 @@
 
 
 #include <gtk/gtk.h>
-#include "query/watcher.h"
+#include "query/querier.h"
 #include "query/console.h"
 
 
