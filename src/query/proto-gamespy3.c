@@ -185,14 +185,14 @@ gsq_gamespy3_process (GsqQuerier *querier, guint16 qport, const gchar *data,
 			gchar *gameid = gsq_lookup_value (priv->info,
 					"gamename", "p268435717", NULL);
 			if (strcmp (gameid, "unreal3") == 0) {
-				gsq_querier_set_id (querier, "ut3");
+				gsq_querier_set_gameid (querier, "ut3");
 				gsq_querier_set_game (querier, "Unreal Tournament 3");
 				gsq_querier_add_field (querier, N_("Score"), G_TYPE_INT);
 				gsq_querier_add_field (querier, N_("Deaths"), G_TYPE_INT);
 				gsq_querier_add_field (querier, N_("Team"), G_TYPE_STRING);
 				gsq_querier_add_field (querier, N_("Ping"), G_TYPE_INT);
 			} else if (strcmp (gameid, "battlefield2") == 0) {
-				gsq_querier_set_id (querier, "bf2");
+				gsq_querier_set_gameid (querier, "bf2");
 				gsq_querier_set_game (querier, "Battlefield 2");
 				gsq_querier_add_field (querier, N_("Score"), G_TYPE_INT);
 				gsq_querier_add_field (querier, N_("Deaths"), G_TYPE_INT);
@@ -201,7 +201,7 @@ gsq_gamespy3_process (GsqQuerier *querier, guint16 qport, const gchar *data,
 				gsq_querier_add_field (querier, N_("Ping"), G_TYPE_INT);
 			} else if ((strcmp (gameid, "stella") == 0 || strcmp (gameid, "stellad") == 0) &&
 					strcmp ("bf2142", g_hash_table_lookup (priv->info, "gamevariant")) == 0) {
-				gsq_querier_set_id (querier, "bf2142");
+				gsq_querier_set_gameid (querier, "bf2142");
 				gsq_querier_set_game (querier, "Battlefield 2142");
 				gsq_querier_add_field (querier, N_("Score"), G_TYPE_INT);
 				gsq_querier_add_field (querier, N_("Deaths"), G_TYPE_INT);
