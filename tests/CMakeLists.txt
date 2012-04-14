@@ -20,17 +20,3 @@ add_executable (test-querier
 target_link_libraries (test-querier
 		${GLIB_LIBRARIES}
 		${GS_LIBRARIES})
-
-add_executable (test-watcher
-		../src/query/querier.c
-		../src/query/watcher.c
-		../src/query/proto-gamespy.c
-		../src/query/proto-gamespy3.c
-		../src/query/proto-quake3.c
-		../src/query/proto-source.c
-		../src/query/updater.c
-		../src/query/utils.c
-		test-watcher.c)
-target_link_libraries (test-watcher
-		${GLIB_LIBRARIES}
-		${GS_LIBRARIES})
