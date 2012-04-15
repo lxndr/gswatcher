@@ -717,12 +717,11 @@ gsq_querier_update (GsqQuerier *querier)
 	if (querier->priv->working)
 		return;
 	
+	querier->priv->working = TRUE;
 	if (querier->priv->iaddr) {
-		querier->priv->working = TRUE;
 		g_timer_reset (querier->priv->timer);
 		gsq_querier_query (querier);
 	} else {
-		querier->priv->working = TRUE;
 		gsq_querier_resolve (querier);
 	}
 }
@@ -877,7 +876,7 @@ gsq_socket_recveived (GSocket *socket, GIOCondition condition, gpointer udata)
 	
 	length = g_socket_receive_from (socket, &saddr, data, 4095, NULL, NULL);
 	/* certain servers may send very short spammy messages.
-			such messages can never have useful information */
+			assume that such messages can never have useful information */
 	if (length < 5) {
 		if (saddr)
 			g_object_unref (saddr);
