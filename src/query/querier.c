@@ -731,7 +731,10 @@ gsq_querier_update (GsqQuerier *querier)
 void
 gsq_querier_add_field (GsqQuerier *querier, const gchar *name, GType type)
 {
+	g_return_if_fail (GSQ_IS_QUERIER (querier));
+	g_return_if_fail (name != NULL);
 	g_return_if_fail (querier->priv->players == NULL);
+	g_return_if_fail (querier->priv->newplayers == NULL);
 	
 	GsqField field;
 	field.name = g_strdup (name);

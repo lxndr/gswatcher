@@ -362,41 +362,42 @@ get_player_list (GsqQuerier *querier, gchar *p)
 
 
 static gboolean
-source_process2 (GsqQuerier *querier, gchar *p)
+source_process2 (GsqQuerier *querier, gchar *p, gssize size)
 {
 	Private *priv = gsq_querier_get_pdata (querier);
 	gint type = get_byte (&p);
 	
 	switch (type) {
-	case 'A': {
-		memcpy (priv->plist_query, "\xFF\xFF\xFF\xFF\x55", 5);
-		memcpy (priv->plist_query + 5, p, 4);
-		
-		/* request player list right away */
-		guint32 port = gsq_querier_get_gport (querier);
-		if (port == 0)
-			port = 27015;
-		gsq_querier_send (querier, port, priv->plist_query, 9);
-		} break;
+	case 'A':
+		if (size == 9) {
+			memcpy (priv->plist_query, "\xFF\xFF\xFF\xFF\x55", 5);
+			memcpy (priv->plist_query + 5, p, 4);
+			
+			/* request player list right away */
+			guint32 port = gsq_querier_get_gport (querier);
+			if (port == 0)
+				port = 27015;
+			gsq_querier_send (querier, port, priv->plist_query, 9);
+			return TRUE;
+		}
+		break;
 	case 'I':
 		get_server_info (querier, p);
 		priv->newprotocol = TRUE;
-		break;
+		return TRUE;
 	case 'm':
 		if (!priv->newprotocol)
 			get_server_info_gold (querier, p);
-		break;
+		return TRUE;
 	case 'D':
 		get_player_list (querier, p);
-		break;
+		return TRUE;
 	case 'R':
 		gsq_querier_emit_log (querier, p);
-		break;
-	default:
-		return FALSE;
+		return TRUE;
 	}
 	
-	return TRUE;
+	return FALSE;
 }
 
 
@@ -456,14 +457,28 @@ gsq_source_process (GsqQuerier *querier, guint16 qport,
 	gint format = get_long (&p);
 	
 	if (format == -1) {
-		if (!source_process2 (querier, p))
+		if (!source_process2 (querier, p, size))
 			return FALSE;
 	} else if (format == -2) {
-		gint reqid = get_long (&p);
-		gboolean compressed = reqid >= 0x10000000;
-		gint maxpackets = get_byte (&p);
-		gint numpacket = get_byte (&p);
-		guint16 length = get_short (&p);
+		gint reqid, maxpackets, numpacket;
+		gboolean compressed;
+		guint16 length;
+		
+		reqid = get_long (&p);
+		compressed = reqid >> 7;
+		
+		if (*((gint32 *) (p + 1)) == -1) {
+			/* GoldSource way */
+			guint8 c = get_byte (&p);
+			maxpackets = c & 0x0F;
+			numpacket = c >> 4;
+			length = size - (p - data);
+		} else {
+			/* Source way */
+			maxpackets = get_byte (&p);
+			numpacket = get_byte (&p);
+			length = get_short (&p);
+		}
 		
 		/* perform some checks */
 		if (compressed) {
@@ -471,16 +486,20 @@ gsq_source_process (GsqQuerier *querier, guint16 qport,
 			return FALSE;
 		}
 		
-		if (maxpackets < 2)
+		if (maxpackets < 2 || numpacket >= maxpackets)
 			return FALSE;
 		if (length > 1248)
 			return FALSE;
 		
 		if (priv->reqid != reqid) {
 			free_packets (priv->packets);
-			g_array_set_size (priv->packets, maxpackets);
 			priv->reqid = reqid;
 		}
+		
+		if (priv->packets->len == 0)
+			g_array_set_size (priv->packets, maxpackets);
+		else if (maxpackets != priv->packets->len)
+			return FALSE;
 		
 		Packet *pkt = &g_array_index (priv->packets, Packet, numpacket);
 		pkt->length = length;
@@ -489,7 +508,7 @@ gsq_source_process (GsqQuerier *querier, guint16 qport,
 		if (got_all_packets (priv->packets, maxpackets)) {
 			gsize datasize;
 			p = assemble_packets (priv->packets, &datasize);
-			gboolean ret = source_process2 (querier, p + 4);
+			gboolean ret = source_process2 (querier, p + 4, size);
 			g_slice_free1 (datasize, p);
 			free_packets (priv->packets);
 			priv->reqid = 0;
