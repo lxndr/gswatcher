@@ -367,6 +367,12 @@ source_process2 (GsqQuerier *querier, gchar *p, gssize size)
 	Private *priv = gsq_querier_get_pdata (querier);
 	gint type = get_byte (&p);
 	
+	if ((type == 'A' || type == 'I' || type == 'm' || type == 'D' || type == 'R') &&
+			gsq_querier_get_fields (querier)->len == 0) {
+		gsq_querier_add_field (querier, "Kills", G_TYPE_INT);
+		gsq_querier_add_field (querier, "Time", G_TYPE_STRING);
+	}
+	
 	switch (type) {
 	case 'A':
 		if (size == 9) {
@@ -514,11 +520,6 @@ gsq_source_process (GsqQuerier *querier, guint16 qport,
 			priv->reqid = 0;
 			return ret;
 		}
-	}
-	
-	if (gsq_querier_get_fields (querier)->len == 0) {
-		gsq_querier_add_field (querier, "Kills", G_TYPE_INT);
-		gsq_querier_add_field (querier, "Time", G_TYPE_STRING);
 	}
 	
 	return TRUE;
