@@ -1,10 +1,4 @@
-pkg_check_modules (GLIB REQUIRED glib-2.0>=2.30 gobject-2.0>=2.30 gio-2.0>=2.30)
-
-if (WIN32)
-	set (GS_LIBRARIES m)
-else ()
-	set (GS_LIBRARIES m)
-endif ()
+set (GS_LIBRARIES m)
 
 include_directories (${GLIB_INCLUDE_DIRS})
 

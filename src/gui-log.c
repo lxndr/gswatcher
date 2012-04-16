@@ -49,17 +49,15 @@ gui_log_setup (GsClient *client)
 		gtk_text_view_set_buffer (GTK_TEXT_VIEW (logview), client->log_buffer);
 		gtk_text_buffer_get_end_iter (client->log_buffer, &iter);
 		
-		GtkTextMark *mark = gtk_text_buffer_create_mark (client->log_buffer, NULL, &iter, TRUE);
+		GtkTextMark *mark = gtk_text_buffer_create_mark (client->log_buffer,
+				NULL, &iter, TRUE);
 		gtk_text_view_scroll_mark_onscreen (GTK_TEXT_VIEW (logview), mark);
 		gtk_text_buffer_delete_mark (client->log_buffer, mark);
-		
-		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (auto_button), client->log_auto);
 	} else {
 		gtk_widget_set_sensitive (page, FALSE);
 		gtk_widget_set_sensitive (toolbar, FALSE);
 		
 		gtk_text_view_set_buffer (GTK_TEXT_VIEW (logview), NULL);
-		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (auto_button), FALSE);
 	}
 }
 
