@@ -140,7 +140,7 @@ gs_window_about_clicked (GtkButton *button)
 #endif
 			"logo-icon-name", "gstool",
 			"version", GS_VERSION,
-			"website", "http://gstool.sourceforge.net",
+			"website", GS_HOMEPAGE,
 			"website-label", _("Offical Web Page"),
 			NULL);
 }
