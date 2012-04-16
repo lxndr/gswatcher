@@ -88,15 +88,15 @@ gui_plist_update (GsClient *client)
 	GArray *fields;
 	guint i;
 	
+	if (!client)
+		return;
+	
 	/* store selected player */
 	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (listview));
 	if (gtk_tree_selection_get_selected (selection, &model, &iter))
 		gtk_tree_model_get (model, &iter, 0, &selected, -1);
 	liststore = GTK_LIST_STORE (model);
 	gtk_list_store_clear (liststore);
-	
-	if (!client)
-		goto finish;
 	
 	fields = gsq_querier_get_fields (client->querier);
 	iplayer = gsq_querier_get_players (client->querier);
@@ -115,7 +115,6 @@ gui_plist_update (GsClient *client)
 		iplayer = iplayer->next;
 	}
 	
-finish:
 	if (selected)
 		g_free (selected);
 }

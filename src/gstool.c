@@ -215,7 +215,7 @@ initialize_paths (GsApplication *app, const gchar *exe)
 	g_free (config_dir);
 	
 #ifdef GS_DATADIR
-	gchar *data_dir = GS_DATADIR;
+	gchar *data_dir = g_build_filename (GS_DATADIR, "gstool", NULL);
 #else
 	gchar *data_dir = g_build_filename (root_dir, "share", "gstool", NULL);
 #endif
@@ -226,15 +226,13 @@ initialize_paths (GsApplication *app, const gchar *exe)
 	
 #ifdef ENABLE_NLS
 #ifdef GS_LOCALEDIR
-	app->locale_dir = GS_LOCALEDIR;
+	app->locale_dir = g_strdup (GS_LOCALEDIR);
 #else
 	app->locale_dir = g_build_filename (root_dir, "share", "locale", NULL);
 #endif
 #endif
 	
-#ifndef GS_DATADIR
 	g_free (data_dir);
-#endif
 	g_free (root_dir);
 }
 

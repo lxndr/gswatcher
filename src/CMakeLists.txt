@@ -1,8 +1,3 @@
-pkg_check_modules (GTK3 REQUIRED gtk+-3.0>=3.2 gmodule-2.0)
-if (UNIX AND NOT APPLE)
-	pkg_check_modules (CANBERRA REQUIRED libcanberra)
-endif ()
-
 if (APPLE)
 	add_definitions (-DG_OS_MACOSX)
 endif ()
@@ -15,15 +10,23 @@ else ()
 	set (GS_LIBRARIES m)
 endif ()
 
-include_directories (${GTK3_INCLUDE_DIRS} ${CANBERRA_INCLUDE_DIRS})
+include_directories (${GLIB_INCLUDE_DIRS} ${GTK3_INCLUDE_DIRS}
+		${CANBERRA_INCLUDE_DIRS})
+
 add_definitions (
 		-DGETTEXT_PACKAGE=\"gstool\"
-		-DGS_VERSION=\"${GS_VERSION}\")
-if (CMAKE_INSTALL_DATADIR)
-	add_definitions (-DGS_DATADIR=\"${CMAKE_INSTALL_DATADIR}\")
+		-DGS_VERSION=\"${GS_VERSION}\"
+		-DGS_HOMEPAGE=\"${GS_HOMEPAGE}\")
+
+if (GSTOOL_ABS_PATHS)
+	add_definitions (-DGS_DATADIR=\"${CMAKE_INSTALL_FULL_DATAROOTDIR}\")
 endif ()
-if (CMAKE_INSTALL_LOCALEDIR)
-	add_definitions (-DENABLE_NLS -DGS_LOCALEDIR=\"${CMAKE_INSTALL_LOCALEDIR}\")
+
+if (GSTOOL_ENABLE_NLS)
+	add_definitions (-DENABLE_NLS)
+	if (GSTOOL_ABS_PATHS)
+		add_definitions (-DGS_LOCALEDIR=\"${CMAKE_INSTALL_FULL_LOCALEDIR}\")
+	endif ()
 endif ()
 
 add_executable (gstool
@@ -48,10 +51,13 @@ add_executable (gstool
 		gui-notification.c
 		gui-log.c
 		gui-chat.c)
+
 target_link_libraries (gstool
+		${GLIB_LIBRARIES}
 		${GTK3_LIBRARIES}
 		${CANBERRA_LIBRARIES}
 		${GEOIP_LIBRARIES}
 		${GS_LIBRARIES})
 
-install (TARGETS gstool DESTINATION bin)
+install (TARGETS gstool
+		DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
