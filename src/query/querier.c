@@ -913,12 +913,12 @@ gsq_socket_recveived (GSocket *socket, GIOCondition condition, gpointer udata)
 				gsq_querier_detect (querier, port, data, length);
 			}
 			
-			gdouble time = g_timer_elapsed (querier->priv->timer, NULL);
-			querier->priv->ping = (glong) floor (time * 1000);
-			querier->priv->working = FALSE;
-			
 			if (priv->protocol) {
 				if (priv->update_sinfo) {
+					gdouble time = g_timer_elapsed (querier->priv->timer, NULL);
+					querier->priv->ping = (glong) floor (time * 1000);
+					querier->priv->working = FALSE;
+					
 					g_signal_emit (querier, signals[SIGNAL_INFO_UPDATE], 0);
 					
 					guint hash = g_string_hash (priv->gameid);
