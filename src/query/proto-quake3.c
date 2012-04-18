@@ -171,8 +171,8 @@ get_sinfo (GsqQuerier *querier, gchar *data, gsize length, guint16 qport)
 			return FALSE;
 		}
 		
-		gsq_querier_add_field (querier, _("Score"), G_TYPE_INT);
-		gsq_querier_add_field (querier, _("Ping"), G_TYPE_INT);
+		gsq_querier_add_field (querier, N_("Score"), G_TYPE_INT);
+		gsq_querier_add_field (querier, N_("Ping"), G_TYPE_INT);
 	}
 	
 	/* server name */
