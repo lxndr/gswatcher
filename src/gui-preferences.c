@@ -128,7 +128,6 @@ gs_prefs_create ()
 	PangoAttrList *bold = pango_attr_list_new ();
 	PangoAttribute *attr = pango_attr_weight_new (PANGO_WEIGHT_BOLD);
 	pango_attr_list_insert (bold, attr);
-//	pango_attribute_destroy (attr);
 	
 	GtkWidget *grid = gtk_grid_new ();
 	g_object_set (G_OBJECT (grid),
