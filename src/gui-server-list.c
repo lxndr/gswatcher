@@ -448,8 +448,10 @@ gui_slist_get_game_column_mode ()
 void
 gui_slist_set_visible (gboolean seen)
 {
-	if (seen && !visible)
+	if (seen && !visible) {
+		visible = TRUE;
 		gui_slist_update_all ();
+	}
 	visible = seen;
 }
 
