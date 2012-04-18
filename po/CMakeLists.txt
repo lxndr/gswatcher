@@ -23,6 +23,10 @@ add_custom_command (
 		src/gui-log.c
 		src/gui-preferences.c
 		src/gui-info.c
+		src/query/proto-gamespy.c
+		src/query/proto-gamespy3.c
+		src/query/proto-quake3.c
+		src/query/proto-source.c
 	DEPENDS
 		../src/client.c
 		../src/gstool.c
@@ -34,6 +38,10 @@ add_custom_command (
 		../src/gui-log.c
 		../src/gui-preferences.c
 		../src/gui-info.c
+		../src/query/proto-gamespy.c
+		../src/query/proto-gamespy3.c
+		../src/query/proto-quake3.c
+		../src/query/proto-source.c
 	COMMENT
 		"Generating PO template file")
 
