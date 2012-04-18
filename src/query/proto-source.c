@@ -26,6 +26,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <glib/gprintf.h>
+#include <glib/gi18n.h>
 #include "utils.h"
 #include "querier-private.h"
 #include "proto-source.h"
@@ -369,8 +370,8 @@ source_process2 (GsqQuerier *querier, gchar *p, gssize size)
 	
 	if ((type == 'A' || type == 'I' || type == 'm' || type == 'D' || type == 'R') &&
 			gsq_querier_get_fields (querier)->len == 0) {
-		gsq_querier_add_field (querier, "Kills", G_TYPE_INT);
-		gsq_querier_add_field (querier, "Time", G_TYPE_STRING);
+		gsq_querier_add_field (querier, N_("Kills"), G_TYPE_INT);
+		gsq_querier_add_field (querier, N_("Time"), G_TYPE_STRING);
 	}
 	
 	switch (type) {
