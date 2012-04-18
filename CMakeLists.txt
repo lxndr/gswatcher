@@ -8,9 +8,9 @@ set (GS_LANGUAGES ru)
 include (GNUInstallDirs)
 find_package (PkgConfig)
 
-pkg_check_modules (GLIB REQUIRED glib-2.0>=2.30 gobject-2.0>=2.30
-		gio-2.0>=2.30 gmodule-2.0>=2.30)
-pkg_check_modules (GTK3 REQUIRED gtk+-3.0>=3.2)
+pkg_check_modules (GLIB REQUIRED glib-2.0>=2.32 gobject-2.0>=2.32
+		gio-2.0>=2.32 gmodule-2.0>=2.32)
+pkg_check_modules (GTK3 REQUIRED gtk+-3.0>=3.4)
 if (UNIX AND NOT APPLE)
 	pkg_check_modules (CANBERRA REQUIRED libcanberra)
 endif ()
