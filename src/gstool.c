@@ -98,6 +98,7 @@ gs_application_init (GsApplication *app)
 {
 	app->buddy_list = g_hash_table_new_full (g_str_hash, g_str_equal, NULL,
 			(GDestroyNotify) free_buddy);
+	app->default_port = 27500;
 }
 
 
