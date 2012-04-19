@@ -51,14 +51,14 @@ gui_prefs_gamecolumn_changed (GtkComboBox *widget, gpointer udata)
 	gui_slist_set_game_column_mode (gtk_combo_box_get_active (widget));
 	gs_application_save_preferences (app);
 }
-														
+
 
 static void
 gui_prefs_port_changed (GtkAdjustment *adjustment, gpointer udata)
 {
-	//guint16 value = (guint16) gtk_adjustment_get_value (adjustment);
-	// gsq_querier_set_default_port (value);
-	//gs_application_save_preferences (app);
+	guint16 value = (guint16) gtk_adjustment_get_value (adjustment);
+	app->default_port = value;
+	gs_application_save_preferences (app);
 }
 
 
