@@ -32,7 +32,6 @@
 
 #if defined (G_OS_UNIX)
 	#ifndef G_OS_MACOSX
-		#include <canberra.h>
 		#include <gdk/gdkx.h>
 	#endif
 	#include <unistd.h>
@@ -57,12 +56,105 @@ static gint timeout = 5;
 
 
 
-// Sound notification    =======================================================
+/*                            Sound notification                              */
 
 static gchar *sound_file = NULL;
-#if defined (G_OS_UNIX) && !defined (G_OS_MACOSX)
-static ca_context *ca = NULL;
-#endif
+static gchar *sound_default_playbins[] = {
+		"gst-launch-0.10 --quiet playbin2 uri=file://$(file)",
+		"mplayer -quiet -novideo -noar -noconsolecontrols -nojoystick -nolirc -nomouseinput $(file)",
+		"vlc $(file)",
+		NULL
+	};
+static gchar *sound_specific_playbin = NULL;
+static gchar **sound_argv = NULL;
+static GPid sound_pid = 0;
+
+
+static gboolean
+eval_playbin_cmd_cb (const GMatchInfo *minfo, GString *result, gpointer udata)
+{
+	gchar *match = g_match_info_fetch (minfo, 0);
+	if (strcmp (match, "$(file)") == 0) {
+		gchar *fname = g_shell_quote (sound_file);
+		g_string_append (result, fname);
+		g_free (fname);
+	} else {
+		g_string_append_printf (result, "%s", match);
+	}
+	g_free (match);
+	return FALSE;
+}
+
+static gchar *
+eval_playbin_cmd (const gchar *cmd)
+{
+	GRegex *reg = g_regex_new ("\\$\\(.+\\)", 0, 0, NULL);
+	gchar *command = g_regex_replace_eval (reg, cmd, -1, 0, 0,
+			eval_playbin_cmd_cb, NULL, NULL);
+	g_regex_unref (reg);
+	return command;
+}
+
+
+static gboolean
+check_playbin_cmd (const gchar *cmd)
+{
+	GError *error = NULL;
+	gint argc;
+	
+	gchar *cmdline = eval_playbin_cmd (cmd);
+	if (!g_shell_parse_argv (cmdline, &argc, &sound_argv, &error)) {
+		g_warning ("%s", error->message);
+		g_error_free (error);
+		g_free (cmdline);
+		return FALSE;
+	}
+	g_free (cmdline);
+	
+	if (argc <= 1) {
+		g_strfreev (sound_argv);
+		sound_argv = NULL;
+		return FALSE;
+	}
+	
+	gchar *path = g_find_program_in_path (sound_argv[0]);
+	if (!path) {
+		g_strfreev (sound_argv);
+		sound_argv = NULL;
+		return FALSE;
+	}
+	
+	g_free (sound_argv[0]);
+	sound_argv[0] = path;
+	return TRUE;
+}
+
+static void
+update_playbin_cmd ()
+{
+	if (sound_specific_playbin) {
+		check_playbin_cmd (sound_specific_playbin);
+	} else {
+		gint i;
+		for (i = 0; i < 3; i++)
+			if (check_playbin_cmd (sound_default_playbins[i]))
+				break;
+	}
+}
+
+void
+gs_notification_set_playbin (const gchar *cmd)
+{
+	if (sound_specific_playbin) {
+		g_free (sound_specific_playbin);
+		sound_specific_playbin = NULL;
+	}
+	
+	if (cmd)
+		sound_specific_playbin = g_strdup (cmd);
+	
+	update_playbin_cmd ();
+}
 
 
 void
@@ -75,6 +167,8 @@ gs_notification_set_sound (const gchar *sound)
 		sound_file = g_strdup (sound);
 	else
 		sound_file = g_build_filename (app->sound_dir, "alert01.ogg", NULL);
+	
+	update_playbin_cmd ();
 }
 
 const gchar *
@@ -85,16 +179,31 @@ gs_notification_get_sound ()
 
 
 static void
+playbin_died (GPid pid, gint status, gpointer data)
+{
+	sound_pid = 0;
+}
+
+void
 gs_notification_sound ()
 {
-	if (!sound_file)
+	GError *error = NULL;
+	
+	if (sound_pid)
+		g_spawn_close_pid (sound_pid);
+	
+	if (sound_argv == NULL)
 		return;
 	
-#if defined (G_OS_UNIX) && !defined (G_OS_MACOSX)
-	ca_context_play (ca, 0, "media.filename", sound_file, NULL);
-#elif defined (G_OS_WIN32)
-	PlaySound (sound_file, NULL, SND_FILENAME | SND_ASYNC);
-#endif
+	if (!g_spawn_async (NULL, sound_argv, NULL,
+			G_SPAWN_DO_NOT_REAP_CHILD | G_SPAWN_STDOUT_TO_DEV_NULL,
+			NULL, NULL, &sound_pid, &error)) {
+		g_warning (error->message);
+		g_error_free (error);
+		return;
+	}
+	
+	g_child_watch_add (sound_pid, playbin_died, NULL);
 }
 
 
@@ -444,7 +553,6 @@ gs_notification_init (gboolean notifier)
 	
 #if defined (G_OS_UNIX) && !defined (G_OS_MACOSX)
 	internal = notifier;
-	ca_context_create (&ca);
 	
 	if (!internal) {
 		GModule *libnotify = g_module_open ("libnotify.so", G_MODULE_BIND_LAZY);

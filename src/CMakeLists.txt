@@ -10,8 +10,7 @@ else ()
 	set (GS_LIBRARIES m)
 endif ()
 
-include_directories (${GLIB_INCLUDE_DIRS} ${GTK3_INCLUDE_DIRS}
-		${CANBERRA_INCLUDE_DIRS})
+include_directories (${GLIB_INCLUDE_DIRS} ${GTK3_INCLUDE_DIRS})
 
 add_definitions (
 		-DGETTEXT_PACKAGE=\"gstool\"
@@ -55,7 +54,6 @@ add_executable (gstool
 target_link_libraries (gstool
 		${GLIB_LIBRARIES}
 		${GTK3_LIBRARIES}
-		${CANBERRA_LIBRARIES}
 		${GEOIP_LIBRARIES}
 		${GS_LIBRARIES})
 
