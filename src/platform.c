@@ -42,3 +42,28 @@ gs_get_system_font ()
 	
 	return g_strdup (GS_DEFAULT_MONOSPACE_FONT);
 }
+
+
+gchar *
+gs_quote_win32_file_name (const gchar *fname)
+{
+	g_return_val_if_fail (fname != NULL, NULL);
+	
+	GString *s = g_string_sized_new (64);
+	
+	while (*fname) {
+		switch (*fname) {
+		case '\'':
+			g_string_append (s, "'\\''");
+			break;
+		case '\\':
+			g_string_append (s, "\\\\");
+			break;
+		default:
+			g_string_append_c (s, *fname);
+		}
+		++fname;
+	}
+	
+	return g_string_free (s, FALSE);
+}

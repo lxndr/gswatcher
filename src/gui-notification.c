@@ -27,6 +27,7 @@
 #include <glib/gprintf.h>
 #include <string.h>
 #include "gstool.h"
+#include "platform.h"
 #include "gui-notification.h"
 
 
@@ -60,7 +61,11 @@ static gint timeout = 5;
 
 static gchar *sound_file = NULL;
 static gchar *sound_default_playbins[] = {
+#ifdef G_OS_WIN32
+		"gst-launch-0.10.exe --quiet playbin2 uri='file:///$(file)'",
+#else
 		"gst-launch-0.10 --quiet playbin2 uri=file://$(file)",
+#endif
 		"mplayer -quiet -novideo -noar -noconsolecontrols -nojoystick -nolirc -nomouseinput $(file)",
 		"vlc $(file)",
 		NULL
@@ -68,6 +73,7 @@ static gchar *sound_default_playbins[] = {
 static gchar *sound_specific_playbin = NULL;
 static gchar **sound_argv = NULL;
 static GPid sound_pid = 0;
+static guint sound_pid_watch = 0;
 
 
 static gboolean
@@ -75,7 +81,11 @@ eval_playbin_cmd_cb (const GMatchInfo *minfo, GString *result, gpointer udata)
 {
 	gchar *match = g_match_info_fetch (minfo, 0);
 	if (strcmp (match, "$(file)") == 0) {
+#ifdef G_OS_WIN32
+		gchar *fname = gs_quote_win32_file_name (sound_file);
+#else
 		gchar *fname = g_shell_quote (sound_file);
+#endif
 		g_string_append (result, fname);
 		g_free (fname);
 	} else {
@@ -182,6 +192,7 @@ static void
 playbin_died (GPid pid, gint status, gpointer data)
 {
 	sound_pid = 0;
+	sound_pid_watch = 0;
 }
 
 void
@@ -189,8 +200,12 @@ gs_notification_sound ()
 {
 	GError *error = NULL;
 	
-	if (sound_pid)
+	if (sound_pid) {
+		g_source_remove (sound_pid_watch);
 		g_spawn_close_pid (sound_pid);
+		sound_pid_watch = 0;
+		sound_pid = 0;
+	}
 	
 	if (sound_argv == NULL)
 		return;
@@ -203,7 +218,7 @@ gs_notification_sound ()
 		return;
 	}
 	
-	g_child_watch_add (sound_pid, playbin_died, NULL);
+	sound_pid_watch = g_child_watch_add (sound_pid, playbin_died, NULL);
 }
 
 
