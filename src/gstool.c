@@ -255,6 +255,7 @@ gs_application_local_command_line (GApplication *app, gchar ***argumnets,
 	gboolean version = FALSE;
 	gboolean debug = FALSE;
 	gboolean notifier = FALSE;
+	gchar *playbin = NULL;
 	
 	GError *error = NULL;
 	GOptionContext *context;
@@ -271,6 +272,8 @@ gs_application_local_command_line (GApplication *app, gchar ***argumnets,
 		{"notifier", 'n', 0, G_OPTION_ARG_NONE, &notifier,
 				N_("Use internal notifier"), NULL},
 #endif
+		{"playbin", 'p', 0, G_OPTION_ARG_STRING, &playbin,
+				N_("Command to play sounds"), NULL},
 		{NULL}
 	};
 	
@@ -279,7 +282,7 @@ gs_application_local_command_line (GApplication *app, gchar ***argumnets,
 	g_option_context_add_main_entries (context, options, NULL);
 	
 	if (!g_option_context_parse (context, &argc, &argv, &error)) {
-		g_printerr (error->message);
+		g_printerr ("%s\n", error->message);
 		exit (EXIT_FAILURE);
 	}
 	
@@ -292,6 +295,8 @@ gs_application_local_command_line (GApplication *app, gchar ***argumnets,
 	gsq_set_debug_flags (debug ?
 			GSQ_DEBUG_INCOMING_DATA | GSQ_DEBUG_OUTGOING_DATA | GSQ_DEBUG_EVENT :
 			GSQ_DEBUG_NONE);
+	if (playbin)
+		gs_notification_set_playbin (playbin);
 	
 	g_option_context_free (context);
 	return G_APPLICATION_CLASS (gs_application_parent_class)->

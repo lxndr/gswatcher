@@ -82,6 +82,13 @@ gs_prefs_sound_changed (GtkFileChooserButton *widget, gpointer udata)
 
 
 static void
+gs_prefs_sound_test_clicked (GtkButton *button, gpointer udata)
+{
+	gs_notification_sound ();
+}
+
+
+static void
 gui_prefs_sysfont_toggled (GtkToggleButton *togglebutton, gpointer udata)
 {
 	gboolean value = gtk_toggle_button_get_active (togglebutton);
@@ -257,7 +264,15 @@ gs_prefs_create ()
 			"hexpand", TRUE,
 			NULL);
 	g_signal_connect (ctl_nsound, "file-set", G_CALLBACK (gs_prefs_sound_changed), NULL);
-	gtk_grid_attach (GTK_GRID (grid), ctl_nsound, 1, 7, 1, 1);
+	
+	GtkWidget *test_button = gtk_button_new_from_stock (GTK_STOCK_MEDIA_PLAY);
+	g_signal_connect (test_button, "clicked",
+			G_CALLBACK (gs_prefs_sound_test_clicked), NULL);
+	
+	GtkWidget *sound_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+	gtk_box_pack_start (GTK_BOX (sound_box), ctl_nsound, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (sound_box), test_button, FALSE, TRUE, 0);
+	gtk_grid_attach (GTK_GRID (grid), sound_box, 1, 7, 1, 1);
 	
 	label = gtk_label_new (_("_Sound:"));
 	g_object_set (G_OBJECT (label),

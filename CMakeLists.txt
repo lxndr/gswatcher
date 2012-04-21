@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.8)
 project (gstool C)
 
-set (GS_VERSION "1.0")
+set (GS_VERSION "1.0b1")
 set (GS_HOMEPAGE "http://gstool.sourceforge.net")
 set (GS_LANGUAGES ru)
 
@@ -11,9 +11,6 @@ find_package (PkgConfig)
 pkg_check_modules (GLIB REQUIRED glib-2.0>=2.32 gobject-2.0>=2.32
 		gio-2.0>=2.32 gmodule-2.0>=2.32)
 pkg_check_modules (GTK3 REQUIRED gtk+-3.0>=3.4)
-if (UNIX AND NOT APPLE)
-	pkg_check_modules (CANBERRA REQUIRED libcanberra)
-endif ()
 
 
 option (GSTOOL_BUILD_TESTS "Build tests" ON)
