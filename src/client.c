@@ -416,6 +416,8 @@ gs_client_set_connect_command (const gchar *command)
 gchar *
 gs_client_get_connect_command ()
 {
+	if (!connect_command)
+		connect_command = g_strdup ("steam://connect/$(address)");
 	return connect_command;
 }
 
