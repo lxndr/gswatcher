@@ -13,7 +13,7 @@ endif ()
 include_directories (${GLIB_INCLUDE_DIRS} ${GTK3_INCLUDE_DIRS})
 
 add_definitions (
-		-DGETTEXT_PACKAGE=\"gstool\"
+		-DGETTEXT_PACKAGE=\"gswatcher\"
 		-DGS_VERSION=\"${GS_VERSION}\"
 		-DGS_HOMEPAGE=\"${GS_HOMEPAGE}\")
 
@@ -28,7 +28,7 @@ if (GSTOOL_ENABLE_NLS)
 	endif ()
 endif ()
 
-add_executable (gstool
+add_executable (gswatcher
 		query/querier.c
 		query/proto-gamespy.c
 		query/proto-gamespy3.c
@@ -39,7 +39,7 @@ add_executable (gstool
 		platform.c
 		client.c
 		json.c
-		gstool.c
+		gswatcher.c
 		gui-buddy-list.c
 		gui-console.c
 		gui-info.c
@@ -51,11 +51,11 @@ add_executable (gstool
 		gui-log.c
 		gui-chat.c)
 
-target_link_libraries (gstool
+target_link_libraries (gswatcher
 		${GLIB_LIBRARIES}
 		${GTK3_LIBRARIES}
 		${GEOIP_LIBRARIES}
 		${GS_LIBRARIES})
 
-install (TARGETS gstool
+install (TARGETS gswatcher
 		DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})

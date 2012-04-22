@@ -1,7 +1,7 @@
 /* 
  * gui-window.c
  * 
- * Copyright (C) 2011-2012 GSTool Developer(s)
+ * Copyright (C) 2011-2012 GSWatcher Developer(s)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public License as
@@ -24,7 +24,7 @@
 
 #include <glib/gprintf.h>
 #include "gui-window.h"
-#include "gstool.h"
+#include "gswatcher.h"
 #include "gui-server-list.h"
 #include "gui-info.h"
 #include "gui-player-list.h"
@@ -133,12 +133,12 @@ gs_window_about_clicked (GtkButton *button)
 	};
 	
 	gtk_show_about_dialog (GTK_WINDOW (window),
-			"program-name", "Game Server Tool",
+			"program-name", "Game Server Watcher",
 			"authors", authors,
 #if GTK_MAJOR_VERSION == 3
 			"license-type", GTK_LICENSE_GPL_3_0,
 #endif
-			"logo-icon-name", "gstool",
+			"logo-icon-name", "gswatcher",
 			"version", GS_VERSION,
 			"website", GS_HOMEPAGE,
 			"website-label", _("Offical Web Page"),
@@ -331,7 +331,7 @@ GtkWidget *
 gui_window_create ()
 {
 /* tray icon */
-	trayicon = gtk_status_icon_new_from_icon_name ("gstool");
+	trayicon = gtk_status_icon_new_from_icon_name ("gswatcher");
 	g_object_set (G_OBJECT (trayicon),
 			"title", _("Game Server Tool"),
 			"tooltip-text", _("Game Server Tool"),
@@ -547,7 +547,7 @@ gui_window_create ()
 	GtkWidget *blist_label = gui_window_create_tablabel (GTK_STOCK_ORIENTATION_PORTRAIT, _("Buddy list"));
 	
 /* preference tab */
-	GtkWidget *prefs = gs_prefs_create ();
+	GtkWidget *prefs = gui_prefs_create ();
 	
 	GtkWidget *prefs_label = gui_window_create_tablabel (GTK_STOCK_PREFERENCES, _("Preferences"));
 	
@@ -571,8 +571,8 @@ gui_window_create ()
 	
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	g_object_set (G_OBJECT (window),
-			"title",			"Game Server Tool",
-			"icon-name",		"gstool",
+			"title",			"Game Server Watcher",
+			"icon-name",		"gswatcher",
 			"default-width",	win_width,
 			"default-height",	win_height,
 			"hide-titlebar-when-maximized", TRUE,

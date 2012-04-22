@@ -1,7 +1,7 @@
 /* 
  * gui-window.h
  * 
- * Copyright (C) 2011-2012 GSTool Developer(s)
+ * Copyright (C) 2011-2012 GSWatcher Developer(s)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public License as
@@ -29,7 +29,7 @@
 #include <glib/gi18n-lib.h>
 #include <gtk/gtk.h>
 #include "json.h"
-#include "gstool.h"
+#include "gswatcher.h"
 
 
 extern GtkWidget *window;

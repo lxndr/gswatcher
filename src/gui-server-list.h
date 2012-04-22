@@ -1,7 +1,7 @@
 /* 
  * gui-server-list.h
  * 
- * Copyright (C) 2011-2012 GSTool Developer(s)
+ * Copyright (C) 2011-2012 GSWatcher Developer(s)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public License as
@@ -22,11 +22,11 @@
 
 
 
-#ifndef __GSTOOL__SERVER_LIST_H__
-#define __GSTOOL__SERVER_LIST_H__
+#ifndef __GUI__SERVER_LIST_H__
+#define __GUI__SERVER_LIST_H__
 
 #include <gtk/gtk.h>
-#include "gstool.h"
+#include "gswatcher.h"
 
 
 typedef enum _GuiGameColumnMode {

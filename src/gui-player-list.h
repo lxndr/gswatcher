@@ -1,7 +1,7 @@
 /* 
  * gui-player-list.h
  * 
- * Copyright (C) 2011-2012 GSTool Developer(s)
+ * Copyright (C) 2011-2012 GSWatcher Developer(s)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public License as
@@ -22,8 +22,8 @@
 
 
 
-#ifndef __GSTOOL__PLAEYR_LIST_H__
-#define __GSTOOL__PLAYER_LIST_H__
+#ifndef __GUI__PLAEYR_LIST_H__
+#define __GUI__PLAYER_LIST_H__
 
 #include <gtk/gtk.h>
 #include "client.h"
