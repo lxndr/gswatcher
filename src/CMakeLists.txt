@@ -17,13 +17,13 @@ add_definitions (
 		-DGS_VERSION=\"${GS_VERSION}\"
 		-DGS_HOMEPAGE=\"${GS_HOMEPAGE}\")
 
-if (GSTOOL_ABS_PATHS)
+if (GSWATCHER_ABS_PATHS)
 	add_definitions (-DGS_DATADIR=\"${CMAKE_INSTALL_FULL_DATAROOTDIR}\")
 endif ()
 
-if (GSTOOL_ENABLE_NLS)
+if (GSWATCHER_ENABLE_NLS)
 	add_definitions (-DENABLE_NLS)
-	if (GSTOOL_ABS_PATHS)
+	if (GSWATCHER_ABS_PATHS)
 		add_definitions (-DGS_LOCALEDIR=\"${CMAKE_INSTALL_FULL_LOCALEDIR}\")
 	endif ()
 endif ()

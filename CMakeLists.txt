@@ -13,9 +13,9 @@ pkg_check_modules (GLIB REQUIRED glib-2.0>=2.32 gobject-2.0>=2.32
 pkg_check_modules (GTK3 REQUIRED gtk+-3.0>=3.4)
 
 
-option (GSTOOL_BUILD_TESTS "Build tests" ON)
-option (GSTOOL_ENABLE_NLS "National language support" ON)
-option (GSTOOL_ABS_PATHS "Use absolute paths" ON)
+option (GSWATCHER_BUILD_TESTS "Build tests" ON)
+option (GSWATCHER_ENABLE_NLS "National language support" ON)
+option (GSWATCHER_ABS_PATHS "Use absolute paths" ON)
 
 
 set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -DDEBUG")
@@ -25,24 +25,24 @@ set (CMAKE_EXE_LINKER_FLAGS_PROFILE "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -pg")
 
 
 add_subdirectory (src)
-if (GSTOOL_ENABLE_NLS)
+if (GSWATCHER_ENABLE_NLS)
 	add_subdirectory (po)
 endif ()
-if (GSTOOL_BUILD_TESTS)
+if (GSWATCHER_BUILD_TESTS)
 	add_subdirectory (tests)
 endif ()
 
 
-install (FILES icons/gstool.png
+install (FILES icons/gswatcher.png
 			DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/pixmaps)
 install (DIRECTORY icons/flags
-			DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/gstool/icons
+			DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/gswatcher/icons
 			FILES_MATCHING PATTERN "*.png")
 install (DIRECTORY icons/games
-			DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/gstool/icons
+			DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/gswatcher/icons
 			FILES_MATCHING PATTERN "*.png")
 install (DIRECTORY sounds
-			DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/gstool)
+			DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/gswatcher)
 install (FILES gstool.desktop
 			DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/applications)
 install (FILES LICENSE README
