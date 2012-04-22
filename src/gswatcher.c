@@ -1,7 +1,7 @@
 /* 
- * gstool.c
+ * gswatcher.c
  * 
- * Copyright (C) 2011-2012 GSTool Developer(s)
+ * Copyright (C) 2011-2012 GSWatcher Developer(s)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public License as
@@ -27,7 +27,7 @@
 #include <glib/gprintf.h>
 #include "json.h"
 #include "gui-window.h"
-#include "gstool.h"
+#include "gswatcher.h"
 #include "platform.h"
 #include "gui-server-list.h"
 #include "gui-console.h"
@@ -182,7 +182,7 @@ gs_application_get_property (GObject *object, guint prop_id, GValue *value,
 GsApplication *
 gs_application_new ()
 {
-	return g_object_new (GS_TYPE_APPLICATION, "application-id", "org.gstool",
+	return g_object_new (GS_TYPE_APPLICATION, "application-id", "org.gswatcher",
 			"flags", G_APPLICATION_FLAGS_NONE, NULL);
 }
 
@@ -206,7 +206,7 @@ initialize_paths (GsApplication *app, const gchar *exe)
 	g_free (exepath);
 	g_object_unref (fexe);
 	
-	gchar *config_dir = g_build_filename (g_get_user_config_dir (), "gstool", NULL);
+	gchar *config_dir = g_build_filename (g_get_user_config_dir (), "gswatcher", NULL);
 	g_mkdir_with_parents (config_dir, 0750);
 	
 	app->buddy_list_path = g_build_filename (config_dir, "buddylist.json", NULL);
@@ -216,9 +216,9 @@ initialize_paths (GsApplication *app, const gchar *exe)
 	g_free (config_dir);
 	
 #ifdef GS_DATADIR
-	gchar *data_dir = g_build_filename (GS_DATADIR, "gstool", NULL);
+	gchar *data_dir = g_build_filename (GS_DATADIR, "gswatcher", NULL);
 #else
-	gchar *data_dir = g_build_filename (root_dir, "share", "gstool", NULL);
+	gchar *data_dir = g_build_filename (root_dir, "share", "gswatcher", NULL);
 #endif
 	
 	app->icon_dir = g_build_filename (data_dir, "icons", NULL);

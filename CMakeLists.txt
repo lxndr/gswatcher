@@ -1,8 +1,8 @@
 cmake_minimum_required (VERSION 2.8)
 project (gstool C)
 
-set (GS_VERSION "1.0b1")
-set (GS_HOMEPAGE "http://gstool.sourceforge.net")
+set (GS_VERSION "1.5b1")
+set (GS_HOMEPAGE "http://gswatcher.sourceforge.net")
 set (GS_LANGUAGES ru)
 
 include (GNUInstallDirs)

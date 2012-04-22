@@ -1,7 +1,7 @@
 /* 
  * gui-preferences.h
  * 
- * Copyright (C) 2011-2012 GSTool Developer(s)
+ * Copyright (C) 2011-2012 GSWatcher Developer(s)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public License as
@@ -22,14 +22,14 @@
 
 
 
-#ifndef __GSTOOL__PREFERENCES_H__
-#define __GSTOOL__PREFERENCES_H__
+#ifndef __GUI__PREFERENCES_H__
+#define __GUI__PREFERENCES_H__
 
 #include <gtk/gtk.h>
-#include "gstool.h"
+#include "gswatcher.h"
 
 
-GtkWidget *gs_prefs_create ();
+GtkWidget *gui_prefs_create ();
 
 void gui_prefs_set_interval (gdouble interval);
 void gui_prefs_set_game_column_mode (GuiGameColumnMode mode);

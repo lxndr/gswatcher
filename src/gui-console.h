@@ -1,7 +1,7 @@
 /* 
  * gui-console.h
  * 
- * Copyright (C) 2011-2012 GSTool Developer(s)
+ * Copyright (C) 2011-2012 GSWatcher Developer(s)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public License as
@@ -22,8 +22,8 @@
 
 
 
-#ifndef __GSTOOL__CONSOLE_H__
-#define __GSTOOL__CONSOLE_H__
+#ifndef __GUI__CONSOLE_H__
+#define __GUI__CONSOLE_H__
 
 #include <gtk/gtk.h>
 #include "client.h"
