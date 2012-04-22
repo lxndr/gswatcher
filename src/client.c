@@ -359,14 +359,32 @@ gs_client_enable_log (GsClient *client, gboolean enable)
 			return;
 		}
 		
-		if (client->log_address)
+		if (client->log_address) {
 			g_free (client->log_address);
-		guint16 port = gsq_get_local_ipv4_port (client->querier);
-		client->log_address = g_strdup_printf ("%s:%d", userhost, port);
+			client->log_address = NULL;
+		}
+		
+		GError *error = NULL;
+		GResolver *resolver = g_resolver_get_default ();
+		GList *addresses = g_resolver_lookup_by_name (resolver, userhost,
+				NULL, &error);
+		if (!addresses) {
+			g_free (userhost);
+			g_object_unref (resolver);
+			return;
+		}
+		g_object_unref (resolver);
+		g_free (userhost);
+		
+		userhost = g_inet_address_to_string (addresses->data);
+		if (userport == 0)
+			userport = gsq_get_local_ipv4_port (client->querier);
+		
+		client->log_address = g_strdup_printf ("%s:%d", userhost, userport);
 		g_free (userhost);
 		
 		gchar *cmd = g_strdup_printf ("logaddress_add %s;log on", client->log_address);
-		gsq_console_send_full (client->console, cmd, 5,
+		gsq_console_send_full (client->console, cmd, 3,
 				(GAsyncReadyCallback) log_command_callback, client);
 		g_free (cmd);
 	} else {
