@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.7\n"
 "Report-Msgid-Bugs-To: lxndr87@users.sourceforge.net\n"
-"POT-Creation-Date: 2012-04-18 09:57+0400\n"
-"PO-Revision-Date: 2012-03-11 17:36+0400\n"
+"POT-Creation-Date: 2012-04-23 01:32+0400\n"
+"PO-Revision-Date: 2012-04-23 17:36+0400\n"
 "Last-Translator: Alexander AB\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -30,47 +30,51 @@ msgstr "Отключён"
 msgid "You have to provide a log address"
 msgstr "Укажите адрес для лога"
 
-#: src/gstool.c:263
+#: src/gswatcher.c:265
 msgid "Show version number and exit"
 msgstr "Показать версию и выйти"
 
-#: src/gstool.c:265
+#: src/gswatcher.c:267
 msgid "Start minimized in system tray"
 msgstr "Запустить свёрнутым"
 
-#: src/gstool.c:267
+#: src/gswatcher.c:269
 msgid "Output all packets into stdout"
 msgstr "Выводить пакеты в стандартный вывод"
 
-#: src/gstool.c:269
+#: src/gswatcher.c:271
 msgid "Watch only this server"
 msgstr "Следить только за этим сервером"
 
-#: src/gstool.c:272
+#: src/gswatcher.c:274
 msgid "Use internal notifier"
 msgstr "Использовать свой уведомитель"
 
-#: src/gstool.c:378
+#: src/gswatcher.c:277
+msgid "Command to play sounds"
+msgstr ""
+
+#: src/gswatcher.c:384
 #, c-format
 msgid "Couldn't save buddy list: %s"
 msgstr "Не удалось сохранить список друзей: %s"
 
-#: src/gstool.c:480
+#: src/gswatcher.c:486
 #, c-format
 msgid "Couldn't load buddy list: %s"
 msgstr "Не удалось загрузить список друзей: %s"
 
-#: src/gstool.c:529
+#: src/gswatcher.c:535
 #, c-format
 msgid "Couldn't save server list: %s"
 msgstr "Не удалось сохранить список серверов: %s"
 
-#: src/gstool.c:617
+#: src/gswatcher.c:623
 #, c-format
 msgid "Player %s has connected"
 msgstr "Игрок %s подключился"
 
-#: src/gstool.c:618 src/gstool.c:648
+#: src/gswatcher.c:624 src/gswatcher.c:654
 #, c-format
 msgid ""
 "Address: %s\n"
@@ -81,17 +85,17 @@ msgstr ""
 "Сервер: %s\n"
 "Игроки: %d / %d"
 
-#: src/gstool.c:647
+#: src/gswatcher.c:653
 #, c-format
 msgid "Server with %s has free slot"
 msgstr "На сервере с %s есть свободный слот"
 
-#: src/gstool.c:737
+#: src/gswatcher.c:743
 #, c-format
 msgid "Are you sure you want to remove \"%s\" ( %s) from the list?"
 msgstr "Вы уверены, что хотите удалить \"%s\" (%s) из списка?"
 
-#: src/gstool.c:900
+#: src/gswatcher.c:906
 #, c-format
 msgid "Couldn't save preferences to %s: %s"
 msgstr "Настройки не сохранены"
@@ -140,7 +144,7 @@ msgstr "Выйти"
 msgid "Information"
 msgstr "Информация"
 
-#: src/gui-window.c:494 src/gui-preferences.c:273
+#: src/gui-window.c:494 src/gui-preferences.c:287
 msgid "Console"
 msgstr "Консоль"
 
@@ -156,32 +160,32 @@ msgstr "Чат"
 msgid "Timeout"
 msgstr "Таймаут"
 
-#: src/gui-server-list.c:562
+#: src/gui-server-list.c:564
 msgid "Favorite servers"
 msgstr "Любимые сервера"
 
-#: src/gui-server-list.c:573
+#: src/gui-server-list.c:575
 msgid "Other servers"
 msgstr "Другие сервера"
 
-#: src/gui-server-list.c:592
+#: src/gui-server-list.c:594
 msgctxt "Server"
 msgid "Name"
 msgstr "Название"
 
-#: src/gui-server-list.c:634
+#: src/gui-server-list.c:636
 msgid "Game"
 msgstr "Игра"
 
-#: src/gui-server-list.c:654
+#: src/gui-server-list.c:656
 msgid "Map"
 msgstr "Карта"
 
-#: src/gui-server-list.c:669
+#: src/gui-server-list.c:671
 msgid "Players"
 msgstr "Игроки"
 
-#: src/gui-server-list.c:684 src/query/proto-gamespy.c:117
+#: src/gui-server-list.c:686 src/query/proto-gamespy.c:117
 #: src/query/proto-gamespy.c:121 src/query/proto-gamespy.c:125
 #: src/query/proto-gamespy.c:128 src/query/proto-gamespy3.c:193
 #: src/query/proto-gamespy3.c:201 src/query/proto-gamespy3.c:210
@@ -231,63 +235,63 @@ msgstr "Выкл."
 msgid "Keep on"
 msgstr "Держать включенным"
 
-#: src/gui-preferences.c:141
+#: src/gui-preferences.c:147
 msgid "General"
 msgstr "Основные"
 
-#: src/gui-preferences.c:161
+#: src/gui-preferences.c:167
 msgid "Update _interval:"
 msgstr "_Частота обновления:"
 
-#: src/gui-preferences.c:173
+#: src/gui-preferences.c:179
 msgid "Icon only"
 msgstr "Только значки"
 
-#: src/gui-preferences.c:175
+#: src/gui-preferences.c:181
 msgid "Game name"
 msgstr "Название игры"
 
-#: src/gui-preferences.c:177
+#: src/gui-preferences.c:183
 msgid "Game name and game mode if known"
 msgstr "Название игры и игровой режим"
 
-#: src/gui-preferences.c:183
+#: src/gui-preferences.c:189
 msgid "_Game column:"
 msgstr "Колонка \"_Игра\""
 
-#: src/gui-preferences.c:204
+#: src/gui-preferences.c:210
 msgid "Port:"
 msgstr "Порт:"
 
-#: src/gui-preferences.c:222
+#: src/gui-preferences.c:228
 msgid "Connect command:"
 msgstr "Команда подключения:"
 
-#: src/gui-preferences.c:232
+#: src/gui-preferences.c:238
 msgid "Notifications"
 msgstr "Уведомления"
 
-#: src/gui-preferences.c:246
+#: src/gui-preferences.c:252
 msgid "E_nable"
 msgstr "_Включить"
 
-#: src/gui-preferences.c:255
+#: src/gui-preferences.c:261
 msgid "Choose notification sound"
 msgstr "Выберите звук уведомлений"
 
-#: src/gui-preferences.c:263
+#: src/gui-preferences.c:277
 msgid "_Sound:"
 msgstr "_Звук"
 
-#: src/gui-preferences.c:287
+#: src/gui-preferences.c:301
 msgid "Use s_ystem monospace font"
 msgstr "Использовать _системный шрифт"
 
-#: src/gui-preferences.c:304
+#: src/gui-preferences.c:318
 msgid "_Font:"
 msgstr "_Шрифт"
 
-#: src/gui-preferences.c:321
+#: src/gui-preferences.c:335
 msgid "_Log address:"
 msgstr "Обратный адрес для _журнала"
 

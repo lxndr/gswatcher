@@ -14,7 +14,7 @@ add_custom_command (
 		--directory=${CMAKE_SOURCE_DIR} --from-code=UTF-8
 		--msgid-bugs-address=lxndr87@users.sourceforge.net
 		src/client.c
-		src/gstool.c
+		src/gswatcher.c
 		src/gui-window.c
 		src/gui-server-list.c
 		src/gui-player-list.c
@@ -29,7 +29,7 @@ add_custom_command (
 		src/query/proto-source.c
 	DEPENDS
 		../src/client.c
-		../src/gstool.c
+		../src/gswatcher.c
 		../src/gui-window.c
 		../src/gui-server-list.c
 		../src/gui-player-list.c
