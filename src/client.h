@@ -1,7 +1,7 @@
 /* 
- * client.h: a layer between GsqWatcher and the GUI
+ * client.h: a layer between GsqQuerier and the GUI
  * 
- * Copyright (C) 2011-2012 GSTool Developer(s)
+ * Copyright (C) 2011-2012 GSWatcher Developer(s)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public License as
@@ -22,8 +22,8 @@
 
 
 
-#ifndef __GSTOOL__CLIENT_H__
-#define __GSTOOL__CLIENT_H__
+#ifndef __GSWATCHER__CLIENT_H__
+#define __GSWATCHER__CLIENT_H__
 
 
 #include <gtk/gtk.h>

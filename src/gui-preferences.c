@@ -1,7 +1,7 @@
 /* 
  * gui-preferences.c
  * 
- * Copyright (C) 2011-2012 GSTool Developer(s)
+ * Copyright (C) 2011-2012 GSWatcher Developer(s)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public License as
@@ -128,7 +128,7 @@ gui_prefs_connect_changed (GtkEntry *entry, gpointer user_data)
 
 														
 GtkWidget *
-gs_prefs_create ()
+gui_prefs_create ()
 {
 	GtkWidget *box, *label, *tmp;
 	
