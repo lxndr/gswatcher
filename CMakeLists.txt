@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.8)
-project (gstool C)
+project (gswatcher C)
 
 set (GS_VERSION "1.5b1")
 set (GS_HOMEPAGE "http://gswatcher.sourceforge.net")
@@ -11,6 +11,14 @@ find_package (PkgConfig)
 pkg_check_modules (GLIB REQUIRED glib-2.0>=2.32 gobject-2.0>=2.32
 		gio-2.0>=2.32 gmodule-2.0>=2.32)
 pkg_check_modules (GTK3 REQUIRED gtk+-3.0>=3.4)
+
+if (WIN32)
+	find_library (GEOIP_LIBRARIES GeoIP ws2_32)
+else ()
+	find_library (GEOIP_LIBRARIES GeoIP)
+endif ()
+
+set (GS_LIBRARIES m)
 
 
 option (GSWATCHER_BUILD_TESTS "Build tests" ON)
@@ -43,9 +51,7 @@ install (DIRECTORY icons/games
 			FILES_MATCHING PATTERN "*.png")
 install (DIRECTORY sounds
 			DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/gswatcher)
-install (FILES gstool.desktop
+install (FILES gswatcher.desktop
 			DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/applications)
 install (FILES LICENSE README
 			DESTINATION ${CMAKE_INSTALL_FULL_DOCDIR})
-
-

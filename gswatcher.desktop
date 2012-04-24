@@ -1,9 +1,9 @@
 [Desktop Entry]
 Encoding=UTF-8
-Name=Game Server Tool
+Name=Game Server Watcher
 Comment=A simple game server browser and an administrative tool
-Exec=gstool
-Icon=gstool
+Exec=gswatcher
+Icon=gswatcher
 Terminal=false
 Type=Application
 Categories=Network;
