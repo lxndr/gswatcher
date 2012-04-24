@@ -2,14 +2,6 @@ if (APPLE)
 	add_definitions (-DG_OS_MACOSX)
 endif ()
 
-if (WIN32)
-	set (GEOIP_LIBRARIES GeoIP ws2_32)
-	set (GS_LIBRARIES winmm m)
-else ()
-	set (GEOIP_LIBRARIES GeoIP)
-	set (GS_LIBRARIES m)
-endif ()
-
 include_directories (${GLIB_INCLUDE_DIRS} ${GTK3_INCLUDE_DIRS})
 
 add_definitions (
