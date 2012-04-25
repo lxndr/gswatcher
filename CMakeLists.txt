@@ -13,9 +13,9 @@ pkg_check_modules (GLIB REQUIRED glib-2.0>=2.32 gobject-2.0>=2.32
 pkg_check_modules (GTK3 REQUIRED gtk+-3.0>=3.4)
 
 if (WIN32)
-	find_library (GEOIP_LIBRARIES GeoIP ws2_32)
+	set (GEOIP_LIBRARIES GeoIP ws2_32)
 else ()
-	find_library (GEOIP_LIBRARIES GeoIP)
+	set (GEOIP_LIBRARIES GeoIP)
 endif ()
 
 set (GS_LIBRARIES m)
