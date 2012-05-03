@@ -23,7 +23,6 @@
 
 
 #include <string.h>
-#include <glib/gprintf.h>
 #include <gio/gio.h>
 #include "utils.h"
 #include "console.h"
@@ -37,28 +36,18 @@ enum {
 };
 
 enum {
-	SIGNAL_CONNECT,
-	SIGNAL_DISCONNECT,
+	SIGNAL_CONNECTED,
+	SIGNAL_DISCONNECTED,
+	SIGNAL_AUTHENTICATED,
 	LAST_SIGNAL
 };
 
 
 typedef struct _Request {
 	gchar *command;
-	gchar key[14];	/* with this key we can found out if respond is complite */
-	GString *output;
 	GSimpleAsyncResult *result;
 	gint attempts;
 } Request;
-
-typedef struct _Packet {
-	gint32 size;
-	gint32 id;
-	gint32 type;
-	gchar data[4096];
-	gchar *p;
-	gsize left;
-} Packet;
 
 struct _GsqConsolePrivate {
 	gchar *address;
@@ -70,7 +59,8 @@ struct _GsqConsolePrivate {
 	gboolean working;
 	gboolean authenticated;
 	GList *queue;
-	Packet packet;
+	guint chunk_size;
+	GByteArray *chunk;
 };
 
 
@@ -98,25 +88,28 @@ gsq_console_finalize (GObject *object)
 	
 	if (priv->address)
 		g_free (priv->address);
+	
 	if (priv->password)
 		g_free (priv->password);
 	
 	while (priv->queue) {
 		Request *req = priv->queue->data;
 		g_free (req->command);
-		g_string_free (req->output, TRUE);
 		g_object_unref (req->result);
-		priv->queue = priv->queue->next;
+		priv->queue = g_list_delete_link (priv->queue, priv->queue);
 	}
 	
 	if (priv->socket) {
 		g_socket_close (priv->socket, NULL);
 		g_object_unref (priv->socket);
 	}
+	
 	if (priv->timer) {
 		g_source_remove (priv->timer);
 		priv->timer = 0;
 	}
+	
+	g_byte_array_free (priv->chunk, TRUE);
 }
 
 
@@ -188,14 +181,19 @@ gsq_console_class_init (GsqConsoleClass *class)
 			g_param_spec_uint ("timeout", "Timeout", "Timeout",
 			0, 120, 10, G_PARAM_WRITABLE | G_PARAM_READABLE | G_PARAM_CONSTRUCT));
 	
-	signals[SIGNAL_CONNECT] = g_signal_new ("connect",
-			G_OBJECT_CLASS_TYPE (class), G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-			G_STRUCT_OFFSET (GsqConsoleClass, connect), NULL, NULL,
+	signals[SIGNAL_CONNECTED] = g_signal_new ("connected",
+			G_OBJECT_CLASS_TYPE (class), G_SIGNAL_RUN_FIRST,
+			G_STRUCT_OFFSET (GsqConsoleClass, connected), NULL, NULL,
 			g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
 	
-	signals[SIGNAL_DISCONNECT] = g_signal_new ("disconnect",
+	signals[SIGNAL_DISCONNECTED] = g_signal_new ("disconnected",
+			G_OBJECT_CLASS_TYPE (class), G_SIGNAL_RUN_FIRST,
+			G_STRUCT_OFFSET (GsqConsoleClass, disconnected), NULL, NULL,
+			g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
+	
+	signals[SIGNAL_AUTHENTICATED] = g_signal_new ("authenticated",
 			G_OBJECT_CLASS_TYPE (class), G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-			G_STRUCT_OFFSET (GsqConsoleClass, disconnect), NULL, NULL,
+			G_STRUCT_OFFSET (GsqConsoleClass, authenticated), NULL, NULL,
 			g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
 }
 
@@ -204,13 +202,7 @@ gsq_console_init (GsqConsole *console)
 {
 	console->priv = G_TYPE_INSTANCE_GET_PRIVATE (console, GSQ_TYPE_CONSOLE,
 			GsqConsolePrivate);
-}
-
-GsqConsole *
-gsq_console_new (const gchar *address)
-{
-	g_return_val_if_fail (address != NULL, NULL);
-	return g_object_new (GSQ_TYPE_CONSOLE, "address", address, NULL);
+	console->priv->chunk = g_byte_array_new ();
 }
 
 
@@ -247,18 +239,12 @@ gsq_console_get_timeout (GsqConsole *console)
 	return console->priv->timeout;
 }
 
-gboolean
-gsq_console_is_connected (GsqConsole *console)
-{
-	g_return_val_if_fail (GSQ_IS_CONSOLE (console), FALSE);
-	return console->priv->authenticated;
-}
-
 
 static void
 close_connection (GsqConsole *console)
 {
 	GsqConsolePrivate *priv = console->priv;
+	priv->authenticated = FALSE;
 	
 	if (priv->timer) {
 		g_source_remove (priv->timer);
@@ -275,14 +261,10 @@ close_connection (GsqConsole *console)
 		priv->socket = NULL;
 	}
 	
-	priv->working = FALSE;
-	priv->authenticated = FALSE;
-	priv->packet.size = 0;
-	priv->packet.left = 0;
-	
 	if (priv->queue)
 		establish_connection (console);
 }
+
 
 static void
 throw_error (GsqConsole *console, GError *error)
@@ -293,9 +275,7 @@ throw_error (GsqConsole *console, GError *error)
 		req->attempts--;
 		if (req->attempts == 0) {
 			priv->queue = g_list_delete_link (priv->queue, priv->queue);
-			
 			g_free (req->command);
-			g_string_free (req->output, TRUE);
 			g_simple_async_result_take_error (req->result, error);
 			g_simple_async_result_complete (req->result);
 			g_object_unref (req->result);
@@ -308,43 +288,8 @@ throw_error (GsqConsole *console, GError *error)
 
 
 static gboolean
-g_socket_send_all (GSocket *socket, const gchar *buffer, gsize size,
-		GCancellable *cancellable, GError **error)
-{
-	gssize ret;
-	
-	do {
-		if ((ret = g_socket_send (socket, buffer, size, cancellable, error)) <= 0)
-			return FALSE;
-		buffer += ret;
-		size -= ret;
-	} while (size > 0);
-	
-	return TRUE;
-}
-
-static gboolean
-source_send_packet (GSocket *socket, gint32 id, gint32 type, const gchar *cmd,
-		GCancellable *cancellable, GError **error)
-{
-	id = GINT32_TO_LE (id);
-	type = GINT32_TO_LE (type);
-	
-	gsize len = strlen (cmd) + 1;
-	gint32 size = GINT32_TO_LE (len + 9);
-	
-	return	g_socket_send_all (socket, (gchar *) &size, 4, cancellable, error) &&
-			g_socket_send_all (socket, (gchar *) &id, 4, cancellable, error) &&
-			g_socket_send_all (socket, (gchar *) &type, 4, cancellable, error) &&
-			g_socket_send_all (socket, cmd, len, cancellable, error) &&
-			g_socket_send_all (socket, "", 1, cancellable, error);
-}
-
-
-static gboolean
 socket_timeout (GsqConsole *console)
 {
-	console->priv->timer = 0;
 	GError *error = NULL;
 	g_set_error_literal (&error, GSQ_CONSOLE_ERROR, GSQ_CONSOLE_ERROR_TIMEOUT, "Connection timed out");
 	throw_error (console, error);
@@ -352,57 +297,103 @@ socket_timeout (GsqConsole *console)
 }
 
 
-#define source_send_password(sock, pass, cancel, error)	\
-			source_send_packet (sock, 0, 3, pass, cancel, error)
+static void
+start_timer (GsqConsole *console)
+{
+	g_return_if_fail (console->priv->timer == 0);
+	
+	GsqConsolePrivate *pr = console->priv;
+	pr->timer = g_timeout_add_seconds (
+			pr->timeout, (GSourceFunc) socket_timeout, console);
+	pr->working = TRUE;
+}
+
+static void
+stop_timer (GsqConsole *console)
+{
+	GsqConsolePrivate *pr = console->priv;
+	g_source_remove (pr->timer);
+	pr->timer = 0;
+	pr->working = FALSE;
+}
 
 
 static void
-send_command (GsqConsole *console)
+send_request (GsqConsole *console)
 {
 	GsqConsolePrivate *priv = console->priv;
+	GsqConsoleClass *console_class = GSQ_CONSOLE_GET_CLASS (console);
+	GError *error = NULL;
+	
 	if (priv->queue == NULL)
 		return;
-	Request *req = priv->queue->data;
-	guint32 key = g_random_int ();
-	g_sprintf (req->key, "END%X \n", key);
-	gchar *cmd = g_strdup_printf ("%s;echo END%X", req->command, key);
-	source_send_packet (priv->socket, 0, 2, cmd, NULL, NULL);
-	g_free (cmd);
 	
-	priv->timer = g_timeout_add_seconds (priv->timeout, (GSourceFunc) socket_timeout, console);
-	priv->working = TRUE;
+	Request *req = priv->queue->data;
+	if (!console_class->command (console, req->command, &error)) {
+		throw_error (console, error);
+		return;
+	}
+	
+	start_timer (console);
 }
 
 
-static void
-respond_received (GsqConsole *console)
+void
+gsq_console_authenticate (GsqConsole *console)
+{
+	g_return_if_fail (GSQ_IS_CONSOLE (console));
+	console->priv->authenticated = TRUE;
+	g_signal_emit (console, signals[SIGNAL_AUTHENTICATED], 0);
+	send_request (console);
+}
+
+gboolean
+gsq_console_is_authenticated (GsqConsole *console)
+{
+	g_return_val_if_fail (GSQ_IS_CONSOLE (console), FALSE);
+	return console->priv->authenticated;
+}
+
+
+void
+gsq_console_set_chunk_size (GsqConsole *console, guint size)
+{
+	g_return_if_fail (GSQ_IS_CONSOLE (console));
+	console->priv->chunk_size = size;
+}
+
+guint
+gsq_console_get_chunk_size (GsqConsole *console)
+{
+	g_return_val_if_fail (GSQ_IS_CONSOLE (console), 0);
+	return console->priv->chunk_size;
+}
+
+
+gboolean
+gsq_console_send_data (GsqConsole *console, const gchar *data, gsize length,
+		GError **error)
 {
 	GsqConsolePrivate *priv = console->priv;
-	Request *req = (Request *) priv->queue->data;
+	gssize ret;
 	
-	priv->queue = g_list_delete_link (priv->queue, priv->queue);
+	do {
+		if ((ret = g_socket_send (priv->socket, data, length, NULL, error)) <= 0)
+			return FALSE;
+		data += ret;
+		length -= ret;
+	} while (length > 0);
 	
-	g_free (req->command);
-	gchar *output = gsq_utf8_repair (req->output->str);
-	g_simple_async_result_set_op_res_gpointer (req->result, output, g_free);
-	g_string_free (req->output, TRUE);
-	g_simple_async_result_complete (req->result);
-	g_object_unref (req->result);
-	g_slice_free (Request, req);
-	
-	g_source_remove (priv->timer);
-	priv->timer = 0;
-	priv->working = FALSE;
-	
-	send_command (console);
+	return TRUE;
 }
+
 
 
 static gboolean
 socket_received (GSocket *socket, GIOCondition cond, GsqConsole *console)
 {
-	GsqConsolePrivate *priv = console->priv;
-	Packet *pkt = &priv->packet;
+	GsqConsolePrivate *pr = console->priv;
+	GsqConsoleClass *console_class = GSQ_CONSOLE_GET_CLASS (console);
 	GError *error = NULL;
 	
 	if (cond & G_IO_HUP) {
@@ -411,82 +402,45 @@ socket_received (GSocket *socket, GIOCondition cond, GsqConsole *console)
 		return FALSE;
 	}
 	
-	
-	if (pkt->size == 0 && pkt->left == 0) {	/* new packet */
-		pkt->left = 12;
-		pkt->p = pkt->data;
-	}
-	
-	gssize size = g_socket_receive (socket, pkt->p, pkt->left, NULL, &error);
-	if (G_UNLIKELY (size == 0)) {			/* disconnect */
-		close_connection (console);
-		g_signal_emit (console, signals[SIGNAL_DISCONNECT], 0);
-		return FALSE;
-	} else if (G_UNLIKELY (size == -1)) {	/* error */
-		throw_error (console, error);
-		return FALSE;
-	} else {
-		if (priv->queue == NULL) {
+	gchar data[4096];
+	gssize length = pr->chunk_size > 0 ? pr->chunk_size - pr->chunk->len : 4096;
+	length = g_socket_receive (socket, data, length, NULL, &error);
+	if (length > 0) {
+		if (pr->queue == NULL) {
 			g_set_error_literal (&error, GSQ_CONSOLE_ERROR, GSQ_CONSOLE_ERROR_DATA,
 					"Odd data has been received");
 			throw_error (console, error);
 			return FALSE;
 		}
-		Request *req = (Request *) priv->queue->data;
 		
-		pkt->p += size;
-		pkt->left -= size;
-		if (pkt->left == 0) {
-			if (pkt->size == 0) {			/* header */
-				pkt->size = GINT32_FROM_LE (* (gint32 *) (pkt->data + 0));
-				pkt->id = GINT32_FROM_LE (* (gint32 *) (pkt->data + 4));
-				pkt->type = GINT32_FROM_LE (* (gint32 *) (pkt->data + 8));
-				if (pkt->size < 10 || pkt->size > 4106 || !(pkt->type == 0 || pkt->type == 2)) {
-					g_set_error_literal (&error, GSQ_CONSOLE_ERROR,
-							GSQ_CONSOLE_ERROR_DATA,
-							"Odd data has been received");
+		if (pr->chunk_size > 0) {
+			/* gather data */
+			g_byte_array_append (pr->chunk, (guint8 *) data, length);
+			if (pr->chunk->len >= pr->chunk_size) {
+				if (!console_class->received (console, (gchar *) pr->chunk->data,
+						pr->chunk->len, &error)) {
 					throw_error (console, error);
 					return FALSE;
 				}
-				pkt->p = pkt->data;
-				pkt->left = pkt->size - 8;
-			} else {						/* data */
-				if (priv->packet.type == 2) {
-					if (priv->packet.id == -1) {
-						g_set_error_literal (&error, GSQ_CONSOLE_ERROR,
-								GSQ_CONSOLE_ERROR_AUTH,
-								"Authentication attempt failed");
-						throw_error (console, error);
-					} else {
-						priv->working = FALSE;
-						priv->authenticated = TRUE;
-						g_source_remove (priv->timer);
-						priv->timer = 0;
-						g_signal_emit (console, signals[SIGNAL_CONNECT], 0);
-						send_command (console);
-					}
-				} else {
-					
-					if (priv->authenticated) {
-						gboolean final = FALSE;
-						if (pkt->p - pkt->data >= 15 && strncmp (pkt->p - 15, req->key, 13) == 0) {
-							*(pkt->p - 15) = 0;
-							final = TRUE;
-						}
-						
-						req->output = g_string_append (req->output, pkt->data);
-						if (final)
-							respond_received (console);
-					}
-					
-				}
-				/* clear everything for next packet */
-				pkt->size = 0;
+				
+				g_byte_array_set_size (pr->chunk, 0);
+			}
+		} else {
+			/* if chunk_size == 0, do not accumulate data */
+			if (console_class->received (console, data, length, &error)) {
+				throw_error (console, error);
+				return FALSE;
 			}
 		}
+		return TRUE;
+	} else if (length == 0) {
+		close_connection (console);
+		g_signal_emit (console, signals[SIGNAL_DISCONNECTED], 0);
+	} else {
+		throw_error (console, error);
 	}
 	
-	return TRUE;
+	return FALSE;
 }
 
 
@@ -498,18 +452,15 @@ socket_connected (GSocket *socket, GIOCondition cond, GsqConsole *console)
 	
 	if (g_socket_check_connect_result (socket, &error)) {
 		if (priv->password && *priv->password) {
-			g_source_remove (priv->timer);
+			stop_timer (console);
 			g_socket_set_blocking (priv->socket, TRUE);
-			source_send_password (socket, priv->password, NULL, NULL);
+			g_signal_emit (console, signals[SIGNAL_CONNECTED], 0);
 			
 			/* create receivng source */
 			GSource *source = g_socket_create_source (socket, G_IO_IN, NULL);
 			g_source_set_callback (source, (GSourceFunc) socket_received,
 					console, NULL);
 			priv->source = g_source_attach (source, NULL);
-			
-			priv->timer = g_timeout_add_seconds (priv->timeout,
-					(GSourceFunc) socket_timeout, console);
 		} else {
 			g_set_error_literal (&error, GSQ_CONSOLE_ERROR, GSQ_CONSOLE_ERROR_PASS,
 					"Password is not specified");
@@ -529,6 +480,8 @@ address_resolved (GSocketAddressEnumerator *enumerator, GAsyncResult *result,
 	GsqConsolePrivate *priv = console->priv;
 	GError *error = NULL;
 	GSocketAddress *saddr;
+	
+	g_return_if_fail (priv->socket == NULL);
 	
 	if (!(saddr = g_socket_address_enumerator_next_finish (enumerator, result,
 			&error))) {
@@ -560,8 +513,7 @@ address_resolved (GSocketAddressEnumerator *enumerator, GAsyncResult *result,
 	}
 	g_object_unref (saddr);
 	
-	priv->timer = g_timeout_add_seconds (priv->timeout,
-			(GSourceFunc) socket_timeout, console);
+	start_timer (console);
 }
 
 static void
@@ -619,7 +571,6 @@ gsq_console_send_full (GsqConsole *console, const gchar *command,
 	/* form a request */
 	Request *req = g_slice_new0 (Request);
 	req->command = g_strdup (command);
-	req->output = g_string_sized_new (0);
 	req->result = g_simple_async_result_new (G_OBJECT (console), callback,
 			udata, gsq_console_send);
 	req->attempts = attempts;
@@ -627,7 +578,7 @@ gsq_console_send_full (GsqConsole *console, const gchar *command,
 	
 	if (!priv->working) {
 		if (priv->authenticated)
-			send_command (console);
+			send_request (console);
 		else
 			establish_connection (console);
 	}
@@ -651,4 +602,28 @@ gsq_console_queue_length (GsqConsole *console)
 {
 	g_return_val_if_fail (GSQ_IS_CONSOLE (console), 0);
 	return g_list_length (console->priv->queue);
+}
+
+
+void
+gsq_console_finish_respond (GsqConsole *console, const gchar *msg)
+{
+	GsqConsolePrivate *pr = console->priv;
+	GsqConsoleClass *console_class = GSQ_CONSOLE_GET_CLASS (console);
+	Request *req = (Request *) pr->queue->data;
+	
+	pr->queue = g_list_delete_link (pr->queue, pr->queue);
+	stop_timer (console);
+	
+	g_free (req->command);
+	gchar *output = gsq_utf8_repair (msg);
+	g_simple_async_result_set_op_res_gpointer (req->result, output, g_free);
+	g_simple_async_result_complete (req->result);
+	g_object_unref (req->result);
+	g_slice_free (Request, req);
+	
+	if (console_class->reset)
+		console_class->reset (console);
+	
+	send_request (console);
 }
