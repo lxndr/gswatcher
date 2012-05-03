@@ -43,7 +43,6 @@ typedef enum {
 } GsqConsoleErrorEnum;
 
 
-
 #define GSQ_TYPE_CONSOLE			(gsq_console_get_type ())
 #define GSQ_CONSOLE(obj)			(G_TYPE_CHECK_INSTANCE_CAST ((obj), GSQ_TYPE_CONSOLE, GsqConsole))
 #define GSQ_IS_CONSOLE(obj)			(G_TYPE_CHECK_INSTANCE_TYPE ((obj), GSQ_TYPE_CONSOLE))
@@ -63,18 +62,31 @@ struct _GsqConsole {
 struct _GsqConsoleClass {
 	GObjectClass parent_class;
 	
-	void (*connect) (GsqConsole *console);
-	void (*disconnect) (GsqConsole *console);
+	void (*connected) (GsqConsole *console);
+	void (*disconnected) (GsqConsole *console);
+	void (*authenticated) (GsqConsole *console);
+	gboolean (*command) (GsqConsole *console, const gchar *msg, GError **error);
+	gboolean (*received) (GsqConsole *console, const gchar *data, gsize length,
+			GError **error);
+	void (*reset) (GsqConsole *console);
 };
 
 GType gsq_console_get_type (void) G_GNUC_CONST;
-GsqConsole* gsq_console_new (const gchar *address);
+
+void gsq_console_set_chunk_size (GsqConsole *console, guint size);
+guint gsq_console_get_chunk_size (GsqConsole *console);
+
+gboolean gsq_console_send_data (GsqConsole *console, const gchar *data,
+		gsize length, GError **error);
 
 void gsq_console_set_password (GsqConsole *console, const gchar *password);
 const gchar *gsq_console_get_password (GsqConsole *console);
 
 void gsq_console_set_timeout (GsqConsole *console, guint timeout);
 guint gsq_console_get_timeout (GsqConsole *console);
+
+void gsq_console_authenticate (GsqConsole *console);
+gboolean gsq_console_is_authenticated (GsqConsole *console);
 
 void gsq_console_send (GsqConsole *console, const gchar *command,
 		GAsyncReadyCallback callback, gpointer udata);
@@ -84,8 +96,8 @@ void gsq_console_send_full (GsqConsole *console, const gchar *command,
 gchar *gsq_console_send_finish (GsqConsole *console, GAsyncResult *result,
 		GError **error);
 
-gboolean gsq_console_is_connected (GsqConsole *console);
 guint gsq_console_queue_length (GsqConsole *console);
+void gsq_console_finish_respond (GsqConsole *console, const gchar *msg);
 
 
 G_END_DECLS

@@ -27,6 +27,8 @@ add_executable (gswatcher
 		query/proto-quake3.c
 		query/proto-source.c
 		query/console.c
+		query/console-source.c
+		query/console-telnet.c
 		query/utils.c
 		platform.c
 		client.c
