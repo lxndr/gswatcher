@@ -52,8 +52,9 @@ static void gs_client_querier_resolved (GsqQuerier *querier, GsClient *client);
 static void gs_client_querier_info_updated (GsqQuerier *querier, GsClient *client);
 static void gs_client_watcher_map_changed (GsqQuerier *querier, GsClient *client);
 static void gs_client_querier_log (GsqQuerier *querier, const gchar *msg, GsClient *client);
-static void gs_client_console_connect (GsqConsole *console, GsClient *client);
-static void gs_client_console_disconnect (GsqConsole *console, GsClient *client);
+static void gs_client_console_connected (GsqConsole *console, GsClient *client);
+static void gs_client_console_authenticated (GsqConsole *console, GsClient* client);
+static void gs_client_console_disconnected (GsqConsole *console, GsClient *client);
 
 
 G_DEFINE_TYPE (GsClient, gs_client, G_TYPE_OBJECT);
@@ -161,11 +162,13 @@ gs_client_new (const gchar *address)
 			G_CALLBACK (gs_client_querier_log), client);
 	gui_log_init (client);
 	
-	client->console = gsq_console_new (address);
-	g_signal_connect (client->console, "connect",
-			G_CALLBACK (gs_client_console_connect), client);
-	g_signal_connect (client->console, "disconnect",
-			G_CALLBACK (gs_client_console_disconnect), client);
+	client->console = gsq_console_source_new (address);
+	g_signal_connect (client->console, "connected",
+			G_CALLBACK (gs_client_console_connected), client);
+	g_signal_connect (client->console, "authenticated",
+			G_CALLBACK (gs_client_console_authenticated), client);
+	g_signal_connect (client->console, "disconnected",
+			G_CALLBACK (gs_client_console_disconnected), client);
 	gs_console_init (client);
 	
 	gui_chat_init (client);
@@ -288,13 +291,19 @@ gs_client_querier_log (GsqQuerier *querier, const gchar *msg, GsClient *client)
 
 
 static void
-gs_client_console_connect (GsqConsole *console, GsClient* client)
+gs_client_console_connected (GsqConsole *console, GsClient* client)
 {
 	gs_console_log (client, GS_CONSOLE_INFO, _("Connected"));
 }
 
 static void
-gs_client_console_disconnect (GsqConsole *console, GsClient* client)
+gs_client_console_authenticated (GsqConsole *console, GsClient* client)
+{
+	gs_console_log (client, GS_CONSOLE_INFO, _("Authenticated"));
+}
+
+static void
+gs_client_console_disconnected (GsqConsole *console, GsClient* client)
 {
 	gs_console_log (client, GS_CONSOLE_INFO, _("Disconnected"));
 }

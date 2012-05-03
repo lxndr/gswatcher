@@ -28,7 +28,8 @@
 
 #include <gtk/gtk.h>
 #include "query/querier.h"
-#include "query/console.h"
+#include "query/console-source.h"
+#include "query/console-telnet.h"
 
 
 #define GS_TYPE_CLIENT				(gs_client_get_type ())
