@@ -293,19 +293,19 @@ gs_client_querier_log (GsqQuerier *querier, const gchar *msg, GsClient *client)
 static void
 gs_client_console_connected (GsqConsole *console, GsClient* client)
 {
-	gs_console_log (client, GS_CONSOLE_INFO, _("Connected"));
+	gs_console_log (client, GUI_CONSOLE_INFO, _("Connected"));
 }
 
 static void
 gs_client_console_authenticated (GsqConsole *console, GsClient* client)
 {
-	gs_console_log (client, GS_CONSOLE_INFO, _("Authenticated"));
+	gs_console_log (client, GUI_CONSOLE_INFO, _("Authenticated"));
 }
 
 static void
 gs_client_console_disconnected (GsqConsole *console, GsClient* client)
 {
-	gs_console_log (client, GS_CONSOLE_INFO, _("Disconnected"));
+	gs_console_log (client, GUI_CONSOLE_INFO, _("Disconnected"));
 }
 
 
@@ -315,9 +315,9 @@ command_callback (GsqConsole *console, GAsyncResult *result, GsClient *client)
 	GError *error = NULL;
 	gchar *output = gsq_console_send_finish (console, result, &error);
 	if (output)
-		gs_console_log (client, GS_CONSOLE_RESPOND, output);
+		gs_console_log (client, GUI_CONSOLE_RESPOND, output);
 	else
-		gs_console_log (client, GS_CONSOLE_ERROR, error->message);
+		gs_console_log (client, GUI_CONSOLE_ERROR, error->message);
 }
 
 
@@ -351,9 +351,9 @@ log_command_callback (GsqConsole *console, GAsyncResult *result, GsClient *clien
 	GError *error = NULL;
 	gchar *output = gsq_console_send_finish (console, result, &error);
 	if (output)
-		gs_console_log (client, GS_CONSOLE_RESPOND, output);
+		gs_console_log (client, GUI_CONSOLE_RESPOND, output);
 	else
-		gs_console_log (client, GS_CONSOLE_ERROR, error->message);
+		gs_console_log (client, GUI_CONSOLE_ERROR, error->message);
 }
 
 void
@@ -363,7 +363,7 @@ gs_client_enable_log (GsClient *client, gboolean enable)
 		guint16 userport;
 		gchar *userhost = gsq_parse_address (logaddress, &userport, NULL);
 		if (!userhost) {
-			gs_console_log (client, GS_CONSOLE_ERROR,
+			gs_console_log (client, GUI_CONSOLE_ERROR,
 					_("You have to provide a log address"));
 			return;
 		}
@@ -416,9 +416,9 @@ chat_message_callback (GsqConsole *console, GAsyncResult *result, GsClient *clie
 	GError *error = NULL;
 	gchar *output = gsq_console_send_finish (console, result, &error);
 	if (output)
-		gs_console_log (client, GS_CONSOLE_RESPOND, output);
+		gs_console_log (client, GUI_CONSOLE_RESPOND, output);
 	else
-		gs_console_log (client, GS_CONSOLE_ERROR, error->message);
+		gs_console_log (client, GUI_CONSOLE_ERROR, error->message);
 }
 
 void

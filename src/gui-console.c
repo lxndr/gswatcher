@@ -168,7 +168,7 @@ gs_console_send (GsClient *cl, const gchar *cmd)
 	}
 	
 	gs_console_add_history (cl, cmd);
-	gs_console_log (cl, GS_CONSOLE_COMMAND, cmd);
+	gs_console_log (cl, GUI_CONSOLE_COMMAND, cmd);
 	gs_client_send_command (cl, cmd);
 }
 
@@ -333,17 +333,17 @@ gs_console_create ()
 {
 	tag_table = gtk_text_tag_table_new ();
 	
-	tags[GS_CONSOLE_INFO] = gtk_text_tag_new ("inf");
-	g_object_set (tags[GS_CONSOLE_INFO], "foreground", "dark gray", NULL);
-	gtk_text_tag_table_add (tag_table, tags[GS_CONSOLE_INFO]);
+	tags[GUI_CONSOLE_INFO] = gtk_text_tag_new ("inf");
+	g_object_set (tags[GUI_CONSOLE_INFO], "foreground", "dark gray", NULL);
+	gtk_text_tag_table_add (tag_table, tags[GUI_CONSOLE_INFO]);
 	
-	tags[GS_CONSOLE_COMMAND] = gtk_text_tag_new ("cmd");
-	g_object_set (tags[GS_CONSOLE_COMMAND], "foreground", "dark green", NULL);
-	gtk_text_tag_table_add (tag_table, tags[GS_CONSOLE_COMMAND]);
+	tags[GUI_CONSOLE_COMMAND] = gtk_text_tag_new ("cmd");
+	g_object_set (tags[GUI_CONSOLE_COMMAND], "foreground", "dark green", NULL);
+	gtk_text_tag_table_add (tag_table, tags[GUI_CONSOLE_COMMAND]);
 	
-	tags[GS_CONSOLE_ERROR] = gtk_text_tag_new ("err");
-	g_object_set (tags[GS_CONSOLE_ERROR], "foreground", "dark red", NULL);
-	gtk_text_tag_table_add (tag_table, tags[GS_CONSOLE_ERROR]);
+	tags[GUI_CONSOLE_ERROR] = gtk_text_tag_new ("err");
+	g_object_set (tags[GUI_CONSOLE_ERROR], "foreground", "dark red", NULL);
+	gtk_text_tag_table_add (tag_table, tags[GUI_CONSOLE_ERROR]);
 	
 // widgets
 	logview = gtk_text_view_new ();
