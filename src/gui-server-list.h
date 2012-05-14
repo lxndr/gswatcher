@@ -30,20 +30,21 @@
 
 
 typedef enum _GuiGameColumnMode {
-	GUI_GAME_COLUMN_ICON,		// icon only
-	GUI_GAME_COLUMN_NAME,		// game name
-	GUI_GAME_COLUMN_FULL		// game name and game mode if known
+	GUI_GAME_COLUMN_ICON,		/* icon only */
+	GUI_GAME_COLUMN_NAME,		/* game name */
+	GUI_GAME_COLUMN_FULL		/* game name and game mode if known */
 } GuiGameColumnMode;
 
 
 GtkWidget * gui_slist_create ();
+void gui_slist_add (GsClient *cl);
+void gui_slist_remove (GsClient *cl);
+void gui_slist_update (GsClient *cl);
+void gui_slist_update_list (GList *ls);
+
 GsClient *gui_slist_get_selected ();
-void gui_slist_add (GsClient *client);
-void gui_slist_remove (GsClient *client);
-void gui_slist_set_favorite (GsClient *client, gboolean favorite);
 void gui_slist_set_hscrollbar (gboolean hscrollbar);
 void gui_slist_set_visible (gboolean seen);
-void gui_slist_update_all ();
 
 void gui_slist_set_game_column_mode (GuiGameColumnMode mode);
 GuiGameColumnMode gui_slist_get_game_column_mode ();

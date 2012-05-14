@@ -225,7 +225,7 @@ favorite_toggled (GtkToggleButton *button, gpointer udata)
 	GsClient *client = gui_slist_get_selected ();
 	gboolean favorite = gtk_toggle_button_get_active (button);
 	gs_client_set_favorite (client, favorite);
-	gui_slist_set_favorite (client, favorite);
+	gui_slist_update (client);
 	gs_application_save_server_list (app);
 }
 
