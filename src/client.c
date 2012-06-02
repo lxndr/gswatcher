@@ -34,6 +34,7 @@
 enum {
 	PROP_0,
 	PROP_FAVORITE,
+	PROP_CONSOLE_PASSWORD
 };
 
 
@@ -51,6 +52,7 @@ static void gs_client_finalize (GObject *object);
 static void gs_client_querier_resolved (GsqQuerier *querier, GsClient *client);
 static void gs_client_querier_info_updated (GsqQuerier *querier, GsClient *client);
 static void gs_client_watcher_map_changed (GsqQuerier *querier, GsClient *client);
+static void gs_client_querier_gameid_changed (GsqQuerier *querier, GsClient *client);
 static void gs_client_querier_log (GsqQuerier *querier, const gchar *msg, GsClient *client);
 static void gs_client_console_connected (GsqConsole *console, GsClient *client);
 static void gs_client_console_authenticated (GsqConsole *console, GsClient* client);
@@ -80,6 +82,10 @@ gs_client_class_init (GsClientClass *class)
 	g_object_class_install_property (object_class, PROP_FAVORITE,
 			g_param_spec_boolean ("favorite", "Favorite", "Favorite server",
 			FALSE, G_PARAM_READABLE | G_PARAM_WRITABLE));
+	
+	g_object_class_install_property (object_class, PROP_CONSOLE_PASSWORD,
+			g_param_spec_string ("console-password", "Console password", "Console password",
+			"", G_PARAM_READABLE | G_PARAM_WRITABLE));
 }
 
 
@@ -100,7 +106,8 @@ gs_client_finalize (GObject *object)
 	
 	g_object_unref (client->console_buffer);
 	g_object_unref (client->console_history);
-	g_object_unref (client->console);
+	if (client->console)
+		g_object_unref (client->console);
 	
 	if (client->log_address)
 		g_free (client->log_address);
@@ -122,6 +129,9 @@ gs_client_set_property (GObject *object, guint prop_id, const GValue *value,
 	case PROP_FAVORITE:
 		client->favorite = g_value_get_boolean (value);
 		break;
+	case PROP_CONSOLE_PASSWORD:
+		gs_client_set_console_password (client, g_value_get_string (value));
+		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;
@@ -137,6 +147,9 @@ gs_client_get_property (GObject *object, guint prop_id, GValue *value,
 	switch (prop_id) {
 	case PROP_FAVORITE:
 		g_value_set_boolean (value, client->favorite);
+		break;
+	case PROP_CONSOLE_PASSWORD:
+		g_value_set_string (value, gs_client_get_console_password (client));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -158,19 +171,13 @@ gs_client_new (const gchar *address)
 			G_CALLBACK (gs_client_querier_info_updated), client);
 	g_signal_connect (client->querier, "map-changed",
 			G_CALLBACK (gs_client_watcher_map_changed), client);
+	g_signal_connect (client->querier, "gameid-changed",
+			G_CALLBACK (gs_client_querier_gameid_changed), client);
 	g_signal_connect (client->querier, "log",
 			G_CALLBACK (gs_client_querier_log), client);
+	
 	gui_log_init (client);
-	
-	client->console = gsq_console_source_new (address);
-	g_signal_connect (client->console, "connected",
-			G_CALLBACK (gs_client_console_connected), client);
-	g_signal_connect (client->console, "authenticated",
-			G_CALLBACK (gs_client_console_authenticated), client);
-	g_signal_connect (client->console, "disconnected",
-			G_CALLBACK (gs_client_console_disconnected), client);
 	gs_console_init (client);
-	
 	gui_chat_init (client);
 	
 	return client;
@@ -190,6 +197,25 @@ gs_client_get_favorite (GsClient *client)
 {
 	g_return_val_if_fail (GS_IS_CLIENT (client), FALSE);
 	return client->favorite;
+}
+
+
+void
+gs_client_set_console_password (GsClient *client, const gchar *password)
+{
+	g_return_if_fail (GS_IS_CLIENT (client));
+	if (client->console_password)
+		g_free (client->console_password);
+	client->console_password = g_strdup (password);
+	if (client->console)
+		gsq_console_set_password (client->console, password);
+}
+
+const gchar *
+gs_client_get_console_password (GsClient *client)
+{
+	g_return_val_if_fail (GS_IS_CLIENT (client), FALSE);
+	return client->console_password;
 }
 
 
@@ -256,6 +282,30 @@ gs_client_watcher_map_changed (GsqQuerier *querier, GsClient *client)
 {
 	if (client->log_auto)
 		gs_client_enable_log (client, TRUE);
+}
+
+
+static void
+gs_client_querier_gameid_changed (GsqQuerier *querier, GsClient *client)
+{
+	if (client->console)
+		g_object_unref (client->console);
+	
+	GType type;
+	if (strcmp (gsq_querier_get_gameid (querier), "ss3") == 0)
+		type = GSQ_TYPE_CONSOLE_TELNET;
+	else
+		type = GSQ_TYPE_CONSOLE_SOURCE;
+	
+	client->console = g_object_new (type, "address",
+			gsq_querier_get_address (client->querier), NULL);
+	gsq_console_set_password (client->console, client->console_password);
+	g_signal_connect (client->console, "connected",
+			G_CALLBACK (gs_client_console_connected), client);
+	g_signal_connect (client->console, "authenticated",
+			G_CALLBACK (gs_client_console_authenticated), client);
+	g_signal_connect (client->console, "disconnected",
+			G_CALLBACK (gs_client_console_disconnected), client);
 }
 
 

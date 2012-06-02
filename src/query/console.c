@@ -243,6 +243,7 @@ gsq_console_get_timeout (GsqConsole *console)
 static void
 close_connection (GsqConsole *console)
 {
+	GsqConsoleClass *class = GSQ_CONSOLE_GET_CLASS (console);
 	GsqConsolePrivate *priv = console->priv;
 	priv->authenticated = FALSE;
 	
@@ -260,6 +261,10 @@ close_connection (GsqConsole *console)
 		g_object_unref (priv->socket);
 		priv->socket = NULL;
 	}
+	
+	g_byte_array_set_size (priv->chunk, 0);
+	if (class->reset)
+		class->reset (console);
 	
 	if (priv->queue)
 		establish_connection (console);
