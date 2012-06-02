@@ -516,7 +516,7 @@ save_server_list_func (GsClient *client, GJsonNode *root)
 	g_json_object_set_boolean (node, "favorite",
 			client->favorite);
 	g_json_object_set_string (node, "rcon-password",
-			gsq_console_get_password (client->console));
+			gs_client_get_console_password (client));
 	g_json_array_add (root, node);
 }
 
@@ -675,7 +675,7 @@ add_server (GsApplication *app, const gchar *address, const gchar *name,
 	GsClient *client = gs_client_new (address);
 	gsq_querier_set_name (client->querier, name);
 	client->favorite = favorite;
-	gsq_console_set_password (client->console, rcon_password);
+	gs_client_set_console_password (client, rcon_password);
 	g_signal_connect (client->querier, "player-online",
 			G_CALLBACK (player_online), app);
 	g_signal_connect (client->querier, "player-offline",
