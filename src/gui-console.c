@@ -249,7 +249,7 @@ static void
 gs_console_password_changed (GtkEntry *entry, gpointer udata)
 {
 	GsClient *client = gui_slist_get_selected ();
-	gsq_console_set_password (client->console, gtk_entry_get_text (entry));
+	gs_client_set_console_password (client, gtk_entry_get_text (entry));
 	gs_application_save_server_list (app);
 }
 
@@ -281,7 +281,7 @@ gui_console_setup (GsClient *client)
 		history_end = TRUE;
 		
 		gtk_entry_completion_set_model (history, GTK_TREE_MODEL (client->console_history));		
-		gui_console_set_password (gsq_console_get_password (client->console));
+		gui_console_set_password (gs_client_get_console_password (client));
 	} else {
 		gtk_widget_set_sensitive (page, FALSE);
 		gtk_widget_set_sensitive (toolbar, FALSE);

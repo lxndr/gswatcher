@@ -57,6 +57,8 @@ struct _GsClient {
 	
 	/* console */
 	GsqConsole *console;
+	gchar *console_password;
+	guint16 console_port;
 	GtkTextBuffer *console_buffer;
 	GtkListStore *console_history;
 	
@@ -82,6 +84,8 @@ gboolean gs_client_get_favorite (GsClient *client);
 
 gchar *gs_client_get_game_name (GsClient* client, gboolean extra);
 
+void gs_client_set_console_password (GsClient *client, const gchar *password);
+const gchar *gs_client_get_console_password (GsClient *client);
 void gs_client_send_command (GsClient* client, const gchar *cmd);
 
 void gs_client_set_logaddress (const gchar *address);
