@@ -21,6 +21,7 @@ if (GSWATCHER_ENABLE_NLS)
 endif ()
 
 add_executable (gswatcher
+		gtkpopupbutton.c
 		query/querier.c
 		query/proto-gamespy.c
 		query/proto-gamespy3.c

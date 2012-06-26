@@ -297,8 +297,13 @@ gs_client_querier_gameid_changed (GsqQuerier *querier, GsClient *client)
 	else
 		type = GSQ_TYPE_CONSOLE_SOURCE;
 	
-	client->console = g_object_new (type, "address",
-			gsq_querier_get_address (client->querier), NULL);
+	guint16 gport, qport;
+	gchar *host = gsq_parse_address (gsq_querier_get_address (client->querier), &gport, &qport);
+	
+	client->console = g_object_new (type, "host", host, "port", 0, NULL);
+	
+	g_free (host);
+	
 	gsq_console_set_password (client->console, client->console_password);
 	g_signal_connect (client->console, "connected",
 			G_CALLBACK (gs_client_console_connected), client);

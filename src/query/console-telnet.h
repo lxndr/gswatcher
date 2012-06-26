@@ -50,7 +50,7 @@ struct _GsqConsoleTelnetClass {
 };
 
 GType gsq_console_telnet_get_type (void) G_GNUC_CONST;
-GsqConsole* gsq_console_telnet_new (const gchar *address);
+GsqConsole* gsq_console_telnet_new (const gchar *host, guint16 port);
 
 
 G_END_DECLS

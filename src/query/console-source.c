@@ -86,10 +86,11 @@ gsq_console_source_finalize (GObject *object)
 
 
 GsqConsole *
-gsq_console_source_new (const gchar *address)
+gsq_console_source_new (const gchar *host, guint16 port)
 {
-	g_return_val_if_fail (address != NULL, NULL);
-	return g_object_new (GSQ_TYPE_CONSOLE_SOURCE, "address", address, NULL);
+	g_return_val_if_fail (host != NULL, NULL);
+	return g_object_new (GSQ_TYPE_CONSOLE_SOURCE,
+			"host", host, "port", port == 0 ? 27015 : port, NULL);
 }
 
 
