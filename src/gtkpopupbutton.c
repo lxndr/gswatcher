@@ -1,6 +1,13 @@
 #include "gtkpopupbutton.h"
 
 
+enum {
+	SIGNAL_POPUP,
+	SIGNAL_POPDOWN,
+	LAST_SIGNAL
+};
+
+
 struct _GtkPopupButtonPrivate {
 	GtkWidget *dock;
 	GdkDevice *grab_pointer;
@@ -8,6 +15,12 @@ struct _GtkPopupButtonPrivate {
 };
 
 
+static guint signals[LAST_SIGNAL] = {0};
+
+
+static void gtk_popup_button_dispose(GObject* object);
+static void gtk_popup_button_popup_real (GtkPopupButton *popup_button, GdkDevice *device);
+static void gtk_popup_button_popdown_real (GtkPopupButton *popup_button);
 static gboolean gtk_popup_button_press_event (GtkWidget *widget,
 		GdkEventButton *event);
 static gboolean dock_button_press_event (GtkWidget *widget,
@@ -22,11 +35,22 @@ G_DEFINE_TYPE (GtkPopupButton, gtk_popup_button, GTK_TYPE_TOGGLE_BUTTON);
 static void
 gtk_popup_button_class_init (GtkPopupButtonClass *klass)
 {
-	GObjectClass *gobject_class = (GObjectClass *) klass;
-	g_type_class_add_private (gobject_class, sizeof (GtkPopupButtonPrivate));
+	GObjectClass *object_class = (GObjectClass *) klass;
+	object_class->dispose = gtk_popup_button_dispose;
+	g_type_class_add_private (object_class, sizeof (GtkPopupButtonPrivate));
 	
 	GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 	widget_class->button_press_event = gtk_popup_button_press_event;
+	
+	signals[SIGNAL_POPUP] = g_signal_new_class_handler ("popup",
+			G_OBJECT_CLASS_TYPE (klass), G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
+			G_CALLBACK (gtk_popup_button_popup_real), NULL, NULL,
+			g_cclosure_marshal_VOID__OBJECT, G_TYPE_NONE, 1, GDK_TYPE_DEVICE);
+	
+	signals[SIGNAL_POPDOWN] = g_signal_new_class_handler ("popdown",
+			G_OBJECT_CLASS_TYPE (klass), G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
+			G_CALLBACK (gtk_popup_button_popdown_real), NULL, NULL,
+			g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
 }
 
 
@@ -36,7 +60,7 @@ gtk_popup_button_init (GtkPopupButton *popup_button)
 	popup_button->priv = G_TYPE_INSTANCE_GET_PRIVATE (popup_button,
 			GTK_TYPE_POPUP_BUTTON, GtkPopupButtonPrivate);
 	GtkPopupButtonPrivate *priv = popup_button->priv;
-		
+	
 	/* popup window */
 	priv->dock = gtk_window_new (GTK_WINDOW_POPUP);
 	gtk_container_set_border_width (GTK_CONTAINER (priv->dock), 4);
@@ -50,9 +74,23 @@ gtk_popup_button_init (GtkPopupButton *popup_button)
 
 
 GtkWidget *
-gtk_popup_button_new (const gchar *label)
+gtk_popup_button_new ()
 {
-	return g_object_new (GTK_TYPE_POPUP_BUTTON, "label", label, NULL);
+	return g_object_new (GTK_TYPE_POPUP_BUTTON, NULL);
+}
+
+
+static void
+gtk_popup_button_dispose(GObject* object)
+{
+	GtkPopupButton *popup_button = GTK_POPUP_BUTTON (object);
+	
+	if (popup_button->priv->dock) {
+		gtk_widget_destroy (popup_button->priv->dock);
+		popup_button->priv->dock = NULL;
+	}
+	
+	G_OBJECT_CLASS (gtk_popup_button_parent_class)->dispose (object);
 }
 
 
@@ -61,6 +99,40 @@ gtk_popup_button_get_popup (GtkPopupButton *popup_button)
 {
 	g_return_val_if_fail (GTK_IS_POPUP_BUTTON (popup_button), NULL);
 	return popup_button->priv->dock;
+}
+
+
+void
+gtk_popup_button_popup (GtkPopupButton *popup_button)
+{
+	GdkDevice *device = gtk_get_current_event_device ();
+	
+	if (!device) {
+		GdkDisplay *display = gtk_widget_get_display (GTK_WIDGET (popup_button));
+		GdkDeviceManager *device_manager = gdk_display_get_device_manager (display);
+		GList *devices = gdk_device_manager_list_devices (
+				device_manager, GDK_DEVICE_TYPE_MASTER);
+		device = devices->data;
+		g_list_free (devices);
+	}
+	
+	gtk_popup_button_popup_for_device (popup_button, device);
+}
+
+
+void
+gtk_popup_button_popup_for_device (GtkPopupButton *popup_button, GdkDevice *device)
+{
+	g_return_if_fail (GTK_IS_POPUP_BUTTON (popup_button));
+	g_signal_emit (popup_button, signals[SIGNAL_POPUP], 0, device);
+}
+
+
+void
+gtk_popup_button_popdown (GtkPopupButton *popup_button)
+{
+	g_return_if_fail (GTK_IS_POPUP_BUTTON (popup_button));
+	g_signal_emit (popup_button, signals[SIGNAL_POPDOWN], 0);
 }
 
 
@@ -102,8 +174,8 @@ dock_key_release_event (GtkWidget *widget, GdkEventKey *event, gpointer udata)
 }
 
 
-void
-gtk_popup_button_popup_for_device (GtkPopupButton *popup_button, GdkDevice *device)
+static void
+gtk_popup_button_popup_real (GtkPopupButton *popup_button, GdkDevice *device)
 {
 	GtkPopupButtonPrivate *priv = popup_button->priv;
 	GtkAllocation button_allocation, dock_allocation;
@@ -193,8 +265,8 @@ gtk_popup_button_popup_for_device (GtkPopupButton *popup_button, GdkDevice *devi
 }
 
 
-void
-gtk_popup_button_popdown (GtkPopupButton *popup_button)
+static void
+gtk_popup_button_popdown_real (GtkPopupButton *popup_button)
 {
 	GtkPopupButtonPrivate *priv = popup_button->priv;
 	

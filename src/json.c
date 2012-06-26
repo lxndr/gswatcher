@@ -710,6 +710,8 @@ g_json_integer_new (gint64 value)
 gint64
 g_json_integer_get (GJsonNode *node)
 {
+	g_return_val_if_fail (node != NULL, 0);
+	
 	switch (node->type) {
 	case JSON_TYPE_INTEGER:
 		return node->i;
@@ -727,6 +729,8 @@ g_json_integer_get (GJsonNode *node)
 void
 g_json_integer_set (GJsonNode *node, gint64 value)
 {
+	g_return_if_fail (node != NULL);
+	
 	g_json_node_reset (node, JSON_TYPE_INTEGER);
 	node->i = value;
 }
@@ -746,6 +750,8 @@ g_json_float_new (gdouble value)
 gdouble
 g_json_float_get (GJsonNode *node)
 {
+	g_return_val_if_fail (node != NULL, 0.0);
+	
 	switch (node->type) {
 	case JSON_TYPE_INTEGER:
 		return (gdouble) node->i;
@@ -763,6 +769,8 @@ g_json_float_get (GJsonNode *node)
 void
 g_json_float_set (GJsonNode *node, gdouble value)
 {
+	g_return_if_fail (node != NULL);
+	
 	g_json_node_reset (node, JSON_TYPE_FLOAT);
 	node->f = value;
 }
