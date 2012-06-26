@@ -52,7 +52,7 @@ struct _GsqConsoleSourceClass {
 };
 
 GType gsq_console_source_get_type (void) G_GNUC_CONST;
-GsqConsole* gsq_console_source_new (const gchar *address);
+GsqConsole* gsq_console_source_new (const gchar *host, guint16 port);
 
 
 G_END_DECLS

@@ -79,6 +79,9 @@ guint gsq_console_get_chunk_size (GsqConsole *console);
 gboolean gsq_console_send_data (GsqConsole *console, const gchar *data,
 		gsize length, GError **error);
 
+void gsq_console_set_port (GsqConsole *console, guint16 port);
+guint16 gsq_console_get_port (GsqConsole *console);
+
 void gsq_console_set_password (GsqConsole *console, const gchar *password);
 const gchar *gsq_console_get_password (GsqConsole *console);
 

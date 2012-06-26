@@ -64,16 +64,18 @@ gsq_console_telnet_finalize (GObject *object)
 
 
 GsqConsole *
-gsq_console_telnet_new (const gchar *address)
+gsq_console_telnet_new (const gchar *host, guint16 port)
 {
-	g_return_val_if_fail (address != NULL, NULL);
-	return g_object_new (GSQ_TYPE_CONSOLE_TELNET, "address", address, NULL);
+	g_return_val_if_fail (host != NULL, NULL);
+	return g_object_new (GSQ_TYPE_CONSOLE_TELNET,
+			"host", host, "port", port, NULL);
 }
 
 
 static void
 gsq_console_telnet_connected (GsqConsole *console)
 {
+	g_print ("telnet activated\n");
 }
 
 

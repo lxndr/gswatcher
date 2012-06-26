@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.7\n"
 "Report-Msgid-Bugs-To: lxndr87@users.sourceforge.net\n"
-"POT-Creation-Date: 2012-04-23 01:32+0400\n"
+"POT-Creation-Date: 2012-06-24 18:53+0400\n"
 "PO-Revision-Date: 2012-04-23 17:36+0400\n"
 "Last-Translator: Alexander AB\n"
 "Language-Team: Russian\n"
@@ -18,15 +18,19 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: src/client.c:293
+#: src/client.c:351
 msgid "Connected"
 msgstr "Подключён"
 
-#: src/client.c:299
+#: src/client.c:357
+msgid "Authenticated"
+msgstr ""
+
+#: src/client.c:363
 msgid "Disconnected"
 msgstr "Отключён"
 
-#: src/client.c:358
+#: src/client.c:422
 msgid "You have to provide a log address"
 msgstr "Укажите адрес для лога"
 
@@ -160,32 +164,32 @@ msgstr "Чат"
 msgid "Timeout"
 msgstr "Таймаут"
 
-#: src/gui-server-list.c:564
+#: src/gui-server-list.c:565
 msgid "Favorite servers"
 msgstr "Любимые сервера"
 
-#: src/gui-server-list.c:575
+#: src/gui-server-list.c:576
 msgid "Other servers"
 msgstr "Другие сервера"
 
-#: src/gui-server-list.c:594
+#: src/gui-server-list.c:595
 msgctxt "Server"
 msgid "Name"
 msgstr "Название"
 
-#: src/gui-server-list.c:636
+#: src/gui-server-list.c:637
 msgid "Game"
 msgstr "Игра"
 
-#: src/gui-server-list.c:656
+#: src/gui-server-list.c:657
 msgid "Map"
 msgstr "Карта"
 
-#: src/gui-server-list.c:671
+#: src/gui-server-list.c:672
 msgid "Players"
 msgstr "Игроки"
 
-#: src/gui-server-list.c:686 src/query/proto-gamespy.c:117
+#: src/gui-server-list.c:687 src/query/proto-gamespy.c:117
 #: src/query/proto-gamespy.c:121 src/query/proto-gamespy.c:125
 #: src/query/proto-gamespy.c:128 src/query/proto-gamespy3.c:193
 #: src/query/proto-gamespy3.c:201 src/query/proto-gamespy3.c:210
@@ -214,13 +218,19 @@ msgstr "Место"
 msgid "Notify"
 msgstr "Ув."
 
-#: src/gui-console.c:162
+#: src/gui-console.c:163
 msgid ""
 "This command will shut down the server. Are you sure you want to continue?"
 msgstr "Эта команда выключит сервер. Вы уверены, что хотите продолжить?"
 
-#: src/gui-console.c:307 src/gui-info.c:171
-msgid "Password:"
+#: src/gui-console.c:310
+#, fuzzy
+msgid "P_ort:"
+msgstr "Порт:"
+
+#: src/gui-console.c:324
+#, fuzzy
+msgid "_Password:"
 msgstr "Пароль:"
 
 #: src/gui-log.c:126
@@ -323,6 +333,10 @@ msgstr "Карта:"
 msgid "Players:"
 msgstr "Игроки:"
 
+#: src/gui-info.c:171
+msgid "Password:"
+msgstr "Пароль:"
+
 #: src/gui-info.c:184
 msgid "Version:"
 msgstr "Версия:"
@@ -384,10 +398,10 @@ msgstr "Зрители"
 msgid "Skill"
 msgstr "Навык"
 
-#: src/query/proto-source.c:373
+#: src/query/proto-source.c:382
 msgid "Kills"
 msgstr "Убито"
 
-#: src/query/proto-source.c:374
+#: src/query/proto-source.c:383
 msgid "Time"
 msgstr "Время"

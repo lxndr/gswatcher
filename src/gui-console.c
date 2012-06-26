@@ -27,6 +27,7 @@
 #include "gswatcher.h"
 #include "gui-server-list.h"
 #include "gui-console.h"
+#include "gtkpopupbutton.h"
 
 
 static GtkWidget *page, *logview, *entry;
@@ -304,25 +305,46 @@ gs_console_init (GsClient *client)
 GtkWidget *
 gs_console_create_bar ()
 {
-	GtkWidget *password_label = gtk_label_new (_("Password:"));
-	g_object_set (G_OBJECT (password_label),
+	GtkWidget *opt_port = gtk_entry_new ();
+	
+	GtkWidget *opt_label1 = gtk_label_new (_("P_ort:"));
+	g_object_set (G_OBJECT (opt_label1),
+			"xalign", 0.0f,
 			"use-underline", TRUE,
-			"mnemonic-widget", password,
+			"mnemonic-widget", opt_port,
 			NULL);
 	
 	password = gtk_entry_new ();
 	g_object_set (G_OBJECT (password),
 			"visibility", FALSE,
 			NULL);
-	g_signal_connect (password, "changed", G_CALLBACK (gs_console_password_changed),
+	g_signal_connect (password, "changed",
+			G_CALLBACK (gs_console_password_changed), NULL);
+	
+	GtkWidget *opt_label2 = gtk_label_new (_("_Password:"));
+	g_object_set (G_OBJECT (opt_label2),
+			"xalign", 0.0f,
+			"use-underline", TRUE,
+			"mnemonic-widget", password,
 			NULL);
 	
+	GtkWidget *opt_grid = gtk_grid_new ();
+	gtk_grid_set_row_spacing (GTK_GRID (opt_grid), 2);
+	gtk_grid_set_column_spacing (GTK_GRID (opt_grid), 2);
+	gtk_grid_attach (GTK_GRID (opt_grid), opt_label1, 0, 0, 1, 1);
+	gtk_grid_attach (GTK_GRID (opt_grid), opt_port, 1, 0, 1, 1);
+	gtk_grid_attach (GTK_GRID (opt_grid), opt_label2, 0, 1, 1, 1);
+	gtk_grid_attach (GTK_GRID (opt_grid), password, 1, 1, 1, 1);
+	gtk_widget_show_all (opt_grid);
+	
+	GtkWidget *settings = gtk_popup_button_new ("Settings");
+	gtk_container_add (GTK_CONTAINER (gtk_popup_button_get_popup (GTK_POPUP_BUTTON (settings))), opt_grid);
+
 	toolbar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
 	g_object_set (G_OBJECT (toolbar),
 			"sensitive", FALSE,
 			NULL);
-	gtk_box_pack_start (GTK_BOX (toolbar), password_label, FALSE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (toolbar), password, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (toolbar), settings, FALSE, TRUE, 0);
 	gtk_widget_show_all (toolbar);
 	return toolbar;
 }

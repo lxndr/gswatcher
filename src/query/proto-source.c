@@ -80,12 +80,17 @@ gsq_source_free (GsqQuerier *querier)
 void
 gsq_source_query (GsqQuerier *querier)
 {
-	guint32 port = gsq_querier_get_gport (querier);
-	if (port == 0)
-		port = 27015;
+	guint16 port = gsq_querier_get_qport (querier);
+	if (port == 0) {
+		port = gsq_querier_get_gport (querier);
+		if (port == 0)
+			port = 27015;
+	}
 	
+	/* server info */
 	gsq_querier_send (querier, port, sinfo_query, 25);
 	
+	/* player list */
 	Private *priv = gsq_querier_get_pdata (querier);
 	const gchar *query = priv && *priv->plist_query ?
 			priv->plist_query : plist_query;
@@ -287,6 +292,10 @@ get_server_info (GsqQuerier *querier, gchar *p)
 			game_id = "nd";
 			game_name = "Nuclear dawn";
 			break;
+		case 41070:
+			game_id = "ss3";
+			game_name = "Serious Sam 3";
+			break;
 	}
 	
 	gsq_querier_set_gameid (querier, game_id);
@@ -456,9 +465,11 @@ gsq_source_process (GsqQuerier *querier, guint16 qport,
 	}
 	
 	/* check if this packet belongs to the querier */
-	guint16 port = gsq_querier_get_gport (querier);
-	if (!(port == qport || (port == 0 && qport == 27015)))
-		return FALSE;
+	if (qport != gsq_querier_get_qport (querier)) {
+		guint16 port = gsq_querier_get_gport (querier);
+		if (!(port == qport || (port == 0 && qport == 27015)))
+			return FALSE;
+	}
 	
 	gchar *p = (gchar *) data;
 	gint format = get_long (&p);
