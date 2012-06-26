@@ -26,15 +26,16 @@ struct _GtkPopupButton {
 struct _GtkPopupButtonClass {
 	GtkToggleButtonClass parent_class;
 	
-	void (*popup) (GtkPopupButton *popup_button);
+	void (*popup) (GtkPopupButton *popup_button, GdkDevice *device);
 	void (*popdown) (GtkPopupButton *popup_button);
 };
 
 
 GType gtk_popup_button_get_type (void) G_GNUC_CONST;
-GtkWidget *gtk_popup_button_new (const gchar *label);
+GtkWidget *gtk_popup_button_new ();
 
 GtkWidget *gtk_popup_button_get_popup (GtkPopupButton *popup_button);
+void gtk_popup_button_popup (GtkPopupButton *popup_button);
 void gtk_popup_button_popup_for_device (GtkPopupButton *popup_button,
 		GdkDevice *device);
 void gtk_popup_button_popdown (GtkPopupButton *popup_button);

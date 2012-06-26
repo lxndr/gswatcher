@@ -201,6 +201,23 @@ gs_client_get_favorite (GsClient *client)
 
 
 void
+gs_client_set_console_port (GsClient *client, guint16 port)
+{
+	g_return_if_fail (GS_IS_CLIENT (client));
+	client->console_port = port;
+	if (client->console)
+		gsq_console_set_port (client->console, port);
+}
+
+guint16
+gs_client_get_console_port (GsClient *client)
+{
+	g_return_val_if_fail (GS_IS_CLIENT (client), FALSE);
+	return client->console_port;
+}
+
+
+void
 gs_client_set_console_password (GsClient *client, const gchar *password)
 {
 	g_return_if_fail (GS_IS_CLIENT (client));
@@ -288,29 +305,46 @@ gs_client_watcher_map_changed (GsqQuerier *querier, GsClient *client)
 static void
 gs_client_querier_gameid_changed (GsqQuerier *querier, GsClient *client)
 {
-	if (client->console)
-		g_object_unref (client->console);
+	const gchar *gameid = gsq_querier_get_gameid (querier);
+	
+	/* change console protocol */
+	GsqConsole *old = client->console;
 	
 	GType type;
-	if (strcmp (gsq_querier_get_gameid (querier), "ss3") == 0)
+	if (strcmp (gameid, "ss3") == 0)
 		type = GSQ_TYPE_CONSOLE_TELNET;
 	else
 		type = GSQ_TYPE_CONSOLE_SOURCE;
 	
 	guint16 gport, qport;
-	gchar *host = gsq_parse_address (gsq_querier_get_address (client->querier), &gport, &qport);
+	gchar *host = gsq_parse_address (gsq_querier_get_address (client->querier),
+			&gport, &qport);
 	
-	client->console = g_object_new (type, "host", host, "port", 0, NULL);
+	if (strcmp (gameid, "ss3") == 0) {		/* Serious Sam 3: BFE */
+		client->console_settings = GUI_CONSOLE_PORT | GUI_CONSOLE_PASS;
+		if (client->console_port == 0)
+			client->console_port = 27015;
+	} else {								/*  */
+		client->console_settings = GUI_CONSOLE_PASS;
+		client->console_port = gport > 0 ? gport : 27015;
+	}
 	
+	client->console = g_object_new (type,
+			"host", host,
+			"port", client->console_port,
+			"password", client->console_password,
+			NULL);
 	g_free (host);
 	
-	gsq_console_set_password (client->console, client->console_password);
 	g_signal_connect (client->console, "connected",
 			G_CALLBACK (gs_client_console_connected), client);
 	g_signal_connect (client->console, "authenticated",
 			G_CALLBACK (gs_client_console_authenticated), client);
 	g_signal_connect (client->console, "disconnected",
 			G_CALLBACK (gs_client_console_disconnected), client);
+	
+	if (old)
+		g_object_unref (old);
 }
 
 
@@ -379,6 +413,11 @@ command_callback (GsqConsole *console, GAsyncResult *result, GsClient *client)
 void
 gs_client_send_command (GsClient* client, const gchar *cmd)
 {
+	if (!client->console) {
+		gs_console_log (client, GUI_CONSOLE_ERROR, _("Server's protocol is not determined"));
+		return;
+	}
+	
 	gsq_console_send (client->console, cmd,
 			(GAsyncReadyCallback) command_callback, client);
 }

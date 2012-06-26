@@ -563,7 +563,7 @@ establish_connection (GsqConsole *console)
 	}
 	
 	priv->working = TRUE;
-	GSocketConnectable *connectable = g_network_address_new (priv->host, 27015);
+	GSocketConnectable *connectable = g_network_address_new (priv->host, priv->port);
 	GSocketAddressEnumerator *enumerator = g_socket_connectable_enumerate (connectable);
 	g_socket_address_enumerator_next_async (enumerator, NULL,
 			(GAsyncReadyCallback) address_resolved, console);
