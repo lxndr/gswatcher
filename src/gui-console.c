@@ -22,6 +22,7 @@
 
 
 
+#include <stdlib.h>
 #include "platform.h"
 #include "gui-window.h"
 #include "gswatcher.h"
@@ -34,7 +35,7 @@ static GtkWidget *page, *logview, *entry;
 static GtkEntryCompletion *history;
 static GtkTreeIter history_iter;
 static gboolean history_end;
-static GtkWidget *toolbar, *password;
+static GtkWidget *toolbar, *port_label, *port, *password_label, *password;
 
 static GtkTextTagTable *tag_table;
 static GtkTextTag *tags[4] = {NULL};
@@ -247,20 +248,29 @@ gui_console_key_pressed (GtkWidget *widget, GdkEventKey *event, gpointer udata)
 														
 
 static void
-gs_console_password_changed (GtkEntry *entry, gpointer udata)
+gui_console_settings_popup (GtkPopupButton *popup_button, gpointer udata)
 {
 	GsClient *client = gui_slist_get_selected ();
-	gs_client_set_console_password (client, gtk_entry_get_text (entry));
-	gs_application_save_server_list (app);
+	
+	gchar tmp[8];
+	g_snprintf (tmp, 8, "%" G_GUINT16_FORMAT, gs_client_get_console_port (client));
+	gtk_entry_set_text (GTK_ENTRY (port), tmp);
+	
+	const gchar *pass = gs_client_get_console_password (client);
+	gtk_entry_set_text (GTK_ENTRY (password), pass ? pass : "");
+	
+	gtk_widget_set_sensitive (password, client->console_settings & GUI_CONSOLE_PASS);
+	gtk_widget_set_sensitive (port, client->console_settings & GUI_CONSOLE_PORT);
 }
 
 
 static void
-gui_console_set_password (const gchar *pass)
+gui_console_settings_popdown (GtkPopupButton *popup_button, gpointer udata)
 {
-	g_signal_handlers_block_by_func (password, gs_console_password_changed, NULL);
-	gtk_entry_set_text (GTK_ENTRY (password), pass ? pass : "");
-	g_signal_handlers_unblock_by_func (password, gs_console_password_changed, NULL);
+	GsClient *client = gui_slist_get_selected ();
+	gs_client_set_console_password (client, gtk_entry_get_text (GTK_ENTRY (password)));
+	gs_client_set_console_port (client, atoi (gtk_entry_get_text (GTK_ENTRY (port))));
+	gs_application_save_server_list (app);
 }
 
 
@@ -281,15 +291,13 @@ gui_console_setup (GsClient *client)
 		
 		history_end = TRUE;
 		
-		gtk_entry_completion_set_model (history, GTK_TREE_MODEL (client->console_history));		
-		gui_console_set_password (gs_client_get_console_password (client));
+		gtk_entry_completion_set_model (history, GTK_TREE_MODEL (client->console_history));
 	} else {
 		gtk_widget_set_sensitive (page, FALSE);
 		gtk_widget_set_sensitive (toolbar, FALSE);
 		
 		gtk_text_view_set_buffer (GTK_TEXT_VIEW (logview), NULL);
 		gtk_entry_completion_set_model (history, NULL);
-		gui_console_set_password (NULL);
 	}
 }
 
@@ -305,41 +313,58 @@ gs_console_init (GsClient *client)
 GtkWidget *
 gs_console_create_bar ()
 {
-	GtkWidget *opt_port = gtk_entry_new ();
+	/* settings window */
+	port = gtk_entry_new ();
 	
-	GtkWidget *opt_label1 = gtk_label_new (_("P_ort:"));
-	g_object_set (G_OBJECT (opt_label1),
+	port_label = gtk_label_new (_("P_ort:"));
+	g_object_set (G_OBJECT (port_label),
 			"xalign", 0.0f,
 			"use-underline", TRUE,
-			"mnemonic-widget", opt_port,
+			"mnemonic-widget", port,
 			NULL);
 	
 	password = gtk_entry_new ();
 	g_object_set (G_OBJECT (password),
 			"visibility", FALSE,
 			NULL);
-	g_signal_connect (password, "changed",
-			G_CALLBACK (gs_console_password_changed), NULL);
 	
-	GtkWidget *opt_label2 = gtk_label_new (_("_Password:"));
-	g_object_set (G_OBJECT (opt_label2),
+	password_label = gtk_label_new (_("_Password:"));
+	g_object_set (G_OBJECT (password_label),
 			"xalign", 0.0f,
 			"use-underline", TRUE,
 			"mnemonic-widget", password,
 			NULL);
 	
-	GtkWidget *opt_grid = gtk_grid_new ();
-	gtk_grid_set_row_spacing (GTK_GRID (opt_grid), 2);
-	gtk_grid_set_column_spacing (GTK_GRID (opt_grid), 2);
-	gtk_grid_attach (GTK_GRID (opt_grid), opt_label1, 0, 0, 1, 1);
-	gtk_grid_attach (GTK_GRID (opt_grid), opt_port, 1, 0, 1, 1);
-	gtk_grid_attach (GTK_GRID (opt_grid), opt_label2, 0, 1, 1, 1);
-	gtk_grid_attach (GTK_GRID (opt_grid), password, 1, 1, 1, 1);
-	gtk_widget_show_all (opt_grid);
+	GtkWidget *grid = gtk_grid_new ();
+	gtk_grid_set_row_spacing (GTK_GRID (grid), 2);
+	gtk_grid_set_column_spacing (GTK_GRID (grid), 2);
+	gtk_grid_attach (GTK_GRID (grid), port_label, 0, 0, 1, 1);
+	gtk_grid_attach (GTK_GRID (grid), port, 1, 0, 1, 1);
+	gtk_grid_attach (GTK_GRID (grid), password_label, 0, 1, 1, 1);
+	gtk_grid_attach (GTK_GRID (grid), password, 1, 1, 1, 1);
+	gtk_widget_show_all (grid);
 	
-	GtkWidget *settings = gtk_popup_button_new ("Settings");
-	gtk_container_add (GTK_CONTAINER (gtk_popup_button_get_popup (GTK_POPUP_BUTTON (settings))), opt_grid);
-
+	/* settings button */
+	GtkWidget *label = gtk_label_new (_("Settings"));
+	
+	GtkWidget *separator = gtk_separator_new (GTK_ORIENTATION_VERTICAL);
+	
+	GtkWidget *arrow = gtk_arrow_new (GTK_ARROW_UP, GTK_SHADOW_NONE);
+	
+	GtkWidget *box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+	gtk_box_pack_start (GTK_BOX (box), label, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (box), separator, FALSE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (box), arrow, FALSE, TRUE, 0);
+	
+	GtkWidget *settings = gtk_popup_button_new ();
+	gtk_container_add (GTK_CONTAINER (settings), box);
+	GtkWidget *popup_window = gtk_popup_button_get_popup (GTK_POPUP_BUTTON (settings));
+	gtk_container_add (GTK_CONTAINER (popup_window), grid);
+	g_signal_connect (settings, "popup",
+			G_CALLBACK (gui_console_settings_popup), NULL);
+	g_signal_connect (settings, "popdown",
+			G_CALLBACK (gui_console_settings_popdown), NULL);
+	
 	toolbar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
 	g_object_set (G_OBJECT (toolbar),
 			"sensitive", FALSE,

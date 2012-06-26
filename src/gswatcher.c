@@ -515,8 +515,12 @@ save_server_list_func (GsClient *client, GJsonNode *root)
 			gsq_querier_get_address (client->querier));
 	g_json_object_set_boolean (node, "favorite",
 			client->favorite);
-	g_json_object_set_string (node, "rcon-password",
-			gs_client_get_console_password (client));
+	if (client->console_settings & GUI_CONSOLE_PASS)
+		g_json_object_set_string (node, "console-password",
+				client->console_password);
+	if (client->console_settings & GUI_CONSOLE_PORT)
+		g_json_object_set_integer (node, "console-port",
+				client->console_port);
 	g_json_array_add (root, node);
 }
 
@@ -667,7 +671,7 @@ player_offline (GsqQuerier *querier, GsqPlayer *player, GsApplication *app)
 
 static GsClient *
 add_server (GsApplication *app, const gchar *address, const gchar *name,
-		gboolean favorite, const gchar *rcon_password)
+		gboolean favorite, const gchar *rcon_password, guint16 rcon_port)
 {
 	if (gs_application_find_server (app, address))
 		return NULL;
@@ -676,6 +680,7 @@ add_server (GsApplication *app, const gchar *address, const gchar *name,
 	gsq_querier_set_name (client->querier, name);
 	client->favorite = favorite;
 	gs_client_set_console_password (client, rcon_password);
+	gs_client_set_console_port (client, rcon_port);
 	g_signal_connect (client->querier, "player-online",
 			G_CALLBACK (player_online), app);
 	g_signal_connect (client->querier, "player-offline",
@@ -694,7 +699,7 @@ gs_application_add_server (GsApplication *app, const gchar *address)
 	g_return_val_if_fail (GS_IS_APPLICATION (app), NULL);
 	g_return_val_if_fail (address != NULL, NULL);
 	
-	GsClient *client = add_server (app, address, NULL, FALSE, NULL);
+	GsClient *client = add_server (app, address, NULL, FALSE, NULL, 0);
 	gs_application_save_server_list (app);
 	return client;
 }
@@ -704,7 +709,7 @@ static void
 add_servers (GsApplication *app, gchar **servers)
 {
 	while (*servers) {
-		add_server (app, *servers, NULL, TRUE, NULL);
+		add_server (app, *servers, NULL, TRUE, NULL, 0);
 		servers++;
 	}
 }
@@ -798,7 +803,8 @@ load_server_list (GsApplication *app)
 				g_json_object_get_string (node, "address"),
 				g_json_object_get_string (node, "name"),
 				g_json_object_get_boolean (node, "favorite"),
-				g_json_object_get_string (node, "rcon-password")
+				g_json_object_get_string (node, "console-password"),
+				g_json_object_get_integer (node, "console-port")
 			);
 		}
 	}

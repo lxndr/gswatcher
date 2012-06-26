@@ -32,6 +32,18 @@
 #include "query/console-telnet.h"
 
 
+typedef enum _GuiConsoleSettings {
+	GUI_CONSOLE_NONE = 1 << 0,
+	GUI_CONSOLE_HOST = 1 << 1,
+	GUI_CONSOLE_PORT = 1 << 2,
+	GUI_CONSOLE_USER = 1 << 3,
+	GUI_CONSOLE_PASS = 1 << 4,
+	GUI_CONSOLE_ALL = GUI_CONSOLE_HOST | GUI_CONSOLE_PORT |
+			GUI_CONSOLE_USER | GUI_CONSOLE_PASS
+} GuiConsoleSettings;
+
+
+
 #define GS_TYPE_CLIENT				(gs_client_get_type ())
 #define GS_CLIENT(obj)				(G_TYPE_CHECK_INSTANCE_CAST ((obj), GS_TYPE_CLIENT, GsClient))
 #define GS_CLIENT_CLASS(klass)		(G_TYPE_CHECK_CLASS_CAST ((klass), GS_TYPE_CLIENT, GsClientClass))
@@ -57,6 +69,7 @@ struct _GsClient {
 	
 	/* console */
 	GsqConsole *console;
+	GuiConsoleSettings console_settings;
 	gchar *console_password;
 	guint16 console_port;
 	GtkTextBuffer *console_buffer;
@@ -84,6 +97,8 @@ gboolean gs_client_get_favorite (GsClient *client);
 
 gchar *gs_client_get_game_name (GsClient* client, gboolean extra);
 
+void gs_client_set_console_port (GsClient *client, guint16 port);
+guint16 gs_client_get_console_port (GsClient *client);
 void gs_client_set_console_password (GsClient *client, const gchar *password);
 const gchar *gs_client_get_console_password (GsClient *client);
 void gs_client_send_command (GsClient* client, const gchar *cmd);
