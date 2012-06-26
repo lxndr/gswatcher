@@ -30,7 +30,8 @@
 
 enum {
 	PROP_0,
-	PROP_ADDRESS,
+	PROP_HOST,
+	PROP_PORT,
 	PROP_PASSWORD,
 	PROP_TIMEOUT
 };
@@ -50,7 +51,8 @@ typedef struct _Request {
 } Request;
 
 struct _GsqConsolePrivate {
-	gchar *address;
+	gchar *host;
+	guint16 port;
 	gchar *password;
 	GSocket *socket;
 	guint source;
@@ -86,8 +88,8 @@ gsq_console_finalize (GObject *object)
 	GsqConsole *console = GSQ_CONSOLE (object);
 	GsqConsolePrivate *priv = console->priv;
 	
-	if (priv->address)
-		g_free (priv->address);
+	if (priv->host)
+		g_free (priv->host);
 	
 	if (priv->password)
 		g_free (priv->password);
@@ -121,8 +123,11 @@ gsq_console_set_property (GObject *object, guint prop_id, const GValue *value,
 	GsqConsolePrivate *priv = console->priv;
 	
 	switch (prop_id) {
-	case PROP_ADDRESS:
-		priv->address = g_strdup (g_value_get_string (value));
+	case PROP_HOST:
+		priv->host = g_strdup (g_value_get_string (value));
+		break;
+	case PROP_PORT:
+		priv->port = g_value_get_uint (value);
 		break;
 	case PROP_PASSWORD:
 		gsq_console_set_password (console, g_value_get_string (value));
@@ -144,8 +149,11 @@ gsq_console_get_property (GObject *object, guint prop_id, GValue *value,
 	GsqConsolePrivate *priv = console->priv;
 	
 	switch (prop_id) {
-	case PROP_ADDRESS:
-		g_value_set_string (value, priv->address);
+	case PROP_HOST:
+		g_value_set_string (value, priv->host);
+		break;
+	case PROP_PORT:
+		g_value_set_uint (value, priv->port);
 		break;
 	case PROP_PASSWORD:
 		g_value_set_string (value, priv->password);
@@ -169,9 +177,13 @@ gsq_console_class_init (GsqConsoleClass *class)
 	
 	g_type_class_add_private (gobject_class, sizeof (GsqConsolePrivate));
 	
-	g_object_class_install_property (gobject_class, PROP_ADDRESS,
-			g_param_spec_string ("address", "Address", "Address and port",
+	g_object_class_install_property (gobject_class, PROP_HOST,
+			g_param_spec_string ("host", "Host", "Host name",
 			NULL, G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
+	
+	g_object_class_install_property (gobject_class, PROP_PORT,
+			g_param_spec_uint ("port", "Port", "Host port",
+			0, G_MAXUINT16, 0, G_PARAM_WRITABLE | G_PARAM_READABLE));
 	
 	g_object_class_install_property (gobject_class, PROP_PASSWORD,
 			g_param_spec_string ("password", "Password", "RCon password",
@@ -203,6 +215,23 @@ gsq_console_init (GsqConsole *console)
 	console->priv = G_TYPE_INSTANCE_GET_PRIVATE (console, GSQ_TYPE_CONSOLE,
 			GsqConsolePrivate);
 	console->priv->chunk = g_byte_array_new ();
+}
+
+
+void
+gsq_console_set_port (GsqConsole *console, guint16 port)
+{
+	g_return_if_fail (GSQ_IS_CONSOLE (console));
+	console->priv->port = port;
+	g_object_notify (G_OBJECT (console), "port");
+}
+
+
+guint16
+gsq_console_get_port (GsqConsole *console)
+{
+	g_return_val_if_fail (GSQ_IS_CONSOLE (console), 0);
+	return console->priv->port;
 }
 
 
@@ -393,7 +422,6 @@ gsq_console_send_data (GsqConsole *console, const gchar *data, gsize length,
 }
 
 
-
 static gboolean
 socket_received (GSocket *socket, GIOCondition cond, GsqConsole *console)
 {
@@ -534,16 +562,9 @@ establish_connection (GsqConsole *console)
 		return;
 	}
 	
-	GSocketConnectable *connectable;
-	GSocketAddressEnumerator *enumerator;
-	
-	if (!(connectable = g_network_address_parse (priv->address, 27015, &error))) {
-		throw_error (console, error);
-		return;
-	}
-	
 	priv->working = TRUE;
-	enumerator = g_socket_connectable_enumerate (connectable);
+	GSocketConnectable *connectable = g_network_address_new (priv->host, 27015);
+	GSocketAddressEnumerator *enumerator = g_socket_connectable_enumerate (connectable);
 	g_socket_address_enumerator_next_async (enumerator, NULL,
 			(GAsyncReadyCallback) address_resolved, console);
 	g_object_unref (enumerator);
