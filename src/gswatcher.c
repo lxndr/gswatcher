@@ -492,10 +492,10 @@ load_buddy_list (GsApplication *app)
 	gchar *name;
 	g_json_iter_init (&iter, root);
 	while (g_json_iter_next_object (&iter, &name, &node)) {
-		gint64 lastseen = g_json_object_get_integer (node, "lastseen");
-		const gchar *lastaddr = g_json_object_get_string (node, "lastaddr");
-		gboolean notify = g_json_object_get_boolean (node, "notify");
-		GsBuddy *buddy = add_buddy_real (app, name, lastseen, lastaddr, notify);
+		GsBuddy *buddy = add_buddy_real (app, name,
+				g_json_object_get_integer (node, "lastseen", 0),
+				g_json_object_get_string (node, "lastaddr", NULL),
+				g_json_object_get_boolean (node, "notify", FALSE));
 		gui_blist_add (buddy);
 	}
 	g_json_node_free (root);
@@ -798,14 +798,13 @@ load_server_list (GsApplication *app)
 	GJsonIter iter;
 	g_json_iter_init (&iter, root);
 	while (g_json_iter_next_array (&iter, &node)) {
-		if (g_json_object_has (node, "address")) {
-			add_server (app,
-				g_json_object_get_string (node, "address"),
-				g_json_object_get_string (node, "name"),
-				g_json_object_get_boolean (node, "favorite"),
-				g_json_object_get_string (node, "console-password"),
-				g_json_object_get_integer (node, "console-port")
-			);
+		const gchar *address = g_json_object_get_string (node, "address", NULL);
+		if (address && *address) {
+			add_server (app, address,
+				g_json_object_get_string (node, "name", NULL),
+				g_json_object_get_boolean (node, "favorite", FALSE),
+				g_json_object_get_string (node, "console-password", NULL),
+				g_json_object_get_integer (node, "console-port", 0));
 		}
 	}
 	g_json_node_free (root);
@@ -820,39 +819,32 @@ load_preferences (GsApplication *app)
 	GError *error = NULL;
 	
 	if ((node = g_json_read_from_file (app->preferences_path, &error))) {
-		if (g_json_object_has (node, "interval"))
-			gs_application_set_interval (app,
-					g_json_object_get_float (node, "interval"));
+		gs_application_set_interval (app,
+				g_json_object_get_float (node, "interval", 2.5));
 		
-		if (g_json_object_has (node, "game-column"))
-			gui_slist_set_game_column_mode (
-					g_json_object_get_float (node, "game-column"));
+		gui_slist_set_game_column_mode (
+				g_json_object_get_integer (node, "game-column", 0));
 		
-		if (g_json_object_has (node, "port"))
-			app->default_port = g_json_object_get_integer (node, "port");
+		app->default_port =
+				g_json_object_get_integer (node, "port", 27500);
 		
-		if (g_json_object_has (node, "connect-command"))
-			gs_client_set_connect_command (g_json_object_get_string (node, "connect-command"));
+		gs_client_set_connect_command (
+				g_json_object_get_string (node, "connect-command", NULL));
 		
-		if (g_json_object_has (node, "notification-enable"))
-			gs_notification_set_enable (
-					g_json_object_get_boolean (node, "notification-enable"));
+		gs_notification_set_enable (
+				g_json_object_get_boolean (node, "notification-enable", TRUE));
 		
-		const gchar *sound = NULL;
-		if (g_json_object_has (node, "notification-sound"))
-			sound = g_json_object_get_string (node, "notification-sound");
-		gs_notification_set_sound (sound);
+		gs_notification_set_sound (
+				g_json_object_get_string (node, "notification-sound", NULL));
 		
-		if (g_json_object_has (node, "font"))
-			gui_console_set_font (g_json_object_get_string (node, "font"));
+		gui_console_set_font (
+				g_json_object_get_string (node, "font", NULL));
 		
-		gboolean use_system_font = TRUE;
-		if (g_json_object_has (node, "system-font"))
-			use_system_font = g_json_object_get_boolean (node, "system-font");
-		gui_console_set_use_system_font (use_system_font);
+		gui_console_set_use_system_font (
+				g_json_object_get_boolean (node, "system-font", TRUE));
 		
-		if (g_json_object_has (node, "log-address"))
-			gs_client_set_logaddress (g_json_object_get_string (node, "log-address"));
+		gs_client_set_logaddress (
+				g_json_object_get_string (node, "log-address", NULL));
 		
 		GJsonNode *geometry = g_json_object_get (node, "geometry");
 		if (geometry)

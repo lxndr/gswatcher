@@ -100,14 +100,19 @@ void g_json_object_set (GJsonNode *object, const gchar *name, GJsonNode *node);
 #define g_json_object_set_float(obj, name, val) \
 		g_json_object_set (obj, name, g_json_float_new (val))
 GJsonNode *g_json_object_get (GJsonNode *object, const gchar *name);
-#define g_json_object_get_string(obj, name) \
-		g_json_string_get (g_json_object_get (obj, name))
-#define g_json_object_get_boolean(obj, name) \
-		g_json_boolean_get (g_json_object_get (obj, name))
-#define g_json_object_get_integer(obj, name) \
-		g_json_integer_get (g_json_object_get (obj, name))
-#define g_json_object_get_float(obj, name) \
-		g_json_float_get (g_json_object_get (obj, name))
+
+#define g_json_object_get_fn(type, ctype) \
+		G_INLINE_FUNC ctype \
+		g_json_object_get_##type (GJsonNode *node, const gchar *name, ctype def) \
+		{ \
+			GJsonNode *child = g_json_object_get (node, name); \
+			return child ? g_json_##type##_get (child) : def; \
+		}
+g_json_object_get_fn (string, const gchar *)
+g_json_object_get_fn (boolean, gboolean)
+g_json_object_get_fn (integer, gint64)
+g_json_object_get_fn (float, gdouble)
+#undef g_json_object_get_fn
 
 
 //typedef gboolean (*JsonReader) (gchar *chr, gpointer udata);

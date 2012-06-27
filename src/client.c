@@ -429,7 +429,7 @@ gs_client_set_logaddress (const gchar *address)
 {
 	if (logaddress)
 		g_free (logaddress);
-	logaddress = g_strdup (address);
+	logaddress = g_strdup (address ? address : "");
 }
 
 gchar *
