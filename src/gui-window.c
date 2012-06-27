@@ -260,33 +260,25 @@ gui_window_hide ()
 void
 gui_window_load_geometry (GJsonNode *geometry)
 {
-	if (g_json_object_has (geometry, "left"))
-		win_left = g_json_object_get_integer (geometry, "left");
-	if (g_json_object_has (geometry, "top"))
-		win_top = g_json_object_get_integer (geometry, "top");
+	win_left = g_json_object_get_integer (geometry, "left", 10);
+	win_top = g_json_object_get_integer (geometry, "top", 10);
 	gtk_window_move (GTK_WINDOW (window), win_left, win_top);
 	
-	if (g_json_object_has (geometry, "width"))
-		win_width = g_json_object_get_integer (geometry, "width");
-	if (g_json_object_has (geometry, "height"))
-		win_height = g_json_object_get_integer (geometry, "height");
+	win_width = g_json_object_get_integer (geometry, "width", 800);
+	win_height = g_json_object_get_integer (geometry, "height", 600);
 	gtk_window_resize (GTK_WINDOW (window), win_width, win_height);
 	
-	if (g_json_object_has (geometry, "maximized"))
-		win_maximized = g_json_object_get_integer (geometry, "maximized");
+	win_maximized = g_json_object_get_boolean (geometry, "maximized", FALSE);
 	if (win_maximized)
 		gtk_window_maximize (GTK_WINDOW (window));
 	
-	if (g_json_object_has (geometry, "layout"))
-		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (layout_button),
-				g_json_object_get_integer (geometry, "layout"));
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (layout_button),
+			g_json_object_get_boolean (geometry, "layout", FALSE));
 	
-	if (g_json_object_has (geometry, "slist-size"))
-		gtk_paned_set_position (GTK_PANED (slist_paned),
-				g_json_object_get_integer (geometry, "slist-size"));
-	if (g_json_object_has (geometry, "plist-size"))
-		gtk_paned_set_position (GTK_PANED (plist_paned),
-				g_json_object_get_integer (geometry, "plist-size"));
+	gtk_paned_set_position (GTK_PANED (slist_paned),
+			g_json_object_get_integer (geometry, "slist-size", 200));
+	gtk_paned_set_position (GTK_PANED (plist_paned),
+			g_json_object_get_integer (geometry, "plist-size", 200));
 }
 
 GJsonNode *
@@ -298,10 +290,10 @@ gui_window_save_geometry ()
 	g_json_object_set_integer (node, "top", win_top);
 	g_json_object_set_integer (node, "width", win_width);
 	g_json_object_set_integer (node, "height", win_height);
-	g_json_object_set_integer (node, "maximized", win_maximized);
+	g_json_object_set_boolean (node, "maximized", win_maximized);
 	
 	gboolean layout = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (layout_button));
-	g_json_object_set_integer (node, "layout", layout);
+	g_json_object_set_boolean (node, "layout", layout);
 	
 	gint slist_size = gtk_paned_get_position (GTK_PANED (slist_paned));
 	g_json_object_set_integer (node, "slist-size", slist_size);
