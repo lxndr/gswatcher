@@ -51,7 +51,7 @@ static void gs_client_get_property (GObject *object, guint prop_id,
 static void gs_client_finalize (GObject *object);
 static void gs_client_querier_resolved (GsqQuerier *querier, GsClient *client);
 static void gs_client_querier_info_updated (GsqQuerier *querier, GsClient *client);
-static void gs_client_watcher_map_changed (GsqQuerier *querier, GsClient *client);
+static void gs_client_querier_map_changed (GsqQuerier *querier, GsClient *client);
 static void gs_client_querier_gameid_changed (GsqQuerier *querier, GsClient *client);
 static void gs_client_querier_log (GsqQuerier *querier, const gchar *msg, GsClient *client);
 static void gs_client_console_connected (GsqConsole *console, GsClient *client);
@@ -170,7 +170,7 @@ gs_client_new (const gchar *address)
 	g_signal_connect (client->querier, "info-update",
 			G_CALLBACK (gs_client_querier_info_updated), client);
 	g_signal_connect (client->querier, "map-changed",
-			G_CALLBACK (gs_client_watcher_map_changed), client);
+			G_CALLBACK (gs_client_querier_map_changed), client);
 	g_signal_connect (client->querier, "gameid-changed",
 			G_CALLBACK (gs_client_querier_gameid_changed), client);
 	g_signal_connect (client->querier, "log",
@@ -275,9 +275,11 @@ gs_client_querier_resolved (GsqQuerier *querier, GsClient *client)
 static void
 gs_client_querier_info_updated (GsqQuerier *querier, GsClient *client)
 {
+	/* password field */
 	gchar *password = gsq_querier_get_extra (querier, "password");
 	client->password = password ? strcmp (password, "true") == 0 : FALSE;
 	
+	/* version field */
 	if (client->version)
 		g_free (client->version);
 	
@@ -295,7 +297,7 @@ gs_client_querier_info_updated (GsqQuerier *querier, GsClient *client)
 
 
 static void
-gs_client_watcher_map_changed (GsqQuerier *querier, GsClient *client)
+gs_client_querier_map_changed (GsqQuerier *querier, GsClient *client)
 {
 	if (client->log_auto)
 		gs_client_enable_log (client, TRUE);

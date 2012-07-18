@@ -130,6 +130,7 @@ gui_slist_selection_func (GtkTreeSelection *selection, GtkTreeModel *model,
 	
 	gtk_tree_model_get_iter (model, &iter, path);
 	gtk_tree_model_get (model, &iter, COLUMN_TYPE, &type, -1);
+	
 	if (type == ROW_FAVORITE || type == ROW_OTHER)
 		return TRUE;
 	return FALSE;
@@ -272,6 +273,26 @@ get_game_icon (const gchar *code)
 }
 
 
+static gchar *
+format_date_time (gint64 time)
+{
+	gint64 day = time / (24 * 60 * 60);
+	gint64 hour = time / 60 / 60 % 24;
+	gint64 minute = time / 60 % 60;
+	gint64 second = time % 60;
+	
+	GString *s = g_string_sized_new (8);
+	
+	if (day > 0)
+		g_string_append_printf (s, "%" G_GINT64_FORMAT " ", day);
+	g_string_append_printf (s, "%" G_GINT64_FORMAT ":%.2" G_GINT64_FORMAT, hour, minute);
+	if (hour == 0)
+		g_string_append_printf (s, ":%.2" G_GINT64_FORMAT, second);
+	
+	return g_string_free (s, FALSE);
+}
+
+
 static void
 server_error (GsqQuerier *querier, const gchar *msg, GsClient *client)
 {
@@ -284,10 +305,28 @@ server_error (GsqQuerier *querier, const gchar *msg, GsClient *client)
 static void
 server_timed_out (GsqQuerier *querier, GsClient *client)
 {
-	gtk_list_store_set (liststore, &client->sliter,
+	GDateTime *dt = g_date_time_new_now_local ();
+	gint64 time = g_date_time_to_unix (dt);
+	
+	if (client->last_online == 0) {
+		gtk_list_store_set (liststore, &client->sliter,
 			COLUMN_PING, _("Timeout"),
 			COLUMN_PING_COLOR, "red",
 			-1);
+		client->last_online = time;
+	} else {
+		time -= client->last_online;
+		gchar *tmp = format_date_time (time);
+		
+		gtk_list_store_set (liststore, &client->sliter,
+				COLUMN_PING, tmp,
+				COLUMN_PING_COLOR, "red",
+				-1);
+		
+		g_free (tmp);
+	}
+	
+	g_date_time_unref (dt);
 }
 
 static void
@@ -316,6 +355,7 @@ game_detected (GsqQuerier *querier, GsClient *client)
 static void
 server_info_updated (GsqQuerier *querier, GsClient *client)
 {
+	client->last_online = 0;
 	gui_slist_update (client);
 }
 
@@ -331,22 +371,18 @@ server_players_updated (GsqQuerier *querier, GsClient *cl)
 void
 gui_slist_add (GsClient *cl)
 {
-	g_return_if_fail (cl != NULL);
-	
-	gchar *gamename = gs_client_get_game_name (cl,
-			game_column_mode == GUI_GAME_COLUMN_FULL);
+	g_return_if_fail (GS_IS_CLIENT (cl));
 	
 	gtk_list_store_append (liststore, &cl->sliter);
 	gtk_list_store_set (liststore, &cl->sliter,
 			COLUMN_SERVER, cl,
-			COLUMN_TYPE, cl->favorite ? ROW_FAVORITE : ROW_OTHER,
 			COLUMN_SPACE, TRUE,
-			COLUMN_NAME, gsq_querier_get_name (cl->querier),
 			COLUMN_ICON_VISIBLE, game_column_mode == GUI_GAME_COLUMN_ICON,
-			COLUMN_GAME, gamename,
+			COLUMN_PING, _("Querying"),
+			COLUMN_PING_COLOR, "grey",
 			-1);
 	
-	g_free (gamename);
+	gui_slist_update (cl);
 	
 	GtkTreeSelection *sel = gtk_tree_view_get_selection (GTK_TREE_VIEW (listview));
 	if (gtk_tree_selection_count_selected_rows (sel) == 0)
@@ -412,7 +448,8 @@ gui_slist_set_visible (gboolean seen)
 }
 
 
-void gui_slist_update (GsClient *cl)
+void
+gui_slist_update (GsClient *cl)
 {
 	if (!visible)
 		return;
@@ -429,11 +466,9 @@ void gui_slist_update (GsClient *cl)
 	/* player count color */
 	gint num = gsq_querier_get_numplayers (cl->querier);
 	gint max = gsq_querier_get_maxplayers (cl->querier);
-	gchar *players_color = "dark green";
-	if (num >= max)
-		players_color = "dark red";
-	else if (num == 0)
-		players_color = "black";
+	const gchar *player_color = "black";
+	if (num != 0 && max > 0)
+		player_color = num >= max ? "dark red" : "dark green";
 	
 	/* ping */
 	gchar *ping = g_strdup_printf ("%ld", gsq_querier_get_ping (cl->querier));
@@ -444,11 +479,15 @@ void gui_slist_update (GsClient *cl)
 			COLUMN_GAME, gamename,
 			COLUMN_MAP, gsq_querier_get_map (cl->querier),
 			COLUMN_PLAYERS, players,
-			COLUMN_PLAYERS_COLOR, players_color,
+			COLUMN_PLAYERS_COLOR, player_color,
 			COLUMN_PLAYERS_NUMBER, gsq_querier_get_numplayers (cl->querier),
-			COLUMN_PING, ping,
-			COLUMN_PING_COLOR, "black",
 			-1);
+	
+	if (gsq_querier_get_ping (cl->querier))
+		gtk_list_store_set (liststore, &cl->sliter,
+				COLUMN_PING, ping,
+				COLUMN_PING_COLOR, "black",
+				-1);
 	
 	g_free (ping);
 	g_free (players);
@@ -463,8 +502,7 @@ gui_slist_update_list (GList *ls)
 {
 	while (ls) {
 		GsClient *cl = ls->data;
-		if (gsq_querier_get_ping (cl->querier) > 0)
-			gui_slist_update (cl);
+		gui_slist_update (cl);
 		ls = ls->next;
 	}
 }
