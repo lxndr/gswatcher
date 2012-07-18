@@ -239,6 +239,7 @@ gsq_querier_set_property (GObject *object, guint prop_id, const GValue *value,
 		if (priv->address)
 			g_free (priv->address);
 		priv->address = g_strdup (g_value_get_string (value));
+		gsq_querier_set_name (querier, priv->address);
 		break;
 	case PROP_RESET_ADDRESS:
 		priv->reset_address = g_value_get_boolean (value);
@@ -430,11 +431,11 @@ gsq_querier_set_name (GsqQuerier *querier, const gchar *name)
 {
 	g_return_if_fail (GSQ_IS_QUERIER (querier));
 	g_string_truncate (querier->priv->name, 0);
-	if (name != NULL)
-		g_string_insert_len (querier->priv->name, -1, name, -1);
+	g_string_insert_len (querier->priv->name, -1,
+			name && *name ? name : querier->priv->address, -1);
 }
 
-gchar *
+const gchar *
 gsq_querier_get_name (GsqQuerier *querier)
 {
 	g_return_val_if_fail (GSQ_IS_QUERIER (querier), NULL);
@@ -452,7 +453,7 @@ gsq_querier_set_gameid (GsqQuerier *querier, const gchar *gameid)
 		g_string_insert_len (priv->gameid, -1, gameid, -1);
 }
 
-gchar *
+const gchar *
 gsq_querier_get_gameid (GsqQuerier *querier)
 {
 	g_return_val_if_fail (GSQ_IS_QUERIER (querier), NULL);
@@ -468,7 +469,7 @@ gsq_querier_set_game (GsqQuerier *querier, const gchar *game)
 		g_string_insert_len (querier->priv->game, -1, game, -1);
 }
 
-gchar *
+const gchar *
 gsq_querier_get_game (GsqQuerier *querier)
 {
 	g_return_val_if_fail (GSQ_IS_QUERIER (querier), NULL);
@@ -484,7 +485,7 @@ gsq_querier_set_mode (GsqQuerier *querier, const gchar *mode)
 		g_string_insert_len (querier->priv->mode, -1, mode, -1);
 }
 
-gchar *
+const gchar *
 gsq_querier_get_mode (GsqQuerier *querier)
 {
 	g_return_val_if_fail (GSQ_IS_QUERIER (querier), NULL);
@@ -502,7 +503,7 @@ gsq_querier_set_map (GsqQuerier *querier, const gchar *map)
 		g_string_insert_len (priv->map, -1, map, -1);
 }
 
-gchar *
+const gchar *
 gsq_querier_get_map (GsqQuerier *querier)
 {
 	g_return_val_if_fail (GSQ_IS_QUERIER (querier), NULL);
@@ -518,7 +519,7 @@ gsq_querier_set_version (GsqQuerier *querier, const gchar *version)
 		g_string_insert_len (querier->priv->version, -1, version, -1);
 }
 
-gchar *
+const gchar *
 gsq_querier_get_version (GsqQuerier *querier)
 {
 	g_return_val_if_fail (GSQ_IS_QUERIER (querier), NULL);

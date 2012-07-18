@@ -240,8 +240,8 @@ gchar *
 gs_client_get_game_name (GsClient* client, gboolean extra)
 {
 	GsqQuerier *querier = client->querier;
-	gchar *game = gsq_querier_get_game (querier);
-	gchar *mode = gsq_querier_get_mode (querier);
+	const gchar *game = gsq_querier_get_game (querier);
+	const gchar *mode = gsq_querier_get_mode (querier);
 	
 	if (*mode && extra)
 		return g_strdup_printf ("%s (%s)", game, mode);
@@ -283,7 +283,7 @@ gs_client_querier_info_updated (GsqQuerier *querier, GsClient *client)
 	if (client->version)
 		g_free (client->version);
 	
-	gchar *version = gsq_querier_get_version (querier);
+	const gchar *version = gsq_querier_get_version (querier);
 	
 	if (strcmp (gsq_querier_get_protocol (querier), "source") == 0) {
 		gchar *type = gsq_querier_get_extra (querier, "type");

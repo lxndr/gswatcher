@@ -110,7 +110,7 @@ gamespy_reset (Private *priv)
 static void
 gamespy_add_fields (GsqQuerier *querier)
 {
-	gchar *game_id = gsq_querier_get_gameid (querier);
+	const gchar *game_id = gsq_querier_get_gameid (querier);
 	
 	gsq_querier_add_field (querier, N_("Frags"), G_TYPE_INT);
 	if (strcmp (game_id, "kf") == 0) {
@@ -144,7 +144,7 @@ get_team_name_to (gint num)
 static void
 gamespy_fill (GsqQuerier *querier, GHashTable *values)
 {
-	gchar *gameid = gsq_querier_get_gameid (querier);
+	const gchar *gameid = gsq_querier_get_gameid (querier);
 	
 	/* server info */
 	gsq_querier_set_name (querier,
@@ -287,7 +287,7 @@ gsq_gamespy_process (GsqQuerier *querier, guint16 qport,
 	if (g_hash_table_lookup (priv->values, "final"))
 		priv->max = num;
 	
-	gchar *gameid = gsq_querier_get_gameid (querier);
+	const gchar *gameid = gsq_querier_get_gameid (querier);
 	if (!*gameid) {
 		/* while protocol is being detected, we only need the first packet */
 		if (num != 1)
