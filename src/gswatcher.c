@@ -670,17 +670,15 @@ player_offline (GsqQuerier *querier, GsqPlayer *player, GsApplication *app)
 
 
 static GsClient *
-add_server (GsApplication *app, const gchar *address, const gchar *name,
-		gboolean favorite, const gchar *rcon_password, guint16 rcon_port)
+add_server (GsApplication *app, const gchar *address)
 {
+	if (!(address && *address))
+		return NULL;
+	
 	if (gs_application_find_server (app, address))
 		return NULL;
 	
 	GsClient *client = gs_client_new (address);
-	gsq_querier_set_name (client->querier, name);
-	client->favorite = favorite;
-	gs_client_set_console_password (client, rcon_password);
-	gs_client_set_console_port (client, rcon_port);
 	g_signal_connect (client->querier, "player-online",
 			G_CALLBACK (player_online), app);
 	g_signal_connect (client->querier, "player-offline",
@@ -689,6 +687,7 @@ add_server (GsApplication *app, const gchar *address, const gchar *name,
 	gui_slist_add (client);
 	update_timer (app);
 	gsq_querier_update (client->querier);
+	
 	return client;
 }
 
@@ -699,7 +698,7 @@ gs_application_add_server (GsApplication *app, const gchar *address)
 	g_return_val_if_fail (GS_IS_APPLICATION (app), NULL);
 	g_return_val_if_fail (address != NULL, NULL);
 	
-	GsClient *client = add_server (app, address, NULL, FALSE, NULL, 0);
+	GsClient *client = add_server (app, address);
 	gs_application_save_server_list (app);
 	return client;
 }
@@ -709,7 +708,7 @@ static void
 add_servers (GsApplication *app, gchar **servers)
 {
 	while (*servers) {
-		add_server (app, *servers, NULL, TRUE, NULL, 0);
+		add_server (app, *servers);
 		servers++;
 	}
 }
@@ -799,12 +798,17 @@ load_server_list (GsApplication *app)
 	g_json_iter_init (&iter, root);
 	while (g_json_iter_next_array (&iter, &node)) {
 		const gchar *address = g_json_object_get_string (node, "address", NULL);
-		if (address && *address) {
-			add_server (app, address,
-				g_json_object_get_string (node, "name", NULL),
-				g_json_object_get_boolean (node, "favorite", FALSE),
-				g_json_object_get_string (node, "console-password", NULL),
-				g_json_object_get_integer (node, "console-port", 0));
+		GsClient *client = add_server (app, address);
+		if (client) {
+			gsq_querier_set_name (client->querier,
+					g_json_object_get_string (node, "name", NULL));
+			client->favorite =
+					g_json_object_get_boolean (node, "favorite", FALSE);
+			gs_client_set_console_password (client,
+					g_json_object_get_string (node, "console-password", NULL));
+			gs_client_set_console_port (client,
+					g_json_object_get_integer (node, "console-port", 0));
+			gui_slist_update (client);
 		}
 	}
 	g_json_node_free (root);
