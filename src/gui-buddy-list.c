@@ -96,7 +96,7 @@ gui_blist_update_real (GsBuddy *buddy, GtkTreeIter *iter)
 		
 		guint count = g_list_length (buddy->servers);
 		if (count > 0) {
-			gchar *srvname = gsq_querier_get_name (((GsClient *) buddy->servers->data)->querier);
+			const gchar *srvname = gsq_querier_get_name (((GsClient *) buddy->servers->data)->querier);
 			if (count == 1) {
 				place = g_strdup (srvname);
 			} else if (count > 1) {
