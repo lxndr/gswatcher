@@ -550,6 +550,25 @@ gs_address_changed (GtkEntry *entry, gpointer udata)
 }
 
 
+static gboolean
+slist_key_pressed (GtkWidget *widget, GdkEventKey *event, gpointer udata)
+{
+	if (event->keyval == GDK_KEY_Delete) {
+		gs_application_remove_server_ask (app, selected);
+	} else if (event->state == GDK_CONTROL_MASK &&
+			(event->keyval == GDK_KEY_C || event->keyval == GDK_KEY_c ||
+			event->keyval == GDK_KEY_Cyrillic_PE || event->keyval == GDK_KEY_Cyrillic_pe)) {
+		gs_client_connect_to_game (selected);
+	} else if (event->state == GDK_CONTROL_MASK &&
+			(event->keyval == GDK_KEY_F || event->keyval == GDK_KEY_f ||
+			event->keyval == GDK_KEY_Cyrillic_I || event->keyval == GDK_KEY_Cyrillic_i)) {
+		/* TODO favour */
+	}
+	
+	return TRUE;
+}
+
+
 GtkWidget *
 gui_slist_create ()
 {
@@ -623,6 +642,8 @@ gui_slist_create ()
 			NULL);
 	gtk_tree_view_set_row_separator_func (GTK_TREE_VIEW (listview),
 			(GtkTreeViewRowSeparatorFunc) gui_slist_separator_func, NULL, NULL);
+	g_signal_connect (listview, "key-press-event",
+			G_CALLBACK (slist_key_pressed), NULL);
 	
 	GtkTreeViewColumn *column;
 	GtkCellRenderer *cell;
@@ -732,7 +753,7 @@ gui_slist_create ()
 			"text", COLUMN_PING,
 			"foreground", COLUMN_PING_COLOR,
 			NULL);
-	gtk_tree_view_insert_column (GTK_TREE_VIEW (listview), column, -1);	
+	gtk_tree_view_insert_column (GTK_TREE_VIEW (listview), column, -1);
 	
 	
 	GtkTreeSelection *sel = gtk_tree_view_get_selection (GTK_TREE_VIEW (listview));
