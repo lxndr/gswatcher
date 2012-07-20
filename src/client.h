@@ -66,7 +66,7 @@ struct _GsClient {
 	const gchar *country_code;
 	const gchar *country;
 	GtkTreeIter sliter;			/* server list iterator */
-	gint64 last_online;
+	gint64 timeout_time;
 	
 	/* console */
 	GsqConsole *console;

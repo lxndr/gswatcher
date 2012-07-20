@@ -57,6 +57,7 @@ enum {
 	COLUMN_PLAYERS_NUMBER,
 	COLUMN_PING,
 	COLUMN_PING_COLOR,
+	COLUMN_ONLINE,
 	COLUMN_NUMBER
 };
 
@@ -193,7 +194,6 @@ gui_slist_selection_changed (GtkTreeSelection *selection, gpointer udata)
 	const gchar *addr = selected ? gsq_querier_get_address (selected->querier) : "";
 	gtk_entry_set_text (GTK_ENTRY (entry), addr);
 	gui_info_setup (selected);
-	gui_info_update (selected);
 	gui_plist_setup (selected);
 	gui_plist_update (selected);
 	gui_console_setup (selected);
@@ -299,6 +299,7 @@ server_error (GsqQuerier *querier, const gchar *msg, GsClient *client)
 	gtk_list_store_set (liststore, &client->sliter,
 			COLUMN_PING, msg,
 			COLUMN_PING_COLOR, "red",
+			COLUMN_ONLINE, FALSE,
 			-1);
 }
 
@@ -308,25 +309,31 @@ server_timed_out (GsqQuerier *querier, GsClient *client)
 	GDateTime *dt = g_date_time_new_now_local ();
 	gint64 time = g_date_time_to_unix (dt);
 	
-	if (client->last_online == 0) {
+	if (client->timeout_time == 0) {
 		gtk_list_store_set (liststore, &client->sliter,
 			COLUMN_PING, _("Timeout"),
 			COLUMN_PING_COLOR, "red",
+			COLUMN_PLAYERS_COLOR, NULL,
+			COLUMN_ONLINE, FALSE,
 			-1);
-		client->last_online = time;
+		client->timeout_time = time;
 	} else {
-		time -= client->last_online;
+		time -= client->timeout_time;
 		gchar *tmp = format_date_time (time);
 		
 		gtk_list_store_set (liststore, &client->sliter,
 				COLUMN_PING, tmp,
 				COLUMN_PING_COLOR, "red",
+				COLUMN_ONLINE, FALSE,
 				-1);
 		
 		g_free (tmp);
 	}
 	
 	g_date_time_unref (dt);
+	
+	if (client == selected)
+		gui_info_setup (client);
 }
 
 static void
@@ -355,7 +362,7 @@ game_detected (GsqQuerier *querier, GsClient *client)
 static void
 server_info_updated (GsqQuerier *querier, GsClient *client)
 {
-	client->last_online = 0;
+	client->timeout_time = 0;
 	gui_slist_update (client);
 }
 
@@ -380,6 +387,7 @@ gui_slist_add (GsClient *cl)
 			COLUMN_ICON_VISIBLE, game_column_mode == GUI_GAME_COLUMN_ICON,
 			COLUMN_PING, _("Querying"),
 			COLUMN_PING_COLOR, "grey",
+			COLUMN_ONLINE, FALSE,
 			-1);
 	
 	gui_slist_update (cl);
@@ -458,6 +466,9 @@ gui_slist_update (GsClient *cl)
 	gchar *gamename = gs_client_get_game_name (cl,
 			game_column_mode == GUI_GAME_COLUMN_FULL);
 	
+	/* map name */
+	const gchar *mapname = gsq_querier_get_map (cl->querier);
+	
 	/* number of players */
 	gchar *players = g_strdup_printf ("%d / %d",
 			gsq_querier_get_numplayers (cl->querier),
@@ -466,7 +477,7 @@ gui_slist_update (GsClient *cl)
 	/* player count color */
 	gint num = gsq_querier_get_numplayers (cl->querier);
 	gint max = gsq_querier_get_maxplayers (cl->querier);
-	const gchar *player_color = "black";
+	const gchar *player_color = NULL;
 	if (num != 0 && max > 0)
 		player_color = num >= max ? "dark red" : "dark green";
 	
@@ -476,17 +487,18 @@ gui_slist_update (GsClient *cl)
 	gtk_list_store_set (liststore, &cl->sliter,
 			COLUMN_TYPE, cl->favorite ? ROW_FAVORITE : ROW_OTHER,
 			COLUMN_NAME, gsq_querier_get_name (cl->querier),
-			COLUMN_GAME, gamename,
-			COLUMN_MAP, gsq_querier_get_map (cl->querier),
+			COLUMN_GAME, *gamename ? gamename : _("unknown"),
+			COLUMN_MAP, *mapname ? mapname : _("unknown"),
 			COLUMN_PLAYERS, players,
 			COLUMN_PLAYERS_COLOR, player_color,
-			COLUMN_PLAYERS_NUMBER, gsq_querier_get_numplayers (cl->querier),
+			COLUMN_PLAYERS_NUMBER, num,
 			-1);
 	
 	if (gsq_querier_get_ping (cl->querier))
 		gtk_list_store_set (liststore, &cl->sliter,
 				COLUMN_PING, ping,
-				COLUMN_PING_COLOR, "black",
+				COLUMN_PING_COLOR, NULL,
+				COLUMN_ONLINE, TRUE,
 				-1);
 	
 	g_free (ping);
@@ -599,7 +611,9 @@ gui_slist_create ()
 			// players, color, number
 			G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT,
 			// ping, ping color
-			G_TYPE_STRING, G_TYPE_STRING);
+			G_TYPE_STRING, G_TYPE_STRING,
+			/* online */
+			G_TYPE_BOOLEAN);
 	gtk_tree_sortable_set_sort_func (GTK_TREE_SORTABLE (liststore),
 			COLUMN_NAME, gui_slist_sort_string_func, NULL, NULL);
 	gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (liststore),
@@ -621,6 +635,7 @@ gui_slist_create ()
 			COLUMN_SPACE, FALSE,
 			COLUMN_NAME, _("Favorite servers"),
 			COLUMN_NAME_WEIGHT, PANGO_WEIGHT_BOLD,
+			COLUMN_ONLINE, TRUE,
 			-1);
 	gtk_list_store_append (liststore, &iter);
 	gtk_list_store_set (liststore, &iter,
@@ -632,6 +647,7 @@ gui_slist_create ()
 			COLUMN_SPACE, FALSE,
 			COLUMN_NAME, _("Other servers"),
 			COLUMN_NAME_WEIGHT, PANGO_WEIGHT_BOLD,
+			COLUMN_ONLINE, TRUE,
 			-1);
 	
 /* server list view */
@@ -670,6 +686,7 @@ gui_slist_create ()
 	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (column), cell,
 			"pixbuf", COLUMN_ICON,
 			"visible", COLUMN_ICON_VISIBLE,
+			"sensitive", COLUMN_ONLINE,
 			NULL);
 	cell = gtk_cell_renderer_text_new ();
 	g_object_set (G_OBJECT (cell),
@@ -680,11 +697,13 @@ gui_slist_create ()
 	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (column), cell,
 			"text", COLUMN_NAME,
 			"weight", COLUMN_NAME_WEIGHT,
+			"sensitive", COLUMN_ONLINE,
 			NULL);
 	cell = gtk_cell_renderer_pixbuf_new ();
 	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (column), cell, FALSE);
 	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (column), cell,
 			"pixbuf", COLUMN_FLAG,
+			"sensitive", COLUMN_ONLINE,
 			NULL);
 	gtk_tree_view_column_set_sort_order (GTK_TREE_VIEW_COLUMN (column),
 			GTK_SORT_ASCENDING);
@@ -702,11 +721,13 @@ gui_slist_create ()
 	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (gamecolumn), cell, FALSE);
 	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (gamecolumn), cell,
 			"pixbuf", COLUMN_ICON,
+			"sensitive", COLUMN_ONLINE,
 			NULL);
 	cell = gtk_cell_renderer_text_new ();
 	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (gamecolumn), cell, TRUE);
 	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (gamecolumn), cell,
 			"text", COLUMN_GAME,
+			"sensitive", COLUMN_ONLINE,
 			NULL);
 	gtk_tree_view_insert_column (GTK_TREE_VIEW (listview), gamecolumn, -1);
 	
@@ -722,6 +743,7 @@ gui_slist_create ()
 	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (column), cell, TRUE);
 	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (column), cell,
 			"text", COLUMN_MAP,
+			"sensitive", COLUMN_ONLINE,
 			NULL);
 	gtk_tree_view_insert_column (GTK_TREE_VIEW (listview), column, -1);
 	
@@ -737,6 +759,7 @@ gui_slist_create ()
 	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (column), cell,
 			"text", COLUMN_PLAYERS,
 			"foreground", COLUMN_PLAYERS_COLOR,
+			"sensitive", COLUMN_ONLINE,
 			NULL);
 	gtk_tree_view_insert_column (GTK_TREE_VIEW (listview), column, -1);
 	
@@ -746,6 +769,7 @@ gui_slist_create ()
 			"title", _("Ping"),
 			"clickable", TRUE,
 			"sort-column-id", COLUMN_PING,
+			"sizing", GTK_TREE_VIEW_COLUMN_AUTOSIZE,
 			NULL);
 	cell = gtk_cell_renderer_text_new ();
 	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (column), cell, TRUE);
