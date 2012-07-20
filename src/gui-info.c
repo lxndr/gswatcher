@@ -27,64 +27,81 @@
 #include "gui-window.h"
 #include "gui-server-list.h"
 #include "gui-player-list.h"
+#include "gui-info.h"
+
 
 
 static GtkWidget *grid, *ctl_address, *ctl_name, *ctl_game, *ctl_map,
-		*ctl_players, *ctl_password, *ctl_version, *ctl_location;
+		*ctl_players, *ctl_password, *ctl_version, *ctl_location, *ctl_message;
 static GtkWidget *toolbar, *ctl_remove, *ctl_favorite, *ctl_connect;
 
 
 static void favorite_toggled (GtkToggleButton *button, gpointer udata);
 
 
+
 void
-gui_info_setup (GsClient *client)
+gui_info_setup (GsClient *cl)
 {
-	if (client) {
+	if (cl) {
+		/* enable and set up the toolbar */
 		gtk_widget_set_sensitive (toolbar, TRUE);
-		gtk_widget_set_sensitive (grid, TRUE);
 		
 		g_signal_handlers_block_by_func (ctl_favorite, favorite_toggled, NULL);
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ctl_favorite),
-				gs_client_get_favorite (client));
+				gs_client_get_favorite (cl));
 		g_signal_handlers_unblock_by_func (ctl_favorite, favorite_toggled, NULL);
+		
+		/* enable and set up the information */
+		gtk_widget_set_sensitive (grid, TRUE);
+		
+		gtk_label_set_text (GTK_LABEL (ctl_address), gsq_querier_get_address (cl->querier));
+		gtk_label_set_text (GTK_LABEL (ctl_location), cl->country);
+		gui_info_update (cl);
+		
+		gtk_widget_set_visible (ctl_message, cl->timeout_time > 0);
 	} else {
+		/* none is selected. disable the toolbar and clear information grid */
 		gtk_widget_set_sensitive (toolbar, FALSE);
 		gtk_widget_set_sensitive (grid, FALSE);
+		gtk_widget_set_visible (ctl_message, FALSE);
+		
+		gtk_label_set_text (GTK_LABEL (ctl_address), _("N/A"));
+		gtk_label_set_text (GTK_LABEL (ctl_name), _("N/A"));
+		gtk_label_set_text (GTK_LABEL (ctl_game), _("N/A"));
+		gtk_label_set_text (GTK_LABEL (ctl_map), _("N/A"));
+		gtk_label_set_text (GTK_LABEL (ctl_players), _("N/A"));
+		gtk_label_set_text (GTK_LABEL (ctl_password), _("N/A"));
+		gtk_label_set_text (GTK_LABEL (ctl_version), _("N/A"));
+		gtk_label_set_text (GTK_LABEL (ctl_location), _("N/A"));
 	}
 }
+
+
 
 void
 gui_info_update (GsClient *client)
 {
-	if (client) {
-		gchar *players = g_strdup_printf ("%d / %d",
-				gsq_querier_get_numplayers (client->querier),
-				gsq_querier_get_maxplayers (client->querier));
-		gchar *gamename = gs_client_get_game_name (client, TRUE);
-		
-		gtk_label_set_text (GTK_LABEL (ctl_address), gsq_querier_get_address (client->querier));
-		gtk_label_set_text (GTK_LABEL (ctl_name), gsq_querier_get_name (client->querier));
-		gtk_label_set_text (GTK_LABEL (ctl_game), gamename);
-		gtk_label_set_text (GTK_LABEL (ctl_map), gsq_querier_get_map (client->querier));
-		gtk_label_set_text (GTK_LABEL (ctl_players), players);
-		gtk_label_set_text (GTK_LABEL (ctl_password), client->password ? _("Yes") : _("No"));
-		gtk_label_set_text (GTK_LABEL (ctl_version), client->version);
-		gtk_label_set_text (GTK_LABEL (ctl_location), client->country);
-		
-		g_free (players);
-		g_free (gamename);
-	} else {
-		gtk_label_set_text (GTK_LABEL (ctl_address), "");
-		gtk_label_set_text (GTK_LABEL (ctl_name), "");
-		gtk_label_set_text (GTK_LABEL (ctl_game), "");
-		gtk_label_set_text (GTK_LABEL (ctl_map), "");
-		gtk_label_set_text (GTK_LABEL (ctl_players), "");
-		gtk_label_set_text (GTK_LABEL (ctl_password), "");
-		gtk_label_set_text (GTK_LABEL (ctl_version), "");
-		gtk_label_set_text (GTK_LABEL (ctl_location), "");
-	}
+	gchar *players = g_strdup_printf ("%d / %d",
+			gsq_querier_get_numplayers (client->querier),
+			gsq_querier_get_maxplayers (client->querier));
+	
+	gchar *gamename = gs_client_get_game_name (client, TRUE);
+	
+	const gchar *mapname = gsq_querier_get_map (client->querier);
+	
+	gtk_widget_set_visible (ctl_message, FALSE);
+	gtk_label_set_text (GTK_LABEL (ctl_name), gsq_querier_get_name (client->querier));
+	gtk_label_set_text (GTK_LABEL (ctl_game), *gamename ? gamename : _("N/A"));
+	gtk_label_set_text (GTK_LABEL (ctl_map), *mapname ? mapname : _("N/A"));
+	gtk_label_set_text (GTK_LABEL (ctl_players), players);
+	gtk_label_set_text (GTK_LABEL (ctl_password), client->password ? _("Yes") : _("No"));
+	gtk_label_set_text (GTK_LABEL (ctl_version), client->version);
+	
+	g_free (players);
+	g_free (gamename);
 }
+
 
 
 GtkWidget *
@@ -208,6 +225,15 @@ gui_info_create ()
 	gtk_grid_attach (GTK_GRID (grid), ctl_location, 1, 7, 1, 1);
 	
 	gtk_widget_show_all (grid);
+	
+	ctl_message = gtk_label_new (_("<span color=\"red\">This server is not responding and most likely offline.</span>"));
+	g_object_set (G_OBJECT (ctl_message),
+			"visible", FALSE,
+			"use-markup", TRUE,
+			"hexpand", TRUE,
+			NULL);
+	gtk_grid_attach (GTK_GRID (grid), ctl_message, 1, 8, 2, 1);
+	
 	return grid;
 }
 
