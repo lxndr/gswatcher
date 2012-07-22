@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.7\n"
 "Report-Msgid-Bugs-To: lxndr87@users.sourceforge.net\n"
-"POT-Creation-Date: 2012-06-24 18:53+0400\n"
+"POT-Creation-Date: 2012-07-22 17:15+0400\n"
 "PO-Revision-Date: 2012-04-23 17:36+0400\n"
 "Last-Translator: Alexander AB\n"
 "Language-Team: Russian\n"
@@ -18,19 +18,23 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: src/client.c:351
+#: src/client.c:387
 msgid "Connected"
 msgstr "Подключён"
 
-#: src/client.c:357
+#: src/client.c:393
 msgid "Authenticated"
 msgstr ""
 
-#: src/client.c:363
+#: src/client.c:399
 msgid "Disconnected"
 msgstr "Отключён"
 
-#: src/client.c:422
+#: src/client.c:419
+msgid "Server's protocol is not determined"
+msgstr "Протокол сервера не определён"
+
+#: src/client.c:463
 msgid "You have to provide a log address"
 msgstr "Укажите адрес для лога"
 
@@ -56,7 +60,7 @@ msgstr "Использовать свой уведомитель"
 
 #: src/gswatcher.c:277
 msgid "Command to play sounds"
-msgstr ""
+msgstr "Путь к проигрывателю"
 
 #: src/gswatcher.c:384
 #, c-format
@@ -68,17 +72,17 @@ msgstr "Не удалось сохранить список друзей: %s"
 msgid "Couldn't load buddy list: %s"
 msgstr "Не удалось загрузить список друзей: %s"
 
-#: src/gswatcher.c:535
+#: src/gswatcher.c:539
 #, c-format
 msgid "Couldn't save server list: %s"
 msgstr "Не удалось сохранить список серверов: %s"
 
-#: src/gswatcher.c:623
+#: src/gswatcher.c:627
 #, c-format
 msgid "Player %s has connected"
 msgstr "Игрок %s подключился"
 
-#: src/gswatcher.c:624 src/gswatcher.c:654
+#: src/gswatcher.c:628 src/gswatcher.c:657
 #, c-format
 msgid ""
 "Address: %s\n"
@@ -89,17 +93,17 @@ msgstr ""
 "Сервер: %s\n"
 "Игроки: %d / %d"
 
-#: src/gswatcher.c:653
+#: src/gswatcher.c:656
 #, c-format
 msgid "Server with %s has free slot"
 msgstr "На сервере с %s есть свободный слот"
 
-#: src/gswatcher.c:743
+#: src/gswatcher.c:746
 #, c-format
 msgid "Are you sure you want to remove \"%s\" ( %s) from the list?"
 msgstr "Вы уверены, что хотите удалить \"%s\" (%s) из списка?"
 
-#: src/gswatcher.c:906
+#: src/gswatcher.c:907
 #, c-format
 msgid "Couldn't save preferences to %s: %s"
 msgstr "Настройки не сохранены"
@@ -108,88 +112,96 @@ msgstr "Настройки не сохранены"
 msgid "Offical Web Page"
 msgstr "Домашняя страница"
 
-#: src/gui-window.c:336 src/gui-window.c:337
+#: src/gui-window.c:328 src/gui-window.c:329
 msgid "Game Server Tool"
 msgstr "Game Server Tool"
 
-#: src/gui-window.c:343
+#: src/gui-window.c:335
 msgid "_Show"
 msgstr "_Показать"
 
-#: src/gui-window.c:350 src/gui-window.c:420
+#: src/gui-window.c:342 src/gui-window.c:412
 msgid "_Pause"
 msgstr "_Преостановить"
 
-#: src/gui-window.c:376 src/gui-window.c:542
+#: src/gui-window.c:368 src/gui-window.c:534
 msgid "Server list"
 msgstr "Список серверов"
 
-#: src/gui-window.c:386 src/gui-window.c:547
+#: src/gui-window.c:378 src/gui-window.c:539
 msgid "Buddy list"
 msgstr "Список друзей"
 
-#: src/gui-window.c:396 src/gui-window.c:552
+#: src/gui-window.c:388 src/gui-window.c:544
 msgid "Preferences"
 msgstr "Настройки"
 
-#: src/gui-window.c:411
+#: src/gui-window.c:403
 msgid "_Layout"
 msgstr "_Вид"
 
-#: src/gui-window.c:431
+#: src/gui-window.c:423
 msgid "About"
 msgstr "О программе"
 
-#: src/gui-window.c:441
+#: src/gui-window.c:433
 msgid "Quit"
 msgstr "Выйти"
 
-#: src/gui-window.c:485
+#: src/gui-window.c:477
 msgid "Information"
 msgstr "Информация"
 
-#: src/gui-window.c:494 src/gui-preferences.c:287
+#: src/gui-window.c:486 src/gui-preferences.c:287
 msgid "Console"
 msgstr "Консоль"
 
-#: src/gui-window.c:503
+#: src/gui-window.c:495
 msgid "Log"
 msgstr "Журнал"
 
-#: src/gui-window.c:512
+#: src/gui-window.c:504
 msgid "Chat"
 msgstr "Чат"
 
-#: src/gui-server-list.c:288
+#: src/gui-server-list.c:315
 msgid "Timeout"
 msgstr "Таймаут"
 
-#: src/gui-server-list.c:565
+#: src/gui-server-list.c:384
+msgid "Querying"
+msgstr ""
+
+#: src/gui-server-list.c:485 src/gui-server-list.c:486
+msgid "unknown"
+msgstr ""
+
+#: src/gui-server-list.c:631
 msgid "Favorite servers"
 msgstr "Любимые сервера"
 
-#: src/gui-server-list.c:576
+#: src/gui-server-list.c:643
 msgid "Other servers"
 msgstr "Другие сервера"
 
-#: src/gui-server-list.c:595
+#: src/gui-server-list.c:665
 msgctxt "Server"
 msgid "Name"
 msgstr "Название"
 
-#: src/gui-server-list.c:637
+#: src/gui-server-list.c:710
 msgid "Game"
 msgstr "Игра"
 
-#: src/gui-server-list.c:657
+#: src/gui-server-list.c:732
 msgid "Map"
 msgstr "Карта"
 
-#: src/gui-server-list.c:672
+#: src/gui-server-list.c:748
 msgid "Players"
 msgstr "Игроки"
 
-#: src/gui-server-list.c:687 src/query/proto-gamespy.c:117
+#: src/gui-server-list.c:764 src/query/proto-gamespy.c:117
 #: src/query/proto-gamespy.c:121 src/query/proto-gamespy.c:125
 #: src/query/proto-gamespy.c:128 src/query/proto-gamespy3.c:193
 #: src/query/proto-gamespy3.c:201 src/query/proto-gamespy3.c:210
@@ -218,20 +230,22 @@ msgstr "Место"
 msgid "Notify"
 msgstr "Ув."
 
-#: src/gui-console.c:163
+#: src/gui-console.c:164
 msgid ""
 "This command will shut down the server. Are you sure you want to continue?"
 msgstr "Эта команда выключит сервер. Вы уверены, что хотите продолжить?"
 
-#: src/gui-console.c:310
-#, fuzzy
+#: src/gui-console.c:319
 msgid "P_ort:"
-msgstr "Порт:"
+msgstr "П_орт:"
 
-#: src/gui-console.c:324
-#, fuzzy
+#: src/gui-console.c:331
 msgid "_Password:"
-msgstr "Пароль:"
+msgstr "_Пароль:"
+
+#: src/gui-console.c:348
+msgid "Settings"
+msgstr ""
 
 #: src/gui-log.c:126
 msgid "Enable log"
@@ -305,59 +319,73 @@ msgstr "_Шрифт"
 msgid "_Log address:"
 msgstr "Обратный адрес для _журнала"
 
-#: src/gui-info.c:71
+#: src/gui-info.c:69 src/gui-info.c:70 src/gui-info.c:71 src/gui-info.c:72
+#: src/gui-info.c:73 src/gui-info.c:74 src/gui-info.c:75 src/gui-info.c:76
+#: src/gui-info.c:95 src/gui-info.c:96
+msgid "N/A"
+msgstr "Н/А"
+
+#: src/gui-info.c:98
 msgid "Yes"
 msgstr "Да"
 
-#: src/gui-info.c:71
+#: src/gui-info.c:98
 msgid "No"
 msgstr "Нет"
 
-#: src/gui-info.c:103
+#: src/gui-info.c:120
 msgid "Name:"
 msgstr "Название:"
 
-#: src/gui-info.c:119
+#: src/gui-info.c:136
 msgid "Address:"
 msgstr "Адрес:"
 
-#: src/gui-info.c:132
+#: src/gui-info.c:149
 msgid "Game:"
 msgstr "Игра:"
 
-#: src/gui-info.c:145
+#: src/gui-info.c:162
 msgid "Map:"
 msgstr "Карта:"
 
-#: src/gui-info.c:158
+#: src/gui-info.c:175
 msgid "Players:"
 msgstr "Игроки:"
 
-#: src/gui-info.c:171
+#: src/gui-info.c:188
 msgid "Password:"
 msgstr "Пароль:"
 
-#: src/gui-info.c:184
+#: src/gui-info.c:201
 msgid "Version:"
 msgstr "Версия:"
 
-#: src/gui-info.c:197
+#: src/gui-info.c:214
 msgid "Location:"
 msgstr "Положение:"
 
-#: src/gui-info.c:248
+#: src/gui-info.c:229
+msgid ""
+"<span color=\"red\">This server is not responding and most likely offline.</"
+"span>"
+msgstr ""
+"<span color=\"red\">Этот сервер не отвечает и вероятно отключен.</"
+"span>"
+
+#: src/gui-info.c:274
 msgid "Remove selected server"
 msgstr "Удалить выбранный сервер"
 
-#: src/gui-info.c:256
+#: src/gui-info.c:282
 msgid "Favor selected server"
 msgstr "Переместить в любимые"
 
-#: src/gui-info.c:262
+#: src/gui-info.c:288
 msgid "Connect"
 msgstr "Подключиться"
 
-#: src/gui-info.c:264
+#: src/gui-info.c:290
 msgid "Connect to selected server"
 msgstr "Подключиться к серверу"
 
