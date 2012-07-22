@@ -181,7 +181,7 @@ get_sinfo (GsqQuerier *querier, gchar *data, gsize length, guint16 qport)
 	g_string_assign (querier->name, name);
 	/* map name */
 	gchar *map = g_hash_table_lookup (values, "mapname");
-	g_string_assign (querier->gameid, map);
+	g_string_assign (querier->map, map);
 	/* maximum players */
 	gchar *maxplayers = g_hash_table_lookup (values, "sv_maxclients");
 	querier->maxplayers = atoi (maxplayers);

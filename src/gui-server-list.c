@@ -466,13 +466,11 @@ gui_slist_update (GsClient *cl)
 	const gchar *mapname = cl->querier->map->str;
 	
 	/* number of players */
-	gchar *players = g_strdup_printf ("%d / %d",
-			cl->querier->numplayers,
-			cl->querier->maxplayers);
-	
-	/* player count color */
 	gint num = cl->querier->numplayers;
 	gint max = cl->querier->maxplayers;
+	gchar *players = g_strdup_printf ("%d / %d", num, max);
+	
+	/* player count color */
 	const gchar *player_color = NULL;
 	if (num != 0 && max > 0)
 		player_color = num >= max ? "dark red" : "dark green";
@@ -482,7 +480,8 @@ gui_slist_update (GsClient *cl)
 	
 	gtk_list_store_set (liststore, &cl->sliter,
 			COLUMN_TYPE, cl->favorite ? ROW_FAVORITE : ROW_OTHER,
-			COLUMN_NAME, cl->querier->name->str,
+			COLUMN_NAME, *cl->querier->name->str ?
+					cl->querier->name->str : gsq_querier_get_address (cl->querier),
 			COLUMN_GAME, *gamename ? gamename : _("unknown"),
 			COLUMN_MAP, *mapname ? mapname : _("unknown"),
 			COLUMN_PLAYERS, players,
