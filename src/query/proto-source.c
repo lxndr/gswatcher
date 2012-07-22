@@ -165,33 +165,33 @@ get_server_info (GsqQuerier *querier, gchar *p)
 	gchar *dir, *desc, *tags, tmp[256];
 	gchar *server_os, *server_type;
 	
-	guint8 pver = get_byte (&p);						// Protocol version
-	gsq_querier_set_name (querier, get_string (&p));	// Server name
-	gsq_querier_set_map (querier, get_string (&p));		// Map name
-	dir = get_string (&p);								// Game folder
-	desc = get_string (&p);								// Game description
-	guint16 appid = get_short (&p);						// Application ID
-	gsq_querier_set_numplayers (querier, get_byte (&p));// Number of players
-	gsq_querier_set_maxplayers (querier, get_byte (&p));// Maximum players
-	get_byte (&p);										// Number of bots
-	gchar dedicated = get_byte (&p);					// Dedicated
-	gchar os = get_byte (&p);							// OS
-	gsq_querier_set_password (querier, get_byte (&p));	// Password
-	gboolean secure = get_byte (&p);					// Secure
-	gsq_querier_set_version (querier, get_string (&p));	// Game version
-	guint8 edf = get_byte (&p);							// extra data field
+	guint8 pver = get_byte (&p);							// Protocol version
+	g_string_assign (querier->name, get_string (&p));		// Server name
+	g_string_assign (querier->map, get_string (&p));		// Map name
+	dir = get_string (&p);									// Game folder
+	desc = get_string (&p);									// Game description
+	guint16 appid = get_short (&p);							// Application ID
+	querier->numplayers = get_byte (&p);					// Number of players
+	querier->maxplayers = get_byte (&p);					// Maximum players
+	get_byte (&p);											// Number of bots
+	gchar dedicated = get_byte (&p);						// Dedicated
+	gchar os = get_byte (&p);								// OS
+	querier->password = get_byte (&p);						// Password
+	gboolean secure = get_byte (&p);						// Secure
+	g_string_assign (querier->version, get_string (&p));	// Game version
+	guint8 edf = get_byte (&p);								// extra data field
 	if (edf & 0x80)
-		get_short (&p);									// server's game port
+		get_short (&p);										// server's game port
 	if (edf & 0x10)
-		get_longlong (&p);								// server's SteamID
+		get_longlong (&p);									// server's SteamID
 	if (edf & 0x40) {
-		get_short (&p);									// spectator port
-		get_string (&p);								// spectator name
+		get_short (&p);										// spectator port
+		get_string (&p);									// spectator name
 	}
 	if (edf & 0x20)
-		tags = get_string (&p);							// tags
+		tags = get_string (&p);								// tags
 	if (edf & 0x01)
-		get_longlong (&p);								// server's Game ID
+		get_longlong (&p);									// server's Game ID
 	
 	switch (os) {
 		case 'l': server_os = "Linux"; break;
@@ -298,9 +298,9 @@ get_server_info (GsqQuerier *querier, gchar *p)
 			break;
 	}
 	
-	gsq_querier_set_gameid (querier, game_id);
-	gsq_querier_set_game (querier, game_name);
-	gsq_querier_set_mode (querier, game_mode);
+	g_string_assign (querier->gameid, game_id);
+	g_string_assign (querier->gamename, game_name);
+	g_string_assign (querier->gamemode, game_mode);
 	gsq_querier_emit_info_update (querier);
 }
 
@@ -310,22 +310,22 @@ get_server_info_gold (GsqQuerier *querier, gchar *p)
 	gchar *dir, tmp[64];
 	
 	get_string (&p);									// Game server IP and port
-	gsq_querier_set_name (querier, get_string (&p));	// Server name
-	gsq_querier_set_map (querier, get_string (&p));		// Map name
+	g_string_assign (querier->name, get_string (&p));	// Server name
+	g_string_assign (querier->map, get_string (&p));	// Map name
 	dir = get_string (&p);								// Game directory
 	get_string (&p);									// Game description
-	gsq_querier_set_numplayers (querier, get_byte (&p));// Number of players
-	gsq_querier_set_maxplayers (querier, get_byte (&p));// Maximum players
+	querier->numplayers = get_byte (&p);				// Number of players
+	querier->maxplayers = get_byte (&p);				// Maximum players
 	guint8 pver = get_byte (&p);						// Network version
 	gchar dedicated = get_byte (&p);					// Dedicated
 	gchar os = get_byte (&p);							// OS
-	gsq_querier_set_password (querier, get_byte (&p));	// Password
+	querier->password = get_byte (&p);					// Password
 	get_byte (&p);										// IsMod
 	gboolean secure = get_byte (&p);					// Secure
 	
 	if (strcmp (dir, "cstrike") == 0) {
-		gsq_querier_set_gameid (querier, "cs");
-		gsq_querier_set_game (querier, "Counter-Strike");
+		g_string_assign (querier->gameid, "cs");
+		g_string_assign (querier->gamename, "Counter-Strike");
 	}
 	
 	g_snprintf (tmp, 64, "%d", pver);

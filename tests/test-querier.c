@@ -10,7 +10,7 @@ resolved (GsqQuerier *querier, gpointer udata)
 {
 	g_print (">> %s RESOLVED :: %s\n",
 			gsq_querier_get_address (querier),
-			gsq_querier_get_name (querier));
+			querier->name->str);
 }
 
 static void
@@ -25,11 +25,11 @@ static void
 info_updated (GsqQuerier *querier, gpointer udata)
 {
 	g_print (">> %s, %s, %s, %d / %d, %ld\n",
-			gsq_querier_get_name (querier),
-			gsq_querier_get_game (querier),
-			gsq_querier_get_map (querier),
-			gsq_querier_get_numplayers (querier),
-			gsq_querier_get_maxplayers (querier),
+			querier->name->str,
+			querier->gamename->str,
+			querier->map->str,
+			querier->numplayers,
+			querier->maxplayers,
 			gsq_querier_get_ping (querier));
 }
 
@@ -37,8 +37,8 @@ static void
 player_updated (GsqQuerier *querier, gpointer udata)
 {
 	g_print (">> Players %d / %d\n",
-			gsq_querier_get_numplayers (querier),
-			gsq_querier_get_maxplayers (querier));
+			querier->numplayers,
+			querier->maxplayers);
 }
 
 static void

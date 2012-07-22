@@ -27,7 +27,7 @@
 
 
 #include <gtk/gtk.h>
-#include "query/querier.h"
+#include "query/watcher.h"
 #include "query/console-source.h"
 #include "query/console-telnet.h"
 
@@ -66,7 +66,6 @@ struct _GsClient {
 	const gchar *country_code;
 	const gchar *country;
 	GtkTreeIter sliter;			/* server list iterator */
-	gint64 timeout_time;
 	
 	/* console */
 	GsqConsole *console;
