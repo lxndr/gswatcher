@@ -8,11 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: lxndr87@users.sourceforge.net\n"
-<<<<<<< HEAD
 "POT-Creation-Date: 2012-07-22 17:23+0400\n"
-=======
-"POT-Creation-Date: 2012-07-22 18:07+0400\n"
->>>>>>> 5c908de24825d0a7fca7040dae85587e3a4b0723
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -172,7 +168,6 @@ msgstr ""
 msgid "Querying"
 msgstr ""
 
-<<<<<<< HEAD
 #: src/gui-server-list.c:485 src/gui-server-list.c:486
 msgid "unknown"
 msgstr ""
@@ -186,26 +181,10 @@ msgid "Other servers"
 msgstr ""
 
 #: src/gui-server-list.c:665
-=======
-#: src/gui-server-list.c:486 src/gui-server-list.c:487
-msgid "unknown"
-msgstr ""
-
-#: src/gui-server-list.c:632
-msgid "Favorite servers"
-msgstr ""
-
-#: src/gui-server-list.c:644
-msgid "Other servers"
-msgstr ""
-
-#: src/gui-server-list.c:666
->>>>>>> 5c908de24825d0a7fca7040dae85587e3a4b0723
 msgctxt "Server"
 msgid "Name"
 msgstr ""
 
-<<<<<<< HEAD
 #: src/gui-server-list.c:710
 msgid "Game"
 msgstr ""
@@ -219,21 +198,6 @@ msgid "Players"
 msgstr ""
 
 #: src/gui-server-list.c:764 src/query/proto-gamespy.c:117
-=======
-#: src/gui-server-list.c:711
-msgid "Game"
-msgstr ""
-
-#: src/gui-server-list.c:733
-msgid "Map"
-msgstr ""
-
-#: src/gui-server-list.c:749
-msgid "Players"
-msgstr ""
-
-#: src/gui-server-list.c:765 src/query/proto-gamespy.c:117
->>>>>>> 5c908de24825d0a7fca7040dae85587e3a4b0723
 #: src/query/proto-gamespy.c:121 src/query/proto-gamespy.c:125
 #: src/query/proto-gamespy.c:128 src/query/proto-gamespy3.c:193
 #: src/query/proto-gamespy3.c:201 src/query/proto-gamespy3.c:210
