@@ -59,7 +59,7 @@ gui_info_setup (GsClient *cl)
 		gtk_label_set_text (GTK_LABEL (ctl_location), cl->country);
 		gui_info_update (cl);
 		
-		gtk_widget_set_visible (ctl_message, cl->timeout_time > 0);
+		gtk_widget_set_visible (ctl_message, !gsq_watcher_is_online (GSQ_WATCHER (cl->querier)));
 	} else {
 		/* none is selected. disable the toolbar and clear information grid */
 		gtk_widget_set_sensitive (toolbar, FALSE);
@@ -83,15 +83,15 @@ void
 gui_info_update (GsClient *client)
 {
 	gchar *players = g_strdup_printf ("%d / %d",
-			gsq_querier_get_numplayers (client->querier),
-			gsq_querier_get_maxplayers (client->querier));
+			client->querier->numplayers,
+			client->querier->maxplayers);
 	
 	gchar *gamename = gs_client_get_game_name (client, TRUE);
 	
-	const gchar *mapname = gsq_querier_get_map (client->querier);
+	const gchar *mapname = client->querier->map->str;
 	
 	gtk_widget_set_visible (ctl_message, FALSE);
-	gtk_label_set_text (GTK_LABEL (ctl_name), gsq_querier_get_name (client->querier));
+	gtk_label_set_text (GTK_LABEL (ctl_name), client->querier->name->str);
 	gtk_label_set_text (GTK_LABEL (ctl_game), *gamename ? gamename : _("N/A"));
 	gtk_label_set_text (GTK_LABEL (ctl_map), *mapname ? mapname : _("N/A"));
 	gtk_label_set_text (GTK_LABEL (ctl_players), players);
