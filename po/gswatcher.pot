@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: lxndr87@users.sourceforge.net\n"
-"POT-Creation-Date: 2012-06-24 18:53+0400\n"
+"POT-Creation-Date: 2012-07-22 17:23+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,19 +17,23 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/client.c:351
+#: src/client.c:387
 msgid "Connected"
 msgstr ""
 
-#: src/client.c:357
+#: src/client.c:393
 msgid "Authenticated"
 msgstr ""
 
-#: src/client.c:363
+#: src/client.c:399
 msgid "Disconnected"
 msgstr ""
 
-#: src/client.c:422
+#: src/client.c:419
+msgid "Server's protocol is not determined"
+msgstr ""
+
+#: src/client.c:463
 msgid "You have to provide a log address"
 msgstr ""
 
@@ -67,17 +71,17 @@ msgstr ""
 msgid "Couldn't load buddy list: %s"
 msgstr ""
 
-#: src/gswatcher.c:535
+#: src/gswatcher.c:539
 #, c-format
 msgid "Couldn't save server list: %s"
 msgstr ""
 
-#: src/gswatcher.c:623
+#: src/gswatcher.c:627
 #, c-format
 msgid "Player %s has connected"
 msgstr ""
 
-#: src/gswatcher.c:624 src/gswatcher.c:654
+#: src/gswatcher.c:628 src/gswatcher.c:657
 #, c-format
 msgid ""
 "Address: %s\n"
@@ -85,17 +89,17 @@ msgid ""
 "Players: %d / %d"
 msgstr ""
 
-#: src/gswatcher.c:653
+#: src/gswatcher.c:656
 #, c-format
 msgid "Server with %s has free slot"
 msgstr ""
 
-#: src/gswatcher.c:743
+#: src/gswatcher.c:746
 #, c-format
 msgid "Are you sure you want to remove \"%s\" ( %s) from the list?"
 msgstr ""
 
-#: src/gswatcher.c:906
+#: src/gswatcher.c:907
 #, c-format
 msgid "Couldn't save preferences to %s: %s"
 msgstr ""
@@ -104,88 +108,96 @@ msgstr ""
 msgid "Offical Web Page"
 msgstr ""
 
-#: src/gui-window.c:336 src/gui-window.c:337
+#: src/gui-window.c:328 src/gui-window.c:329
 msgid "Game Server Tool"
 msgstr ""
 
-#: src/gui-window.c:343
+#: src/gui-window.c:335
 msgid "_Show"
 msgstr ""
 
-#: src/gui-window.c:350 src/gui-window.c:420
+#: src/gui-window.c:342 src/gui-window.c:412
 msgid "_Pause"
 msgstr ""
 
-#: src/gui-window.c:376 src/gui-window.c:542
+#: src/gui-window.c:368 src/gui-window.c:534
 msgid "Server list"
 msgstr ""
 
-#: src/gui-window.c:386 src/gui-window.c:547
+#: src/gui-window.c:378 src/gui-window.c:539
 msgid "Buddy list"
 msgstr ""
 
-#: src/gui-window.c:396 src/gui-window.c:552
+#: src/gui-window.c:388 src/gui-window.c:544
 msgid "Preferences"
 msgstr ""
 
-#: src/gui-window.c:411
+#: src/gui-window.c:403
 msgid "_Layout"
 msgstr ""
 
-#: src/gui-window.c:431
+#: src/gui-window.c:423
 msgid "About"
 msgstr ""
 
-#: src/gui-window.c:441
+#: src/gui-window.c:433
 msgid "Quit"
 msgstr ""
 
-#: src/gui-window.c:485
+#: src/gui-window.c:477
 msgid "Information"
 msgstr ""
 
-#: src/gui-window.c:494 src/gui-preferences.c:287
+#: src/gui-window.c:486 src/gui-preferences.c:287
 msgid "Console"
 msgstr ""
 
-#: src/gui-window.c:503
+#: src/gui-window.c:495
 msgid "Log"
 msgstr ""
 
-#: src/gui-window.c:512
+#: src/gui-window.c:504
 msgid "Chat"
 msgstr ""
 
-#: src/gui-server-list.c:288
+#: src/gui-server-list.c:315
 msgid "Timeout"
 msgstr ""
 
-#: src/gui-server-list.c:565
+#: src/gui-server-list.c:384
+msgid "Querying"
+msgstr ""
+
+#: src/gui-server-list.c:485 src/gui-server-list.c:486
+msgid "unknown"
+msgstr ""
+
+#: src/gui-server-list.c:631
 msgid "Favorite servers"
 msgstr ""
 
-#: src/gui-server-list.c:576
+#: src/gui-server-list.c:643
 msgid "Other servers"
 msgstr ""
 
-#: src/gui-server-list.c:595
+#: src/gui-server-list.c:665
 msgctxt "Server"
 msgid "Name"
 msgstr ""
 
-#: src/gui-server-list.c:637
+#: src/gui-server-list.c:710
 msgid "Game"
 msgstr ""
 
-#: src/gui-server-list.c:657
+#: src/gui-server-list.c:732
 msgid "Map"
 msgstr ""
 
-#: src/gui-server-list.c:672
+#: src/gui-server-list.c:748
 msgid "Players"
 msgstr ""
 
-#: src/gui-server-list.c:687 src/query/proto-gamespy.c:117
+#: src/gui-server-list.c:764 src/query/proto-gamespy.c:117
 #: src/query/proto-gamespy.c:121 src/query/proto-gamespy.c:125
 #: src/query/proto-gamespy.c:128 src/query/proto-gamespy3.c:193
 #: src/query/proto-gamespy3.c:201 src/query/proto-gamespy3.c:210
@@ -214,17 +226,21 @@ msgstr ""
 msgid "Notify"
 msgstr ""
 
-#: src/gui-console.c:163
+#: src/gui-console.c:164
 msgid ""
 "This command will shut down the server. Are you sure you want to continue?"
 msgstr ""
 
-#: src/gui-console.c:310
+#: src/gui-console.c:319
 msgid "P_ort:"
 msgstr ""
 
-#: src/gui-console.c:324
+#: src/gui-console.c:331
 msgid "_Password:"
+msgstr ""
+
+#: src/gui-console.c:348
+msgid "Settings"
 msgstr ""
 
 #: src/gui-log.c:126
@@ -299,59 +315,71 @@ msgstr ""
 msgid "_Log address:"
 msgstr ""
 
-#: src/gui-info.c:71
+#: src/gui-info.c:69 src/gui-info.c:70 src/gui-info.c:71 src/gui-info.c:72
+#: src/gui-info.c:73 src/gui-info.c:74 src/gui-info.c:75 src/gui-info.c:76
+#: src/gui-info.c:95 src/gui-info.c:96
+msgid "N/A"
+msgstr ""
+
+#: src/gui-info.c:98
 msgid "Yes"
 msgstr ""
 
-#: src/gui-info.c:71
+#: src/gui-info.c:98
 msgid "No"
 msgstr ""
 
-#: src/gui-info.c:103
+#: src/gui-info.c:120
 msgid "Name:"
 msgstr ""
 
-#: src/gui-info.c:119
+#: src/gui-info.c:136
 msgid "Address:"
 msgstr ""
 
-#: src/gui-info.c:132
+#: src/gui-info.c:149
 msgid "Game:"
 msgstr ""
 
-#: src/gui-info.c:145
+#: src/gui-info.c:162
 msgid "Map:"
 msgstr ""
 
-#: src/gui-info.c:158
+#: src/gui-info.c:175
 msgid "Players:"
 msgstr ""
 
-#: src/gui-info.c:171
+#: src/gui-info.c:188
 msgid "Password:"
 msgstr ""
 
-#: src/gui-info.c:184
+#: src/gui-info.c:201
 msgid "Version:"
 msgstr ""
 
-#: src/gui-info.c:197
+#: src/gui-info.c:214
 msgid "Location:"
 msgstr ""
 
-#: src/gui-info.c:248
+#: src/gui-info.c:229
+msgid ""
+"<span color=\"red\">This server is not responding and most likely offline.</"
+"span>"
+msgstr ""
+
+#: src/gui-info.c:274
 msgid "Remove selected server"
 msgstr ""
 
-#: src/gui-info.c:256
+#: src/gui-info.c:282
 msgid "Favor selected server"
 msgstr ""
 
-#: src/gui-info.c:262
+#: src/gui-info.c:288
 msgid "Connect"
 msgstr ""
 
-#: src/gui-info.c:264
+#: src/gui-info.c:290
 msgid "Connect to selected server"
 msgstr ""
 
