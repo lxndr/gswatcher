@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.7\n"
 "Report-Msgid-Bugs-To: lxndr87@users.sourceforge.net\n"
-"POT-Creation-Date: 2012-07-22 17:15+0400\n"
+"POT-Creation-Date: 2012-07-22 17:42+0400\n"
 "PO-Revision-Date: 2012-04-23 17:36+0400\n"
 "Last-Translator: Alexander AB\n"
 "Language-Team: Russian\n"
@@ -32,7 +32,11 @@ msgstr "Отключён"
 
 #: src/client.c:419
 msgid "Server's protocol is not determined"
+<<<<<<< HEAD
 msgstr "Протокол сервера не определён"
+=======
+msgstr ""
+>>>>>>> 5c908de24825d0a7fca7040dae85587e3a4b0723
 
 #: src/client.c:463
 msgid "You have to provide a log address"
@@ -172,36 +176,36 @@ msgstr "Таймаут"
 msgid "Querying"
 msgstr ""
 
-#: src/gui-server-list.c:485 src/gui-server-list.c:486
+#: src/gui-server-list.c:486 src/gui-server-list.c:487
 msgid "unknown"
-msgstr ""
+msgstr "неизвестно"
 
-#: src/gui-server-list.c:631
+#: src/gui-server-list.c:632
 msgid "Favorite servers"
 msgstr "Любимые сервера"
 
-#: src/gui-server-list.c:643
+#: src/gui-server-list.c:644
 msgid "Other servers"
 msgstr "Другие сервера"
 
-#: src/gui-server-list.c:665
+#: src/gui-server-list.c:666
 msgctxt "Server"
 msgid "Name"
 msgstr "Название"
 
-#: src/gui-server-list.c:710
+#: src/gui-server-list.c:711
 msgid "Game"
 msgstr "Игра"
 
-#: src/gui-server-list.c:732
+#: src/gui-server-list.c:733
 msgid "Map"
 msgstr "Карта"
 
-#: src/gui-server-list.c:748
+#: src/gui-server-list.c:749
 msgid "Players"
 msgstr "Игроки"
 
-#: src/gui-server-list.c:764 src/query/proto-gamespy.c:117
+#: src/gui-server-list.c:765 src/query/proto-gamespy.c:117
 #: src/query/proto-gamespy.c:121 src/query/proto-gamespy.c:125
 #: src/query/proto-gamespy.c:128 src/query/proto-gamespy3.c:193
 #: src/query/proto-gamespy3.c:201 src/query/proto-gamespy3.c:210
@@ -242,6 +246,10 @@ msgstr "П_орт:"
 #: src/gui-console.c:331
 msgid "_Password:"
 msgstr "_Пароль:"
+
+#: src/gui-console.c:348
+msgid "Settings"
+msgstr ""
 
 #: src/gui-console.c:348
 msgid "Settings"
@@ -323,7 +331,11 @@ msgstr "Обратный адрес для _журнала"
 #: src/gui-info.c:73 src/gui-info.c:74 src/gui-info.c:75 src/gui-info.c:76
 #: src/gui-info.c:95 src/gui-info.c:96
 msgid "N/A"
+<<<<<<< HEAD
 msgstr "Н/А"
+=======
+msgstr ""
+>>>>>>> 5c908de24825d0a7fca7040dae85587e3a4b0723
 
 #: src/gui-info.c:98
 msgid "Yes"
