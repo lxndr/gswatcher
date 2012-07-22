@@ -510,7 +510,7 @@ save_server_list_func (GsClient *client, GJsonNode *root)
 {
 	GJsonNode *node = g_json_object_new ();
 	g_json_object_set_string (node, "name",
-			gsq_querier_get_name (client->querier));
+			client->querier->name->str);
 	g_json_object_set_string (node, "address",
 			gsq_querier_get_address (client->querier));
 	g_json_object_set_boolean (node, "favorite",
@@ -627,9 +627,9 @@ player_online (GsqQuerier *querier, GsqPlayer *player, GsApplication *app)
 			gchar *title = g_strdup_printf (_("Player %s has connected"), buddy->name);
 			gchar *text = g_strdup_printf (_("Address: %s\nServer: %s\nPlayers: %d / %d"),
 					gsq_querier_get_address (querier),
-					gsq_querier_get_name (querier),
-					gsq_querier_get_numplayers (querier),
-					gsq_querier_get_maxplayers (querier));
+					querier->name->str,
+					querier->numplayers,
+					querier->maxplayers);
 			gs_notification_message (title, text);
 			g_free (title);
 			g_free (text);
@@ -652,14 +652,13 @@ player_offline (GsqQuerier *querier, GsqPlayer *player, GsApplication *app)
 		GsqPlayer *pl = l->data;
 		buddy = gs_application_find_buddy (app, pl->name);
 		
-		if (buddy && buddy->notify &&
-				gsq_querier_get_maxplayers (querier) - gsq_querier_get_numplayers (querier) == 1) {
+		if (buddy && buddy->notify && querier->maxplayers - querier->numplayers == 1) {
 			gchar *title = g_strdup_printf (_("Server with %s has free slot"), buddy->name);
 			gchar *text = g_strdup_printf (_("Address: %s\nServer: %s\nPlayers: %d / %d"),
 					gsq_querier_get_address (querier),
-					gsq_querier_get_name (querier),
-					gsq_querier_get_numplayers (querier),
-					gsq_querier_get_maxplayers (querier));
+					querier->name->str,
+					querier->numplayers,
+					querier->maxplayers);
 			gs_notification_message (title, text);
 			g_free (title);
 			g_free (text);
@@ -745,7 +744,7 @@ gs_application_remove_server_ask (GsApplication *app, GsClient *client)
 	GtkWidget *dialog = gtk_message_dialog_new (GTK_WINDOW (window),
 			GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO,
 			_("Are you sure you want to remove \"%s\" ( %s) from the list?"),
-			gsq_querier_get_name (client->querier),
+			client->querier->name->str,
 			gsq_querier_get_address (client->querier));
 	if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_YES) {
 		gui_slist_remove (client);
@@ -800,7 +799,7 @@ load_server_list (GsApplication *app)
 		const gchar *address = g_json_object_get_string (node, "address", NULL);
 		GsClient *client = add_server (app, address);
 		if (client) {
-			gsq_querier_set_name (client->querier,
+			g_string_assign (client->querier->name,
 					g_json_object_get_string (node, "name", NULL));
 			client->favorite =
 					g_json_object_get_boolean (node, "favorite", FALSE);

@@ -306,19 +306,18 @@ server_error (GsqQuerier *querier, const gchar *msg, GsClient *client)
 static void
 server_timed_out (GsqQuerier *querier, GsClient *client)
 {
-	GDateTime *dt = g_date_time_new_now_local ();
-	gint64 time = g_date_time_to_unix (dt);
+	GTimeVal tv;
+	g_get_current_time (&tv);
+	guint64 time = tv.tv_sec - gsq_watcher_get_offline_time (GSQ_WATCHER (querier));
 	
-	if (client->timeout_time == 0) {
+	if (time < 15) {
 		gtk_list_store_set (liststore, &client->sliter,
-			COLUMN_PING, _("Timeout"),
-			COLUMN_PING_COLOR, "red",
-			COLUMN_PLAYERS_COLOR, NULL,
-			COLUMN_ONLINE, FALSE,
-			-1);
-		client->timeout_time = time;
+				COLUMN_PING, _("Timeout"),
+				COLUMN_PING_COLOR, "red",
+				COLUMN_PLAYERS_COLOR, NULL,
+				COLUMN_ONLINE, FALSE,
+				-1);
 	} else {
-		time -= client->timeout_time;
 		gchar *tmp = format_date_time (time);
 		
 		gtk_list_store_set (liststore, &client->sliter,
@@ -329,8 +328,6 @@ server_timed_out (GsqQuerier *querier, GsClient *client)
 		
 		g_free (tmp);
 	}
-	
-	g_date_time_unref (dt);
 	
 	if (client == selected)
 		gui_info_setup (client);
@@ -351,7 +348,7 @@ static void
 game_detected (GsqQuerier *querier, GsClient *client)
 {
 	gtk_list_store_set (liststore, &client->sliter,
-			COLUMN_ICON, get_game_icon (gsq_querier_get_gameid (client->querier)),
+			COLUMN_ICON, get_game_icon (client->querier->gameid->str),
 			-1);
 	
 	if (client == selected)
@@ -362,7 +359,6 @@ game_detected (GsqQuerier *querier, GsClient *client)
 static void
 server_info_updated (GsqQuerier *querier, GsClient *client)
 {
-	client->timeout_time = 0;
 	gui_slist_update (client);
 }
 
@@ -467,16 +463,16 @@ gui_slist_update (GsClient *cl)
 			game_column_mode == GUI_GAME_COLUMN_FULL);
 	
 	/* map name */
-	const gchar *mapname = gsq_querier_get_map (cl->querier);
+	const gchar *mapname = cl->querier->map->str;
 	
 	/* number of players */
 	gchar *players = g_strdup_printf ("%d / %d",
-			gsq_querier_get_numplayers (cl->querier),
-			gsq_querier_get_maxplayers (cl->querier));
+			cl->querier->numplayers,
+			cl->querier->maxplayers);
 	
 	/* player count color */
-	gint num = gsq_querier_get_numplayers (cl->querier);
-	gint max = gsq_querier_get_maxplayers (cl->querier);
+	gint num = cl->querier->numplayers;
+	gint max = cl->querier->maxplayers;
 	const gchar *player_color = NULL;
 	if (num != 0 && max > 0)
 		player_color = num >= max ? "dark red" : "dark green";
@@ -486,7 +482,7 @@ gui_slist_update (GsClient *cl)
 	
 	gtk_list_store_set (liststore, &cl->sliter,
 			COLUMN_TYPE, cl->favorite ? ROW_FAVORITE : ROW_OTHER,
-			COLUMN_NAME, gsq_querier_get_name (cl->querier),
+			COLUMN_NAME, cl->querier->name->str,
 			COLUMN_GAME, *gamename ? gamename : _("unknown"),
 			COLUMN_MAP, *mapname ? mapname : _("unknown"),
 			COLUMN_PLAYERS, players,

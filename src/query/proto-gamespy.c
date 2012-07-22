@@ -110,7 +110,7 @@ gamespy_reset (Private *priv)
 static void
 gamespy_add_fields (GsqQuerier *querier)
 {
-	const gchar *game_id = gsq_querier_get_gameid (querier);
+	const gchar *game_id = querier->gameid->str;
 	
 	gsq_querier_add_field (querier, N_("Frags"), G_TYPE_INT);
 	if (strcmp (game_id, "kf") == 0) {
@@ -144,19 +144,19 @@ get_team_name_to (gint num)
 static void
 gamespy_fill (GsqQuerier *querier, GHashTable *values)
 {
-	const gchar *gameid = gsq_querier_get_gameid (querier);
+	const gchar *gameid = querier->gameid->str;
 	
 	/* server info */
-	gsq_querier_set_name (querier,
+	g_string_assign (querier->name,
 			g_hash_table_lookup (values, "hostname"));
-	gsq_querier_set_map (querier,
+	g_string_assign (querier->map,
 			gsq_lookup_value (values, "maptitle", "mapname", NULL));
-	gsq_querier_set_version (querier,
+	g_string_assign (querier->version,
 			g_hash_table_lookup (values, "gamever"));
-	gsq_querier_set_numplayers (querier, gsq_str2int (
-			g_hash_table_lookup (values, "numplayers")));
-	gsq_querier_set_maxplayers (querier, gsq_str2int (
-			g_hash_table_lookup (values, "maxplayers")));
+	querier->numplayers = gsq_str2int (
+			g_hash_table_lookup (values, "numplayers"));
+	querier->maxplayers = gsq_str2int (
+			g_hash_table_lookup (values, "maxplayers"));
 	gsq_querier_emit_info_update (querier);
 	
 	/* player list */
@@ -287,7 +287,7 @@ gsq_gamespy_process (GsqQuerier *querier, guint16 qport,
 	if (g_hash_table_lookup (priv->values, "final"))
 		priv->max = num;
 	
-	const gchar *gameid = gsq_querier_get_gameid (querier);
+	const gchar *gameid = querier->gameid->str;
 	if (!*gameid) {
 		/* while protocol is being detected, we only need the first packet */
 		if (num != 1)
@@ -301,39 +301,39 @@ gsq_gamespy_process (GsqQuerier *querier, guint16 qport,
 			if (gametype && (strcmp (gametype, "KFGameType") == 0 ||
 					strcmp (gametype, "SRGameType") == 0)) {
 				/* Killing Floor */
-				gsq_querier_set_gameid (querier, "kf");
-				gsq_querier_set_game (querier, "Killing Floor");
+				g_string_assign (querier->gameid, "kf");
+				g_string_assign (querier->gamename, "Killing Floor");
 			} else {
 				/* Red Orchestra OR game based on it */
-				gsq_querier_set_gameid (querier, "ro");
-				gsq_querier_set_game (querier, "Red Orchestra");
+				g_string_assign (querier->gameid, "ro");
+				g_string_assign (querier->gamename, "Red Orchestra");
 				if (gametype)
-					gsq_querier_set_mode (querier, gametype);
+					g_string_assign (querier->gamemode, gametype);
 			}
 		} else if (gamename && strcmp (gamename, "ut") == 0) {
 			if (gametype && strncmp (gametype, "TO", 2) == 0) {
 				/* Tactical Ops */
-				gsq_querier_set_gameid (querier, "to-aot");
-				gsq_querier_set_game (querier, "Tactical Ops: Assault on Terror");
+				g_string_assign (querier->gameid, "to-aot");
+				g_string_assign (querier->gamename, "Tactical Ops: Assault on Terror");
 				gchar version[8];
 				g_sprintf (version, "%c.%c.%c",
 						gametype[2], gametype[3], gametype[4]);
-				gsq_querier_set_version (querier, version);
+				g_string_assign (querier->version, version);
 			} else {
 				/* Unreal Tournament */
-				gsq_querier_set_gameid (querier, "ut");
-				gsq_querier_set_game (querier, "Unreal Tournament");
-				gsq_querier_set_mode (querier, gametype);
+				g_string_assign (querier->gameid, "ut");
+				g_string_assign (querier->gamename, "Unreal Tournament");
+				g_string_assign (querier->gamemode, gametype);
 			}
 		} else if (gamename && (strcmp (gamename, "bfield1942") == 0 ||
 				strcmp (gamename, "bfield1942d") == 0)) {
 			/* Battlefield 1942 */
-			gsq_querier_set_gameid (querier, "bf1942");
-			gsq_querier_set_game (querier, "Battlefield 1942");
+			g_string_assign (querier->gameid, "bf1942");
+			g_string_assign (querier->gamename, "Battlefield 1942");
 		} else {
 			/* Something else */
-			gsq_querier_set_gameid (querier, gamename);
-			gsq_querier_set_game (querier, gamename);
+			g_string_assign (querier->gameid, gamename);
+			g_string_assign (querier->gamename, gamename);
 		}
 		
 		gamespy_add_fields (querier);
@@ -348,7 +348,7 @@ gsq_gamespy_process (GsqQuerier *querier, guint16 qport,
 			if (gport != port)
 				goto error;
 		} else {
-			gameid = gsq_querier_get_gameid (querier);
+			gameid = querier->gameid->str;
 			if (!((strcmp (gameid, "kf") == 0 && port == 7707) ||
 					(strcmp (gameid, "ro") == 0 && port == 7757) ||
 					(strcmp (gameid, "to-aot") == 0 && port == 7777) ||

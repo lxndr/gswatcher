@@ -164,7 +164,7 @@ gs_client_new (const gchar *address)
 	g_return_val_if_fail (address != NULL, NULL);
 	GsClient *client = g_object_new (GS_TYPE_CLIENT, NULL);
 	
-	client->querier = gsq_querier_new (address);
+	client->querier = GSQ_QUERIER (gsq_watcher_new (address));
 	g_signal_connect (client->querier, "resolve",
 			G_CALLBACK (gs_client_querier_resolved), client);
 	g_signal_connect (client->querier, "info-update",
@@ -240,8 +240,8 @@ gchar *
 gs_client_get_game_name (GsClient* client, gboolean extra)
 {
 	GsqQuerier *querier = client->querier;
-	const gchar *game = gsq_querier_get_game (querier);
-	const gchar *mode = gsq_querier_get_mode (querier);
+	const gchar *game = querier->gamename->str;
+	const gchar *mode = querier->gamemode->str;
 	
 	if (*mode && extra)
 		return g_strdup_printf ("%s (%s)", game, mode);
@@ -283,7 +283,7 @@ gs_client_querier_info_updated (GsqQuerier *querier, GsClient *client)
 	if (client->version)
 		g_free (client->version);
 	
-	const gchar *version = gsq_querier_get_version (querier);
+	const gchar *version = querier->version->str;
 	
 	if (strcmp (gsq_querier_get_protocol (querier), "source") == 0) {
 		gchar *type = gsq_querier_get_extra (querier, "type");
@@ -307,7 +307,7 @@ gs_client_querier_map_changed (GsqQuerier *querier, GsClient *client)
 static void
 gs_client_querier_gameid_changed (GsqQuerier *querier, GsClient *client)
 {
-	const gchar *gameid = gsq_querier_get_gameid (querier);
+	const gchar *gameid = querier->gameid->str;
 	
 	/* change console protocol */
 	GsqConsole *old = client->console;
