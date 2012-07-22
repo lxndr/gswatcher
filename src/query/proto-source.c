@@ -214,7 +214,7 @@ get_server_info (GsqQuerier *querier, gchar *p)
 	gsq_querier_set_extra (querier, "appid", tmp);
 	gsq_querier_set_extra (querier, "secure", secure ? "true" : "false");
 	
-	gchar *game_id = NULL, *game_name = desc, *game_mode = NULL;
+	const gchar *game_id = "", *game_name = desc, *game_mode = "";
 	switch (appid) {
 		case 10:
 			if (strcmp (dir, "cstrike") == 0) {
