@@ -25,6 +25,7 @@
 #ifndef __GSQUERY__UTILS_H__
 #define __GSQUERY__UTILS_H__
 
+#include <stdlib.h>
 #include <glib.h>
 
 G_BEGIN_DECLS
@@ -34,8 +35,15 @@ gchar *gsq_utf8_repair (const gchar *text);
 void gsq_print_dump (const gchar *data, gsize length);
 gchar *gsq_parse_address (const gchar *addr, guint16 *port, guint16 *port2);
 gchar *gsq_lookup_value (GHashTable *values, ...) G_GNUC_NULL_TERMINATED;
-gint gsq_str2int (const gchar *str);
 gboolean gsq_str2bool (const gchar *str);
+
+
+inline static gint
+gsq_str2int (const gchar *str)
+{
+	return str ? atoi (str) : 0;
+}
+
 
 
 /* Float endianness conversion macros */
@@ -71,6 +79,37 @@ GFLOAT_SWAP_LE_BE (gfloat in)
 #define GFLOATFROM_BE(val)	(GFLOAT_TO_BE (val))
 
 #endif
+
+
+inline static void
+g_string_safe_assign (GString *string, const gchar *rval)
+{
+	g_return_if_fail (string != NULL);
+	if (string->str != rval) {
+		g_string_truncate (string, 0);
+		if (rval)
+			g_string_insert_len (string, -1, rval, -1);
+	}
+}
+
+
+static inline guint8
+gsq_get_uint8 (gchar **p)
+{
+	gint8 v = * (guint8 *) *p;
+	*p += 1;
+	return v;
+}
+
+
+static inline gchar *
+gsq_get_cstring (gchar **p)
+{
+	gchar *s = *p;
+	*p += strlen (s);
+	(*p)++;
+	return s;
+}
 
 
 G_END_DECLS

@@ -147,13 +147,6 @@ gsq_lookup_value (GHashTable *values, ...)
 }
 
 
-gint
-gsq_str2int (const gchar *str)
-{
-	return str ? atoi (str) : 0;
-}
-
-
 gboolean
 gsq_str2bool (const gchar *str)
 {
