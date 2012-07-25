@@ -532,7 +532,8 @@ gsq_source_process (GsqQuerier *querier, guint16 qport,
 			priv->reqid = 0;
 			return ret;
 		}
-	}
+	} else
+		return FALSE;
 	
 	return TRUE;
 }
