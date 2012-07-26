@@ -47,9 +47,10 @@ typedef struct _Packet {
 
 typedef struct _Private {
 	GArray *packets;
+	gint8 number;
 	GHashTable *sinfo;
 	GHashTable *plist;
-	gint8 number;
+	gchar *teams[2];
 } Private;
 
 
@@ -58,9 +59,69 @@ const gsize query_length = 7;
 const guint16 default_ports[] = {6500, 25565, 29900, 64000, 64100};
 
 
+
+static void
+free_plist_values (GPtrArray *array)
+{
+	g_ptr_array_free (array, TRUE);
+}
+
+
+static void
+clear_private_data (Private *priv)
+{
+	gint i;
+	GHashTableIter iter;
+	GPtrArray *values;
+	
+	/* clear essential server info */
+	g_hash_table_remove (priv->sinfo, "hostname");
+	g_hash_table_remove (priv->sinfo, "p1073741825");
+	g_hash_table_remove (priv->sinfo, "mapname");
+	g_hash_table_remove (priv->sinfo, "map");
+	g_hash_table_remove (priv->sinfo, "numplayers");
+	g_hash_table_remove (priv->sinfo, "maxplayers");
+	g_hash_table_remove (priv->sinfo, "gamever");
+	g_hash_table_remove (priv->sinfo, "version");
+	g_hash_table_remove (priv->sinfo, "EngineVersion");
+	g_hash_table_remove (priv->sinfo, "password");
+	g_hash_table_remove (priv->sinfo, "s7");
+	g_hash_table_remove (priv->sinfo, "bf2_os");
+	
+	/* clear player list */
+	g_hash_table_iter_init (&iter, priv->plist);
+	while (g_hash_table_iter_next (&iter, NULL, (gpointer *) &values))
+		g_ptr_array_set_size (values, 0);
+	
+	/* free packet data */
+	for (i = 0; i < priv->packets->len; i++) {
+		Packet *pkt = &g_array_index (priv->packets, Packet, i);
+		if (pkt->data)
+			g_slice_free1 (pkt->length, pkt->data);
+	}
+	
+	g_array_set_size (priv->packets, 0);
+	priv->number = 0;
+}
+
+
 void
 gsq_gamespy3_free (GsqQuerier *querier)
 {
+	gint i;
+	Private *priv = gsq_querier_get_pdata (querier);
+	
+	g_hash_table_unref (priv->sinfo);
+	g_hash_table_unref (priv->plist);
+	
+	for (i = 0; i < priv->packets->len; i++) {
+		Packet *pkt = &g_array_index (priv->packets, Packet, i);
+		if (pkt->data)
+			g_slice_free1 (pkt->length, pkt->data);
+	}
+	g_array_free (priv->packets, TRUE);
+	
+	g_slice_free (Private, priv);
 }
 
 
@@ -82,8 +143,8 @@ gsq_gamespy3_query (GsqQuerier *querier)
 }
 
 
-static inline gboolean
-get_sinfo (GHashTable *sinfo, gchar **data, gchar *end)
+static inline void
+get_sinfo (GHashTable *sinfo, gchar **data, const gchar *end)
 {
 	gchar *p = *data;
 	
@@ -91,18 +152,16 @@ get_sinfo (GHashTable *sinfo, gchar **data, gchar *end)
 		gchar *key = gsq_get_cstring (&p);
 		if (p >= end)
 			break;
-		
 		gchar *value = gsq_get_cstring (&p);
 		g_hash_table_replace (sinfo, key, value);
 	}
 	
 	*data = p + 1;
-	return TRUE;
 }
 
 
-static inline gboolean
-get_plist (GHashTable *plist, gchar **data, gchar *end)
+static inline void
+get_plist (GHashTable *plist, gchar **data, const gchar *end)
 {
 	gchar *p = *data;
 	
@@ -115,7 +174,7 @@ get_plist (GHashTable *plist, gchar **data, gchar *end)
 			a = g_ptr_array_new ();
 			g_hash_table_insert (plist, field, a);
 		}
-		g_ptr_array_set_size (a, number);
+		g_ptr_array_set_size (a, number);	/* start with */
 		
 		while (*p && p < end) {
 			gchar *value = gsq_get_cstring (&p);
@@ -126,30 +185,27 @@ get_plist (GHashTable *plist, gchar **data, gchar *end)
 	}
 	
 	*data = p + 1;
-	return TRUE;
 }
 
 
 static gboolean
-process_packet (Private *priv, gchar *p, gchar *end)
+process_packet (Private *priv, const gchar *data, const gchar *end)
 {
+	gchar *p = (gchar *) data;
+	
 	while (p < end) {
-		guint8 type = *p++;
-		
-		/* server info */
-		if (type == 0) {
-			if (!get_sinfo (priv->sinfo, &p, end))
-				return FALSE;
-		/* player list */
-		} else if (type == 1) {
-			if (!get_plist (priv->plist, &p, end))
-				return FALSE;
-		} else {
+		switch (*p++) {
+		case 0:		/* server info */
+			get_sinfo (priv->sinfo, &p, end);
+			break;
+		case 1:		/* player list */
+			get_plist (priv->plist, &p, end);
+			break;
+		case 2:		/* team info */
 			return TRUE;
+		default:
+			return FALSE;
 		}
-		
-		if (end < p)
-			return TRUE;
 	}
 	
 	return TRUE;
@@ -159,13 +215,15 @@ process_packet (Private *priv, gchar *p, gchar *end)
 static gboolean
 got_all_packets (Private *priv)
 {
+	gint i;
+	
 	if (priv->number == 0 || priv->packets->len < priv->number)
 		return FALSE;
 	
-	gint i;
 	for (i = 0; i < priv->packets->len; i++)
 		if (g_array_index (priv->packets, Packet, i).length == 0)
 			return FALSE;
+	
 	return TRUE;
 }
 
@@ -184,10 +242,30 @@ fill_info (GsqQuerier *querier, Private *priv)
 			gsq_lookup_value (priv->sinfo, "numplayers", NULL));
 	querier->maxplayers = gsq_str2int (
 			gsq_lookup_value (priv->sinfo, "maxplayers", NULL));
-	g_string_safe_assign (querier->version,
-			gsq_lookup_value (priv->sinfo, "gamever", "version", NULL));
 	querier->password = gsq_str2bool (
 			gsq_lookup_value (priv->sinfo, "password", "s7", NULL));
+	
+	if (strcmp (querier->gameid->str, "bf2") == 0) {
+		const gchar *version = gsq_lookup_value (priv->sinfo, "gamever", NULL);
+		const gchar *os = gsq_lookup_value (priv->sinfo, "bf2_os", NULL);
+		const gboolean dedicated = gsq_str2bool (
+				gsq_lookup_value (priv->sinfo, "bf2_dedicated", NULL));
+		g_string_printf (querier->version, "%s (%s%s)", version, os,
+				dedicated ? ", Dedicated" : "");
+		priv->teams[0] = gsq_lookup_value (priv->sinfo, "bf2_team1", NULL);
+		priv->teams[1] = gsq_lookup_value (priv->sinfo, "bf2_team2", NULL);
+		
+	} else if (strcmp (querier->gameid->str, "bf2142") == 0) {
+		g_string_safe_assign (querier->version,
+				gsq_lookup_value (priv->sinfo, "gamever", NULL));
+		priv->teams[0] = gsq_lookup_value (priv->sinfo, "bf2142_team1", NULL);
+		priv->teams[1] = gsq_lookup_value (priv->sinfo, "bf2142_team2", NULL);
+		
+	} else {
+		g_string_safe_assign (querier->version,
+				gsq_lookup_value (priv->sinfo, "gamever", "version",
+						"EngineVersion", NULL));
+	}
 	
 	/* player list */
 	GPtrArray *player_list = g_hash_table_lookup (priv->plist, "player_");
@@ -225,7 +303,7 @@ fill_info (GsqQuerier *querier, Private *priv)
 					gsq_str2int (g_ptr_array_index (score_list, i)),
 					gsq_str2int (g_ptr_array_index (deaths_list, i)),
 					gsq_str2int (g_ptr_array_index (skill_list, i)),
-					g_ptr_array_index (team_list, i),
+					priv->teams[gsq_str2int (g_ptr_array_index (team_list, i)) - 1],
 					gsq_str2int (g_ptr_array_index (ping_list, i)));
 		
 	} else {
@@ -239,18 +317,69 @@ fill_info (GsqQuerier *querier, Private *priv)
 }
 
 
-static void
-clear_packets (Private *priv)
+static gboolean
+detect_game (GsqQuerier *querier, Private *priv, const gchar *data, const gchar *end)
 {
-	gint i;
+	if (!process_packet (priv, data, end))
+		return FALSE;
 	
-	for (i = 0; i < priv->packets->len; i++) {
-		Packet *pkt = &g_array_index (priv->packets, Packet, i);
-		if (pkt->data)
-			g_slice_free1 (pkt->length, pkt->data);
+	guint16 gport = gsq_querier_get_gport (querier);
+	
+	const gchar *gameid = gsq_lookup_value (priv->sinfo,
+			"gamename", "game_id", NULL);
+	guint16 hostport = gsq_str2int (gsq_lookup_value (priv->sinfo,
+			"hostport", NULL));
+	
+	if (gameid == NULL) {
+		if (g_hash_table_lookup (priv->sinfo, "p268435717")) {
+			g_string_assign (querier->gameid, "ut3");
+			g_string_assign (querier->gamename, "Unreal Tournament 3");
+			gsq_querier_add_field (querier, N_("Score"), G_TYPE_INT);
+			gsq_querier_add_field (querier, N_("Deaths"), G_TYPE_INT);
+			gsq_querier_add_field (querier, N_("Team"), G_TYPE_STRING);
+			gsq_querier_add_field (querier, N_("Ping"), G_TYPE_INT);
+			if (gport == 0) gport = 7777;
+		} else {
+			g_string_assign (querier->gameid, gameid);
+			g_string_assign (querier->gamename, gameid);
+		}
+	} else if (strcmp (gameid, "battlefield2") == 0) {
+		g_string_assign (querier->gameid, "bf2");
+		g_string_assign (querier->gamename, "Battlefield 2");
+		gsq_querier_add_field (querier, N_("Score"), G_TYPE_INT);
+		gsq_querier_add_field (querier, N_("Deaths"), G_TYPE_INT);
+		gsq_querier_add_field (querier, N_("Skill"), G_TYPE_INT);
+		gsq_querier_add_field (querier, N_("Team"), G_TYPE_STRING);
+		gsq_querier_add_field (querier, N_("Ping"), G_TYPE_INT);
+		if (gport == 0) gport = 16567;
+	} else if (strcmp (gameid, "stella") == 0 || strcmp (gameid, "stellad") == 0) {
+		gchar *gamevariant = g_hash_table_lookup (priv->sinfo, "gamevariant");
+		if (gamevariant && strcmp (gamevariant, "bf2142") == 0) {
+			g_string_assign (querier->gameid, "bf2142");
+			g_string_assign (querier->gamename, "Battlefield 2142");
+			gsq_querier_add_field (querier, N_("Score"), G_TYPE_INT);
+			gsq_querier_add_field (querier, N_("Deaths"), G_TYPE_INT);
+			gsq_querier_add_field (querier, N_("Skill"), G_TYPE_INT);
+			gsq_querier_add_field (querier, N_("Team"), G_TYPE_STRING);
+			gsq_querier_add_field (querier, N_("Ping"), G_TYPE_INT);
+			if (gport == 0) gport = 17567;
+		} else {
+			g_string_assign (querier->gameid, gameid);
+			g_string_assign (querier->gamename, gameid);
+		}
+	} else if (strcmp (gameid, "MINECRAFT") == 0) {
+		g_string_assign (querier->gameid, "mc");
+		g_string_assign (querier->gamename, "Minecraft");
+		if (gport == 0) gport = 25565;
+	} else {
+		g_string_assign (querier->gameid, gameid);
+		g_string_assign (querier->gamename, gameid);
 	}
 	
-	g_array_set_size (priv->packets, 0);
+	if (hostport != 0 && gport != 0 && hostport != gport)
+		return FALSE;
+	
+	return TRUE;
 }
 
 
@@ -262,9 +391,9 @@ gsq_gamespy3_process (GsqQuerier *querier, guint16 qport, const gchar *data,
 	if (strncmp (data + 1, "GS3Q", 4) != 0)
 		return FALSE;
 	
-	/* challange */
+	/* challenge */
 	if (type == 9) {
-		if (size < 8)
+		if (size < 7)
 			return FALSE;
 		gchar query[15];
 		memcpy (query, "\xFE\xFD\x00GS3Q\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x01", 15);
@@ -285,7 +414,8 @@ gsq_gamespy3_process (GsqQuerier *querier, guint16 qport, const gchar *data,
 			priv = g_slice_new0 (Private);
 			priv->packets = g_array_sized_new (FALSE, TRUE, sizeof (Packet), 2);
 			priv->sinfo = g_hash_table_new (g_str_hash, g_str_equal);
-			priv->plist = g_hash_table_new (g_str_hash, g_str_equal);
+			priv->plist = g_hash_table_new_full (g_str_hash, g_str_equal,
+					NULL, (GDestroyNotify) free_plist_values);
 			gsq_querier_set_pdata (querier, priv);
 		}
 		
@@ -296,59 +426,16 @@ gsq_gamespy3_process (GsqQuerier *querier, guint16 qport, const gchar *data,
 			priv->number = number + 1;
 		}
 		
+		if (gsq_querier_get_protocol (querier) == NULL)
+			if (!detect_game (querier, priv, data + 15, data + size))
+				return FALSE;
+		
 		/* store data */
 		if (number >= priv->packets->len)
 			g_array_set_size (priv->packets, number + 1);
 		Packet *pkt = &g_array_index (priv->packets, Packet, number);
 		pkt->length = size - 15;
 		pkt->data = g_slice_copy (pkt->length, data + 15);
-		
-		/* process packet's data */
-		if (!process_packet (priv, pkt->data, pkt->data + pkt->length))
-			return FALSE;
-		
-		if (gsq_querier_get_protocol (querier) == NULL) {
-			const gchar *gameid = gsq_lookup_value (priv->sinfo,
-					"gamename", "game_id", NULL);			
-			if (gameid && strcmp (gameid, "battlefield2") == 0) {
-				g_string_assign (querier->gameid, "bf2");
-				g_string_assign (querier->gamename, "Battlefield 2");
-				gsq_querier_add_field (querier, N_("Score"), G_TYPE_INT);
-				gsq_querier_add_field (querier, N_("Deaths"), G_TYPE_INT);
-				gsq_querier_add_field (querier, N_("Skill"), G_TYPE_INT);
-				gsq_querier_add_field (querier, N_("Team"), G_TYPE_STRING);
-				gsq_querier_add_field (querier, N_("Ping"), G_TYPE_INT);
-			} else if (gameid && (strcmp (gameid, "stella") == 0 || strcmp (gameid, "stellad") == 0)) {
-				gchar *gamevariant = g_hash_table_lookup (priv->sinfo, "gamevariant");
-				if (gamevariant && strcmp (gamevariant, "bf2142") == 0) {
-					g_string_assign (querier->gameid, "bf2142");
-					g_string_assign (querier->gamename, "Battlefield 2142");
-					gsq_querier_add_field (querier, N_("Score"), G_TYPE_INT);
-					gsq_querier_add_field (querier, N_("Deaths"), G_TYPE_INT);
-					gsq_querier_add_field (querier, N_("Skill"), G_TYPE_INT);
-					gsq_querier_add_field (querier, N_("Team"), G_TYPE_STRING);
-					gsq_querier_add_field (querier, N_("Ping"), G_TYPE_INT);
-				} else {
-					g_string_assign (querier->gameid, gameid);
-					g_string_assign (querier->gamename, gameid);
-				}
-			} else if (gameid && strcmp (gameid, "MINECRAFT") == 0) {
-				g_string_assign (querier->gameid, "mc");
-				g_string_assign (querier->gamename, "Minecraft");
-			} else {
-				if (g_hash_table_lookup (priv->sinfo, "p268435717")) {
-					g_string_assign (querier->gameid, "ut3");
-					g_string_assign (querier->gamename, "Unreal Tournament 3");
-					gsq_querier_add_field (querier, N_("Score"), G_TYPE_INT);
-					gsq_querier_add_field (querier, N_("Deaths"), G_TYPE_INT);
-					gsq_querier_add_field (querier, N_("Team"), G_TYPE_STRING);
-					gsq_querier_add_field (querier, N_("Ping"), G_TYPE_INT);
-				} else {
-					g_string_assign (querier->gameid, gameid);
-					g_string_assign (querier->gamename, gameid);
-				}
-			}
-		}
 		
 		if (got_all_packets (priv)) {
 			gint i;
@@ -358,7 +445,7 @@ gsq_gamespy3_process (GsqQuerier *querier, guint16 qport, const gchar *data,
 			}
 			
 			fill_info (querier, priv);
-			clear_packets (priv);
+			clear_private_data (priv);
 			gsq_querier_emit_info_update (querier);
 			gsq_querier_emit_player_update (querier);
 		}
