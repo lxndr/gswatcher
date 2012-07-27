@@ -245,7 +245,21 @@ fill_info (GsqQuerier *querier, Private *priv)
 	querier->password = gsq_str2bool (
 			gsq_lookup_value (priv->sinfo, "password", "s7", NULL));
 	
-	if (strcmp (querier->gameid->str, "bf2") == 0) {
+	if (strcmp (querier->gameid->str, "ut3") == 0) {
+		const gchar *mode = gsq_lookup_value (priv->sinfo, "s32779", NULL);
+		switch (gsq_str2int (mode)) {
+		case 1: mode = "DM"; break;
+		case 2: mode = "WAR"; break;
+		case 3: mode = "VCTF"; break;
+		case 4: mode = "TDM"; break;
+		case 5: mode = "DUEL"; break;
+		default: mode = "";
+		}
+		
+		g_string_assign (querier->gamemode, mode);
+		g_string_safe_assign (querier->version,
+				gsq_lookup_value (priv->sinfo, "EngineVersion", NULL));
+	} else if (strcmp (querier->gameid->str, "bf2") == 0) {
 		const gchar *version = gsq_lookup_value (priv->sinfo, "gamever", NULL);
 		const gchar *os = gsq_lookup_value (priv->sinfo, "bf2_os", NULL);
 		const gboolean dedicated = gsq_str2bool (
@@ -263,8 +277,7 @@ fill_info (GsqQuerier *querier, Private *priv)
 		
 	} else {
 		g_string_safe_assign (querier->version,
-				gsq_lookup_value (priv->sinfo, "gamever", "version",
-						"EngineVersion", NULL));
+				gsq_lookup_value (priv->sinfo, "gamever", "version", NULL));
 	}
 	
 	/* player list */
@@ -323,12 +336,15 @@ detect_game (GsqQuerier *querier, Private *priv, const gchar *data, const gchar 
 	if (!process_packet (priv, data, end))
 		return FALSE;
 	
-	guint16 gport = gsq_querier_get_gport (querier);
+	/* these two are necessary */
+	gchar *hostname = gsq_lookup_value (priv->sinfo, "hostname", NULL);
+	gchar *hostport = gsq_lookup_value (priv->sinfo, "hostport", NULL);
+	if (!(hostname && hostport))
+		return FALSE;
 	
-	const gchar *gameid = gsq_lookup_value (priv->sinfo,
-			"gamename", "game_id", NULL);
-	guint16 hostport = gsq_str2int (gsq_lookup_value (priv->sinfo,
-			"hostport", NULL));
+	const gchar *gameid = gsq_lookup_value (priv->sinfo, "gamename", "game_id", NULL);
+	guint16 gport = gsq_querier_get_gport (querier);
+	guint16 hport = gsq_str2int (hostport);
 	
 	if (gameid == NULL) {
 		if (g_hash_table_lookup (priv->sinfo, "p268435717")) {
@@ -376,7 +392,7 @@ detect_game (GsqQuerier *querier, Private *priv, const gchar *data, const gchar 
 		g_string_assign (querier->gamename, gameid);
 	}
 	
-	if (hostport != 0 && gport != 0 && hostport != gport)
+	if (gport != 0 && hport != gport)
 		return FALSE;
 	
 	return TRUE;
