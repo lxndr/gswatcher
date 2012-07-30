@@ -518,6 +518,7 @@ gui_slist_update_list (GList *ls)
 static void
 gs_address_activated (GtkEntry *entry, gpointer udata)
 {
+	gtk_entry_set_icon_sensitive (entry, GTK_ENTRY_ICON_SECONDARY, FALSE);
 	const gchar *address = gtk_entry_get_text (entry);
 	gs_application_add_server (app, address);
 }
@@ -530,12 +531,13 @@ gs_address_icon_clicked (GtkEntry *entry, GtkEntryIconPosition icon,
 	const gchar *address = gtk_entry_get_text (entry);
 	
 	if (icon == GTK_ENTRY_ICON_PRIMARY) {
-		// copy to the clipboard
+		/* copy to the clipboard */
 		GtkClipboard *clipboard = gtk_widget_get_clipboard (GTK_WIDGET (entry),
 				GDK_SELECTION_CLIPBOARD);
 		gtk_clipboard_set_text (clipboard, address, -1);
 	} else {
-		// add new server
+		/* add new server */
+		gtk_entry_set_icon_sensitive (entry, GTK_ENTRY_ICON_SECONDARY, FALSE);
 		const gchar *address = gtk_entry_get_text (entry);
 		gs_application_add_server (app, address);
 	}
