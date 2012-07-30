@@ -46,6 +46,7 @@ typedef struct _Packet {
 } Packet;
 
 typedef struct _Private {
+	guint8 qid;
 	GArray *packets;
 	gint8 number;
 	GHashTable *sinfo;
@@ -54,8 +55,6 @@ typedef struct _Private {
 } Private;
 
 
-const gchar *query = "\xFE\xFD\x09GS3Q";
-const gsize query_length = 7;
 const guint16 default_ports[] = {6500, 25565, 29900, 64000, 64100};
 
 
@@ -128,25 +127,36 @@ gsq_gamespy3_free (GsqQuerier *querier)
 void
 gsq_gamespy3_query (GsqQuerier *querier)
 {
+	Private *priv = gsq_querier_get_pdata (querier);
+	gchar query[7];
+	memcpy (query, "\xFE\xFD\x09GS3Q", 7);
+	
+	if (priv) {
+		priv->qid++;
+		query[6] = priv->qid;
+	} else {
+		query[6] = g_random_int_range (0, G_MAXUINT8);
+	}
+	
 	guint16 port = gsq_querier_get_qport (querier);
 	if (port > 0) {
-		gsq_querier_send (querier, port, query, query_length);
+		gsq_querier_send (querier, port, query, 7);
 	} else {
 		/* try default ports */
 		gint i;
 		port = gsq_querier_get_gport (querier);
 		if (port > 0)
-			gsq_querier_send (querier, port, query, query_length);
+			gsq_querier_send (querier, port, query, 7);
 		for (i = 0; i < G_N_ELEMENTS (default_ports); i++)
-			gsq_querier_send (querier, default_ports[i], query, query_length);
+			gsq_querier_send (querier, default_ports[i], query, 7);
 	}
 }
 
 
-static inline void
-get_sinfo (GHashTable *sinfo, gchar **data, const gchar *end)
+static gchar *
+get_sinfo (GHashTable *sinfo, const gchar *data, const gchar *end)
 {
-	gchar *p = *data;
+	gchar *p = (gchar *) data;
 	
 	while (*p && p < end) {
 		gchar *key = gsq_get_cstring (&p);
@@ -156,17 +166,20 @@ get_sinfo (GHashTable *sinfo, gchar **data, const gchar *end)
 		g_hash_table_replace (sinfo, key, value);
 	}
 	
-	*data = p + 1;
+	return p + 1;
 }
 
 
-static inline void
-get_plist (GHashTable *plist, gchar **data, const gchar *end)
+static gchar *
+get_plist (GHashTable *plist, const gchar *data, const gchar *end)
 {
-	gchar *p = *data;
+	gchar *p = (gchar *) data;
 	
 	while (*p && p < end) {
 		gchar *field = gsq_get_cstring (&p);
+		if (p >= end)
+			break;
+		
 		guint8 number = gsq_get_uint8 (&p);
 		
 		GPtrArray *a = g_hash_table_lookup (plist, field);
@@ -174,17 +187,21 @@ get_plist (GHashTable *plist, gchar **data, const gchar *end)
 			a = g_ptr_array_new ();
 			g_hash_table_insert (plist, field, a);
 		}
-		g_ptr_array_set_size (a, number);	/* start with */
+		/* g_assert (number <= a->len); */
+		g_return_val_if_fail (number <= a->len, NULL);	/* server can mess around */
+		g_ptr_array_set_size (a, number);				/* start with */
 		
 		while (*p && p < end) {
 			gchar *value = gsq_get_cstring (&p);
 			g_ptr_array_add (a, value);
 		}
 		
-		p++;
+		/* Unreal Tournament 3 can put empty strings after each block */
+		while (*p == 0)
+			p++;
 	}
 	
-	*data = p + 1;
+	return p + 1;
 }
 
 
@@ -196,10 +213,12 @@ process_packet (Private *priv, const gchar *data, const gchar *end)
 	while (p < end) {
 		switch (*p++) {
 		case 0:		/* server info */
-			get_sinfo (priv->sinfo, &p, end);
+			p = get_sinfo (priv->sinfo, p, end);
 			break;
 		case 1:		/* player list */
-			get_plist (priv->plist, &p, end);
+			p = get_plist (priv->plist, p, end);
+			if (p == NULL)
+				return TRUE;
 			break;
 		case 2:		/* team info */
 			return TRUE;
@@ -296,7 +315,8 @@ fill_info (GsqQuerier *querier, Private *priv)
 			return FALSE;
 		gchar team_name[8];
 		for (i = 0; i < player_list->len; i++) {
-			g_snprintf (team_name, 8, "Team %s", (gchar *) g_ptr_array_index (team_list, i));
+			g_snprintf (team_name, 8, "Team %d",
+					gsq_str2int (g_ptr_array_index (team_list, i)) + 1);
 			gsq_querier_add_player (querier, g_ptr_array_index (player_list, i),
 					gsq_str2int (g_ptr_array_index (score_list, i)),
 					gsq_str2int (g_ptr_array_index (deaths_list, i)),
@@ -333,8 +353,9 @@ fill_info (GsqQuerier *querier, Private *priv)
 static gboolean
 detect_game (GsqQuerier *querier, Private *priv, const gchar *data, const gchar *end)
 {
-	if (!process_packet (priv, data, end))
+	if (*data != 0)
 		return FALSE;
+	get_sinfo (priv->sinfo, data + 1, end);
 	
 	/* these two are necessary */
 	gchar *hostname = gsq_lookup_value (priv->sinfo, "hostname", NULL);
@@ -403,19 +424,28 @@ gboolean
 gsq_gamespy3_process (GsqQuerier *querier, guint16 qport, const gchar *data,
 		gssize size)
 {
-	guint8 type = *data;
-	if (strncmp (data + 1, "GS3Q", 4) != 0)
+	if (strncmp (data + 1, "GS3", 3) != 0)
 		return FALSE;
+	
+	Private *priv = gsq_querier_get_pdata (querier);
+	guint8 queryid = data[4];
+	if (priv && priv->qid != queryid)
+		return FALSE;
+	
+	guint8 type = *data;
 	
 	/* challenge */
 	if (type == 9) {
 		if (size < 7)
 			return FALSE;
 		gchar query[15];
-		memcpy (query, "\xFE\xFD\x00GS3Q\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x01", 15);
+		memcpy (query, "\xFE\xFD\x00GS3 \xFF\xFF\xFF\xFF\xFF\xFF\xFF\x01", 15);
+		query[6] = queryid;
 		gint32 challenge = GINT32_TO_BE (atoi (data + 5));
 		if (challenge)
 			memcpy (query + 7, &challenge, 4);
+		if (priv)
+			clear_private_data (priv);
 		gsq_querier_send (querier, qport, query, 15);
 		
 	/* server info */
@@ -428,6 +458,7 @@ gsq_gamespy3_process (GsqQuerier *querier, guint16 qport, const gchar *data,
 		Private *priv = gsq_querier_get_pdata (querier);
 		if (priv == NULL) {
 			priv = g_slice_new0 (Private);
+			priv->qid = queryid;
 			priv->packets = g_array_sized_new (FALSE, TRUE, sizeof (Packet), 2);
 			priv->sinfo = g_hash_table_new (g_str_hash, g_str_equal);
 			priv->plist = g_hash_table_new_full (g_str_hash, g_str_equal,
@@ -461,7 +492,6 @@ gsq_gamespy3_process (GsqQuerier *querier, guint16 qport, const gchar *data,
 			}
 			
 			fill_info (querier, priv);
-			clear_private_data (priv);
 			gsq_querier_emit_info_update (querier);
 			gsq_querier_emit_player_update (querier);
 		}
