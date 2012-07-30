@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: lxndr87@users.sourceforge.net\n"
-"POT-Creation-Date: 2012-07-22 17:23+0400\n"
+"POT-Creation-Date: 2012-07-30 13:05+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -172,35 +172,35 @@ msgstr ""
 msgid "unknown"
 msgstr ""
 
-#: src/gui-server-list.c:631
+#: src/gui-server-list.c:633
 msgid "Favorite servers"
 msgstr ""
 
-#: src/gui-server-list.c:643
+#: src/gui-server-list.c:645
 msgid "Other servers"
 msgstr ""
 
-#: src/gui-server-list.c:665
+#: src/gui-server-list.c:667
 msgctxt "Server"
 msgid "Name"
 msgstr ""
 
-#: src/gui-server-list.c:710
+#: src/gui-server-list.c:712
 msgid "Game"
 msgstr ""
 
-#: src/gui-server-list.c:732
+#: src/gui-server-list.c:734
 msgid "Map"
 msgstr ""
 
-#: src/gui-server-list.c:748
+#: src/gui-server-list.c:750
 msgid "Players"
 msgstr ""
 
-#: src/gui-server-list.c:764 src/query/proto-gamespy.c:117
+#: src/gui-server-list.c:766 src/query/proto-gamespy.c:117
 #: src/query/proto-gamespy.c:121 src/query/proto-gamespy.c:125
-#: src/query/proto-gamespy.c:128 src/query/proto-gamespy3.c:193
-#: src/query/proto-gamespy3.c:201 src/query/proto-gamespy3.c:210
+#: src/query/proto-gamespy.c:128 src/query/proto-gamespy3.c:377
+#: src/query/proto-gamespy3.c:390 src/query/proto-gamespy3.c:401
 #: src/query/proto-quake3.c:175
 msgid "Ping"
 msgstr ""
@@ -387,20 +387,20 @@ msgstr ""
 msgid "Frags"
 msgstr ""
 
-#: src/query/proto-gamespy.c:119 src/query/proto-gamespy3.c:191
-#: src/query/proto-gamespy3.c:198 src/query/proto-gamespy3.c:207
+#: src/query/proto-gamespy.c:119 src/query/proto-gamespy3.c:375
+#: src/query/proto-gamespy3.c:387 src/query/proto-gamespy3.c:398
 msgid "Deaths"
 msgstr ""
 
-#: src/query/proto-gamespy.c:120 src/query/proto-gamespy3.c:190
-#: src/query/proto-gamespy3.c:197 src/query/proto-gamespy3.c:206
+#: src/query/proto-gamespy.c:120 src/query/proto-gamespy3.c:374
+#: src/query/proto-gamespy3.c:386 src/query/proto-gamespy3.c:397
 #: src/query/proto-quake3.c:174
 msgid "Score"
 msgstr ""
 
 #: src/query/proto-gamespy.c:122 src/query/proto-gamespy.c:126
-#: src/query/proto-gamespy3.c:192 src/query/proto-gamespy3.c:200
-#: src/query/proto-gamespy3.c:209
+#: src/query/proto-gamespy3.c:376 src/query/proto-gamespy3.c:389
+#: src/query/proto-gamespy3.c:400
 msgid "Team"
 msgstr ""
 
@@ -416,7 +416,7 @@ msgstr ""
 msgid "Spectators"
 msgstr ""
 
-#: src/query/proto-gamespy3.c:199 src/query/proto-gamespy3.c:208
+#: src/query/proto-gamespy3.c:388 src/query/proto-gamespy3.c:399
 msgid "Skill"
 msgstr ""
 
