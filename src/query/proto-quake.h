@@ -1,5 +1,5 @@
 /* 
- * proto-quake3.h: Quake3 based query protocol implementation
+ * proto-quake.h: Quake 2/3 based query protocol implementation
  * 
  * Copyright (C) 2011-2012 GSWatcher Developer(s)
  * 
@@ -22,14 +22,17 @@
 
 
 
-#ifndef __GSQUERY__PROTO_QUAKE3_H__
-#define __GSQUERY__PROTO_QUAKE3_H__
+#ifndef __GSQUERY__PROTO_QUAKE_H__
+#define __GSQUERY__PROTO_QUAKE_H__
 
 #include "querier.h"
 
-void gsq_quake3_query (GsqQuerier *querier);
-gboolean gsq_quake3_process (GsqQuerier *querier, guint16 qport,
-		const gchar *data, gssize size);
-void gsq_quake3_free (GsqQuerier *querier);
+void		gsq_quake2_query (GsqQuerier *querier);
+gboolean	gsq_quake2_process (GsqQuerier *querier, guint16 qport,
+								const gchar *data, gssize size);
+
+void		gsq_quake3_query (GsqQuerier *querier);
+gboolean	gsq_quake3_process (GsqQuerier *querier, guint16 qport,
+								const gchar *data, gssize size);
 
 #endif
