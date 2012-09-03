@@ -1,5 +1,5 @@
 /* 
- * proto-quake3.c: Quake3 based query protocol implementation
+ * proto-quake.c: Quake 2/3 based query protocol implementation
  * 
  * Copyright (C) 2011-2012 GSWatcher Developer(s)
  * 
@@ -29,19 +29,27 @@
 #include <glib/gprintf.h>
 #include "utils.h"
 #include "querier-private.h"
-#include "proto-quake3.h"
+#include "proto-quake.h"
 #include "utils.h"
 
 
-typedef struct _Q3Game {
+typedef struct _GameSpec {
 	gchar *proto_id;
 	gchar *id;
 	gchar *name;
 	gchar *mode_key;
 	guint16 port;
-} Q3Game;
+} GameSpec;
 
-static const Q3Game games[] = {
+
+static const GameSpec q2games[] = {
+	{"arena",                      "arena",   "Alien Arena",                    NULL,         27910},
+	{"baseq2",                     "q2",      "Quake 2",                        NULL,         27910},
+	{"action",                     "aq2",     "Action Quake 2",                 NULL,         27910},
+	{NULL,                         NULL,      NULL,                             NULL,             0}
+};
+
+static const GameSpec q3games[] = {
 	{"base",                       "q3",      "Quake 3",                        NULL,         27960},
 	{"baseq3",                     "q3",      "Quake 3",                        NULL,         27960},
 	{"osp",                        "q3osp",   "Quake3: OSP",                    NULL,         27960},
@@ -61,36 +69,55 @@ static const Q3Game games[] = {
 
 
 
-void
-gsq_quake3_query (GsqQuerier *querier)
+static void
+quake_query (GsqQuerier *querier, const gchar *line, gsize length, const GameSpec *games)
 {
-	static gchar *query = "\xFF\xFF\xFF\xFFgetstatus\n";
-	guint16 port = gsq_querier_get_gport (querier);
+	guint16 port = gsq_querier_get_qport (querier);
+	if (port == 0)
+		port = gsq_querier_get_gport (querier);
+	
 	if (port > 0) {
-		gsq_querier_send (querier, port, query, 14);
+		gsq_querier_send (querier, port, line, length);
 	} else {
 		/* try default ports */
-		gint i, prev = 0;
-		for (i = 0; games[i].proto_id; i++) {
-			if (games[i].port != prev) {
-				gsq_querier_send (querier, games[i].port, query, 14);
-				prev = games[i].port;
+		gint prev = 0;
+		while (games->id) {
+			if (games->port != prev) {
+				gsq_querier_send (querier, games->port, line, length);
+				prev = games->port;
 			}
+			games++;
 		}
 	}
 }
 
 
-static const Q3Game *
-find_spec (const gchar *id)
+void
+gsq_quake2_query (GsqQuerier *querier)
+{
+	/* a final null byte has to be sent thus there's 11 bytes */
+	quake_query (querier, "\xFF\xFF\xFF\xFFstatus", 11, q2games);
+}
+
+void
+gsq_quake3_query (GsqQuerier *querier)
+{
+	quake_query (querier, "\xFF\xFF\xFF\xFFgetstatus\n", 14, q3games);
+}
+
+
+static const GameSpec *
+find_spec (const gchar *id, const GameSpec *games)
 {
 	if (!id)
 		return NULL;
 	
-	gint i;
-	for (i = 0; games[i].proto_id; i++)
-		if (strcmp (games[i].proto_id, id) == 0)
-			return &games[i];
+	while (games->id) {
+		if (strcmp (games->proto_id, id) == 0)
+			return games;
+		games++;
+	}
+	
 	return NULL;
 }
 
@@ -98,6 +125,9 @@ find_spec (const gchar *id)
 static void
 clear_name (gchar *name)
 {
+	if (!name)
+		return;
+	
 	gchar *s = name;
 	gchar *d = name;
 	
@@ -118,31 +148,41 @@ clear_name (gchar *name)
 
 
 static gboolean
-get_sinfo (GsqQuerier *querier, gchar *data, gsize length, guint16 qport)
+quake_process (GsqQuerier *querier, guint16 qport, const gchar *data, const GameSpec *games)
 {
-	data = g_strndup (data, length);
-	gchar *p = data;
+	gchar *plist, *sinfo = g_strdup (data);
+	gchar *p, *f, *v;
 	
-	/* parse data */
-	if (*p++ != '\\')
+	if (!(plist = strchr (sinfo, '\n'))) {
+		g_free (sinfo);
 		return FALSE;
+	}
+	*plist = 0;
+	plist++;
 	
 	GHashTable *values = g_hash_table_new (g_str_hash, g_str_equal);
-	gchar *f, *v;
 	
-	while (TRUE) {
-		/* key */
-		f = strchr (p, '\\');
-		if (f)
-			*f = '\0';
-		else
-			break;
+	/* parse server info */
+	p = sinfo;
+	if (*p++ != '\\') {
+		g_hash_table_destroy (values);
+		g_free (sinfo);
+		return FALSE;
+	}
+	
+	for (;;) {
+		if ((v = strchr (p, '\\'))) {
+			*v = 0;
+			v++;
+		} else {
+			/* error: no value */
+			g_hash_table_destroy (values);
+			g_free (sinfo);
+			return FALSE;
+		}
 		
-		/* value */
-		v = f + 1;
-		f = strchr (v, '\\');
-		if (f)
-			*f = '\0';
+		if ((f = strchr (v, '\\')))
+			*f = 0;
 		
 		g_hash_table_replace (values, p, v);
 		
@@ -152,22 +192,28 @@ get_sinfo (GsqQuerier *querier, gchar *data, gsize length, guint16 qport)
 			break;
 	}
 	
-	/* check game port */
+	if (g_hash_table_size (values) == 0) {
+		g_hash_table_destroy (values);
+		g_free (sinfo);
+		return FALSE;
+	}
+	
+	/* detection */
 	if (!*querier->gameid->str) {
-		gchar *id = g_hash_table_lookup (values, "gamename");
-		const Q3Game *spec = find_spec (id);
+		gchar *id = gsq_lookup_value (values, "game", "gamename", NULL);
+		const GameSpec *spec = find_spec (id, games);
 		if (spec) {
 			g_string_assign (querier->gameid, spec->id);
 			g_string_assign (querier->gamename, spec->name);
 		} else {
-			g_string_assign (querier->gameid, spec->id);
+			g_string_assign (querier->gameid, id);
 			g_string_assign (querier->gamename, id);
 		}
 		
 		guint16 port = gsq_querier_get_gport (querier);
 		if ((port > 0 && port != qport) && (spec && spec->port != qport)) {
 			g_hash_table_destroy (values);
-			g_free (data);
+			g_free (sinfo);
 			return FALSE;
 		}
 		
@@ -176,87 +222,72 @@ get_sinfo (GsqQuerier *querier, gchar *data, gsize length, guint16 qport)
 	}
 	
 	/* server name */
-	gchar *name = gsq_lookup_value (values, "sv_hostname", "hostname", NULL);
-	clear_name (name);
-	g_string_assign (querier->name, name);
+	gchar *name = gsq_lookup_value (values, "hostname", "sv_hostname", NULL);
+	if (name)
+		clear_name (name);
+	g_string_safe_assign (querier->name, name);
 	/* map name */
 	gchar *map = g_hash_table_lookup (values, "mapname");
-	g_string_assign (querier->map, map);
+	g_string_safe_assign (querier->map, map);
 	/* maximum players */
-	gchar *maxplayers = g_hash_table_lookup (values, "sv_maxclients");
-	querier->maxplayers = atoi (maxplayers);
+	querier->maxplayers = gsq_str2int (gsq_lookup_value (values,
+				"maxclients", "sv_maxclients", NULL));
 	/* game version */
-	gchar *version = gsq_lookup_value (values, "version", "gameversion",
-			"shortversion", NULL);
-	g_string_assign (querier->version, version);
+	gchar *version = gsq_lookup_value (values, "version", "gameversion", "shortversion", NULL);
+	g_string_safe_assign (querier->version, version);
 	/* password */
-	gchar *password = gsq_lookup_value (values, "pswrd", "g_needpass", NULL);
-	gsq_querier_set_extra (querier, "password",
-			gsq_str2bool (password) ? "true" : "false");
+	querier->password = gsq_str2bool (gsq_lookup_value (values,
+			"needpass", "pswrd", "g_needpass", NULL));
 	
 	g_hash_table_destroy (values);
+	
+	/* player list */
+	gchar *score, *ping, *player;
+	querier->numplayers = 0;
+	p = plist;
+	while (*p) {
+		/* score */
+		score = p;
+		if (!(f = strchr (score, ' ')))
+			break;
+		*f = 0;
+		/* ping */
+		ping = f + 1;
+		if (!(f = strstr (ping, " \"")))
+			break;
+		*f = 0;
+		/* player */
+		player = f + 2;
+		if (!(f = strstr (player, "\"\n")))
+			break;
+		*f = 0;
+		p = f + 2;
+		
+		clear_name (player);
+		gsq_querier_add_player (querier, player, atoi (score), atoi (ping));
+		querier->numplayers++;
+	}
+	
 	gsq_querier_emit_info_update (querier);
-	g_free (data);
+	gsq_querier_emit_player_update (querier);
+	g_free (sinfo);
 	return TRUE;
 }
 
-static gboolean
-get_plist (GsqQuerier *querier, gchar *p, gssize len)
-{
-	GError *error = NULL;
-	static GRegex *re = NULL;
-	if (!re) {
-		re = g_regex_new ("^(-?\\d+) (\\d+) \"(.*)\"$", G_REGEX_OPTIMIZE |
-				G_REGEX_NEWLINE_LF | G_REGEX_MULTILINE, 0, &error);
-		if (!re)
-			g_error (error->message);
-	}
-	
-	GMatchInfo *minfo;
-	gint numplayers = 0;
-	g_regex_match_full (re, p, len, 0, 0, &minfo, &error);
-	while (g_match_info_matches (minfo)) {
-		gchar *score = g_match_info_fetch (minfo, 1);
-		gchar *ping = g_match_info_fetch (minfo, 2);
-		gchar *name = g_match_info_fetch (minfo, 3);
-		clear_name (name);
-		gsq_querier_add_player (querier, name, atoi (score), atoi (ping));
-		g_free (score);
-		g_free (ping);
-		g_free (name);
-		
-		numplayers++;
-		g_match_info_next (minfo, &error);
-	}
-	g_match_info_free (minfo);
-	
-	if (error) {
-		g_warning ("Error while matching: %s\n", error->message);
-		g_error_free (error);
-	}
-	
-	querier->numplayers = numplayers;
-	gsq_querier_emit_player_update (querier);
-	return TRUE;
-}
 
 gboolean
-gsq_quake3_process (GsqQuerier *querier, guint16 qport,
-		const gchar *data, gssize size)
+gsq_quake2_process (GsqQuerier *querier, guint16 qport, const gchar *data, gssize size)
 {
-	if (size < 20) /* very silly, the size of a respond with empty data */
+	if (size < 11 || strncmp (data, "\xFF\xFF\xFF\xFFprint\n", 10))
 		return FALSE;
-	
-	if (strncmp (data, "\xFF\xFF\xFF\xFFstatusResponse\n", 19) != 0)
+	return quake_process (querier, qport, data + 10, q2games);
+}
+
+
+gboolean
+gsq_quake3_process (GsqQuerier *querier, guint16 qport, const gchar *data, gssize size)
+{
+	if (size < 20 || strncmp (data, "\xFF\xFF\xFF\xFFstatusResponse\n", 19) != 0)
 		return FALSE;
-	
-	gchar *p = (gchar *) data + 19;
-	gchar *f = strchr (p, '\n');
-	if (!f)
-		return FALSE;
-	if (f > data + size)
-		return FALSE;
-	
-	return get_sinfo (querier, p, f - p, qport) &&
-			get_plist (querier, f + 1, size - (f - data + 1));
+	return quake_process (querier, qport, data + 19, q3games);
 }

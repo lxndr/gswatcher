@@ -29,7 +29,7 @@
 #include <gobject/gvaluecollector.h>
 #include "proto-gamespy.h"
 #include "proto-gamespy3.h"
-#include "proto-quake3.h"
+#include "proto-quake.h"
 #include "proto-source.h"
 #include "querier.h"
 #include "querier-private.h"
@@ -862,6 +862,10 @@ gsq_init (guint16 default_port)
 			gsq_source_query,
 			gsq_source_process,
 			gsq_source_free);
+	gsq_register_protocol ("quake2",
+			gsq_quake2_query,
+			gsq_quake2_process,
+			NULL);
 	gsq_register_protocol ("quake3",
 			gsq_quake3_query,
 			gsq_quake3_process,
