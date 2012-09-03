@@ -326,6 +326,10 @@ gs_client_querier_gameid_changed (GsqQuerier *querier, GsClient *client)
 		client->console_settings = GUI_CONSOLE_PORT | GUI_CONSOLE_PASS;
 		if (client->console_port == 0)
 			client->console_port = 27015;
+	} else if (strcmp (gameid, "mc") == 0) {
+		client->console_settings = GUI_CONSOLE_PORT | GUI_CONSOLE_PASS;
+		if (client->console_port == 0)
+			client->console_port = 25575;
 	} else {								/*  */
 		client->console_settings = GUI_CONSOLE_PASS;
 		client->console_port = gport > 0 ? gport : 27015;
