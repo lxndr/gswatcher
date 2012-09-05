@@ -79,6 +79,9 @@ struct _GsClient {
 	gchar *log_address;
 	GtkTextBuffer *log_buffer;
 	gboolean log_auto;
+	gboolean log_auto_scroll;
+	gboolean log_output;
+	gboolean log_wrapping;
 	
 	/* chat */
 	GtkTextBuffer *chat_buffer;

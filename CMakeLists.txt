@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.8)
 project (gswatcher C)
 
-set (GS_VERSION "1.5b1")
+set (GS_VERSION "1.5b2")
 set (GS_HOMEPAGE "http://gswatcher.sourceforge.net")
 set (GS_LANGUAGES ru)
 
