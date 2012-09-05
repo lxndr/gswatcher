@@ -92,6 +92,7 @@ gs_client_class_init (GsClientClass *class)
 static void
 gs_client_init (GsClient *client)
 {
+	client->log_auto_scroll = TRUE;
 }
 
 
