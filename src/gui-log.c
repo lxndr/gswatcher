@@ -30,7 +30,7 @@
 
 static GtkWidget *scrolled, *logview;
 static GtkWidget *toolbar, *enable_log, *disable_log, *auto_button,
-		*show_output, *auto_scroll, *text_wrapping;
+		*show_output, *text_wrapping;
 
 
 void
@@ -57,12 +57,10 @@ gui_log_setup (GsClient *client)
 		gtk_text_view_set_buffer (GTK_TEXT_VIEW (logview), client->log_buffer);
 		gtk_text_buffer_get_end_iter (client->log_buffer, &iter);
 		
-		if (client->log_auto_scroll) {
-			GtkTextMark *mark = gtk_text_buffer_create_mark (client->log_buffer,
-					NULL, &iter, TRUE);
-			gtk_text_view_scroll_mark_onscreen (GTK_TEXT_VIEW (logview), mark);
-			gtk_text_buffer_delete_mark (client->log_buffer, mark);
-		}
+		GtkTextMark *mark = gtk_text_buffer_create_mark (client->log_buffer,
+				NULL, &iter, TRUE);
+		gtk_text_view_scroll_mark_onscreen (GTK_TEXT_VIEW (logview), mark);
+		gtk_text_buffer_delete_mark (client->log_buffer, mark);
 	} else {
 		gtk_widget_set_sensitive (scrolled, FALSE);
 		gtk_widget_set_sensitive (toolbar, FALSE);
@@ -89,11 +87,16 @@ gui_log_print (GsClient *client, const gchar *msg)
 	gtk_text_buffer_get_end_iter (client->log_buffer, &iter);
 	gtk_text_buffer_insert (client->log_buffer, &iter, msg, -1);
 	
-	if (gui_slist_get_selected () == client && client->log_auto_scroll) {
-		GtkTextMark *mark = gtk_text_buffer_create_mark (client->log_buffer,
-				NULL, &iter, TRUE);
-		gtk_text_view_scroll_mark_onscreen (GTK_TEXT_VIEW (logview), mark);
-		gtk_text_buffer_delete_mark (client->log_buffer, mark);
+	if (gui_slist_get_selected () == client) {
+		GtkAdjustment *adj = gtk_scrollable_get_vadjustment (GTK_SCROLLABLE (logview));
+		gdouble upper, value, page_size;
+		g_object_get (adj, "value", &value, "upper", &upper, "page-size", &page_size, NULL);
+		if (value + page_size >= upper) {
+			GtkTextMark *mark = gtk_text_buffer_create_mark (
+					client->log_buffer, NULL, &iter, TRUE);
+			gtk_text_view_scroll_mark_onscreen (GTK_TEXT_VIEW (logview), mark);
+			gtk_text_buffer_delete_mark (client->log_buffer, mark);
+		}
 	}
 }
 
@@ -131,7 +134,6 @@ gui_log_view_popup (GtkPopupButton *popup_button, gpointer udata)
 {
 	GsClient *client = gui_slist_get_selected ();
 	
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (auto_scroll), client->log_auto_scroll);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (show_output), client->log_output);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (text_wrapping), client->log_wrapping);
 }
@@ -142,7 +144,6 @@ gui_log_view_popdown (GtkPopupButton *popup_button, gpointer udata)
 {
 	GsClient *client = gui_slist_get_selected ();
 	
-	client->log_auto_scroll = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (auto_scroll));
 	client->log_output = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (show_output));
 	client->log_wrapping = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (text_wrapping));
 	
@@ -167,7 +168,6 @@ gui_log_create_bar ()
 {
 	/* view panel */
 	show_output = gtk_check_button_new_with_label (_("Show output"));
-	auto_scroll = gtk_check_button_new_with_label (_("Auto-scroll"));
 	text_wrapping = gtk_check_button_new_with_label (_("Text wrapping"));
 	
 	GtkWidget *clear_log = gtk_button_new_with_label (_("Clear log"));
@@ -177,7 +177,6 @@ gui_log_create_bar ()
 	gtk_grid_set_row_spacing (GTK_GRID (grid), 2);
 	gtk_grid_set_column_spacing (GTK_GRID (grid), 2);
 	gtk_grid_attach (GTK_GRID (grid), show_output, 0, 0, 1, 1);
-	gtk_grid_attach (GTK_GRID (grid), auto_scroll, 0, 1, 1, 1);
 	gtk_grid_attach (GTK_GRID (grid), text_wrapping, 0, 2, 1, 1);
 	gtk_grid_attach (GTK_GRID (grid), clear_log, 0, 3, 1, 1);
 	gtk_widget_show_all (grid);

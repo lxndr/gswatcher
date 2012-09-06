@@ -40,21 +40,20 @@ gui_chat_log (GsClient *client, const gchar *name, gint team, const gchar *msg)
 {
 	GtkTextIter iter;
 	gtk_text_buffer_get_end_iter (client->chat_buffer, &iter);
+	if (gtk_text_buffer_get_char_count (client->chat_buffer) > 0)
+		gtk_text_buffer_insert (client->chat_buffer, &iter, "\n", -1);
 	gtk_text_buffer_insert_with_tags (client->chat_buffer, &iter,
 			name, -1, tags[team], NULL);
 	gtk_text_buffer_insert (client->chat_buffer, &iter, ": ", -1);
 	gtk_text_buffer_insert (client->chat_buffer, &iter, msg, -1);
-	gtk_text_buffer_insert (client->chat_buffer, &iter, "\n", -1);
 	
 	if (gui_slist_get_selected () == client) {
-		gint pos, end;
-		g_object_get (client->chat_buffer, "cursor-position", &pos, NULL);
-		end = gtk_text_buffer_get_char_count (client->chat_buffer);
-		
-		/* if cursor put at the end */
-		if (pos == end) {
-			GtkTextMark *mark = gtk_text_buffer_create_mark (client->chat_buffer,
-					NULL, &iter, TRUE);
+		GtkAdjustment *adj = gtk_scrollable_get_vadjustment (GTK_SCROLLABLE (logview));
+		gdouble upper, value, page_size;
+		g_object_get (adj, "value", &value, "upper", &upper, "page-size", &page_size, NULL);
+		if (value + page_size >= upper) {
+			GtkTextMark *mark = gtk_text_buffer_create_mark (
+					client->chat_buffer, NULL, &iter, TRUE);
 			gtk_text_view_scroll_mark_onscreen (GTK_TEXT_VIEW (logview), mark);
 			gtk_text_buffer_delete_mark (client->chat_buffer, mark);
 		}
