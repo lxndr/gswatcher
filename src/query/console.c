@@ -581,8 +581,7 @@ gsq_console_send (GsqConsole *console, const gchar *command,
 }
 
 void
-gsq_console_send_full (GsqConsole *console, const gchar *command,
-		gint attempts,
+gsq_console_send_full (GsqConsole *console, const gchar *command, gint attempts,
 		GAsyncReadyCallback callback, gpointer udata)
 {
 	g_return_if_fail (GSQ_IS_CONSOLE (console));
