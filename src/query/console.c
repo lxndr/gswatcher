@@ -275,6 +275,7 @@ close_connection (GsqConsole *console)
 	GsqConsoleClass *class = GSQ_CONSOLE_GET_CLASS (console);
 	GsqConsolePrivate *priv = console->priv;
 	priv->authenticated = FALSE;
+	priv->working = FALSE;
 	
 	if (priv->timer) {
 		g_source_remove (priv->timer);
