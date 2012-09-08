@@ -110,22 +110,20 @@ void
 gs_console_log (GsClient *client, GsLogType type, const gchar *msg)
 {
 	GtkTextIter iter;
+	GtkTextMark *mark;
+	
 	gtk_text_buffer_get_end_iter (client->console_buffer, &iter);
+	if (gui_slist_get_selected () == client) {
+		mark = gtk_text_buffer_create_mark (client->console_buffer,
+				NULL, &iter, TRUE);
+	}
+	
 	gtk_text_buffer_insert_with_tags (client->console_buffer, &iter, msg, -1, tags[type], NULL);
 	gtk_text_buffer_insert (client->console_buffer, &iter, "\n", -1);
 	
 	if (gui_slist_get_selected () == client) {
-		gint pos, end;
-		g_object_get (client->console_buffer, "cursor-position", &pos, NULL);
-		end = gtk_text_buffer_get_char_count (client->console_buffer);
-		
-		/* if cursor put at the end */
-		if (pos == end) {
-			GtkTextMark *mark = gtk_text_buffer_create_mark (client->console_buffer,
-					NULL, &iter, TRUE);
-			gtk_text_view_scroll_mark_onscreen (GTK_TEXT_VIEW (logview), mark);
-			gtk_text_buffer_delete_mark (client->console_buffer, mark);
-		}
+		gtk_text_view_scroll_to_mark (GTK_TEXT_VIEW (logview), mark, 0.0, TRUE, 0.0, 0.0);
+		gtk_text_buffer_delete_mark (client->console_buffer, mark);
 	}
 }
 
