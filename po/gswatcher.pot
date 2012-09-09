@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: lxndr87@users.sourceforge.net\n"
-"POT-Creation-Date: 2012-07-30 13:05+0400\n"
+"POT-Creation-Date: 2012-09-09 15:37+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,23 +17,23 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/client.c:387
+#: src/client.c:391
 msgid "Connected"
 msgstr ""
 
-#: src/client.c:393
+#: src/client.c:397
 msgid "Authenticated"
 msgstr ""
 
-#: src/client.c:399
+#: src/client.c:403
 msgid "Disconnected"
 msgstr ""
 
-#: src/client.c:419
+#: src/client.c:423
 msgid "Server's protocol is not determined"
 msgstr ""
 
-#: src/client.c:463
+#: src/client.c:467
 msgid "You have to provide a log address"
 msgstr ""
 
@@ -201,7 +201,7 @@ msgstr ""
 #: src/query/proto-gamespy.c:121 src/query/proto-gamespy.c:125
 #: src/query/proto-gamespy.c:128 src/query/proto-gamespy3.c:377
 #: src/query/proto-gamespy3.c:390 src/query/proto-gamespy3.c:401
-#: src/query/proto-quake3.c:175
+#: src/query/proto-quake.c:221
 msgid "Ping"
 msgstr ""
 
@@ -226,32 +226,48 @@ msgstr ""
 msgid "Notify"
 msgstr ""
 
-#: src/gui-console.c:164
+#: src/gui-console.c:162
 msgid ""
 "This command will shut down the server. Are you sure you want to continue?"
 msgstr ""
 
-#: src/gui-console.c:319
+#: src/gui-console.c:317
 msgid "P_ort:"
 msgstr ""
 
-#: src/gui-console.c:331
+#: src/gui-console.c:329
 msgid "_Password:"
 msgstr ""
 
-#: src/gui-console.c:348
+#: src/gui-console.c:346 src/gui-log.c:226
 msgid "Settings"
 msgstr ""
 
-#: src/gui-log.c:126
-msgid "Enable log"
+#: src/gui-log.c:176
+msgid "Show output"
 msgstr ""
 
-#: src/gui-log.c:129
-msgid "Disable log"
+#: src/gui-log.c:177
+msgid "Text wrapping"
 msgstr ""
 
-#: src/gui-log.c:132
+#: src/gui-log.c:179
+msgid "Clear log"
+msgstr ""
+
+#: src/gui-log.c:191
+msgid "View"
+msgstr ""
+
+#: src/gui-log.c:208
+msgid "Enable logging"
+msgstr ""
+
+#: src/gui-log.c:211
+msgid "Disable logging"
+msgstr ""
+
+#: src/gui-log.c:214
 msgid "Keep on"
 msgstr ""
 
@@ -394,7 +410,7 @@ msgstr ""
 
 #: src/query/proto-gamespy.c:120 src/query/proto-gamespy3.c:374
 #: src/query/proto-gamespy3.c:386 src/query/proto-gamespy3.c:397
-#: src/query/proto-quake3.c:174
+#: src/query/proto-quake.c:220
 msgid "Score"
 msgstr ""
 
