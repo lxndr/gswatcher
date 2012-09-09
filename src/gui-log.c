@@ -32,6 +32,8 @@ static GtkWidget *scrolled, *logview;
 static GtkWidget *toolbar, *enable_log, *disable_log, *auto_button,
 		*show_output, *text_wrapping;
 
+static void gui_log_auto_toggled (GtkButton *button, gpointer udata);
+
 
 void
 gui_log_init (GsClient *client)
@@ -44,6 +46,10 @@ void
 gui_log_setup (GsClient *client)
 {
 	if (client) {
+		g_signal_handlers_block_by_func (auto_button, gui_log_auto_toggled, NULL);
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (auto_button), client->log_auto);
+		g_signal_handlers_unblock_by_func (auto_button, gui_log_auto_toggled, NULL);
+		
 		gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (logview),
 				client->log_wrapping ? GTK_WRAP_WORD_CHAR : GTK_WRAP_NONE);
 		gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled),
@@ -230,7 +236,6 @@ gui_log_create_bar ()
 	gtk_container_add (GTK_CONTAINER (settings), box);
 	popup_window = gtk_popup_button_get_popup (GTK_POPUP_BUTTON (settings));
 	gtk_container_add (GTK_CONTAINER (popup_window), grid);
-	
 	
 	toolbar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
 	g_object_set (G_OBJECT (toolbar),
