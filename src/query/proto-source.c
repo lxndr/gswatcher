@@ -276,6 +276,10 @@ get_server_info (GsqQuerier *querier, gchar *p)
 			game_id = "as";
 			game_name = "Alien Swarm";
 			break;
+		case 730:
+			game_id = "csgo";
+			game_name = "Counter-Strike: Global Offensive";
+			break;
 		case 17500:
 			game_id = "zp";
 			game_name = "Zombie Panic!";
