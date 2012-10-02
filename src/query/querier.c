@@ -39,7 +39,12 @@
 enum {
 	PROP_0,
 	PROP_ADDRESS,
+	PROP_GPORT,
+	PROP_GPORT_AUTO,
+	PROP_QPORT,
+	PROP_QPORT_AUTO,
 	PROP_PROTOCOL,
+	PROP_PROTOCOL_AUTO,
 	PROP_RESET_ADDRESS,
 	PROP_RESET
 };
@@ -67,22 +72,25 @@ typedef struct _GsqProtocol {
 
 struct _GsqQuerierPrivate {
 	gchar *address;
+	guint16 gport;
+	guint16 qport;
 	GsqProtocol *protocol;
+	gboolean gport_auto : 1;
+	gboolean qport_auto : 1;
+	gboolean protocol_auto : 1;
+	gboolean reset : 1;
+	gboolean reset_address : 1;
+	gboolean update_sinfo : 1;
+	gboolean update_plist : 1;
+	gboolean working : 1;
 	
 	glong ping;
 	GHashTable *extra;
 	
-	gboolean working;
 	GTimer *timer;
 	GCancellable *cancellable;
 	GInetAddress *iaddr;
-	guint16 gport;
-	guint16 qport;
 	gpointer pdata;
-	gboolean reset;
-	gboolean reset_address;
-	gboolean update_sinfo;
-	gboolean update_plist;
 	GArray *fields;
 	GList *players;
 	GList *newplayers;
@@ -98,9 +106,9 @@ static guint signals[LAST_SIGNAL] = { 0 };
 static void gsq_querier_resolve (GsqQuerier *querier);
 static void gsq_querier_query (GsqQuerier *querier);
 static void gsq_querier_players_updated (GsqQuerier *querier);
-static gboolean gsq_socket_recveived (GSocket *socket,
+static gboolean gsq_socket_received (GSocket *socket,
 		GIOCondition condition, gpointer udata);
-
+static GsqProtocol *gsq_find_protocol (const gchar *name);
 
 G_DEFINE_TYPE (GsqQuerier, gsq_querier, G_TYPE_OBJECT);
 
@@ -141,16 +149,19 @@ gsq_querier_clear (GsqQuerier *querier)
 {
 	GsqQuerierPrivate *priv = querier->priv;
 	
-	g_string_truncate (querier->name, 0);
-	g_string_truncate (querier->gameid, 0);
-	g_string_truncate (querier->gamename, 0);
-	g_string_truncate (querier->gamemode, 0);
-	g_string_truncate (querier->map, 0);
-	g_string_truncate (querier->version, 0);
-	querier->numplayers = 0;
-	querier->maxplayers = 0;
-	querier->password = FALSE;
-	g_hash_table_remove_all (priv->extra);
+	if (priv->reset) {
+		g_string_truncate (querier->name, 0);
+		g_string_truncate (querier->gameid, 0);
+		g_string_truncate (querier->gamename, 0);
+		g_string_truncate (querier->gamemode, 0);
+		g_string_truncate (querier->map, 0);
+		g_string_truncate (querier->version, 0);
+		querier->numplayers = 0;
+		querier->maxplayers = 0;
+		querier->password = FALSE;
+		g_hash_table_remove_all (priv->extra);
+	}
+	
 	gsq_querier_free_fields (priv->fields);
 }
 
@@ -167,8 +178,10 @@ gsq_querier_reset (GsqQuerier *querier)
 			g_object_unref (priv->iaddr);
 			priv->iaddr = NULL;
 		}
-		priv->gport = 0;
-		priv->qport = 0;
+		if (priv->gport_auto)
+			priv->gport = 0;
+		if (priv->qport_auto)
+			priv->qport = 0;
 	}
 	
 	if (priv->pdata) {
@@ -176,7 +189,8 @@ gsq_querier_reset (GsqQuerier *querier)
 			priv->protocol->free (querier);
 		priv->pdata = NULL;
 	}
-	priv->protocol = NULL;
+	if (priv->protocol_auto)
+		priv->protocol = NULL;
 	priv->working = FALSE;
 	priv->ping = 0;
 	
@@ -230,6 +244,24 @@ gsq_querier_set_property (GObject *object, guint prop_id, const GValue *value,
 		priv->address = g_strdup (g_value_get_string (value));
 		g_string_assign (querier->name, priv->address);
 		break;
+	case PROP_GPORT:
+		gsq_querier_set_gport (querier, g_value_get_uint (value));
+		break;
+	case PROP_GPORT_AUTO:
+		gsq_querier_set_gport_auto (querier, g_value_get_boolean (value));
+		break;	
+	case PROP_QPORT:
+		gsq_querier_set_qport (querier, g_value_get_uint (value));
+		break;
+	case PROP_QPORT_AUTO:
+		gsq_querier_set_qport_auto (querier, g_value_get_boolean (value));
+		break;	
+	case PROP_PROTOCOL:
+		gsq_querier_set_protocol (querier, g_value_get_string (value));
+		break;
+	case PROP_PROTOCOL_AUTO:
+		gsq_querier_set_protocol_auto (querier, g_value_get_boolean (value));
+		break;
 	case PROP_RESET:
 		priv->reset = g_value_get_boolean (value);
 		break;
@@ -253,8 +285,23 @@ gsq_querier_get_property (GObject *object, guint prop_id, GValue *value,
 	case PROP_ADDRESS:
 		g_value_set_string (value, priv->address);
 		break;
+	case PROP_GPORT:
+		g_value_set_uint (value, gsq_querier_get_gport (querier));
+		break;
+	case PROP_GPORT_AUTO:
+		g_value_set_boolean (value, gsq_querier_get_gport_auto (querier));
+		break;
+	case PROP_QPORT:
+		g_value_set_uint (value, gsq_querier_get_qport (querier));
+		break;
+	case PROP_QPORT_AUTO:
+		g_value_set_boolean (value, gsq_querier_get_qport_auto (querier));
+		break;
 	case PROP_PROTOCOL:
 		g_value_set_string (value, gsq_querier_get_protocol (querier));
+		break;
+	case PROP_PROTOCOL_AUTO:
+		g_value_set_boolean (value, gsq_querier_get_protocol_auto (querier));
 		break;
 	case PROP_RESET:
 		g_value_set_boolean (value, priv->reset);
@@ -281,23 +328,44 @@ gsq_querier_class_init (GsqQuerierClass *klass)
 	
 	g_object_class_install_property (object_class, PROP_ADDRESS,
 			g_param_spec_string ("address", "Address",
-			"Host and port of the server",
-			NULL, G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
+			"The server's address",
+			NULL, G_PARAM_READWRITE));
+	
+	g_object_class_install_property (object_class, PROP_GPORT,
+			g_param_spec_uint ("gport", "Game port",
+			"The host's port the game's client will join",
+			0, G_MAXUINT16, 0, G_PARAM_READWRITE));
+	
+	g_object_class_install_property (object_class, PROP_GPORT_AUTO,
+			g_param_spec_boolean ("gport-auto", "Auto-detect game port",
+			"Auto-detect game port", TRUE, G_PARAM_READWRITE));
+	
+	g_object_class_install_property (object_class, PROP_QPORT,
+			g_param_spec_uint ("qport", "Query port",
+			"The host's port the querier will query",
+			0, G_MAXUINT16, 0, G_PARAM_READWRITE));
+	
+	g_object_class_install_property (object_class, PROP_QPORT_AUTO,
+			g_param_spec_boolean ("qport-auto", "Auto-detect query port",
+			"Auto-detect query port", TRUE, G_PARAM_READWRITE));
 	
 	g_object_class_install_property (object_class, PROP_PROTOCOL,
 			g_param_spec_string ("protocol", "Protocol",
-			"A protocol the querier is using",
-			NULL, G_PARAM_READABLE | G_PARAM_WRITABLE));
+			"A protocol the querier is using", NULL, G_PARAM_READWRITE));
+	
+	g_object_class_install_property (object_class, PROP_PROTOCOL_AUTO,
+			g_param_spec_boolean ("protocol-auto", "Auto-detect protocol",
+			"Auto-detect protocol", TRUE, G_PARAM_READWRITE));
 	
 	g_object_class_install_property (object_class, PROP_RESET_ADDRESS,
 			g_param_spec_boolean ("reset-address", "Reset address",
 			"Resolve address again on querier reset",
-			FALSE, G_PARAM_READABLE | G_PARAM_WRITABLE));
+			FALSE, G_PARAM_READWRITE));
 	
 	g_object_class_install_property (object_class, PROP_RESET,
 			g_param_spec_boolean ("reset", "Reset",
 			"Clear everything when timeout",
-			TRUE, G_PARAM_READABLE | G_PARAM_WRITABLE));
+			TRUE, G_PARAM_READWRITE));
 	
 	signals[SIGNAL_RESOLVE] = g_signal_new ("resolve",
 			G_OBJECT_CLASS_TYPE (klass), G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
@@ -360,6 +428,9 @@ gsq_querier_init (GsqQuerier *querier)
 	querier->gamemode = g_string_sized_new (4);
 	querier->map = g_string_sized_new (16);
 	querier->version = g_string_sized_new (16);
+	priv->gport_auto = TRUE;
+	priv->qport_auto = TRUE;
+	priv->protocol_auto = TRUE;
 	priv->extra = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_free);
 	priv->cancellable = g_cancellable_new ();
 	priv->timer = g_timer_new ();
@@ -369,10 +440,29 @@ gsq_querier_init (GsqQuerier *querier)
 }
 
 
-GsqQuerier*
-gsq_querier_new (const gchar *address)
+GsqQuerier *
+gsq_querier_new (const gchar *address, guint16 gport, guint16 qport,
+		const gchar *protocol)
 {
-	return g_object_new (GSQ_TYPE_QUERIER, "address", address, NULL);
+	return g_object_new (GSQ_TYPE_QUERIER, "address", address,
+			"gport", gport, "gport-auto", gport == 0,
+			"qport", qport, "qport-auto", qport == 0,
+			"protocol", protocol, "protocol-auto", protocol == NULL,
+			NULL);
+}
+
+
+GsqQuerier *
+gsq_querier_new_parse (const gchar *address)
+{
+	g_return_val_if_fail (address != NULL && *address != '\0', NULL);
+	
+	guint16 gport, qport;
+	gchar *host = gsq_parse_address (address, &gport, &qport);
+	if (host == NULL)
+		return NULL;
+	
+	return gsq_querier_new (host, gport, qport, NULL);
 }
 
 
@@ -402,12 +492,59 @@ gsq_querier_get_address (GsqQuerier *querier)
 	return querier->priv->address;
 }
 
+
+void
+gsq_querier_set_protocol (GsqQuerier *querier, const gchar *name)
+{
+	g_return_if_fail (GSQ_IS_QUERIER (querier));
+	
+	GsqQuerierPrivate *priv = querier->priv;
+	GsqProtocol *protocol = NULL;
+	
+	if (name && *name) {
+		protocol = gsq_find_protocol (name);
+		if (!protocol) {
+			g_warning ("Unknown protocol '%s'", name);
+			return;
+		}
+	}
+	
+	if (protocol == priv->protocol)
+		return;
+	
+	if (priv->pdata) {
+		if (priv->protocol->free)
+			priv->protocol->free (querier);
+		priv->pdata = NULL;
+	}
+	priv->protocol = protocol;
+	
+	g_object_notify (G_OBJECT (querier), "protocol");
+}
+
 const gchar *
 gsq_querier_get_protocol (GsqQuerier *querier)
 {
 	g_return_val_if_fail (GSQ_IS_QUERIER (querier), NULL);
 	return querier->priv->protocol ? querier->priv->protocol->name : NULL;
 }
+
+
+void
+gsq_querier_set_protocol_auto (GsqQuerier *querier, gboolean value)
+{
+	g_return_if_fail (GSQ_IS_QUERIER (querier));
+	querier->priv->protocol_auto = value;
+	g_object_notify (G_OBJECT (querier), "protocol-auto");
+}
+
+gboolean
+gsq_querier_get_protocol_auto (GsqQuerier *querier)
+{
+	g_return_val_if_fail (GSQ_IS_QUERIER (querier), FALSE);
+	return querier->priv->protocol_auto;
+}
+
 
 GInetAddress *
 gsq_querier_get_iaddr (GsqQuerier *querier)
@@ -439,6 +576,15 @@ gsq_querier_get_pdata (GsqQuerier *querier)
 	return querier->priv->pdata;
 }
 
+
+void
+gsq_querier_set_gport (GsqQuerier *querier, guint16 port)
+{
+	g_return_if_fail (GSQ_IS_QUERIER (querier));
+	querier->priv->gport = port;
+	g_object_notify (G_OBJECT (querier), "gport");
+}
+
 guint16
 gsq_querier_get_gport (GsqQuerier *querier)
 {
@@ -446,12 +592,69 @@ gsq_querier_get_gport (GsqQuerier *querier)
 	return querier->priv->gport;
 }
 
+
+void
+gsq_querier_set_gport_auto (GsqQuerier *querier, gboolean value)
+{
+	g_return_if_fail (GSQ_IS_QUERIER (querier));
+	querier->priv->gport_auto = value;
+	g_object_notify (G_OBJECT (querier), "gport-auto");
+}
+
+gboolean
+gsq_querier_get_gport_auto (GsqQuerier *querier)
+{
+	g_return_val_if_fail (GSQ_IS_QUERIER (querier), FALSE);
+	return querier->priv->gport_auto;
+}
+
+
+/**
+ * gsq_querier_set_qport:
+ * @querier: a #GsqQuerier
+ * @port: the new port
+ *
+ * Sets the query port of the querier.
+ **/
+void
+gsq_querier_set_qport (GsqQuerier *querier, guint16 port)
+{
+	g_return_if_fail (GSQ_IS_QUERIER (querier));
+	querier->priv->qport = port;
+	g_object_notify (G_OBJECT (querier), "qport");
+}
+
+/**
+ * gsq_querier_get_qport:
+ * @querier: a #GsqQuerier
+ *
+ * Gets the query port of the querier.
+ *
+ * Return value: The query port of the querier.
+ **/
 guint16
 gsq_querier_get_qport (GsqQuerier *querier)
 {
 	g_return_val_if_fail (GSQ_IS_QUERIER (querier), 0);
 	return querier->priv->qport;
 }
+
+
+void
+gsq_querier_set_qport_auto (GsqQuerier *querier, gboolean value)
+{
+	g_return_if_fail (GSQ_IS_QUERIER (querier));
+	querier->priv->qport_auto = value;
+	g_object_notify (G_OBJECT (querier), "qport-auto");
+}
+
+gboolean
+gsq_querier_get_qport_auto (GsqQuerier *querier)
+{
+	g_return_val_if_fail (GSQ_IS_QUERIER (querier), FALSE);
+	return querier->priv->qport_auto;
+}
+
 
 GArray *
 gsq_querier_get_fields (GsqQuerier *querier)
@@ -483,19 +686,24 @@ gsq_querier_get_extra (GsqQuerier *querier, const gchar *key)
 static void
 gsq_querier_resolved (GResolver *resolver, GAsyncResult *result, GsqQuerier *querier)
 {
+	GsqQuerierPrivate *priv = querier->priv;
+	
 	GList *list = g_resolver_lookup_by_name_finish (resolver, result, NULL);
-	querier->priv->working = FALSE;
+	priv->working = FALSE;
 	if (!list) {
 		g_signal_emit (querier, signals[SIGNAL_ERROR], 0, "Host is unknown");
 		return;
 	}
 	
-	querier->priv->iaddr = g_object_ref (list->data);
+	priv->iaddr = g_object_ref (list->data);
 	g_signal_emit (querier, signals[SIGNAL_RESOLVE], 0);
 	g_resolver_free_addresses (list);
 	
-	if (debug_flags & GSQ_DEBUG_EVENT)
-		g_printf ("** resolved %s\n", querier->priv->address);
+	if (debug_flags & GSQ_DEBUG_EVENT) {
+		gchar *tmp = g_inet_address_to_string (priv->iaddr);
+		g_printf ("** resolved %s (%s)\n", priv->address, tmp);
+		g_free (tmp);
+	}
 	
 	gsq_querier_update (querier);
 }
@@ -505,15 +713,16 @@ gsq_querier_resolve (GsqQuerier *querier)
 {
 	GsqQuerierPrivate *priv = querier->priv;
 	
+	if (priv->address == NULL || *priv->address == '\0')
+		return;
+	
 	if (debug_flags & GSQ_DEBUG_EVENT)
 		g_printf ("** resolving %s\n", priv->address);
 	
-	gchar *host = gsq_parse_address (priv->address, &priv->gport, &priv->qport);
-	
 	GResolver *resolver = g_resolver_get_default ();
-	g_resolver_lookup_by_name_async (resolver, host, querier->priv->cancellable,
+	g_resolver_lookup_by_name_async (
+			resolver, priv->address, querier->priv->cancellable,
 			(GAsyncReadyCallback) gsq_querier_resolved, querier);
-	g_free (host);
 	g_object_unref (resolver);
 }
 
@@ -524,8 +733,9 @@ gsq_querier_send (GsqQuerier *querier, guint16 port, const gchar *data, gsize le
 	GSocketAddress *addr = g_inet_socket_address_new (querier->priv->iaddr, port);
 	
 	if (debug_flags & GSQ_DEBUG_OUTGOING_DATA) {
-		g_printf ("** '%s' sent to port %d %"  G_GSIZE_FORMAT " bytes:\n",
-				gsq_querier_get_address (querier), port, length);
+		g_printf ("** '%s:%d:%d' sent to port %d %"  G_GSIZE_FORMAT " bytes:\n",
+				gsq_querier_get_address (querier), gsq_querier_get_gport (querier),
+				gsq_querier_get_qport (querier), port, length);
 		gsq_print_dump (data, length);
 	}
 	
@@ -544,17 +754,19 @@ gsq_querier_query (GsqQuerier *querier)
 	GsqQuerierPrivate *priv = querier->priv;
 	
 	if (debug_flags & GSQ_DEBUG_EVENT)
-		g_printf ("querying %s\n", priv->address);
+		g_printf ("** querying %s\n", priv->address);
 	
 	if (priv->protocol) {
 		priv->protocol->query (querier);
-	} else {
+	} else if (priv->protocol_auto) {
 		GList *proto_iter = protocols;
 		while (proto_iter) {
 			GsqProtocol *proto = proto_iter->data;
 			proto->query (querier);
 			proto_iter = g_list_next (proto_iter);
 		}
+	} else {
+		g_warning ("Protocol auto-detection is disabled while no protocol is specified");
 	}
 }
 
@@ -563,12 +775,14 @@ gsq_querier_update (GsqQuerier *querier)
 {
 	g_return_if_fail (GSQ_IS_QUERIER (querier));
 	
-	if (querier->priv->working)
+	GsqQuerierPrivate *priv = querier->priv;
+	
+	if (priv->working)
 		return;
 	
-	querier->priv->working = TRUE;
-	if (querier->priv->iaddr) {
-		g_timer_reset (querier->priv->timer);
+	priv->working = TRUE;
+	if (priv->iaddr) {
+		g_timer_reset (priv->timer);
 		gsq_querier_query (querier);
 	} else {
 		gsq_querier_resolve (querier);
@@ -693,9 +907,8 @@ gsq_querier_detect (GsqQuerier *querier, guint16 qport,
 		GsqProtocol *protocol = proto_iter->data;
 		if (protocol->process (querier, qport, data, size)) {
 			priv->protocol = protocol;
-			priv->qport = qport;
 			if (debug_flags & GSQ_DEBUG_EVENT)
-				g_printf ("detected '%s' as '%s'\n", priv->address, protocol->name);
+				g_printf ("** detected '%s' as '%s'\n", priv->address, protocol->name);
 			g_signal_emit (querier, signals[SIGNAL_DETECT], 0);
 			return protocol;
 		} else {
@@ -717,7 +930,7 @@ gsq_querier_detect (GsqQuerier *querier, guint16 qport,
 
 
 static gboolean
-gsq_socket_recveived (GSocket *socket, GIOCondition condition, gpointer udata)
+gsq_socket_received (GSocket *socket, GIOCondition condition, gpointer udata)
 {
 	gssize length;
 	gchar data[4096];
@@ -756,13 +969,14 @@ gsq_socket_recveived (GSocket *socket, GIOCondition condition, gpointer udata)
 			if (priv->protocol) {
 				/* server may send odd data, ignore it */
 				priv->protocol->process (querier, port, data, length);
-			} else {
+			} else if (priv->protocol_auto) {
 				/* this function sets priv->protocol,
 					that's how we know if it succeeds */
 				gsq_querier_detect (querier, port, data, length);
 			}
 			
 			if (priv->protocol) {
+				priv->qport = port;
 				if (priv->update_sinfo) {
 					gdouble time = g_timer_elapsed (querier->priv->timer, NULL);
 					querier->priv->ping = (glong) floor (time * 1000);
@@ -828,7 +1042,7 @@ gsq_init (guint16 default_port)
 		}
 		
 		source = g_socket_create_source (ip4sock, G_IO_IN, NULL);
-		g_source_set_callback (source, (GSourceFunc) gsq_socket_recveived,
+		g_source_set_callback (source, (GSourceFunc) gsq_socket_received,
 				NULL, NULL);
 		g_source_attach (source, NULL);
 		g_source_unref (source);
@@ -849,7 +1063,7 @@ gsq_init (guint16 default_port)
 		}
 		
 		source = g_socket_create_source (ip6sock, G_IO_IN, NULL);
-		g_source_set_callback (source, (GSourceFunc) gsq_socket_recveived,
+		g_source_set_callback (source, (GSourceFunc) gsq_socket_received,
 				NULL, NULL);
 		g_source_attach (source, NULL);
 		g_source_unref (source);
@@ -891,6 +1105,7 @@ gsq_fini ()
 	g_object_unref (ip4sock);
 	g_socket_close (ip6sock, NULL);
 	g_object_unref (ip6sock);
+	/* TODO: clear everything after finalizing a last querier */
 }
 
 guint16
@@ -924,6 +1139,8 @@ gsq_get_debug_flags ()
 static GsqProtocol *
 gsq_find_protocol (const gchar *name)
 {
+	g_return_val_if_fail (name != NULL, NULL);
+	
 	GsqProtocol *proto;
 	GList *iter = protocols;
 	
@@ -941,6 +1158,8 @@ void
 gsq_register_protocol (const gchar *name, GsqQueryFunc query_fn,
 		GsqProcessFunc process_fn, GsqFreeFunc free_fn)
 {
+	g_return_if_fail (name != NULL);
+	
 	GsqProtocol *proto = gsq_find_protocol (name);
 	if (proto) {
 		protocols = g_list_remove (protocols, proto);
@@ -959,6 +1178,8 @@ gsq_register_protocol (const gchar *name, GsqQueryFunc query_fn,
 void
 gsq_unregister_protocol (const gchar *name)
 {
+	g_return_if_fail (name != NULL);
+	
 	GsqProtocol *proto = gsq_find_protocol (name);
 	if (proto) {
 		protocols = g_list_remove (protocols, proto);
@@ -967,4 +1188,6 @@ gsq_unregister_protocol (const gchar *name)
 	} else {
 		g_warning ("Protocol `%s' not found", name);
 	}
+	
+	/* FIXME: what to do with protocols in use? */
 }

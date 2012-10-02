@@ -26,6 +26,7 @@
 #define __GSQUERY__UTILS_H__
 
 #include <stdlib.h>
+#include <string.h>
 #include <glib.h>
 
 G_BEGIN_DECLS
