@@ -100,6 +100,7 @@ gs_client_finalize (GObject *object)
 {
 	GsClient *client = GS_CLIENT (object);
 	
+	g_free (client->address);
 	if (client->version)
 		g_free (client->version);
 	g_object_unref (client->querier);
@@ -164,7 +165,10 @@ gs_client_new (const gchar *address)
 	g_return_val_if_fail (address != NULL, NULL);
 	GsClient *client = g_object_new (GS_TYPE_CLIENT, NULL);
 	
+	client->address = g_strdup (address);
+	
 	client->querier = GSQ_QUERIER (gsq_watcher_new (address));
+	g_string_safe_assign (client->querier->name, address);
 	g_signal_connect (client->querier, "resolve",
 			G_CALLBACK (gs_client_querier_resolved), client);
 	g_signal_connect (client->querier, "info-update",
@@ -181,6 +185,13 @@ gs_client_new (const gchar *address)
 	gui_chat_init (client);
 	
 	return client;
+}
+
+
+const gchar *
+gs_client_get_address (GsClient *client)
+{
+	return client->address;
 }
 
 
@@ -318,9 +329,8 @@ gs_client_querier_gameid_changed (GsqQuerier *querier, GsClient *client)
 	else
 		type = GSQ_TYPE_CONSOLE_SOURCE;
 	
-	guint16 gport, qport;
-	gchar *host = gsq_parse_address (gsq_querier_get_address (client->querier),
-			&gport, &qport);
+	const gchar *host = gsq_querier_get_address (client->querier);
+	guint16 gport = gsq_querier_get_gport (client->querier);
 	
 	if (strcmp (gameid, "ss3") == 0) {		/* Serious Sam 3: BFE */
 		client->console_settings = GUI_CONSOLE_PORT | GUI_CONSOLE_PASS;
@@ -340,7 +350,6 @@ gs_client_querier_gameid_changed (GsqQuerier *querier, GsClient *client)
 			"port", client->console_port,
 			"password", client->console_password,
 			NULL);
-	g_free (host);
 	
 	g_signal_connect (client->console, "connected",
 			G_CALLBACK (gs_client_console_connected), client);
@@ -554,7 +563,7 @@ command_eval_callback (const GMatchInfo *minfo, GString *result, GsClient *clien
 {
 	gchar *match = g_match_info_fetch (minfo, 0);
 	if (strcmp (match, "$(address)") == 0)
-		g_string_append (result, gsq_querier_get_address (client->querier));
+		g_string_append (result, client->address);
 	else
 		g_string_append_printf (result, "$(%s)", match);
 	g_free (match);

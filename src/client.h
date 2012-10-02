@@ -58,6 +58,8 @@ typedef struct _GsClientClass GsClientClass;
 struct _GsClient {
 	GObject parent_object;
 	
+	char *address;
+	
 	/* querier */
 	GsqQuerier *querier;
 	gboolean favorite;
@@ -93,6 +95,8 @@ struct _GsClientClass {
 
 GType gs_client_get_type (void) G_GNUC_CONST;
 GsClient* gs_client_new (const gchar *address);
+
+const gchar *gs_client_get_address (GsClient *client);
 
 void gs_client_set_favorite (GsClient *client, gboolean favorite);
 gboolean gs_client_get_favorite (GsClient *client);

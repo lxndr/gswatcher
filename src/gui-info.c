@@ -55,7 +55,7 @@ gui_info_setup (GsClient *cl)
 		/* enable and set up the information */
 		gtk_widget_set_sensitive (grid, TRUE);
 		
-		gtk_label_set_text (GTK_LABEL (ctl_address), gsq_querier_get_address (cl->querier));
+		gtk_label_set_text (GTK_LABEL (ctl_address), gs_client_get_address (cl));
 		gtk_label_set_text (GTK_LABEL (ctl_location), cl->country);
 		gui_info_update (cl);
 		

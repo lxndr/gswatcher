@@ -22,6 +22,7 @@
 
 
 
+#include "utils.h"
 #include "watcher.h"
 
 
@@ -89,10 +90,20 @@ gsq_watcher_init (GsqWatcher *watcher)
 }
 
 
-GsqWatcher*
+GsqWatcher *
 gsq_watcher_new (const gchar *address)
 {
-	return g_object_new (GSQ_TYPE_WATCHER, "address", address, NULL);
+	g_return_val_if_fail (address != NULL && *address != '\0', NULL);
+	
+	guint16 gport, qport;
+	gchar *host = gsq_parse_address (address, &gport, &qport);
+	if (host == NULL)
+		return NULL;
+	
+	return g_object_new (GSQ_TYPE_WATCHER, "address", host,
+			"gport", gport, "gport-auto", gport == 0,
+			"qport", qport, "qport-auto", qport == 0,
+			NULL);
 }
 
 
