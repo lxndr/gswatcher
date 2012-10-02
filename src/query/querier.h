@@ -87,23 +87,39 @@ struct _GsqPlayer {
 };
 
 
-GType gsq_querier_get_type (void) G_GNUC_CONST;
-GsqQuerier* gsq_querier_new (const gchar *address);
+GType			gsq_querier_get_type (void) G_GNUC_CONST;
+GsqQuerier *	gsq_querier_new (const gchar *address, guint16 gport,
+									guint16 qport, const gchar *protocol);
+GsqQuerier *	gsq_querier_new_parse (const gchar *address);
 
-GInetAddress *gsq_querier_get_iaddr (GsqQuerier *querier);
-void gsq_querier_update (GsqQuerier *querier);
+void			gsq_querier_set_protocol (GsqQuerier *querier, const gchar *protocol);
+const gchar *	gsq_querier_get_protocol (GsqQuerier *querier);
 
-const gchar *gsq_querier_get_address (GsqQuerier *querier);
-guint16 gsq_querier_get_gport (GsqQuerier *querier);
-guint16 gsq_querier_get_qport (GsqQuerier *querier);
-const gchar *gsq_querier_get_protocol (GsqQuerier *querier);
-gchar *gsq_querier_get_extra (GsqQuerier *querier, const gchar *key);
-glong gsq_querier_get_ping (GsqQuerier *querier);
+void			gsq_querier_set_protocol_auto (GsqQuerier *querier, gboolean value);
+gboolean		gsq_querier_get_protocol_auto (GsqQuerier *querier);
 
-GArray *gsq_querier_get_fields (GsqQuerier *querier);
-GList *gsq_querier_get_players (GsqQuerier *querier);
-GsqPlayer *gsq_querier_find_player (GsqQuerier *querier, const gchar *name);
+void			gsq_querier_set_gport (GsqQuerier *querier, guint16 port);
+guint16			gsq_querier_get_gport (GsqQuerier *querier);
 
+void			gsq_querier_set_gport_auto (GsqQuerier *querier, gboolean value);
+gboolean		gsq_querier_get_gport_auto (GsqQuerier *querier);
+
+void			gsq_querier_set_qport (GsqQuerier *querier, guint16 port);
+guint16			gsq_querier_get_qport (GsqQuerier *querier);
+
+void			gsq_querier_set_qport_auto (GsqQuerier *querier, gboolean value);
+gboolean		gsq_querier_get_qport_auto (GsqQuerier *querier);
+
+const gchar *	gsq_querier_get_address (GsqQuerier *querier);
+GInetAddress *	gsq_querier_get_iaddr (GsqQuerier *querier);
+gchar *			gsq_querier_get_extra (GsqQuerier *querier, const gchar *key);
+glong			gsq_querier_get_ping (GsqQuerier *querier);
+
+GArray *		gsq_querier_get_fields (GsqQuerier *querier);
+GList *			gsq_querier_get_players (GsqQuerier *querier);
+GsqPlayer *		gsq_querier_find_player (GsqQuerier *querier, const gchar *name);
+
+void			gsq_querier_update (GsqQuerier *querier);
 
 /* Base functions */
 

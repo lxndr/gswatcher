@@ -512,7 +512,7 @@ save_server_list_func (GsClient *client, GJsonNode *root)
 	g_json_object_set_string (node, "name",
 			client->querier->name->str);
 	g_json_object_set_string (node, "address",
-			gsq_querier_get_address (client->querier));
+			gs_client_get_address (client));
 	g_json_object_set_boolean (node, "favorite",
 			client->favorite);
 	if (client->console_settings & GUI_CONSOLE_PASS)
@@ -609,7 +609,7 @@ gs_application_get_pause (GsApplication *app)
 
 
 static void
-player_online (GsqQuerier *querier, GsqPlayer *player, GsApplication *app)
+player_online (GsqQuerier *querier, GsqPlayer *player, GsClient *client)
 {
 	GsBuddy *buddy = gs_application_find_buddy (app, player->name);
 	
@@ -619,14 +619,14 @@ player_online (GsqQuerier *querier, GsqPlayer *player, GsApplication *app)
 		buddy->lastseen = g_date_time_new_now_local ();
 		if (buddy->lastaddr)
 			g_free (buddy->lastaddr);
-		buddy->lastaddr = g_strdup (gsq_querier_get_address (querier));
+		buddy->lastaddr = g_strdup (gs_client_get_address (client));
 		gui_blist_update (buddy);
 		save_buddy_list (app);
 		
 		if (buddy->notify) {
 			gchar *title = g_strdup_printf (_("Player %s has connected"), buddy->name);
 			gchar *text = g_strdup_printf (_("Address: %s\nServer: %s\nPlayers: %d / %d"),
-					gsq_querier_get_address (querier),
+					gs_client_get_address (client),
 					querier->name->str,
 					querier->numplayers,
 					querier->maxplayers);
@@ -638,7 +638,7 @@ player_online (GsqQuerier *querier, GsqPlayer *player, GsApplication *app)
 }
 
 static void
-player_offline (GsqQuerier *querier, GsqPlayer *player, GsApplication *app)
+player_offline (GsqQuerier *querier, GsqPlayer *player, GsClient *client)
 {
 	GsBuddy *buddy = gs_application_find_buddy (app, player->name);
 	if (buddy) {
@@ -655,7 +655,7 @@ player_offline (GsqQuerier *querier, GsqPlayer *player, GsApplication *app)
 		if (buddy && buddy->notify && querier->maxplayers - querier->numplayers == 1) {
 			gchar *title = g_strdup_printf (_("Server with %s has free slot"), buddy->name);
 			gchar *text = g_strdup_printf (_("Address: %s\nServer: %s\nPlayers: %d / %d"),
-					gsq_querier_get_address (querier),
+					gs_client_get_address (client),
 					querier->name->str,
 					querier->numplayers,
 					querier->maxplayers);
@@ -679,9 +679,9 @@ add_server (GsApplication *app, const gchar *address)
 	
 	GsClient *client = gs_client_new (address);
 	g_signal_connect (client->querier, "player-online",
-			G_CALLBACK (player_online), app);
+			G_CALLBACK (player_online), client);
 	g_signal_connect (client->querier, "player-offline",
-			G_CALLBACK (player_offline), app);
+			G_CALLBACK (player_offline), client);
 	app->server_list = g_list_append (app->server_list, client);
 	gui_slist_add (client);
 	update_timer (app);

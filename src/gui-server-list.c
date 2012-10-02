@@ -191,7 +191,7 @@ gui_slist_selection_changed (GtkTreeSelection *selection, gpointer udata)
 	if (gtk_tree_selection_get_selected (selection, &model, &iter))
 		gtk_tree_model_get (model, &iter, COLUMN_SERVER, &selected, -1);
 	
-	const gchar *addr = selected ? gsq_querier_get_address (selected->querier) : "";
+	const gchar *addr = selected ? gs_client_get_address (selected) : "";
 	gtk_entry_set_text (GTK_ENTRY (entry), addr);
 	gui_info_setup (selected);
 	gui_plist_setup (selected);
@@ -481,7 +481,7 @@ gui_slist_update (GsClient *cl)
 	gtk_list_store_set (liststore, &cl->sliter,
 			COLUMN_TYPE, cl->favorite ? ROW_FAVORITE : ROW_OTHER,
 			COLUMN_NAME, *cl->querier->name->str ?
-					cl->querier->name->str : gsq_querier_get_address (cl->querier),
+					cl->querier->name->str : gs_client_get_address (cl),
 			COLUMN_GAME, *gamename ? gamename : _("unknown"),
 			COLUMN_MAP, *mapname ? mapname : _("unknown"),
 			COLUMN_PLAYERS, players,

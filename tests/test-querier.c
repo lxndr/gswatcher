@@ -64,7 +64,7 @@ sigint ()
 static GsqQuerier *
 add_server (GsqUpdater *updater, const gchar *address)
 {
-	GsqQuerier *querier = gsq_querier_new (address);
+	GsqQuerier *querier = gsq_querier_new_parse (address);
 	g_signal_connect (querier, "resolve", G_CALLBACK (resolved), NULL);
 	g_signal_connect (querier, "detect", G_CALLBACK (detected), NULL);
 	g_signal_connect (querier, "info-update", G_CALLBACK (info_updated), NULL);
