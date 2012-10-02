@@ -83,7 +83,7 @@ gui_blist_update_real (GsBuddy *buddy, GtkTreeIter *iter)
 			GsClient *client = isrv->data;
 			g_string_append_printf (tmp, "%s\n<small>\t%s</small>",
 					client->querier->name->str,
-					gsq_querier_get_address (client->querier));
+					gs_client_get_address (client));
 			if (isrv->next)
 				g_string_append_c (tmp, '\n');
 			isrv = isrv->next;
