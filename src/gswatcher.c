@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <glib/gi18n-lib.h>
 #include <glib/gprintf.h>
+#include "query/utils.h"
 #include "json.h"
 #include "gui-window.h"
 #include "gswatcher.h"
@@ -744,8 +745,7 @@ gs_application_remove_server_ask (GsApplication *app, GsClient *client)
 	GtkWidget *dialog = gtk_message_dialog_new (GTK_WINDOW (window),
 			GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO,
 			_("Are you sure you want to remove \"%s\" ( %s) from the list?"),
-			client->querier->name->str,
-			gsq_querier_get_address (client->querier));
+			client->querier->name->str, gs_client_get_address (client));
 	if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_YES) {
 		gui_slist_remove (client);
 		gs_application_remove_server (app, client);
@@ -761,17 +761,49 @@ gs_application_find_server (GsApplication *app, const gchar *address)
 	g_return_val_if_fail (GS_IS_APPLICATION (app), NULL);
 	g_return_val_if_fail (address != NULL, NULL);
 	
-	GList *iter = app->server_list;
-	GsClient *client;
+	GsClient *found = NULL;
+	guint16 gport, qport;
+	gchar *host = gsq_parse_address (address, &gport, &qport);
+	if (!host)
+		return NULL;
 	
-	while (iter) {
-		client = iter->data;
-		if (strcmp (gsq_querier_get_address (client->querier), address) == 0)
-			return client;
-		iter = iter->next;
+	GList *iter;
+	for (iter = app->server_list; iter; iter = iter->next) {
+		GsClient *client = iter->data;
+		
+		/* compare host names */
+		if (strcmp (host, gsq_querier_get_address (client->querier)) != 0) {
+			GInetAddress *iaddr = gsq_querier_get_iaddr (client->querier);
+			if (!iaddr)
+				continue;
+			
+			gchar *ip = g_inet_address_to_string (iaddr);
+			/* compare ip addresses */
+			if (strcmp (host, ip) != 0) {
+				g_free (ip);
+				continue;
+			}
+			g_free (ip);
+		}
+		
+		/* compare game ports */
+		if (gport > 0) {
+			if (gsq_querier_get_gport (client->querier) == gport) {
+				found = client;
+				break;
+			}
+		} else {
+			if (gsq_querier_get_gport_auto (client->querier)) {
+				found = client;
+				break;
+			}
+		}
+		
+		/* TODO: we probably need to compare query ports too */
 	}
 	
-	return NULL;
+	g_free (host);
+	return found;
 }
 
 
