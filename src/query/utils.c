@@ -79,6 +79,7 @@ gsq_print_dump (const gchar *data, gsize length)
 gchar *
 gsq_parse_address (const gchar *addr, guint16 *port, guint16 *port2)
 {
+	/* FIXME: host::qport fails */
 	g_return_val_if_fail (addr != NULL, NULL);
 	
 	gchar *p = (gchar *) addr, *host = NULL, *f;
@@ -109,7 +110,7 @@ gsq_parse_address (const gchar *addr, guint16 *port, guint16 *port2)
 				p = f + 1;
 			}
 		} else {		// anything with no port(s)
-			return g_strdup (addr);
+			host = g_strdup (addr);
 		}
 	}
 	
