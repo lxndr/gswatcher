@@ -35,18 +35,8 @@
 #include "utils.h"
 
 
-typedef struct _Packet {
-	gchar *data;
-	gsize length;
-} Packet;
-
 typedef struct _Private {
-	guint8 qid;
-	GArray *packets;
-	gint8 number;
 	GHashTable *sinfo;
-	GHashTable *plist;
-	gchar *teams[2];
 } Private;
 
 
@@ -78,8 +68,8 @@ gsq_gamespy2_query (GsqQuerier *querier)
 void
 gsq_gamespy2_free (GsqQuerier *querier)
 {
-	//gint i;
-	//Private *priv = gsq_querier_get_pdata (querier);
+//	Private *priv = gsq_querier_get_pdata (querier);
+//	g_hash_table_unref (priv->sinfo);
 }
 
 
@@ -98,6 +88,57 @@ parse_sinfo (GHashTable *sinfo, const gchar *data, gssize size)
 }
 
 
+static gboolean
+detect_game (GsqQuerier *querier, GHashTable *sinfo)
+{
+	guint16 port;
+	gint hostport = gsq_str2int (g_hash_table_lookup (sinfo, "hostport"));
+	gchar *gameid = gsq_lookup_value (sinfo, "gamename", "game_id", NULL);
+	
+	if (strcmp (gameid, "armygame") == 0) {
+		port = 1716;
+		g_string_assign (querier->gameid, "aa");
+		g_string_assign (querier->gamename, "America's Army");
+		gsq_querier_add_field (querier, N_("Leader"), G_TYPE_INT);
+		gsq_querier_add_field (querier, N_("Goal"), G_TYPE_INT);
+		gsq_querier_add_field (querier, N_("Honor"), G_TYPE_INT);
+		gsq_querier_add_field (querier, N_("Score"), G_TYPE_INT);
+		gsq_querier_add_field (querier, N_("Ping"), G_TYPE_INT);
+	} else if (strcmp (gameid, "bfvietnam") == 0) {
+		port = 15567;
+		g_string_assign (querier->gameid, "bfv");
+		g_string_assign (querier->gamename, "Battlefield: Vietnam");
+		gsq_querier_add_field (querier, N_("Kills"), G_TYPE_INT);
+		gsq_querier_add_field (querier, N_("Deaths"), G_TYPE_INT);
+		gsq_querier_add_field (querier, N_("Score"), G_TYPE_INT);
+		gsq_querier_add_field (querier, N_("Ping"), G_TYPE_INT);
+		gsq_querier_add_field (querier, N_("Team"), G_TYPE_STRING);
+	} else if (strcmp (gameid, "arma2oapc") == 0) {
+		port = 2302;
+		g_string_assign (querier->gameid, "arma2");
+		g_string_assign (querier->gamename, "ArmA 2");
+		gsq_querier_add_field (querier, N_("Score"), G_TYPE_INT);
+		gsq_querier_add_field (querier, N_("Seaths"), G_TYPE_INT);
+		gsq_querier_add_field (querier, N_("Team"), G_TYPE_STRING);
+	} else {
+		port = hostport;
+		g_string_assign (querier->gameid, gameid);
+		g_string_assign (querier->gamename, gameid);
+	}
+	
+	if (hostport > 0) {
+		guint16 gport = gsq_querier_get_gport (querier);
+		if (gport > 0)
+			port = gport;
+		if (port != hostport)
+			return FALSE;
+		gsq_querier_set_gport (querier, gport);
+	}
+	
+	return TRUE;
+}
+
+
 gboolean
 gsq_gamespy2_process (GsqQuerier *querier, guint16 qport,
 		const gchar *data, gssize size)
@@ -113,6 +154,13 @@ gsq_gamespy2_process (GsqQuerier *querier, guint16 qport,
 			return FALSE;
 		}
 		
+		if (!gsq_querier_is_detected (querier)) {
+			if (!detect_game (querier, sinfo)) {
+				g_hash_table_unref (sinfo);
+				return FALSE;
+			}
+		}
+		
 		g_string_safe_assign (querier->name, g_hash_table_lookup (sinfo, "hostname"));
 		g_string_safe_assign (querier->map, g_hash_table_lookup (sinfo, "mapname"));
 		g_string_safe_assign (querier->version, g_hash_table_lookup (sinfo, "gamever"));
@@ -120,41 +168,10 @@ gsq_gamespy2_process (GsqQuerier *querier, guint16 qport,
 		querier->maxplayers = gsq_str2int (g_hash_table_lookup (sinfo, "maxplayers"));
 		querier->password = gsq_str2bool (g_hash_table_lookup (sinfo, "password"));
 		
-		guint16 port;
-		gint hostport = gsq_str2int (g_hash_table_lookup (sinfo, "hostport"));
-		gchar *gameid = gsq_lookup_value (sinfo, "gamename", "game_id", NULL);
-		if (strcmp (gameid, "armygame") == 0) {
-			g_string_assign (querier->gameid, "aa");
-			g_string_assign (querier->gamename, "America's Army");
-			port = 1716;
-		} else if (strcmp (gameid, "bfvietnam") == 0) {
-			g_string_assign (querier->gameid, "bfv");
-			g_string_assign (querier->gamename, "Battlefield: Vietnam");
-			port = 15567;
-		} else if (strcmp (gameid, "arma2oapc") == 0) {
-			g_string_assign (querier->gameid, "arma2");
-			g_string_assign (querier->gamename, "ArmA 2");
-			port = 2302;
-		} else {
-			g_string_assign (querier->gameid, gameid);
-			g_string_assign (querier->gamename, gameid);
-			port = hostport;
-		}
-		
-		if (hostport > 0) {
-			guint16 gport = gsq_querier_get_gport (querier);
-			if (gport > 0)
-				port = gport;
-			if (port != hostport) {
-				g_hash_table_unref (sinfo);
-				return FALSE;
-			}
-			gsq_querier_set_gport (querier, gport);
-		}
-		
 		g_hash_table_unref (sinfo);
 		gsq_querier_emit_info_update (querier);
 		return TRUE;
+		
 	} else if (data[4] == 'p') {
 		return TRUE;
 	}
