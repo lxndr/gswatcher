@@ -84,6 +84,7 @@ struct _GsqQuerierPrivate {
 	gboolean update_sinfo : 1;
 	gboolean update_plist : 1;
 	gboolean working : 1;
+	gboolean detected : 1;
 	
 	glong ping;
 	GHashTable *extra;
@@ -194,6 +195,7 @@ gsq_querier_reset (GsqQuerier *querier)
 		priv->protocol = NULL;
 	priv->working = FALSE;
 	priv->ping = 0;
+	priv->detected = FALSE;
 	
 	priv->newplayers = NULL;
 	gsq_querier_players_updated (querier);
@@ -560,6 +562,14 @@ gsq_querier_get_ping (GsqQuerier *querier)
 {
 	g_return_val_if_fail (GSQ_IS_QUERIER (querier), 0);
 	return querier->priv->ping;
+}
+
+
+gboolean
+gsq_querier_is_detected (GsqQuerier *querier)
+{
+	g_return_val_if_fail (GSQ_IS_QUERIER (querier), FALSE);
+	return querier->priv->detected;
 }
 
 
@@ -978,6 +988,7 @@ gsq_socket_received (GSocket *socket, GIOCondition condition, gpointer udata)
 			
 			if (priv->protocol) {
 				priv->qport = port;
+				priv->detected = TRUE;
 				if (priv->update_sinfo) {
 					gdouble time = g_timer_elapsed (querier->priv->timer, NULL);
 					querier->priv->ping = (glong) floor (time * 1000);

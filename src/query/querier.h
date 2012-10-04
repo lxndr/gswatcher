@@ -114,6 +114,7 @@ const gchar *	gsq_querier_get_address (GsqQuerier *querier);
 GInetAddress *	gsq_querier_get_iaddr (GsqQuerier *querier);
 gchar *			gsq_querier_get_extra (GsqQuerier *querier, const gchar *key);
 glong			gsq_querier_get_ping (GsqQuerier *querier);
+gboolean		gsq_querier_is_detected (GsqQuerier *querier);
 
 GArray *		gsq_querier_get_fields (GsqQuerier *querier);
 GList *			gsq_querier_get_players (GsqQuerier *querier);
