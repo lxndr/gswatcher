@@ -25,6 +25,7 @@ add_executable (gswatcher
 		query/querier.c
 		query/watcher.c
 		query/proto-gamespy.c
+		query/proto-gamespy2.c
 		query/proto-gamespy3.c
 		query/proto-quake.c
 		query/proto-source.c
