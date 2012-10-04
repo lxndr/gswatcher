@@ -28,6 +28,7 @@
 #include <glib/gprintf.h>
 #include <gobject/gvaluecollector.h>
 #include "proto-gamespy.h"
+#include "proto-gamespy2.h"
 #include "proto-gamespy3.h"
 #include "proto-quake.h"
 #include "proto-source.h"
@@ -1088,6 +1089,10 @@ gsq_init (guint16 default_port)
 			gsq_gamespy_query,
 			gsq_gamespy_process,
 			gsq_gamespy_free);
+	gsq_register_protocol ("gamespy2",
+			gsq_gamespy2_query,
+			gsq_gamespy2_process,
+			gsq_gamespy2_free);
 	gsq_register_protocol ("gamespy3",
 			gsq_gamespy3_query,
 			gsq_gamespy3_process,
