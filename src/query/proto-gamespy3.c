@@ -55,7 +55,7 @@ typedef struct _Private {
 } Private;
 
 
-const guint16 default_ports[] = {6500, 25565, 29900, 64000, 64100};
+static const guint16 default_ports[] = {6500, 25565, 29900, 64000, 64100};
 
 
 
