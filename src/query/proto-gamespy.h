@@ -1,5 +1,5 @@
 /* 
- * proto-unreal2.h: Unreal 2 query protocol implementation
+ * proto-gamespy.h: GameSpy query protocol implementation
  * 
  * Copyright (C) 2011-2012 GSWatcher Developer(s)
  * 
