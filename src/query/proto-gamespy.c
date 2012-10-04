@@ -294,7 +294,7 @@ gsq_gamespy_process (GsqQuerier *querier, guint16 qport,
 			goto error;
 		
 		/* determine game */
-		gchar *gamename = g_hash_table_lookup (priv->values, "gamename");
+		gchar *gamename = gsq_lookup_value (priv->values, "gamename", "game_id", NULL);
 		gchar *gametype = g_hash_table_lookup (priv->values, "gametype");
 		
 		if (gamename && strcmp (gamename, "redorchestra") == 0) {
@@ -330,6 +330,10 @@ gsq_gamespy_process (GsqQuerier *querier, guint16 qport,
 			/* Battlefield 1942 */
 			g_string_assign (querier->gameid, "bf1942");
 			g_string_assign (querier->gamename, "Battlefield 1942");
+		} else if (gamename && strcmp (gamename, "bfvietnam") == 0) {
+			/* Battlefield Vietnam uses both GameSpy and GameSpy 2 protocols.
+				We ignore GameSpy 1. */
+			goto error;
 		} else {
 			/* Something else */
 			g_string_assign (querier->gameid, gamename);
