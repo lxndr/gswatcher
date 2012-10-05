@@ -110,7 +110,7 @@ gsq_parse_address (const gchar *addr, guint16 *port, guint16 *port2)
 				p = f + 1;
 			}
 		} else {		// anything with no port(s)
-			host = g_strdup (addr);
+			return g_strdup (addr);
 		}
 	}
 	
