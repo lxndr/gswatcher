@@ -26,6 +26,7 @@
  *   - Crysis                            |         64000  |               
  *   - Crysis 2                          |         64100  |               
  *   - Minecraft                         |         25565  |          gport
+ *   - Arma 2                            |          2302  |          gport
  * 
  */
 
@@ -55,7 +56,7 @@ typedef struct _Private {
 } Private;
 
 
-static const guint16 default_ports[] = {6500, 25565, 29900, 64000, 64100};
+static const guint16 default_ports[] = {2303, 6500, 25565, 29900, 64000, 64100};
 
 
 
@@ -339,6 +340,16 @@ fill_info (GsqQuerier *querier, Private *priv)
 					priv->teams[gsq_str2int (g_ptr_array_index (team_list, i)) - 1],
 					gsq_str2int (g_ptr_array_index (ping_list, i)));
 		
+	} else if (strcmp (querier->gameid->str, "arma2") == 0) {
+		if (!(player_list && score_list && score_list->len == player_list->len &&
+				score_list && score_list->len == player_list->len &&
+				deaths_list && deaths_list->len == player_list->len))
+			return FALSE;
+		for (i = 0; i < player_list->len; i++)
+			gsq_querier_add_player (querier, g_ptr_array_index (player_list, i),
+					gsq_str2int (g_ptr_array_index (score_list, i)),
+					gsq_str2int (g_ptr_array_index (deaths_list, i)));
+		
 	} else {
 		if (!player_list)
 			return FALSE;
@@ -351,21 +362,21 @@ fill_info (GsqQuerier *querier, Private *priv)
 
 
 static gboolean
-detect_game (GsqQuerier *querier, Private *priv, const gchar *data, const gchar *end)
+detect_game (GsqQuerier *querier, Private *priv, guint16 qport,
+		const gchar *data, const gchar *end)
 {
 	if (*data != 0)
 		return FALSE;
 	get_sinfo (priv->sinfo, data + 1, end);
 	
-	/* these two are necessary */
 	gchar *hostname = gsq_lookup_value (priv->sinfo, "hostname", NULL);
-	gchar *hostport = gsq_lookup_value (priv->sinfo, "hostport", NULL);
-	if (!(hostname && hostport))
+	if (!hostname)
 		return FALSE;
 	
-	const gchar *gameid = gsq_lookup_value (priv->sinfo, "gamename", "game_id", NULL);
+	guint16 hostport = gsq_str2int (g_hash_table_lookup (priv->sinfo, "hostport"));
+	gchar *gameid = gsq_lookup_value (priv->sinfo, "gamename", "game_id", NULL);
 	guint16 gport = gsq_querier_get_gport (querier);
-	guint16 hport = gsq_str2int (hostport);
+	guint16 defport = 0;
 	
 	if (gameid == NULL) {
 		if (g_hash_table_lookup (priv->sinfo, "p268435717")) {
@@ -375,10 +386,9 @@ detect_game (GsqQuerier *querier, Private *priv, const gchar *data, const gchar 
 			gsq_querier_add_field (querier, N_("Deaths"), G_TYPE_INT);
 			gsq_querier_add_field (querier, N_("Team"), G_TYPE_STRING);
 			gsq_querier_add_field (querier, N_("Ping"), G_TYPE_INT);
-			if (gport == 0) gport = 7777;
+			defport = 7777;
 		} else {
-			g_string_assign (querier->gameid, gameid);
-			g_string_assign (querier->gamename, gameid);
+			goto fallback;
 		}
 	} else if (strcmp (gameid, "battlefield2") == 0) {
 		g_string_assign (querier->gameid, "bf2");
@@ -388,7 +398,7 @@ detect_game (GsqQuerier *querier, Private *priv, const gchar *data, const gchar 
 		gsq_querier_add_field (querier, N_("Skill"), G_TYPE_INT);
 		gsq_querier_add_field (querier, N_("Team"), G_TYPE_STRING);
 		gsq_querier_add_field (querier, N_("Ping"), G_TYPE_INT);
-		if (gport == 0) gport = 16567;
+		defport = 16567;
 	} else if (strcmp (gameid, "stella") == 0 || strcmp (gameid, "stellad") == 0) {
 		gchar *gamevariant = g_hash_table_lookup (priv->sinfo, "gamevariant");
 		if (gamevariant && strcmp (gamevariant, "bf2142") == 0) {
@@ -399,24 +409,38 @@ detect_game (GsqQuerier *querier, Private *priv, const gchar *data, const gchar 
 			gsq_querier_add_field (querier, N_("Skill"), G_TYPE_INT);
 			gsq_querier_add_field (querier, N_("Team"), G_TYPE_STRING);
 			gsq_querier_add_field (querier, N_("Ping"), G_TYPE_INT);
-			if (gport == 0) gport = 17567;
+			defport = 17567;
 		} else {
-			g_string_assign (querier->gameid, gameid);
-			g_string_assign (querier->gamename, gameid);
+			goto fallback;
 		}
 	} else if (strcmp (gameid, "MINECRAFT") == 0) {
 		g_string_assign (querier->gameid, "mc");
 		g_string_assign (querier->gamename, "Minecraft");
-		if (gport == 0) gport = 25565;
+		defport = 25565;
+	} else if (strcmp (gameid, "arma2oapc") == 0) {
+		g_string_assign (querier->gameid, "arma2");
+		g_string_assign (querier->gamename, "Arma 2");
+		g_string_assign (querier->gamemode,
+				g_hash_table_lookup (priv->sinfo, "gametype"));
+		gsq_querier_add_field (querier, N_("Score"), G_TYPE_INT);
+		gsq_querier_add_field (querier, N_("Deaths"), G_TYPE_INT);
+		defport = 2302;
+		/* Arma 2 does not send hostport. qport and gport are same. */
+		hostport = qport;
 	} else {
+fallback:
 		g_string_assign (querier->gameid, gameid);
 		g_string_assign (querier->gamename, gameid);
 	}
 	
-	if (gport != 0 && hport != gport)
-		return FALSE;
+	if (gport == 0)
+		gport = defport;
+	if (gport > 0 && hostport == gport) {
+		gsq_querier_set_gport (querier, gport);
+		return TRUE;
+	}
 	
-	return TRUE;
+	return FALSE;
 }
 
 
@@ -473,8 +497,8 @@ gsq_gamespy3_process (GsqQuerier *querier, guint16 qport, const gchar *data,
 			priv->number = number + 1;
 		}
 		
-		if (gsq_querier_get_protocol (querier) == NULL)
-			if (!detect_game (querier, priv, data + 15, data + size))
+		if (!gsq_querier_is_detected (querier))
+			if (!detect_game (querier, priv, qport, data + 15, data + size))
 				return FALSE;
 		
 		/* store data */
