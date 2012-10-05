@@ -21,6 +21,7 @@
  * 
  * Supported games:  --------------------+- def. port  ---+- query port  ---
  *   - America's Army                    |          1716  |     gport +  1
+ *   - Armed Assault                     |          2302  |           2302
  *   - Battlefield Vietman               |         23000  |          23000
  * 
  */
@@ -113,13 +114,14 @@ detect_game (GsqQuerier *querier, GHashTable *sinfo)
 		gsq_querier_add_field (querier, N_("Score"), G_TYPE_INT);
 		gsq_querier_add_field (querier, N_("Ping"), G_TYPE_INT);
 		gsq_querier_add_field (querier, N_("Team"), G_TYPE_STRING);
-	} else if (strcmp (gameid, "arma2oapc") == 0) {
+	} else if (strcmp (gameid, "armedass") == 0) {
 		port = 2302;
-		g_string_assign (querier->gameid, "arma2");
-		g_string_assign (querier->gamename, "ArmA 2");
+		g_string_assign (querier->gameid, "arma");
+		g_string_assign (querier->gamename, "Arma");
 		gsq_querier_add_field (querier, N_("Score"), G_TYPE_INT);
-		gsq_querier_add_field (querier, N_("Seaths"), G_TYPE_INT);
-		gsq_querier_add_field (querier, N_("Team"), G_TYPE_STRING);
+		gsq_querier_add_field (querier, N_("Deaths"), G_TYPE_INT);
+	} else if (strcmp (gameid, "arma2oapc") == 0) {
+		return FALSE;
 	} else {
 		port = hostport;
 		g_string_assign (querier->gameid, gameid);
@@ -173,6 +175,52 @@ gsq_gamespy2_process (GsqQuerier *querier, guint16 qport,
 		return TRUE;
 		
 	} else if (data[4] == 'p') {
+		gchar *p = (gchar *) data + 6;
+		gint i, j, fcount = -1;
+		gchar *field;
+		gchar *values[7];
+		guint8 pcount;
+		
+		/* number of players */
+		pcount = gsq_get_uint8 (&p);
+		
+		/* fields */
+		do {
+			fcount++;
+			field = gsq_get_cstring (&p);
+		} while (*field && p < (data + size));
+		
+		gchar *gameid = querier->gameid->str;
+		if (strcmp (gameid, "aa") == 0) {
+			
+		} else if (strcmp (gameid, "bfv") == 0) {
+			for (i = 0; i < pcount; i++) {
+				for (j = 0; j < fcount; j++)
+					values[j] = gsq_get_cstring (&p);
+				gsq_querier_add_player (querier, values[0],
+						gsq_str2int (values[5]), gsq_str2int (values[2]),
+						gsq_str2int (values[1]), gsq_str2int (values[3]),
+						values[4]);
+			}
+			
+		} else if (strcmp (gameid, "arma") == 0) {
+			/* Armed Assault sends an empty string instead of team */
+			for (i = 0; i < pcount; i++) {
+				for (j = 0; j < fcount; j++)
+					values[j] = gsq_get_cstring (&p);
+				gsq_querier_add_player (querier, values[0],
+						gsq_str2int (values[2]), gsq_str2int (values[3]));
+			}
+			
+		} else {
+			for (i = 0; i < pcount; i++) {
+				for (j = 0; j < fcount; j++)
+					values[j] = gsq_get_cstring (&p);
+				gsq_querier_add_player (querier, values[0]);
+			}
+		}
+		
+		gsq_querier_emit_player_update (querier);
 		return TRUE;
 	}
 	
