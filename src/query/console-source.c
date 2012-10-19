@@ -170,7 +170,7 @@ gsq_console_source_received (GsqConsole *console, const gchar *data,
 		} else {
 			if (gsq_console_is_authenticated (console)) {
 				g_string_append (pr->res, data);
-				if (pr->res->len >= 15) {
+				if (pr->res->len >= 13) {
 					gsize mark_pos = pr->res->len - 13;
 					if (strncmp (pr->res->str + pr->res->len - 13, pr->key, 13) == 0) {
 						g_string_truncate (pr->res, mark_pos);
