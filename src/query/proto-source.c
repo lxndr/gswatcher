@@ -98,14 +98,6 @@ gsq_source_query (GsqQuerier *querier)
 }
 
 
-static inline guint8
-get_byte (gchar **p)
-{
-	gint8 v = * (guint8 *) *p;
-	*p += 1;
-	return v;
-}
-
 static inline guint16
 get_short (gchar **p)
 {
@@ -138,15 +130,6 @@ get_float (gchar **p)
 	return GFLOAT_FROM_LE (v);
 }
 
-static inline gchar *
-get_string (gchar **p)
-{
-	gchar *s = *p;
-	*p += strlen (s);
-	(*p)++;
-	return s;
-}
-
 static void
 format_time (gchar *dst, gsize maxlen, gfloat time)
 {
@@ -165,33 +148,33 @@ get_server_info (GsqQuerier *querier, gchar *p)
 	gchar *dir, *desc, *tags, tmp[256];
 	gchar *server_os, *server_type;
 	
-	guint8 pver = get_byte (&p);							// Protocol version
-	g_string_assign (querier->name, get_string (&p));		// Server name
-	g_string_assign (querier->map, get_string (&p));		// Map name
-	dir = get_string (&p);									// Game folder
-	desc = get_string (&p);									// Game description
-	guint16 appid = get_short (&p);							// Application ID
-	querier->numplayers = get_byte (&p);					// Number of players
-	querier->maxplayers = get_byte (&p);					// Maximum players
-	get_byte (&p);											// Number of bots
-	gchar dedicated = get_byte (&p);						// Dedicated
-	gchar os = get_byte (&p);								// OS
-	querier->password = get_byte (&p);						// Password
-	gboolean secure = get_byte (&p);						// Secure
-	g_string_assign (querier->version, get_string (&p));	// Game version
-	guint8 edf = get_byte (&p);								// extra data field
+	guint8 pver = gsq_get_uint8 (&p);							// Protocol version
+	g_string_assign (querier->name, gsq_get_cstring (&p));		// Server name
+	g_string_assign (querier->map, gsq_get_cstring (&p));		// Map name
+	dir = gsq_get_cstring (&p);									// Game folder
+	desc = gsq_get_cstring (&p);								// Game description
+	guint16 appid = get_short (&p);								// Application ID
+	querier->numplayers = gsq_get_uint8 (&p);					// Number of players
+	querier->maxplayers = gsq_get_uint8 (&p);					// Maximum players
+	gsq_get_uint8 (&p);											// Number of bots
+	gchar dedicated = gsq_get_uint8 (&p);						// Dedicated
+	gchar os = gsq_get_uint8 (&p);								// OS
+	querier->password = gsq_get_uint8 (&p);						// Password
+	gboolean secure = gsq_get_uint8 (&p);						// Secure
+	g_string_assign (querier->version, gsq_get_cstring (&p));	// Game version
+	guint8 edf = gsq_get_uint8 (&p);							// Extra data field
 	if (edf & 0x80)
-		get_short (&p);										// server's game port
+		get_short (&p);											// Server's game port
 	if (edf & 0x10)
-		get_longlong (&p);									// server's SteamID
+		get_longlong (&p);										// Server's SteamID
 	if (edf & 0x40) {
-		get_short (&p);										// spectator port
-		get_string (&p);									// spectator name
+		get_short (&p);											// Spectator port
+		gsq_get_cstring (&p);									// Spectator name
 	}
 	if (edf & 0x20)
-		tags = get_string (&p);								// tags
+		tags = gsq_get_cstring (&p);							// Tags
 	if (edf & 0x01)
-		get_longlong (&p);									// server's Game ID
+		get_longlong (&p);										// Server's Game ID
 	
 	switch (os) {
 		case 'l': server_os = "Linux"; break;
@@ -313,19 +296,19 @@ get_server_info_gold (GsqQuerier *querier, gchar *p)
 {
 	gchar *dir, tmp[64];
 	
-	get_string (&p);									// Game server IP and port
-	g_string_assign (querier->name, get_string (&p));	// Server name
-	g_string_assign (querier->map, get_string (&p));	// Map name
-	dir = get_string (&p);								// Game directory
-	get_string (&p);									// Game description
-	querier->numplayers = get_byte (&p);				// Number of players
-	querier->maxplayers = get_byte (&p);				// Maximum players
-	guint8 pver = get_byte (&p);						// Network version
-	gchar dedicated = get_byte (&p);					// Dedicated
-	gchar os = get_byte (&p);							// OS
-	querier->password = get_byte (&p);					// Password
-	get_byte (&p);										// IsMod
-	gboolean secure = get_byte (&p);					// Secure
+	gsq_get_cstring (&p);									// Game server IP and port
+	g_string_assign (querier->name, gsq_get_cstring (&p));	// Server name
+	g_string_assign (querier->map, gsq_get_cstring (&p));	// Map name
+	dir = gsq_get_cstring (&p);								// Game directory
+	gsq_get_cstring (&p);									// Game description
+	querier->numplayers = gsq_get_uint8 (&p);				// Number of players
+	querier->maxplayers = gsq_get_uint8 (&p);				// Maximum players
+	guint8 pver = gsq_get_uint8 (&p);						// Network version
+	gchar dedicated = gsq_get_uint8 (&p);					// Dedicated
+	gchar os = gsq_get_uint8 (&p);							// OS
+	querier->password = gsq_get_uint8 (&p);					// Password
+	gsq_get_uint8 (&p);										// IsMod
+	gboolean secure = gsq_get_uint8 (&p);					// Secure
 	
 	if (strcmp (dir, "cstrike") == 0) {
 		g_string_assign (querier->gameid, "cs");
@@ -360,14 +343,14 @@ get_server_info_gold (GsqQuerier *querier, gchar *p)
 static void
 get_player_list (GsqQuerier *querier, gchar *p)
 {
-	gint8 i, count = get_byte (&p);
+	gint8 i, count = gsq_get_uint8 (&p);
 	gchar time[16];
 	
 	for (i = 0; i < count; i++) {
-		get_byte (&p);
-		gchar *nickname = get_string (&p);			// Nickname
-		gint kills = get_long (&p);					// Kills
-		format_time (time, 16, get_float (&p));		// Time
+		gsq_get_uint8 (&p);
+		gchar *nickname = gsq_get_cstring (&p);			// Nickname
+		gint kills = get_long (&p);						// Kills
+		format_time (time, 16, get_float (&p));			// Time
 		gsq_querier_add_player (querier, nickname, kills, time);
 	}
 	
@@ -379,7 +362,7 @@ static gboolean
 source_process2 (GsqQuerier *querier, gchar *p, gssize size)
 {
 	Private *priv = gsq_querier_get_pdata (querier);
-	gint type = get_byte (&p);
+	gint type = gsq_get_uint8 (&p);
 	
 	if ((type == 'A' || type == 'I' || type == 'm' || type == 'D' || type == 'R') &&
 			gsq_querier_get_fields (querier)->len == 0) {
@@ -487,18 +470,18 @@ gsq_source_process (GsqQuerier *querier, guint16 qport,
 		guint16 length;
 		
 		reqid = get_long (&p);
-		compressed = reqid >> 7;
+		compressed = reqid >> 31;
 		
 		if (*((gint32 *) (p + 1)) == -1) {
 			/* GoldSource way */
-			guint8 c = get_byte (&p);
+			guint8 c = gsq_get_uint8 (&p);
 			maxpackets = c & 0x0F;
 			numpacket = c >> 4;
 			length = size - (p - data);
 		} else {
 			/* Source way */
-			maxpackets = get_byte (&p);
-			numpacket = get_byte (&p);
+			maxpackets = gsq_get_uint8 (&p);
+			numpacket = gsq_get_uint8 (&p);
 			length = get_short (&p);
 		}
 		
