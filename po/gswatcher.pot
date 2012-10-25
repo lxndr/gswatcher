@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: lxndr87@users.sourceforge.net\n"
-"POT-Creation-Date: 2012-09-09 15:37+0400\n"
+"POT-Creation-Date: 2012-10-23 12:53+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,71 +17,71 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/client.c:391
+#: src/client.c:400
 msgid "Connected"
 msgstr ""
 
-#: src/client.c:397
+#: src/client.c:406
 msgid "Authenticated"
 msgstr ""
 
-#: src/client.c:403
+#: src/client.c:412
 msgid "Disconnected"
 msgstr ""
 
-#: src/client.c:423
+#: src/client.c:432
 msgid "Server's protocol is not determined"
 msgstr ""
 
-#: src/client.c:467
+#: src/client.c:476
 msgid "You have to provide a log address"
 msgstr ""
 
-#: src/gswatcher.c:265
+#: src/gswatcher.c:266
 msgid "Show version number and exit"
 msgstr ""
 
-#: src/gswatcher.c:267
+#: src/gswatcher.c:268
 msgid "Start minimized in system tray"
 msgstr ""
 
-#: src/gswatcher.c:269
+#: src/gswatcher.c:270
 msgid "Output all packets into stdout"
 msgstr ""
 
-#: src/gswatcher.c:271
+#: src/gswatcher.c:272
 msgid "Watch only this server"
 msgstr ""
 
-#: src/gswatcher.c:274
+#: src/gswatcher.c:275
 msgid "Use internal notifier"
 msgstr ""
 
-#: src/gswatcher.c:277
+#: src/gswatcher.c:278
 msgid "Command to play sounds"
 msgstr ""
 
-#: src/gswatcher.c:384
+#: src/gswatcher.c:385
 #, c-format
 msgid "Couldn't save buddy list: %s"
 msgstr ""
 
-#: src/gswatcher.c:486
+#: src/gswatcher.c:487
 #, c-format
 msgid "Couldn't load buddy list: %s"
 msgstr ""
 
-#: src/gswatcher.c:539
+#: src/gswatcher.c:540
 #, c-format
 msgid "Couldn't save server list: %s"
 msgstr ""
 
-#: src/gswatcher.c:627
+#: src/gswatcher.c:628
 #, c-format
 msgid "Player %s has connected"
 msgstr ""
 
-#: src/gswatcher.c:628 src/gswatcher.c:657
+#: src/gswatcher.c:629 src/gswatcher.c:658
 #, c-format
 msgid ""
 "Address: %s\n"
@@ -89,17 +89,17 @@ msgid ""
 "Players: %d / %d"
 msgstr ""
 
-#: src/gswatcher.c:656
+#: src/gswatcher.c:657
 #, c-format
 msgid "Server with %s has free slot"
 msgstr ""
 
-#: src/gswatcher.c:746
+#: src/gswatcher.c:747
 #, c-format
 msgid "Are you sure you want to remove \"%s\" ( %s) from the list?"
 msgstr ""
 
-#: src/gswatcher.c:907
+#: src/gswatcher.c:939
 #, c-format
 msgid "Couldn't save preferences to %s: %s"
 msgstr ""
@@ -199,8 +199,8 @@ msgstr ""
 
 #: src/gui-server-list.c:766 src/query/proto-gamespy.c:117
 #: src/query/proto-gamespy.c:121 src/query/proto-gamespy.c:125
-#: src/query/proto-gamespy.c:128 src/query/proto-gamespy3.c:377
-#: src/query/proto-gamespy3.c:390 src/query/proto-gamespy3.c:401
+#: src/query/proto-gamespy.c:128 src/query/proto-gamespy3.c:388
+#: src/query/proto-gamespy3.c:400 src/query/proto-gamespy3.c:411
 #: src/query/proto-quake.c:221
 msgid "Ping"
 msgstr ""
@@ -403,20 +403,21 @@ msgstr ""
 msgid "Frags"
 msgstr ""
 
-#: src/query/proto-gamespy.c:119 src/query/proto-gamespy3.c:375
-#: src/query/proto-gamespy3.c:387 src/query/proto-gamespy3.c:398
+#: src/query/proto-gamespy.c:119 src/query/proto-gamespy3.c:386
+#: src/query/proto-gamespy3.c:397 src/query/proto-gamespy3.c:408
+#: src/query/proto-gamespy3.c:426
 msgid "Deaths"
 msgstr ""
 
-#: src/query/proto-gamespy.c:120 src/query/proto-gamespy3.c:374
-#: src/query/proto-gamespy3.c:386 src/query/proto-gamespy3.c:397
-#: src/query/proto-quake.c:220
+#: src/query/proto-gamespy.c:120 src/query/proto-gamespy3.c:385
+#: src/query/proto-gamespy3.c:396 src/query/proto-gamespy3.c:407
+#: src/query/proto-gamespy3.c:425 src/query/proto-quake.c:220
 msgid "Score"
 msgstr ""
 
 #: src/query/proto-gamespy.c:122 src/query/proto-gamespy.c:126
-#: src/query/proto-gamespy3.c:376 src/query/proto-gamespy3.c:389
-#: src/query/proto-gamespy3.c:400
+#: src/query/proto-gamespy3.c:387 src/query/proto-gamespy3.c:399
+#: src/query/proto-gamespy3.c:410
 msgid "Team"
 msgstr ""
 
@@ -432,14 +433,14 @@ msgstr ""
 msgid "Spectators"
 msgstr ""
 
-#: src/query/proto-gamespy3.c:388 src/query/proto-gamespy3.c:399
+#: src/query/proto-gamespy3.c:398 src/query/proto-gamespy3.c:409
 msgid "Skill"
 msgstr ""
 
-#: src/query/proto-source.c:382
+#: src/query/proto-source.c:369
 msgid "Kills"
 msgstr ""
 
-#: src/query/proto-source.c:383
+#: src/query/proto-source.c:370
 msgid "Time"
 msgstr ""
