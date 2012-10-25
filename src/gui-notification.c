@@ -62,8 +62,10 @@ static gint timeout = 5;
 static gchar *sound_file = NULL;
 static gchar *sound_default_playbins[] = {
 #ifdef G_OS_WIN32
+		"gst-launch-1.0.exe --quiet playbin uri='file:///$(file)'",
 		"gst-launch-0.10.exe --quiet playbin2 uri='file:///$(file)'",
 #else
+		"gst-launch-1.0 --quiet playbin uri=file://$(file)",
 		"gst-launch-0.10 --quiet playbin2 uri=file://$(file)",
 #endif
 		"mplayer -quiet -novideo -noar -noconsolecontrols -nojoystick -nolirc -nomouseinput $(file)",
