@@ -562,16 +562,14 @@ gs_address_changed (GtkEntry *entry, gpointer udata)
 static gboolean
 slist_key_pressed (GtkWidget *widget, GdkEventKey *event, gpointer udata)
 {
-	if (event->keyval == GDK_KEY_Delete) {
+	if (event->hardware_keycode == 119) {
 		gs_application_remove_server_ask (app, selected);
-	} else if (event->state == GDK_CONTROL_MASK &&
-			(event->keyval == GDK_KEY_C || event->keyval == GDK_KEY_c ||
-			event->keyval == GDK_KEY_Cyrillic_PE || event->keyval == GDK_KEY_Cyrillic_pe)) {
+	} else if (event->state == GDK_CONTROL_MASK && event->hardware_keycode == 54) {
 		gs_client_connect_to_game (selected);
-	} else if (event->state == GDK_CONTROL_MASK &&
-			(event->keyval == GDK_KEY_F || event->keyval == GDK_KEY_f ||
-			event->keyval == GDK_KEY_Cyrillic_I || event->keyval == GDK_KEY_Cyrillic_i)) {
-		/* TODO favour */
+	} else if (event->state == GDK_CONTROL_MASK && event->hardware_keycode == 41) {
+		gs_client_set_favorite (selected, !selected->favorite);
+		gui_slist_update (selected);
+		gs_application_save_server_list (app);
 	}
 	
 	return TRUE;
