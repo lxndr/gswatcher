@@ -31,8 +31,14 @@
 #include "gtkpopupbutton.h"
 
 
+typedef struct _GuiConsoleContext {
+	GtkTextBuffer *text_buffer;
+} GuiConsoleContext;
+
+
 static GtkWidget *page, *logview, *entry;
-static GtkEntryCompletion *history;
+static GHashTable *history;
+static GtkEntryCompletion *completion;
 static GtkTreeIter history_iter;
 static gboolean history_end;
 static GtkWidget *toolbar, *port_label, *port, *password_label, *password;
@@ -107,39 +113,45 @@ gui_console_get_font ()
 
 
 void
-gs_console_log (GsClient *client, GsLogType type, const gchar *msg)
+gui_console_log (GsClient *client, GuiConsoleType type, const gchar *msg)
 {
+	GuiConsoleContext *context = client->console_gui;
 	GtkTextIter iter;
 	GtkTextMark *mark;
 	
-	gtk_text_buffer_get_end_iter (client->console_buffer, &iter);
-	if (gui_slist_get_selected () == client) {
-		mark = gtk_text_buffer_create_mark (client->console_buffer,
+	gtk_text_buffer_get_end_iter (context->text_buffer, &iter);
+	if (gui_slist_get_selected () == client)
+		mark = gtk_text_buffer_create_mark (context->text_buffer,
 				NULL, &iter, TRUE);
-	}
 	
-	gtk_text_buffer_insert_with_tags (client->console_buffer, &iter, msg, -1, tags[type], NULL);
-	gtk_text_buffer_insert (client->console_buffer, &iter, "\n", -1);
+	gtk_text_buffer_insert_with_tags (context->text_buffer, &iter, msg, -1, tags[type], NULL);
+	gtk_text_buffer_insert (context->text_buffer, &iter, "\n", -1);
 	
 	if (gui_slist_get_selected () == client) {
 		gtk_text_view_scroll_to_mark (GTK_TEXT_VIEW (logview), mark, 0.0, TRUE, 0.0, 0.0);
-		gtk_text_buffer_delete_mark (client->console_buffer, mark);
+		gtk_text_buffer_delete_mark (context->text_buffer, mark);
 	}
 }
 
 
 static void
-gs_console_add_history (GsClient *client, const gchar *cmd)
+add_to_history (GsClient *client, const gchar *cmd)
 {
-	GtkTreeModel *model = GTK_TREE_MODEL (client->console_history);
+	GtkTreeModel *model;
 	GtkTreeIter iter;
 	gchar *value;
+	
+	model = g_hash_table_lookup (history, client->querier->gameid->str);
+	if (model == NULL) {
+		model = GTK_TREE_MODEL (gtk_list_store_new (1, G_TYPE_STRING));
+		g_hash_table_insert (history, client->querier->gameid->str, model);
+	}
 	
 	if (gtk_tree_model_get_iter_first (model, &iter)) {
 		do {
 			gtk_tree_model_get (model, &iter, 0, &value, -1);
 			if (strcmp (cmd, value) == 0) {
-				gtk_list_store_remove (client->console_history, &iter);
+				gtk_list_store_remove (GTK_LIST_STORE (model), &iter);
 				g_free (value);
 				break;
 			}
@@ -147,14 +159,14 @@ gs_console_add_history (GsClient *client, const gchar *cmd)
 		} while (gtk_tree_model_iter_next (model, &iter));
 	}
 	
-	gtk_list_store_append (client->console_history, &iter);
-	gtk_list_store_set (client->console_history, &iter, 0, cmd, -1);
+	gtk_list_store_append (GTK_LIST_STORE (model), &iter);
+	gtk_list_store_set (GTK_LIST_STORE (model), &iter, 0, cmd, -1);
 	history_end = TRUE;
 }
 
 
-void
-gs_console_send (GsClient *cl, const gchar *cmd)
+static void
+send_command (GsClient *client, const gchar *cmd)
 {
 	if (strcmp (cmd, "exit") == 0 || strcmp (cmd, "quit") == 0) {
 		GtkWidget *dlg = gtk_message_dialog_new (GTK_WINDOW (window),
@@ -167,16 +179,16 @@ gs_console_send (GsClient *cl, const gchar *cmd)
 		gtk_widget_destroy (dlg);
 	}
 	
-	gs_console_add_history (cl, cmd);
-	gs_console_log (cl, GUI_CONSOLE_COMMAND, cmd);
-	gs_client_send_command (cl, cmd);
+	add_to_history (client, cmd);
+	gui_console_log (client, GUI_CONSOLE_COMMAND, cmd);
+	gs_client_send_command (client, cmd);
 }
 
 
 static void
 gs_console_entry_activated (GtkEntry *entry, gpointer udata)
 {
-	gs_console_send (gui_slist_get_selected (), gtk_entry_get_text (entry));
+	send_command (gui_slist_get_selected (), gtk_entry_get_text (entry));
 	gtk_entry_set_text (entry, "");
 }
 
@@ -186,7 +198,7 @@ gs_console_entry_icon_clicked (GtkEntry *entry, GtkEntryIconPosition icon,
 		GdkEvent *event, gpointer udata)
 {
 	if (icon == GTK_ENTRY_ICON_SECONDARY) {
-		gs_console_send (gui_slist_get_selected (), gtk_entry_get_text (entry));
+		send_command (gui_slist_get_selected (), gtk_entry_get_text (entry));
 		gtk_entry_set_text (entry, "");
 	}
 }
@@ -196,11 +208,15 @@ static gboolean
 gui_console_key_pressed (GtkWidget *widget, GdkEventKey *event, gpointer udata)
 {
 	GsClient *client = gui_slist_get_selected ();
-	GtkTreeModel *model = GTK_TREE_MODEL (client->console_history);
-	gchar *cmd;
-	
 	if (!client)
 		return FALSE;
+	
+	GtkTreeModel *model = g_hash_table_lookup (history, client->querier->gameid->str);
+	if (!model) {
+		if (event->keyval == GDK_KEY_Up || event->keyval == GDK_KEY_Down)
+			gtk_widget_error_bell (widget);
+		return FALSE;
+	}
 	
 	if (event->keyval == GDK_KEY_Up) {
 		if (history_end) {
@@ -235,6 +251,7 @@ gui_console_key_pressed (GtkWidget *widget, GdkEventKey *event, gpointer udata)
 		return FALSE; 			// if any other key, do default action
 	}
 	
+	gchar *cmd;
 	gtk_tree_model_get (model, &history_iter, 0, &cmd, -1);
 	gtk_entry_set_text (GTK_ENTRY (entry), cmd);
 	gtk_editable_set_position (GTK_EDITABLE (entry),
@@ -243,7 +260,7 @@ gui_console_key_pressed (GtkWidget *widget, GdkEventKey *event, gpointer udata)
 	
 	return TRUE;
 }
-														
+
 
 static void
 gui_console_settings_popup (GtkPopupButton *popup_button, gpointer udata)
@@ -276,40 +293,60 @@ void
 gui_console_setup (GsClient *client)
 {
 	if (client) {
+		GuiConsoleContext *context = client->console_gui;
+		
 		gtk_widget_set_sensitive (page, TRUE);
 		gtk_widget_set_sensitive (toolbar, TRUE);
 		
 		GtkTextIter iter;
-		gtk_text_view_set_buffer (GTK_TEXT_VIEW (logview), client->console_buffer);
-		gtk_text_buffer_get_end_iter (client->console_buffer, &iter);
+		gtk_text_view_set_buffer (GTK_TEXT_VIEW (logview), context->text_buffer);
+		gtk_text_buffer_get_end_iter (context->text_buffer, &iter);
 		
-		GtkTextMark *mark = gtk_text_buffer_create_mark (client->console_buffer, NULL, &iter, TRUE);
+		GtkTextMark *mark = gtk_text_buffer_create_mark (context->text_buffer, NULL, &iter, TRUE);
 		gtk_text_view_scroll_mark_onscreen (GTK_TEXT_VIEW (logview), mark);
-		gtk_text_buffer_delete_mark (client->console_buffer, mark);
+		gtk_text_buffer_delete_mark (context->text_buffer, mark);
 		
 		history_end = TRUE;
 		
-		gtk_entry_completion_set_model (history, GTK_TREE_MODEL (client->console_history));
+		gtk_entry_completion_set_model (completion,
+				g_hash_table_lookup (history, client->querier->gameid->str));
 	} else {
 		gtk_widget_set_sensitive (page, FALSE);
 		gtk_widget_set_sensitive (toolbar, FALSE);
 		
 		gtk_text_view_set_buffer (GTK_TEXT_VIEW (logview), NULL);
-		gtk_entry_completion_set_model (history, NULL);
+		gtk_entry_completion_set_model (completion, NULL);
 	}
 }
 
 
 void
-gs_console_init (GsClient *client)
+gui_console_init_context (GsClient *client)
 {
-	client->console_buffer = gtk_text_buffer_new (tag_table);
-	client->console_history = gtk_list_store_new (1, G_TYPE_STRING);
+	g_return_if_fail (GS_IS_CLIENT (client));
+	g_return_if_fail (tag_table != NULL);
+	
+	GuiConsoleContext *context = g_slice_new (GuiConsoleContext);
+	context->text_buffer = gtk_text_buffer_new (tag_table);
+	client->console_gui = context;
+}
+
+
+void
+gui_console_free_context (GsClient *client)
+{
+	g_return_if_fail (GS_IS_CLIENT (client));
+	
+	GuiConsoleContext *context = client->console_gui;
+	g_object_unref (context->text_buffer);
+	g_slice_free (GuiConsoleContext, context);
+	
+	client->console_gui = NULL;
 }
 
 
 GtkWidget *
-gs_console_create_bar ()
+gui_console_create_bar ()
 {
 	/* settings window */
 	port = gtk_entry_new ();
@@ -373,9 +410,17 @@ gs_console_create_bar ()
 }
 
 
-GtkWidget *
-gs_console_create ()
+void
+gui_console_destroy_bar ()
 {
+	g_object_unref (toolbar);
+}
+
+
+GtkWidget *
+gui_console_create ()
+{
+	/* log tag table */
 	tag_table = gtk_text_tag_table_new ();
 	
 	tags[GUI_CONSOLE_INFO] = gtk_text_tag_new ("inf");
@@ -390,7 +435,10 @@ gs_console_create ()
 	g_object_set (tags[GUI_CONSOLE_ERROR], "foreground", "dark red", NULL);
 	gtk_text_tag_table_add (tag_table, tags[GUI_CONSOLE_ERROR]);
 	
-// widgets
+	/* history */
+	history = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_object_unref);
+	
+	/* widgets */
 	logview = gtk_text_view_new ();
 	g_object_set (G_OBJECT (logview),
 			"editable", FALSE,
@@ -405,15 +453,15 @@ gs_console_create ()
 			NULL);
 	gtk_container_add (GTK_CONTAINER (scrolled), logview);
 	
-	history = gtk_entry_completion_new ();
-	gtk_entry_completion_set_text_column (history, 0);
+	completion = gtk_entry_completion_new ();
+	gtk_entry_completion_set_text_column (completion, 0);
 	
 	entry = gtk_entry_new ();
 	g_object_set (G_OBJECT (entry),
 			"secondary-icon-stock", GTK_STOCK_MEDIA_PLAY,
 			NULL);
-	gtk_entry_set_completion (GTK_ENTRY (entry), history);
-	g_object_unref (history);
+	gtk_entry_set_completion (GTK_ENTRY (entry), completion);
+	g_object_unref (completion); /* ? */
 	g_signal_connect (entry, "activate", G_CALLBACK (gs_console_entry_activated), NULL);
 	g_signal_connect (entry, "icon-release", G_CALLBACK (gs_console_entry_icon_clicked), NULL);
 	g_signal_connect (entry, "key-press-event", G_CALLBACK (gui_console_key_pressed), NULL);
@@ -428,4 +476,15 @@ gs_console_create ()
 	gtk_widget_show_all (page);
 	
 	return page;
+}
+
+
+void
+gui_console_destroy ()
+{
+	if (fontname)
+		g_free (fontname);
+	
+	g_hash_table_destroy (history);
+	g_object_unref (tag_table);
 }

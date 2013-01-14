@@ -29,21 +29,25 @@
 #include "client.h"
 
 
-typedef enum _GsLogType {
+typedef enum _GuiConsoleType {
 	GUI_CONSOLE_RESPOND,
 	GUI_CONSOLE_INFO,
 	GUI_CONSOLE_COMMAND,
 	GUI_CONSOLE_ERROR
-} GsLogType;
+} GuiConsoleType;
 
 
-GtkWidget *gs_console_create ();
-GtkWidget *gs_console_create_bar ();
-void gs_console_init (GsClient *client);
-void gs_console_free (GsClient *client);
+GtkWidget *gui_console_create ();
+void gui_console_destroy ();
+
+GtkWidget *gui_console_create_bar ();
+void gui_console_destroy_bar ();
+
+void gui_console_init_context (GsClient *client);
+void gui_console_free_context (GsClient *client);
+
 void gui_console_setup (GsClient *client);
-void gs_console_send (GsClient *client, const gchar *cmd);
-void gs_console_log (GsClient *client, GsLogType type, const gchar *msg);
+void gui_console_log (GsClient *client, GuiConsoleType type, const gchar *msg);
 
 void gui_console_set_use_system_font (gboolean sysfont);
 gboolean gui_console_get_use_system_font ();

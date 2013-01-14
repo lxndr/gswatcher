@@ -105,15 +105,19 @@ gs_client_finalize (GObject *object)
 		g_free (client->version);
 	g_object_unref (client->querier);
 	
-	g_object_unref (client->console_buffer);
-	g_object_unref (client->console_history);
+	/* console */
 	if (client->console)
 		g_object_unref (client->console);
+	gui_console_free_context (client);
+	if (client->console_password)
+		g_free (client->console_password);
 	
+	/* log */
 	if (client->log_address)
 		g_free (client->log_address);
 	g_object_unref (client->log_buffer);
 	
+	/* chat */
 	g_object_unref (client->chat_buffer);
 	
 	G_OBJECT_CLASS (gs_client_parent_class)->finalize (object);
@@ -180,8 +184,8 @@ gs_client_new (const gchar *address)
 	g_signal_connect (client->querier, "log",
 			G_CALLBACK (gs_client_querier_log), client);
 	
+	gui_console_init_context (client);
 	gui_log_init (client);
-	gs_console_init (client);
 	gui_chat_init (client);
 	
 	return client;
@@ -397,19 +401,19 @@ gs_client_querier_log (GsqQuerier *querier, const gchar *msg, GsClient *client)
 static void
 gs_client_console_connected (GsqConsole *console, GsClient* client)
 {
-	gs_console_log (client, GUI_CONSOLE_INFO, _("Connected"));
+	gui_console_log (client, GUI_CONSOLE_INFO, _("Connected"));
 }
 
 static void
 gs_client_console_authenticated (GsqConsole *console, GsClient* client)
 {
-	gs_console_log (client, GUI_CONSOLE_INFO, _("Authenticated"));
+	gui_console_log (client, GUI_CONSOLE_INFO, _("Authenticated"));
 }
 
 static void
 gs_client_console_disconnected (GsqConsole *console, GsClient* client)
 {
-	gs_console_log (client, GUI_CONSOLE_INFO, _("Disconnected"));
+	gui_console_log (client, GUI_CONSOLE_INFO, _("Disconnected"));
 }
 
 
@@ -419,9 +423,9 @@ command_callback (GsqConsole *console, GAsyncResult *result, GsClient *client)
 	GError *error = NULL;
 	gchar *output = gsq_console_send_finish (console, result, &error);
 	if (output)
-		gs_console_log (client, GUI_CONSOLE_RESPOND, output);
+		gui_console_log (client, GUI_CONSOLE_RESPOND, output);
 	else
-		gs_console_log (client, GUI_CONSOLE_ERROR, error->message);
+		gui_console_log (client, GUI_CONSOLE_ERROR, error->message);
 }
 
 
@@ -429,7 +433,7 @@ void
 gs_client_send_command (GsClient* client, const gchar *cmd)
 {
 	if (!client->console) {
-		gs_console_log (client, GUI_CONSOLE_ERROR, _("Server's protocol is not determined"));
+		gui_console_log (client, GUI_CONSOLE_ERROR, _("Server's protocol is not determined"));
 		return;
 	}
 	
@@ -460,9 +464,9 @@ log_command_callback (GsqConsole *console, GAsyncResult *result, GsClient *clien
 	GError *error = NULL;
 	gchar *output = gsq_console_send_finish (console, result, &error);
 	if (output)
-		gs_console_log (client, GUI_CONSOLE_RESPOND, output);
+		gui_console_log (client, GUI_CONSOLE_RESPOND, output);
 	else
-		gs_console_log (client, GUI_CONSOLE_ERROR, error->message);
+		gui_console_log (client, GUI_CONSOLE_ERROR, error->message);
 }
 
 void
@@ -472,7 +476,7 @@ gs_client_enable_log (GsClient *client, gboolean enable)
 		guint16 userport;
 		gchar *userhost = gsq_parse_address (logaddress, &userport, NULL);
 		if (!userhost) {
-			gs_console_log (client, GUI_CONSOLE_ERROR,
+			gui_console_log (client, GUI_CONSOLE_ERROR,
 					_("You have to provide a log address"));
 			return;
 		}
@@ -525,9 +529,9 @@ chat_message_callback (GsqConsole *console, GAsyncResult *result, GsClient *clie
 	GError *error = NULL;
 	gchar *output = gsq_console_send_finish (console, result, &error);
 	if (output)
-		gs_console_log (client, GUI_CONSOLE_RESPOND, output);
+		gui_console_log (client, GUI_CONSOLE_RESPOND, output);
 	else
-		gs_console_log (client, GUI_CONSOLE_ERROR, error->message);
+		gui_console_log (client, GUI_CONSOLE_ERROR, error->message);
 }
 
 void
