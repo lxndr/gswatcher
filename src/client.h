@@ -74,8 +74,7 @@ struct _GsClient {
 	GuiConsoleSettings console_settings;
 	gchar *console_password;
 	guint16 console_port;
-	GtkTextBuffer *console_buffer;
-	GtkListStore *console_history;
+	gpointer console_gui;
 	
 	/* log */
 	gchar *log_address;
