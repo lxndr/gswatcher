@@ -481,12 +481,12 @@ gui_window_create ()
 	g_object_ref_sink (infobox_toolbar);
 	
 /* console */
-	GtkWidget *console = gs_console_create ();
+	GtkWidget *console = gui_console_create ();
 	
 	GtkWidget *console_label = gtk_label_new (_("Console"));
 	gtk_widget_show (console_label);
 	
-	console_toolbar = gs_console_create_bar ();
+	console_toolbar = gui_console_create_bar ();
 	g_object_ref_sink (console_toolbar);
 	
 /* log */
@@ -583,7 +583,9 @@ gui_window_destroy ()
 	g_object_unref (traymenu);
 	g_object_unref (trayicon);
 	g_object_unref (infobox_toolbar);
-	g_object_unref (console_toolbar);
+	gui_console_destroy_bar ();
 	g_object_unref (log_toolbar);
+	
+	gui_console_destroy ();
 	gtk_widget_destroy (window);
 }
