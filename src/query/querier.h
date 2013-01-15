@@ -43,7 +43,7 @@ G_BEGIN_DECLS
 
 typedef struct _GsqQuerier			GsqQuerier;
 typedef struct _GsqQuerierPrivate	GsqQuerierPrivate;
-typedef struct _GsqQuerierClass	GsqQuerierClass;
+typedef struct _GsqQuerierClass		GsqQuerierClass;
 typedef struct _GsqField			GsqField;
 typedef struct _GsqPlayer			GsqPlayer;
 
@@ -133,7 +133,6 @@ typedef enum _GsqDebugFlag {
 
 
 gboolean gsq_init (guint16 default_port);
-void gsq_fini ();
 
 guint16 gsq_get_local_ipv4_port ();
 guint16 gsq_get_local_ipv6_port ();

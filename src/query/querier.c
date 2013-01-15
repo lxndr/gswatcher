@@ -100,11 +100,13 @@ struct _GsqQuerierPrivate {
 
 
 static GSocket *ip4sock = NULL, *ip6sock = NULL;
+static GSource *ip4sock_source = NULL, *ip6sock_source = NULL;
 static GList *servers = NULL;
 static GList *protocols = NULL;
 static GsqDebugFlag debug_flags = GSQ_DEBUG_NONE;
 static guint signals[LAST_SIGNAL] = { 0 };
 
+static void gsq_fini ();
 static void gsq_querier_resolve (GsqQuerier *querier);
 static void gsq_querier_query (GsqQuerier *querier);
 static void gsq_querier_players_updated (GsqQuerier *querier);
@@ -230,6 +232,10 @@ gsq_querier_finalize (GObject *object)
 	
 	if (G_OBJECT_CLASS (gsq_querier_parent_class)->finalize)
 		G_OBJECT_CLASS (gsq_querier_parent_class)->finalize (object);
+	
+	/* free sockets if needed */
+	if (servers == NULL)
+		gsq_fini ();
 }
 
 
@@ -465,7 +471,10 @@ gsq_querier_new_parse (const gchar *address)
 	if (host == NULL)
 		return NULL;
 	
-	return gsq_querier_new (host, gport, qport, NULL);
+	GsqQuerier *querier = gsq_querier_new (host, gport, qport, NULL);
+	
+	g_free (host);
+	return querier;
 }
 
 
@@ -1039,7 +1048,6 @@ gsq_init (guint16 default_port)
 {
 	GInetAddress *iaddr;
 	GSocketAddress *saddr;
-	GSource *source;
 	GError *error = NULL;
 	
 	ip4sock = g_socket_new (G_SOCKET_FAMILY_IPV4, G_SOCKET_TYPE_DATAGRAM,
@@ -1053,11 +1061,11 @@ gsq_init (guint16 default_port)
 			g_object_unref (iaddr);
 		}
 		
-		source = g_socket_create_source (ip4sock, G_IO_IN, NULL);
-		g_source_set_callback (source, (GSourceFunc) gsq_socket_received,
+		ip4sock_source = g_socket_create_source (ip4sock, G_IO_IN, NULL);
+		g_source_set_callback (ip4sock_source, (GSourceFunc) gsq_socket_received,
 				NULL, NULL);
-		g_source_attach (source, NULL);
-		g_source_unref (source);
+		g_source_attach (ip4sock_source, NULL);
+		g_source_unref (ip4sock_source);
 	} else {
 		g_warning ("Could not create a IPv4 socket: %s", error->message);
 		g_error_free (error);
@@ -1074,11 +1082,11 @@ gsq_init (guint16 default_port)
 			g_object_unref (iaddr);
 		}
 		
-		source = g_socket_create_source (ip6sock, G_IO_IN, NULL);
-		g_source_set_callback (source, (GSourceFunc) gsq_socket_received,
+		ip6sock_source = g_socket_create_source (ip6sock, G_IO_IN, NULL);
+		g_source_set_callback (ip6sock_source, (GSourceFunc) gsq_socket_received,
 				NULL, NULL);
-		g_source_attach (source, NULL);
-		g_source_unref (source);
+		g_source_attach (ip6sock_source, NULL);
+		g_source_unref (ip6sock_source);
 	} else {
 		g_warning ("Could not create a IPv6 socket: %s", error->message);
 		g_error_free (error);
@@ -1114,14 +1122,13 @@ gsq_init (guint16 default_port)
 	return ip4sock != NULL && ip6sock != NULL;
 }
 
-void
+static void
 gsq_fini ()
 {
-	g_socket_close (ip4sock, NULL);
+	g_source_destroy (ip4sock_source);
 	g_object_unref (ip4sock);
-	g_socket_close (ip6sock, NULL);
+	g_source_destroy (ip6sock_source);
 	g_object_unref (ip6sock);
-	/* TODO: clear everything after finalizing a last querier */
 }
 
 guint16
