@@ -199,6 +199,7 @@ gsq_querier_reset (GsqQuerier *querier)
 	priv->ping = 0;
 	priv->detected = FALSE;
 	
+	gsq_querier_free_players (querier, priv->newplayers);
 	priv->newplayers = NULL;
 	gsq_querier_players_updated (querier);
 	
