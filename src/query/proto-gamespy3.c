@@ -68,37 +68,31 @@ free_plist_values (GPtrArray *array)
 
 
 static void
+free_packet_func (gpointer data)
+{
+	Packet *pkt = data;
+	
+	if (pkt->length > 0) {
+		g_slice_free1 (pkt->length, pkt->data);
+		pkt->data = NULL;
+		pkt->length = 0;
+	}
+}
+
+
+static void
 clear_private_data (Private *priv)
 {
-	gint i;
 	GHashTableIter iter;
 	GPtrArray *values;
 	
-	/* clear essential server info */
-	g_hash_table_remove (priv->sinfo, "hostname");
-	g_hash_table_remove (priv->sinfo, "p1073741825");
-	g_hash_table_remove (priv->sinfo, "mapname");
-	g_hash_table_remove (priv->sinfo, "map");
-	g_hash_table_remove (priv->sinfo, "numplayers");
-	g_hash_table_remove (priv->sinfo, "maxplayers");
-	g_hash_table_remove (priv->sinfo, "gamever");
-	g_hash_table_remove (priv->sinfo, "version");
-	g_hash_table_remove (priv->sinfo, "EngineVersion");
-	g_hash_table_remove (priv->sinfo, "password");
-	g_hash_table_remove (priv->sinfo, "s7");
-	g_hash_table_remove (priv->sinfo, "bf2_os");
+	/* clear server info */
+	g_hash_table_remove_all (priv->sinfo);
 	
 	/* clear player list */
 	g_hash_table_iter_init (&iter, priv->plist);
 	while (g_hash_table_iter_next (&iter, NULL, (gpointer *) &values))
 		g_ptr_array_set_size (values, 0);
-	
-	/* free packet data */
-	for (i = 0; i < priv->packets->len; i++) {
-		Packet *pkt = &g_array_index (priv->packets, Packet, i);
-		if (pkt->data)
-			g_slice_free1 (pkt->length, pkt->data);
-	}
 	
 	g_array_set_size (priv->packets, 0);
 	priv->number = 0;
@@ -108,19 +102,12 @@ clear_private_data (Private *priv)
 void
 gsq_gamespy3_free (GsqQuerier *querier)
 {
-	gint i;
 	Private *priv = gsq_querier_get_pdata (querier);
 	
 	g_hash_table_unref (priv->sinfo);
 	g_hash_table_unref (priv->plist);
 	
-	for (i = 0; i < priv->packets->len; i++) {
-		Packet *pkt = &g_array_index (priv->packets, Packet, i);
-		if (pkt->data)
-			g_slice_free1 (pkt->length, pkt->data);
-	}
 	g_array_free (priv->packets, TRUE);
-	
 	g_slice_free (Private, priv);
 }
 
@@ -159,12 +146,13 @@ get_sinfo (GHashTable *sinfo, const gchar *data, const gchar *end)
 {
 	gchar *p = (gchar *) data;
 	
-	while (*p && p < end) {
+	while (p < end && *p) {
 		gchar *key = gsq_get_cstring (&p);
 		if (p >= end)
 			break;
+		
 		gchar *value = gsq_get_cstring (&p);
-		g_hash_table_replace (sinfo, key, value);
+		g_hash_table_insert (sinfo, key, value);
 	}
 	
 	return p + 1;
@@ -176,29 +164,31 @@ get_plist (GHashTable *plist, const gchar *data, const gchar *end)
 {
 	gchar *p = (gchar *) data;
 	
-	while (*p && p < end) {
+	while (p < end && *p) {
 		gchar *field = gsq_get_cstring (&p);
 		if (p >= end)
 			break;
 		
 		guint8 number = gsq_get_uint8 (&p);
 		
+		/*  */
 		GPtrArray *a = g_hash_table_lookup (plist, field);
-		if (!a) {
+		if (a == NULL) {
 			a = g_ptr_array_new ();
-			g_hash_table_insert (plist, field, a);
+			g_hash_table_insert (plist, g_strdup (field), a);
 		}
+		
 		/* g_assert (number <= a->len); */
 		g_return_val_if_fail (number <= a->len, NULL);	/* server can mess around */
 		g_ptr_array_set_size (a, number);				/* start with */
 		
-		while (*p && p < end) {
+		while (p < end && *p) {
 			gchar *value = gsq_get_cstring (&p);
 			g_ptr_array_add (a, value);
 		}
 		
 		/* Unreal Tournament 3 can put empty strings after each block */
-		while (*p == 0)
+		while (p < end && *p == 0)
 			p++;
 	}
 	
@@ -241,7 +231,7 @@ got_all_packets (Private *priv)
 		return FALSE;
 	
 	for (i = 0; i < priv->packets->len; i++)
-		if (g_array_index (priv->packets, Packet, i).length == 0)
+		if (g_array_index (priv->packets, Packet, i).data == NULL)
 			return FALSE;
 	
 	return TRUE;
@@ -484,9 +474,10 @@ gsq_gamespy3_process (GsqQuerier *querier, guint16 qport, const gchar *data,
 			priv = g_slice_new0 (Private);
 			priv->qid = queryid;
 			priv->packets = g_array_sized_new (FALSE, TRUE, sizeof (Packet), 2);
+			g_array_set_clear_func (priv->packets, free_packet_func);
 			priv->sinfo = g_hash_table_new (g_str_hash, g_str_equal);
 			priv->plist = g_hash_table_new_full (g_str_hash, g_str_equal,
-					NULL, (GDestroyNotify) free_plist_values);
+					g_free, (GDestroyNotify) free_plist_values);
 			gsq_querier_set_pdata (querier, priv);
 		}
 		
