@@ -288,6 +288,9 @@ gs_application_local_command_line (GApplication *app, gchar ***argumnets,
 		exit (EXIT_FAILURE);
 	}
 	
+	// g_option_context_free (context);
+	/* FIXME */
+	
 	if (version) {
 		g_print ("Game Server Tool v" GS_VERSION "\n");
 		exit (EXIT_SUCCESS);
