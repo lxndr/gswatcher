@@ -81,7 +81,7 @@ gtk_popup_button_new ()
 
 
 static void
-gtk_popup_button_dispose(GObject* object)
+gtk_popup_button_dispose (GObject* object)
 {
 	GtkPopupButton *popup_button = GTK_POPUP_BUTTON (object);
 	
