@@ -100,10 +100,13 @@ gsq_watcher_new (const gchar *address)
 	if (host == NULL)
 		return NULL;
 	
-	return g_object_new (GSQ_TYPE_WATCHER, "address", host,
+	GsqWatcher *watcher = g_object_new (GSQ_TYPE_WATCHER, "address", host,
 			"gport", gport, "gport-auto", gport == 0,
 			"qport", qport, "qport-auto", qport == 0,
 			NULL);
+	g_free (host);
+	
+	return watcher;
 }
 
 
