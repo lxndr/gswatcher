@@ -38,16 +38,13 @@
 #include "proto-gamespy.h"
 #include "utils.h"
 
+#define MAX_PACKETS 32
 
-typedef struct _Packet {
-	gchar *data;
-	gsize length;
-} Packet;
 
 typedef struct _Private {
 	gint id;
 	gint max;
-	GArray *packets;
+	GPtrArray *packets;
 	GHashTable *values;
 } Private;
 
@@ -80,14 +77,9 @@ gsq_gamespy_query (GsqQuerier *querier)
 void
 gsq_gamespy_free (GsqQuerier *querier)
 {
-	gint i;
 	Private *priv = gsq_querier_get_pdata (querier);
-	g_hash_table_destroy (priv->values);
-	for (i = 0; i < priv->packets->len; i++) {
-		Packet *pkt = &g_array_index (priv->packets, Packet, i);
-		g_slice_free1 (pkt->length, pkt->data);
-	}
-	g_array_free (priv->packets, TRUE);
+	g_hash_table_unref (priv->values);
+	g_ptr_array_free (priv->packets, TRUE);
 	g_slice_free (Private, priv);
 }
 
@@ -95,20 +87,15 @@ gsq_gamespy_free (GsqQuerier *querier)
 static void
 gamespy_reset (Private *priv)
 {
-	gint i;
-	for (i = 0; i < priv->packets->len; i++) {
-		Packet *pkt = &g_array_index (priv->packets, Packet, i);
-		if (pkt->data)
-			g_slice_free1 (pkt->length, pkt->data);
-	}
-	g_array_set_size (priv->packets, 0);
+	g_hash_table_remove_all (priv->values);
+	g_ptr_array_set_size (priv->packets, 0);
 	priv->id = 0;
 	priv->max = 0;
 }
 
 
 static void
-gamespy_add_fields (GsqQuerier *querier)
+add_fields (GsqQuerier *querier)
 {
 	const gchar *game_id = querier->gameid->str;
 	
@@ -141,8 +128,24 @@ get_team_name_to (gint num)
 }
 
 
+static gboolean
+got_all_packets (Private *priv)
+{
+	gint i;
+	
+	if (priv->max == 0 || priv->packets->len < priv->max)
+		return FALSE;
+	
+	for (i = 0; i < priv->packets->len; i++)
+		if (g_ptr_array_index (priv->packets, i) == NULL)
+			return FALSE;
+	
+	return TRUE;
+}
+
+
 static void
-gamespy_fill (GsqQuerier *querier, GHashTable *values)
+fill_info (GsqQuerier *querier, GHashTable *values)
 {
 	const gchar *gameid = querier->gameid->str;
 	
@@ -217,50 +220,26 @@ gamespy_fill (GsqQuerier *querier, GHashTable *values)
 }
 
 
-gboolean
-gsq_gamespy_process (GsqQuerier *querier, guint16 qport,
-		const gchar *data, gssize size)
+static gboolean
+parse_packet (GHashTable *info, gchar *data)
 {
-	Private *priv = gsq_querier_get_pdata (querier);
-	if (!priv) {
-		/* initialize private data */
-		priv = g_slice_new0 (Private);
-		priv->packets = g_array_sized_new (FALSE, TRUE, sizeof (Packet), 4);
-		priv->values = g_hash_table_new (g_str_hash, g_str_equal);
-		gsq_querier_set_pdata (querier, priv);
-	}
-	
-	/* copy data */
-	Packet pkt;
-	pkt.length = size + 1;
-	pkt.data = g_slice_alloc (pkt.length);
-	memcpy (pkt.data, data, size);
-	pkt.data[size] = '\0';
-	
-	/* remove special keys */
-	g_hash_table_remove (priv->values, "queryid");
-	g_hash_table_remove (priv->values, "final");
-	
-	/* parse data */
-	gchar *f, *v, *k = pkt.data;
+	gchar *f, *v, *k = data;
 	if (*k++ != '\\')
-		goto error;
+		return FALSE;
 	
 	while (TRUE) {
 		/* key */
-		f = strchr (k, '\\');
-		if (f)
+		if ((f = strchr (k, '\\')))
 			*f = '\0';
 		else
-			break;
+			return FALSE;
 		
 		/* value */
 		v = f + 1;
-		f = strchr (v, '\\');
-		if (f)
+		if ((f = strchr (v, '\\')))
 			*f = '\0';
 		
-		g_hash_table_replace (priv->values, k, v);
+		g_hash_table_insert (info, k, v);
 		
 		if (f)
 			k = f + 1;
@@ -268,110 +247,187 @@ gsq_gamespy_process (GsqQuerier *querier, guint16 qport,
 			break;
 	}
 	
-	/* found out if this is a new packet set */
-	gchar *queryid = g_hash_table_lookup (priv->values, "queryid");
-	if (!queryid)
-		goto error;
-	f = strchr (queryid, '.');
-	if (!f)
-		goto error;
-	gint id = atoi (queryid);
-	gint num = atoi (f + 1);
+	return TRUE;
+}
+
+
+static gint
+get_queryid (const gchar *data, gssize length, gint *qid, gint *num, gboolean *final)
+{
+	static GRegex *re = NULL;
+	GError *error = NULL;
 	
-	if (id != priv->id) {
-		gamespy_reset (priv);
-		priv->id = id;
+	if (!re) {
+		re = g_regex_new ("(\\\\final\\\\)?\\\\queryid\\\\(\\d+)\\.(\\d+)(\\\\final\\\\)?$",
+				G_REGEX_OPTIMIZE, 0, &error);
+		if (!re) {
+			g_warning (error->message);
+			g_error_free (error);
+			return -1;
+		}
 	}
 	
-	/* found out how many packets there is in the set */
-	if (g_hash_table_lookup (priv->values, "final"))
-		priv->max = num;
+	GMatchInfo *match;
+	gint ret = -1, p;
 	
-	const gchar *gameid = querier->gameid->str;
-	if (!*gameid) {
-		/* while protocol is being detected, we only need the first packet */
-		if (num != 1)
-			goto error;
-		
-		/* determine game */
-		gchar *gamename = gsq_lookup_value (priv->values, "gamename", "game_id", NULL);
-		gchar *gametype = g_hash_table_lookup (priv->values, "gametype");
-		
-		if (gamename && strcmp (gamename, "redorchestra") == 0) {
-			if (gametype && (strcmp (gametype, "KFGameType") == 0 ||
-					strcmp (gametype, "SRGameType") == 0)) {
-				/* Killing Floor */
-				g_string_assign (querier->gameid, "kf");
-				g_string_assign (querier->gamename, "Killing Floor");
-			} else {
-				/* Red Orchestra OR game based on it */
-				g_string_assign (querier->gameid, "ro");
-				g_string_assign (querier->gamename, "Red Orchestra");
-				if (gametype)
-					g_string_assign (querier->gamemode, gametype);
-			}
-		} else if (gamename && strcmp (gamename, "ut") == 0) {
-			if (gametype && strncmp (gametype, "TO", 2) == 0) {
-				/* Tactical Ops */
-				g_string_assign (querier->gameid, "to-aot");
-				g_string_assign (querier->gamename, "Tactical Ops: Assault on Terror");
-				gchar version[8];
-				g_sprintf (version, "%c.%c.%c",
-						gametype[2], gametype[3], gametype[4]);
-				g_string_assign (querier->version, version);
-			} else {
-				/* Unreal Tournament */
-				g_string_assign (querier->gameid, "ut");
-				g_string_assign (querier->gamename, "Unreal Tournament");
+	if (g_regex_match_full (re, data, length, length < 24 ? 0 : length - 24, 0, &match, &error)) {
+		g_match_info_fetch_pos (match, 0, &ret, NULL);
+		/* query id */
+		g_match_info_fetch_pos (match, 2, &p, NULL);
+		*qid = atoi (&data[p]);
+		/* number */
+		g_match_info_fetch_pos (match, 3, &p, NULL);
+		gint d = atoi (&data[p]);
+		if (d > 0 && d <= MAX_PACKETS)
+			*num = d - 1;
+		else
+			ret = -1;
+		/* final */
+		g_match_info_fetch_pos (match, 1, &p, NULL);
+		if (p == -1)
+			g_match_info_fetch_pos (match, 4, &p, NULL);
+		*final = p != -1;
+	} else {
+		if (error) {
+			g_warning (error->message);
+			g_error_free (error);
+		}
+	}
+	
+	g_match_info_free (match);
+	return ret;
+}
+
+
+static gboolean
+detect_game (GsqQuerier *querier, GHashTable *values)
+{
+	gchar *gamename = gsq_lookup_value (values, "gamename", "game_id", NULL);
+	gchar *gametype = g_hash_table_lookup (values, "gametype");
+	
+	if (gamename && strcmp (gamename, "redorchestra") == 0) {
+		if (gametype && (strcmp (gametype, "KFGameType") == 0 ||
+				strcmp (gametype, "SRGameType") == 0)) {
+			/* Killing Floor */
+			g_string_assign (querier->gameid, "kf");
+			g_string_assign (querier->gamename, "Killing Floor");
+		} else {
+			/* Red Orchestra OR game based on it */
+			g_string_assign (querier->gameid, "ro");
+			g_string_assign (querier->gamename, "Red Orchestra");
+			if (gametype)
 				g_string_assign (querier->gamemode, gametype);
-			}
-		} else if (gamename && (strcmp (gamename, "bfield1942") == 0 ||
-				strcmp (gamename, "bfield1942d") == 0)) {
-			/* Battlefield 1942 */
-			g_string_assign (querier->gameid, "bf1942");
-			g_string_assign (querier->gamename, "Battlefield 1942");
-		} else if (gamename && strcmp (gamename, "bfvietnam") == 0) {
-			/* Battlefield Vietnam uses both GameSpy and GameSpy 2 protocols.
-				We ignore GameSpy 1. */
-			goto error;
-		} else {
-			/* Something else */
-			g_string_assign (querier->gameid, gamename);
-			g_string_assign (querier->gamename, gamename);
 		}
-		
-		gamespy_add_fields (querier);
-		
-		/* check if this packet belongs to the querier */
-		gchar *hostport = g_hash_table_lookup (priv->values, "hostport");
-		guint16 port;
-		if (!(hostport && (port = atoi (hostport))))
-			goto error;
-		guint16 gport = gsq_querier_get_gport (querier);
-		if (gport > 0) {
-			if (gport != port)
-				goto error;
+	} else if (gamename && strcmp (gamename, "ut") == 0) {
+		if (gametype && strncmp (gametype, "TO", 2) == 0) {
+			/* Tactical Ops */
+			g_string_assign (querier->gameid, "to-aot");
+			g_string_assign (querier->gamename, "Tactical Ops: Assault on Terror");
+			gchar version[8];
+			g_sprintf (version, "%c.%c.%c",
+					gametype[2], gametype[3], gametype[4]);
+			g_string_assign (querier->version, version);
 		} else {
-			gameid = querier->gameid->str;
-			if (!((strcmp (gameid, "kf") == 0 && port == 7707) ||
-					(strcmp (gameid, "ro") == 0 && port == 7757) ||
-					(strcmp (gameid, "to-aot") == 0 && port == 7777) ||
-					(strcmp (gameid, "ut") == 0 && port == 7777) ||
-					(strcmp (gameid, "bf1942") == 0 && port == 14567)))
-				goto error;
+			/* Unreal Tournament */
+			g_string_assign (querier->gameid, "ut");
+			g_string_assign (querier->gamename, "Unreal Tournament");
+			g_string_assign (querier->gamemode, gametype);
 		}
+	} else if (gamename && (strcmp (gamename, "bfield1942") == 0 ||
+			strcmp (gamename, "bfield1942d") == 0)) {
+		/* Battlefield 1942 */
+		g_string_assign (querier->gameid, "bf1942");
+		g_string_assign (querier->gamename, "Battlefield 1942");
+	} else if (gamename && strcmp (gamename, "bfvietnam") == 0) {
+		/* Battlefield Vietnam uses both GameSpy and GameSpy 2 protocols.
+			We ignore GameSpy 1. */
+		return FALSE;
+	} else {
+		/* Something else */
+		g_string_assign (querier->gameid, gamename);
+		g_string_assign (querier->gamename, gamename);
 	}
 	
-	/* check if we got all the packets */
-	g_array_append_val (priv->packets, pkt);
-	if (priv->max > 0 && priv->packets->len == priv->max) {
-		gamespy_fill (querier, priv->values);
-		gamespy_reset (priv);
+	add_fields (querier);
+	
+	/* check if this packet belongs to the querier */
+	gchar *hostport = g_hash_table_lookup (values, "hostport");
+	guint16 port;
+	if (!(hostport && (port = atoi (hostport))))
+		return FALSE;
+	guint16 gport = gsq_querier_get_gport (querier);
+	if (gport > 0) {
+		if (gport != port)
+			return FALSE;
+	} else {
+		const gchar *gameid = querier->gameid->str;
+		if (!((strcmp (gameid, "kf") == 0 && port == 7707) ||
+				(strcmp (gameid, "ro") == 0 && port == 7757) ||
+				(strcmp (gameid, "to-aot") == 0 && port == 7777) ||
+				(strcmp (gameid, "ut") == 0 && port == 7777) ||
+				(strcmp (gameid, "bf1942") == 0 && port == 14567)))
+			return FALSE;
 	}
 	
 	return TRUE;
+}
+
+
+gboolean
+gsq_gamespy_process (GsqQuerier *querier, guint16 qport,
+		const gchar *data, gssize size)
+{
+	if (size < 14 || *data != '\\')
+		return FALSE;
 	
-error:
-	g_slice_free1 (pkt.length, pkt.data);
-	return FALSE;
+	gint qid, num, i;
+	gboolean final;
+	size = get_queryid (data, size, &qid, &num, &final);
+	if (size == -1)
+		return FALSE;
+	
+	Private *priv = gsq_querier_get_pdata (querier);
+	if (!priv) {
+		priv = g_slice_new0 (Private);
+		priv->packets = g_ptr_array_new_full (4, g_free);
+		priv->values = g_hash_table_new (g_str_hash, g_str_equal);
+		gsq_querier_set_pdata (querier, priv);
+	}
+	
+	if (qid != priv->id) {
+		gamespy_reset (priv);
+		priv->id = qid;
+	}
+	
+	if (final)
+		priv->max = num + 1;
+	
+	if (!gsq_querier_is_detected (querier)) {
+		if (num == 0) {
+			gchar *tmp_data = g_strndup (data, size);
+			GHashTable *tmp_table = g_hash_table_new (g_str_hash, g_str_equal);
+			gboolean ret = parse_packet (tmp_table, tmp_data) &&
+					detect_game (querier, tmp_table);
+			g_hash_table_unref (tmp_table);
+			g_free (tmp_data);
+			if (ret == FALSE)
+				return FALSE;
+		}
+	}
+	
+	/* store data */
+	if (num >= priv->packets->len)
+		g_ptr_array_set_size (priv->packets, num + 1);
+	g_ptr_array_index (priv->packets, num) = g_strndup (data, size);
+	
+	if (got_all_packets (priv)) {
+		for (i = 0; i < priv->max; i++)
+			parse_packet (priv->values, g_ptr_array_index (priv->packets, i));
+		fill_info (querier, priv->values);
+		gamespy_reset (priv);
+		gsq_querier_emit_info_update (querier);
+		gsq_querier_emit_player_update (querier);
+	}
+	
+	return TRUE;
 }
