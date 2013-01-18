@@ -322,10 +322,12 @@ gs_client_querier_map_changed (GsqQuerier *querier, GsClient *client)
 static void
 gs_client_querier_gameid_changed (GsqQuerier *querier, GsClient *client)
 {
-	const gchar *gameid = querier->gameid->str;
+	if (client->console) {
+		g_object_unref (client->console);
+		client->console = NULL;
+	}
 	
-	/* change console protocol */
-	GsqConsole *old = client->console;
+	const gchar *gameid = querier->gameid->str;
 	
 	GType type;
 	if (strcmp (gameid, "ss3") == 0)
@@ -361,9 +363,6 @@ gs_client_querier_gameid_changed (GsqQuerier *querier, GsClient *client)
 			G_CALLBACK (gs_client_console_authenticated), client);
 	g_signal_connect (client->console, "disconnected",
 			G_CALLBACK (gs_client_console_disconnected), client);
-	
-	if (old)
-		g_object_unref (old);
 }
 
 
