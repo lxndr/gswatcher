@@ -82,6 +82,8 @@ static void
 gsq_console_source_finalize (GObject *object)
 {
 	g_string_free (GSQ_CONSOLE_SOURCE (object)->priv->res, TRUE);
+	
+	G_OBJECT_CLASS (gsq_console_source_parent_class)->finalize (object);
 }
 
 

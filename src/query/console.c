@@ -55,7 +55,7 @@ struct _GsqConsolePrivate {
 	guint16 port;
 	gchar *password;
 	GSocket *socket;
-	guint source;
+	GSource *socket_source;
 	guint timeout;
 	guint timer;
 	gboolean working;
@@ -102,7 +102,7 @@ gsq_console_finalize (GObject *object)
 	}
 	
 	if (priv->socket) {
-		g_socket_close (priv->socket, NULL);
+		g_source_destroy (priv->socket_source);
 		g_object_unref (priv->socket);
 	}
 	
@@ -112,6 +112,8 @@ gsq_console_finalize (GObject *object)
 	}
 	
 	g_byte_array_free (priv->chunk, TRUE);
+	
+	G_OBJECT_CLASS (gsq_console_parent_class)->finalize (object);
 }
 
 
@@ -170,26 +172,26 @@ gsq_console_get_property (GObject *object, guint prop_id, GValue *value,
 static void
 gsq_console_class_init (GsqConsoleClass *class)
 {
-	GObjectClass *gobject_class = G_OBJECT_CLASS (class);
-	gobject_class->set_property = gsq_console_set_property;
-	gobject_class->get_property = gsq_console_get_property;
-	gobject_class->finalize = gsq_console_finalize;
+	GObjectClass *object_class = G_OBJECT_CLASS (class);
+	object_class->set_property = gsq_console_set_property;
+	object_class->get_property = gsq_console_get_property;
+	object_class->finalize = gsq_console_finalize;
 	
-	g_type_class_add_private (gobject_class, sizeof (GsqConsolePrivate));
+	g_type_class_add_private (object_class, sizeof (GsqConsolePrivate));
 	
-	g_object_class_install_property (gobject_class, PROP_HOST,
+	g_object_class_install_property (object_class, PROP_HOST,
 			g_param_spec_string ("host", "Host", "Host name",
 			NULL, G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
 	
-	g_object_class_install_property (gobject_class, PROP_PORT,
+	g_object_class_install_property (object_class, PROP_PORT,
 			g_param_spec_uint ("port", "Port", "Host port",
 			0, G_MAXUINT16, 0, G_PARAM_WRITABLE | G_PARAM_READABLE));
 	
-	g_object_class_install_property (gobject_class, PROP_PASSWORD,
+	g_object_class_install_property (object_class, PROP_PASSWORD,
 			g_param_spec_string ("password", "Password", "RCon password",
 			NULL, G_PARAM_WRITABLE | G_PARAM_READABLE));
 	
-	g_object_class_install_property (gobject_class, PROP_TIMEOUT,
+	g_object_class_install_property (object_class, PROP_TIMEOUT,
 			g_param_spec_uint ("timeout", "Timeout", "Timeout",
 			0, 120, 10, G_PARAM_WRITABLE | G_PARAM_READABLE | G_PARAM_CONSTRUCT));
 	
@@ -212,9 +214,10 @@ gsq_console_class_init (GsqConsoleClass *class)
 static void
 gsq_console_init (GsqConsole *console)
 {
-	console->priv = G_TYPE_INSTANCE_GET_PRIVATE (console, GSQ_TYPE_CONSOLE,
-			GsqConsolePrivate);
-	console->priv->chunk = g_byte_array_new ();
+	GsqConsolePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE (console,
+			GSQ_TYPE_CONSOLE, GsqConsolePrivate);
+	priv->chunk = g_byte_array_new ();
+	console->priv = priv;
 }
 
 
@@ -283,11 +286,10 @@ close_connection (GsqConsole *console)
 	}
 	
 	if (priv->socket) {
-		if (priv->source) {
-			g_source_remove (priv->source);
-			priv->source = 0;
+		if (priv->socket_source) {
+			g_source_destroy (priv->socket_source);
+			priv->socket_source = NULL;
 		}
-		g_socket_close (priv->socket, NULL);
 		g_object_unref (priv->socket);
 		priv->socket = NULL;
 	}
@@ -487,14 +489,16 @@ socket_connected (GSocket *socket, GIOCondition cond, GsqConsole *console)
 	if (g_socket_check_connect_result (socket, &error)) {
 		if (priv->password && *priv->password) {
 			stop_timer (console);
+			g_source_destroy (priv->socket_source);
 			g_socket_set_blocking (priv->socket, TRUE);
 			g_signal_emit (console, signals[SIGNAL_CONNECTED], 0);
 			
 			/* create receivng source */
-			GSource *source = g_socket_create_source (socket, G_IO_IN, NULL);
-			g_source_set_callback (source, (GSourceFunc) socket_received,
+			priv->socket_source = g_socket_create_source (socket, G_IO_IN, NULL);
+			g_source_set_callback (priv->socket_source, (GSourceFunc) socket_received,
 					console, NULL);
-			priv->source = g_source_attach (source, NULL);
+			g_source_attach (priv->socket_source, NULL);
+			g_source_unref (priv->socket_source);
 		} else {
 			g_set_error_literal (&error, GSQ_CONSOLE_ERROR, GSQ_CONSOLE_ERROR_PASS,
 					"Password is not specified");
@@ -515,8 +519,6 @@ address_resolved (GSocketAddressEnumerator *enumerator, GAsyncResult *result,
 	GError *error = NULL;
 	GSocketAddress *saddr;
 	
-	g_return_if_fail (priv->socket == NULL);
-	
 	if (!(saddr = g_socket_address_enumerator_next_finish (enumerator, result,
 			&error))) {
 		throw_error (console, error);
@@ -534,9 +536,11 @@ address_resolved (GSocketAddressEnumerator *enumerator, GAsyncResult *result,
 	
 	/* create connecting source */
 	g_socket_set_blocking (priv->socket, FALSE);
-	GSource *source = g_socket_create_source (priv->socket, G_IO_OUT, NULL);
-	g_source_set_callback (source, (GSourceFunc) socket_connected, console, NULL);
-	priv->source = g_source_attach (source, NULL);
+	priv->socket_source = g_socket_create_source (priv->socket, G_IO_OUT, NULL);
+	g_source_set_callback (priv->socket_source, (GSourceFunc) socket_connected,
+			console, NULL);
+	g_source_attach (priv->socket_source, NULL);
+	g_source_unref (priv->socket_source);
 	
 	/* connect */
 	g_socket_connect (priv->socket, saddr, NULL, &error);
@@ -598,7 +602,7 @@ gsq_console_send_full (GsqConsole *console, const gchar *command, gint attempts,
 	Request *req = g_slice_new0 (Request);
 	req->command = g_strdup (command);
 	req->result = g_simple_async_result_new (G_OBJECT (console), callback,
-			udata, gsq_console_send);
+			udata, gsq_console_send_full);
 	req->attempts = attempts;
 	priv->queue = g_list_append (priv->queue, req);
 	
@@ -614,7 +618,7 @@ gchar *
 gsq_console_send_finish (GsqConsole *console, GAsyncResult *result, GError **error)
 {
 	g_return_val_if_fail (g_simple_async_result_is_valid (result,
-			G_OBJECT (console), gsq_console_send), NULL);
+			G_OBJECT (console), gsq_console_send_full), NULL);
 	
 	GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (result);
 	if (g_simple_async_result_propagate_error (simple, error))

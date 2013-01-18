@@ -62,9 +62,12 @@ struct _GsqConsole {
 struct _GsqConsoleClass {
 	GObjectClass parent_class;
 	
+	/* signals */
 	void (*connected) (GsqConsole *console);
 	void (*disconnected) (GsqConsole *console);
 	void (*authenticated) (GsqConsole *console);
+	
+	/* private methods */
 	gboolean (*command) (GsqConsole *console, const gchar *msg, GError **error);
 	gboolean (*received) (GsqConsole *console, const gchar *data, gsize length,
 			GError **error);
