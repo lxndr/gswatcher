@@ -60,6 +60,7 @@ gsq_console_telnet_init (GsqConsoleTelnet *con)
 static void
 gsq_console_telnet_finalize (GObject *object)
 {
+	G_OBJECT_CLASS (gsq_console_telnet_parent_class)->finalize (object);
 }
 
 
