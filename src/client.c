@@ -560,7 +560,7 @@ gs_client_get_connect_command ()
 	return connect_command;
 }
 
-#ifdef G_OS_WIN32
+
 static gboolean
 command_eval_callback (const GMatchInfo *minfo, GString *result, GsClient *client)
 {
@@ -572,21 +572,27 @@ command_eval_callback (const GMatchInfo *minfo, GString *result, GsClient *clien
 	g_free (match);
 	return FALSE;
 }
-#endif
+
 
 void
 gs_client_connect_to_game (GsClient *client)
 {
-#ifdef G_OS_WIN32
 	GRegex *reg = g_regex_new ("\\$\\(.+\\)", 0, 0, NULL);
 	gchar *command = g_regex_replace_eval (reg, connect_command, -1, 0, 0,
 			(GRegexEvalCallback) command_eval_callback, client, NULL);
 	g_regex_unref (reg);
 	
+#if defined (G_OS_WIN32)
 	int ret = (int) ShellExecute (NULL, "open", command, NULL, NULL, SW_SHOWNORMAL);
 	if (ret <= 32)
 		g_warning ("ShellExecute error: code %d", (int) ret);
+#elif defined (G_OS_UNIX)
+	GError *error = NULL;
+	if (!g_app_info_launch_default_for_uri (command, NULL, &error)) {
+		g_warning ("Could not run commact command: %s", error->message);
+		g_error_free (error);
+	}
+#endif
 	
 	g_free (command);
-#endif
 }
