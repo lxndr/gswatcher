@@ -228,6 +228,8 @@ gsq_querier_finalize (GObject *object)
 	g_string_free (querier->version, TRUE);
 	if (priv->address)
 		g_free (priv->address);
+	if (priv->iaddr)
+			g_object_unref (priv->iaddr);
 	g_hash_table_destroy (priv->extra);
 	g_array_free (priv->fields, TRUE);
 	
