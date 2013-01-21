@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.7\n"
 "Report-Msgid-Bugs-To: lxndr87@users.sourceforge.net\n"
-"POT-Creation-Date: 2013-01-20 04:41+0400\n"
+"POT-Creation-Date: 2013-01-21 05:32+0400\n"
 "PO-Revision-Date: 2013-01-18 18:42+0400\n"
 "Last-Translator: Alexander AB\n"
 "Language-Team: Russian\n"
@@ -176,32 +176,32 @@ msgstr ""
 msgid "unknown"
 msgstr "неизвестно"
 
-#: src/gui-server-list.c:631
+#: src/gui-server-list.c:635
 msgid "Favorite servers"
 msgstr "Любимые сервера"
 
-#: src/gui-server-list.c:643
+#: src/gui-server-list.c:647
 msgid "Other servers"
 msgstr "Другие сервера"
 
-#: src/gui-server-list.c:665
+#: src/gui-server-list.c:669
 msgctxt "Server"
 msgid "Name"
 msgstr "Название"
 
-#: src/gui-server-list.c:710
+#: src/gui-server-list.c:714
 msgid "Game"
 msgstr "Игра"
 
-#: src/gui-server-list.c:732
+#: src/gui-server-list.c:736
 msgid "Map"
 msgstr "Карта"
 
-#: src/gui-server-list.c:748
+#: src/gui-server-list.c:752
 msgid "Players"
 msgstr "Игроки"
 
-#: src/gui-server-list.c:764 src/query/proto-gamespy.c:104
+#: src/gui-server-list.c:768 src/query/proto-gamespy.c:104
 #: src/query/proto-gamespy.c:108 src/query/proto-gamespy.c:112
 #: src/query/proto-gamespy.c:115 src/query/proto-gamespy3.c:378
 #: src/query/proto-gamespy3.c:390 src/query/proto-gamespy3.c:401
