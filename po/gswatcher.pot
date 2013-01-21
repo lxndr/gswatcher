@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: lxndr87@users.sourceforge.net\n"
-"POT-Creation-Date: 2013-01-17 19:14+0400\n"
+"POT-Creation-Date: 2013-01-20 15:12+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -61,27 +61,27 @@ msgstr ""
 msgid "Command to play sounds"
 msgstr ""
 
-#: src/gswatcher.c:388
+#: src/gswatcher.c:385
 #, c-format
 msgid "Couldn't save buddy list: %s"
 msgstr ""
 
-#: src/gswatcher.c:490
+#: src/gswatcher.c:487
 #, c-format
 msgid "Couldn't load buddy list: %s"
 msgstr ""
 
-#: src/gswatcher.c:543
+#: src/gswatcher.c:540
 #, c-format
 msgid "Couldn't save server list: %s"
 msgstr ""
 
-#: src/gswatcher.c:631
+#: src/gswatcher.c:628
 #, c-format
 msgid "Player %s has connected"
 msgstr ""
 
-#: src/gswatcher.c:632 src/gswatcher.c:661
+#: src/gswatcher.c:629 src/gswatcher.c:658
 #, c-format
 msgid ""
 "Address: %s\n"
@@ -89,17 +89,17 @@ msgid ""
 "Players: %d / %d"
 msgstr ""
 
-#: src/gswatcher.c:660
+#: src/gswatcher.c:657
 #, c-format
 msgid "Server with %s has free slot"
 msgstr ""
 
-#: src/gswatcher.c:750
+#: src/gswatcher.c:747
 #, c-format
 msgid "Are you sure you want to remove \"%s\" ( %s) from the list?"
 msgstr ""
 
-#: src/gswatcher.c:942
+#: src/gswatcher.c:939
 #, c-format
 msgid "Couldn't save preferences to %s: %s"
 msgstr ""
