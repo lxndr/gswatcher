@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.7\n"
 "Report-Msgid-Bugs-To: lxndr87@users.sourceforge.net\n"
-"POT-Creation-Date: 2013-01-17 19:14+0400\n"
+"POT-Creation-Date: 2013-01-20 15:36+0400\n"
 "PO-Revision-Date: 2013-01-18 18:42+0400\n"
 "Last-Translator: Alexander AB\n"
 "Language-Team: Russian\n"
@@ -62,27 +62,27 @@ msgstr "Использовать свой уведомитель"
 msgid "Command to play sounds"
 msgstr "Путь к проигрывателю"
 
-#: src/gswatcher.c:388
+#: src/gswatcher.c:385
 #, c-format
 msgid "Couldn't save buddy list: %s"
 msgstr "Не удалось сохранить список друзей: %s"
 
-#: src/gswatcher.c:490
+#: src/gswatcher.c:487
 #, c-format
 msgid "Couldn't load buddy list: %s"
 msgstr "Не удалось загрузить список друзей: %s"
 
-#: src/gswatcher.c:543
+#: src/gswatcher.c:540
 #, c-format
 msgid "Couldn't save server list: %s"
 msgstr "Не удалось сохранить список серверов: %s"
 
-#: src/gswatcher.c:631
+#: src/gswatcher.c:628
 #, c-format
 msgid "Player %s has connected"
 msgstr "Игрок %s подключился"
 
-#: src/gswatcher.c:632 src/gswatcher.c:661
+#: src/gswatcher.c:629 src/gswatcher.c:658
 #, c-format
 msgid ""
 "Address: %s\n"
@@ -93,17 +93,17 @@ msgstr ""
 "Сервер: %s\n"
 "Игроки: %d / %d"
 
-#: src/gswatcher.c:660
+#: src/gswatcher.c:657
 #, c-format
 msgid "Server with %s has free slot"
 msgstr "На сервере с %s есть свободный слот"
 
-#: src/gswatcher.c:750
+#: src/gswatcher.c:747
 #, c-format
 msgid "Are you sure you want to remove \"%s\" ( %s) from the list?"
 msgstr "Вы уверены, что хотите удалить \"%s\" (%s) из списка?"
 
-#: src/gswatcher.c:942
+#: src/gswatcher.c:939
 #, c-format
 msgid "Couldn't save preferences to %s: %s"
 msgstr "Настройки не сохранены"
@@ -176,32 +176,32 @@ msgstr ""
 msgid "unknown"
 msgstr "неизвестно"
 
-#: src/gui-server-list.c:631
+#: src/gui-server-list.c:635
 msgid "Favorite servers"
 msgstr "Любимые сервера"
 
-#: src/gui-server-list.c:643
+#: src/gui-server-list.c:647
 msgid "Other servers"
 msgstr "Другие сервера"
 
-#: src/gui-server-list.c:665
+#: src/gui-server-list.c:669
 msgctxt "Server"
 msgid "Name"
 msgstr "Название"
 
-#: src/gui-server-list.c:710
+#: src/gui-server-list.c:714
 msgid "Game"
 msgstr "Игра"
 
-#: src/gui-server-list.c:732
+#: src/gui-server-list.c:736
 msgid "Map"
 msgstr "Карта"
 
-#: src/gui-server-list.c:748
+#: src/gui-server-list.c:752
 msgid "Players"
 msgstr "Игроки"
 
-#: src/gui-server-list.c:764 src/query/proto-gamespy.c:104
+#: src/gui-server-list.c:768 src/query/proto-gamespy.c:104
 #: src/query/proto-gamespy.c:108 src/query/proto-gamespy.c:112
 #: src/query/proto-gamespy.c:115 src/query/proto-gamespy3.c:378
 #: src/query/proto-gamespy3.c:390 src/query/proto-gamespy3.c:401
