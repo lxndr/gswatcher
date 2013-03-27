@@ -948,7 +948,9 @@ gs_application_save_preferences (GsApplication *app)
 int
 main (int argc, char **argv)
 {
+#if GLIB_MINOR_VERSION < 36
 	g_type_init ();
+#endif
 	app = gs_application_new ();
 	int ret = g_application_run (G_APPLICATION (app), argc, argv);
 	g_object_unref (app);
