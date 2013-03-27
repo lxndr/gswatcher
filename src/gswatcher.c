@@ -289,7 +289,7 @@ gs_application_local_command_line (GApplication *app, gchar ***argumnets,
 	}
 	
 	if (version) {
-		g_print ("Game Server Tool v" GS_VERSION "\n");
+		g_print ("Game Server Watcher v" GS_VERSION "\n");
 		exit (EXIT_SUCCESS);
 	}
 	
@@ -319,7 +319,7 @@ gs_application_startup (GApplication *app)
 	textdomain (GETTEXT_PACKAGE);
 #endif
 	
-	g_set_application_name ("Game Server Tool");
+	g_set_application_name ("Game Server Watcher");
 	gtk_icon_theme_append_search_path (gtk_icon_theme_get_default (),
 			gsapp->pixmap_dir);
 	
