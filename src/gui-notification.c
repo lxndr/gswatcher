@@ -397,12 +397,10 @@ gs_notifier_hide_step (gpointer data)
 	}
 	
 #if GTK_CHECK_VERSION(3, 8, 0)
-	gdouble opacity = gtk_widget_get_opacity (window) - 0.1;
-	g_print("set_widget_opacity %f\n", opacity);
+	gdouble opacity = gtk_widget_get_opacity (window) - 0.05;
 	gtk_widget_set_opacity (window, opacity);
 #else
-	gdouble opacity = gtk_window_get_opacity (GTK_WINDOW (window)) - 0.1;
-	g_print("opacity %f\n", opacity);
+	gdouble opacity = gtk_window_get_opacity (GTK_WINDOW (window)) - 0.05;
 	gtk_window_set_opacity (GTK_WINDOW (window), opacity);
 #endif
 	if (opacity <= 0) {
@@ -425,7 +423,7 @@ gs_notifier_expose_step (gpointer data)
 	g_slice_free (Notification, notification);
 	
 	if (!notifications) {
-		srcid = g_timeout_add (200, gs_notifier_hide_step, NULL);
+		srcid = g_timeout_add (50, gs_notifier_hide_step, NULL);
 		return FALSE;
 	}
 	
