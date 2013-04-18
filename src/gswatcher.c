@@ -25,8 +25,8 @@
 #include <stdlib.h>
 #include <glib/gi18n-lib.h>
 #include <glib/gprintf.h>
+#include <json-glib/json-glib.h>
 #include "query/utils.h"
-#include "json.h"
 #include "gui-window.h"
 #include "gswatcher.h"
 #include "platform.h"
@@ -364,28 +364,37 @@ gs_application_shutdown (GsApplication *app)
 /* buddy list */
 
 static void
-save_buddy_list_func (gchar *name, GsBuddy *buddy, GJsonNode *root)
+save_buddy_list_func (gchar *name, GsBuddy *buddy, JsonObject* list)
 {
-	GJsonNode *node = g_json_object_new ();
-	g_json_object_set_integer (node, "lastseen",
+	JsonObject* obj = json_object_new ();
+	json_object_set_int_member (obj, "lastseen",
 			g_date_time_to_unix (buddy->lastseen));
-	g_json_object_set_string (node, "lastaddr", buddy->lastaddr);
-	g_json_object_set_boolean (node, "notify", buddy->notify);
-	g_json_object_set (root, buddy->name, node);
+	json_object_set_string_member (obj, "lastaddr", buddy->lastaddr);
+	json_object_set_boolean_member (obj, "notify", buddy->notify);
+	json_object_set_object_member (list, buddy->name, obj);
 }
 
 static void
 save_buddy_list (GsApplication *app)
 {
-	GJsonNode *root = g_json_object_new ();
-	g_hash_table_foreach (app->buddy_list, (GHFunc) save_buddy_list_func, root);
+	JsonObject* list = json_object_new ();
+	g_hash_table_foreach (app->buddy_list, (GHFunc) save_buddy_list_func, list);
+	
+	JsonNode *root = json_node_alloc ();
+	json_node_init_object (root, list);
 	
 	GError *error = NULL;
-	if (!g_json_write_to_file (root, app->buddy_list_path, &error)) {
+	JsonGenerator* gen = json_generator_new ();
+	json_generator_set_pretty (gen, TRUE);
+	json_generator_set_root (gen, root);
+	
+	if (!json_generator_to_file (gen, app->buddy_list_path, &error)) {
 		g_warning (_("Couldn't save buddy list: %s"), error->message);
 		g_error_free (error);
 	}
-	g_json_node_free (root);
+	
+	g_object_unref (gen);
+	json_node_free (root);
 }
 
 
@@ -479,27 +488,39 @@ gs_application_add_buddy (GsApplication *app, const gchar *name, gint64 lastseen
 
 
 static void
+load_buddy_list_func (JsonObject *list, const gchar *name, JsonNode *node,
+		GsApplication* app)
+{
+	if (!JSON_NODE_HOLDS_OBJECT (node))
+		return;
+	
+	JsonObject* obj = json_node_get_object (node);
+	GsBuddy *buddy = add_buddy_real (app, name,
+			json_object_get_int_member (obj, "lastseen"),
+			json_object_get_string_member (obj, "lastaddr"),
+			json_object_get_boolean_member (obj, "notify"));
+	gui_blist_add (buddy);
+}
+
+
+static void
 load_buddy_list (GsApplication *app)
 {
-	GJsonNode *root, *node;
 	GError *error = NULL;
-	if (!(root = g_json_read_from_file (app->buddy_list_path, &error))) {
+	JsonParser* parser = json_parser_new ();
+	if (!(json_parser_load_from_file (parser, app->buddy_list_path, &error))) {
 		g_warning (_("Couldn't load buddy list: %s"), error->message);
 		g_error_free (error);
 		return;
 	}
 	
-	GJsonIter iter;
-	gchar *name;
-	g_json_iter_init (&iter, root);
-	while (g_json_iter_next_object (&iter, &name, &node)) {
-		GsBuddy *buddy = add_buddy_real (app, name,
-				g_json_object_get_integer (node, "lastseen", 0),
-				g_json_object_get_string (node, "lastaddr", NULL),
-				g_json_object_get_boolean (node, "notify", FALSE));
-		gui_blist_add (buddy);
+	JsonNode *root = json_parser_get_root (parser);
+	if (JSON_NODE_HOLDS_OBJECT (root)) {
+		JsonObject* list = json_node_get_object (root);
+		json_object_foreach_member (list, (JsonObjectForeach) load_buddy_list_func, app);
 	}
-	g_json_node_free (root);
+	
+	g_object_unref (parser);
 }
 
 
@@ -507,40 +528,44 @@ load_buddy_list (GsApplication *app)
 /* server list */
 
 static void
-save_server_list_func (GsClient *client, GJsonNode *root)
+save_server_list_func (GsClient *client, JsonArray *list)
 {
-	GJsonNode *node = g_json_object_new ();
-	g_json_object_set_string (node, "name",
-			client->querier->name->str);
-	g_json_object_set_string (node, "address",
-			gs_client_get_address (client));
-	g_json_object_set_boolean (node, "favorite",
-			client->favorite);
+	JsonObject* obj = json_object_new ();
+	json_object_set_string_member (obj, "name", client->querier->name->str);
+	json_object_set_string_member (obj, "address", gs_client_get_address (client));
+	json_object_set_boolean_member (obj, "favorite", client->favorite);
 	if (client->console_settings & GUI_CONSOLE_PASS)
-		g_json_object_set_string (node, "console-password",
-				client->console_password);
+		json_object_set_string_member (obj, "console-password", client->console_password);
 	if (client->console_settings & GUI_CONSOLE_PORT)
-		g_json_object_set_integer (node, "console-port",
-				client->console_port);
-	g_json_array_add (root, node);
+		json_object_set_int_member (obj, "console-port", client->console_port);
+	json_array_add_object_element (list, obj);
 }
 
 void
 gs_application_save_server_list (GsApplication *app)
 {
-	/* do not save server list if the user specified servers */
+	/* do not save server list if the user has specified servers */
 	if (app->specific_servers)
 		return;
 	
-	GJsonNode *root = g_json_array_new ();
-	g_list_foreach (app->server_list, (GFunc) save_server_list_func, root);
+	JsonArray* list = json_array_new ();
+	g_list_foreach (app->server_list, (GFunc) save_server_list_func, list);
+	
+	JsonNode *root = json_node_alloc ();
+	json_node_init_array (root, list);
 	
 	GError *error = NULL;
-	if (!g_json_write_to_file (root, app->server_list_path, &error)) {
+	JsonGenerator* gen = json_generator_new ();
+	json_generator_set_pretty (gen, TRUE);
+	json_generator_set_root (gen, root);
+	
+	if (!json_generator_to_file (gen, app->server_list_path, &error)) {
 		g_warning (_("Couldn't save server list: %s"), error->message);
 		g_error_free (error);
 	}
-	g_json_node_free (root);
+	
+	g_object_unref (gen);
+	json_node_free (root);
 }
 
 
@@ -815,34 +840,45 @@ gs_application_server_list (GsApplication *app)
 
 
 static void
+load_server_list_func (JsonArray *list, guint index, JsonNode *node, GsApplication* app)
+{
+	if (!JSON_NODE_HOLDS_OBJECT (node))
+		return;
+	
+	JsonObject* obj = json_node_get_object (node);
+	
+	const gchar *address = json_object_get_string_member (obj, "address");
+	GsClient *client = add_server (app, address);
+	if (client) {
+		g_string_assign (client->querier->name, json_object_get_string_member (obj, "name"));
+		client->favorite = json_object_get_boolean_member (obj, "favorite");
+		if ((node = json_object_get_member (obj, "console-password")))
+			gs_client_set_console_password (client, json_node_get_string (node));
+		if ((node = json_object_get_member (obj, "console-port")))
+			gs_client_set_console_port (client, json_node_get_int (node));
+		gui_slist_update (client);
+	}
+}
+
+
+static void
 load_server_list (GsApplication *app)
 {
-	GJsonNode *root, *node;
 	GError *error = NULL;
-	if (!(root = g_json_read_from_file (app->server_list_path, &error))) {
-		g_warning ("Couldn't load server list: %s", error->message);
+	JsonParser* parser = json_parser_new ();
+	if (!(json_parser_load_from_file (parser, app->server_list_path, &error))) {
+		g_warning (_("Couldn't load server list: %s"), error->message);
 		g_error_free (error);
 		return;
 	}
 	
-	GJsonIter iter;
-	g_json_iter_init (&iter, root);
-	while (g_json_iter_next_array (&iter, &node)) {
-		const gchar *address = g_json_object_get_string (node, "address", NULL);
-		GsClient *client = add_server (app, address);
-		if (client) {
-			g_string_assign (client->querier->name,
-					g_json_object_get_string (node, "name", NULL));
-			client->favorite =
-					g_json_object_get_boolean (node, "favorite", FALSE);
-			gs_client_set_console_password (client,
-					g_json_object_get_string (node, "console-password", NULL));
-			gs_client_set_console_port (client,
-					g_json_object_get_integer (node, "console-port", 0));
-			gui_slist_update (client);
-		}
+	JsonNode *root = json_parser_get_root (parser);
+	if (JSON_NODE_HOLDS_ARRAY (root)) {
+		JsonArray* list = json_node_get_array(root);
+		json_array_foreach_element (list, (JsonArrayForeach) load_server_list_func, app);
 	}
-	g_json_node_free (root);
+	
+	g_object_unref (parser);
 }
 
 
@@ -850,48 +886,58 @@ load_server_list (GsApplication *app)
 static void
 load_preferences (GsApplication *app)
 {
-	GJsonNode *node;
 	GError *error = NULL;
-	
-	if ((node = g_json_read_from_file (app->preferences_path, &error))) {
-		gs_application_set_interval (app,
-				g_json_object_get_float (node, "interval", 2.5));
-		
-		gui_slist_set_game_column_mode (
-				g_json_object_get_integer (node, "game-column", 0));
-		
-		app->default_port =
-				g_json_object_get_integer (node, "port", 27500);
-		
-		gs_client_set_connect_command (
-				g_json_object_get_string (node, "connect-command", NULL));
-		
-		gs_notification_set_enable (
-				g_json_object_get_boolean (node, "notification-enable", TRUE));
-		
-		gs_notification_set_sound (
-				g_json_object_get_string (node, "notification-sound", NULL));
-		
-		gui_console_set_font (
-				g_json_object_get_string (node, "font", NULL));
-		
-		gui_console_set_use_system_font (
-				g_json_object_get_boolean (node, "system-font", TRUE));
-		
-		gs_client_set_logaddress (
-				g_json_object_get_string (node, "log-address", NULL));
-		
-		GJsonNode *geometry = g_json_object_get (node, "geometry");
-		if (geometry)
-			gui_window_load_geometry (geometry);
-		
-		g_json_node_free (node);
-	} else {
-		g_warning ("Couldn't load preferences from %s: %s",
-				app->preferences_path, error->message);
+	JsonParser* parser = json_parser_new ();
+	if (!(json_parser_load_from_file (parser, app->preferences_path, &error))) {
+		g_warning (_("Couldn't load user preferences: %s"), error->message);
 		g_error_free (error);
+		return;
 	}
 	
+	JsonNode *root = json_parser_get_root (parser);
+	if (!JSON_NODE_HOLDS_OBJECT (root)) {
+		g_object_unref (parser);
+		return;
+	}
+	
+	JsonNode* node;
+	JsonObject* obj = json_node_get_object (root);
+	/* update interval */
+	if ((node = json_object_get_member (obj, "interval")))
+		gs_application_set_interval (app, json_node_get_double (node));
+	/* game column mode */
+	if ((node = json_object_get_member (obj, "game-column")))
+		gui_slist_set_game_column_mode (json_node_get_int (node));
+	/* outgoing port */
+	if ((node = json_object_get_member (obj, "port")))
+		app->default_port = json_node_get_int (node);
+	/* connect command */
+	if ((node = json_object_get_member (obj, "connect-command")))
+		gs_client_set_connect_command (json_node_get_string (node));
+	/* enable notifications */
+	if ((node = json_object_get_member (obj, "notification-enable")))
+		gs_notification_set_enable (json_node_get_boolean (node));
+	/* enable sound notifications */
+	if ((node = json_object_get_member (obj, "notification-sound")))
+		gs_notification_set_sound (json_node_get_string (node));
+	/* font */
+	if ((node = json_object_get_member (obj, "font")))
+		gui_console_set_font (json_node_get_string (node));
+	/* use system font */
+	if ((node = json_object_get_member (obj, "system-font")))
+		gui_console_set_use_system_font (json_node_get_boolean (node));
+	/* log incoming address */
+	if ((node = json_object_get_member (obj, "log-address")))
+		gs_client_set_logaddress (json_node_get_string (node));
+	
+	/* main window geometry */
+	JsonObject* geom = json_object_get_object_member (obj, "geometry");
+	if (geom)
+		gui_window_load_geometry (geom);
+	
+	g_object_unref (parser);
+	
+	/* initialize preference widgets */
 	gui_prefs_set_interval (gs_application_get_interval (app));
 	gui_prefs_set_game_column_mode (gui_slist_get_game_column_mode ());
 	gui_prefs_set_port (app->default_port);
@@ -907,40 +953,54 @@ load_preferences (GsApplication *app)
 void
 gs_application_save_preferences (GsApplication *app)
 {
-	GJsonNode *node = g_json_object_new ();
+	JsonObject* obj = json_object_new ();
 	
-	g_json_object_set_float (node, "interval",
+	/* update interval */
+	json_object_set_double_member (obj, "interval",
 			gs_application_get_interval (app));
-	g_json_object_set_integer (node, "game-column",
+	/* game column mode */
+	json_object_set_int_member (obj, "game-column",
 			gui_slist_get_game_column_mode ());
-	g_json_object_set_integer (node, "port",
+	/* outgoing port */
+	json_object_set_int_member (obj, "port",
 			app->default_port);
-	g_json_object_set_string (node, "connect-command",
+	/* connect command */
+	json_object_set_string_member (obj, "connect-command",
 			gs_client_get_connect_command ());
-	
-	g_json_object_set_boolean (node, "notification-enable",
+	/* enable notifications */
+	json_object_set_boolean_member (obj, "notification-enable",
 			gs_notification_get_enable ());
-	g_json_object_set_string (node, "notification-sound",
+	/* notification sound */
+	json_object_set_string_member (obj, "notification-sound",
 			gs_notification_get_sound ());
-	
-	g_json_object_set_boolean (node, "system-font",
+	/* use system monospace font */
+	json_object_set_boolean_member (obj, "system-font",
 			gui_console_get_use_system_font ());
-	g_json_object_set_string (node, "font",
+	/* monospace font */
+	json_object_set_string_member (obj, "font",
 			gui_console_get_font ());
-	
-	g_json_object_set_string (node, "log-address",
+	/* log incoming address */
+	json_object_set_string_member (obj, "log-address",
 			gs_client_get_logaddress ());
+	/* main window geometry */
+	JsonObject *geom = gui_window_save_geometry ();
+	json_object_set_object_member (obj, "geometry", geom);
 	
-	GJsonNode *geometry = gui_window_save_geometry ();
-	g_json_object_set (node, "geometry", geometry);
+	JsonNode *root = json_node_alloc ();
+	json_node_init_object (root, obj);
 	
 	GError *error = NULL;
-	if (!g_json_write_to_file (node, app->preferences_path, &error)) {
-		g_warning (_("Couldn't save preferences to %s: %s"),
-				app->preferences_path, error->message);
+	JsonGenerator* gen = json_generator_new ();
+	json_generator_set_pretty (gen, TRUE);
+	json_generator_set_root (gen, root);
+	
+	if (!json_generator_to_file (gen, app->preferences_path, &error)) {
+		g_warning (_("Couldn't save user preferences: %s"), error->message);
 		g_error_free (error);
 	}
-	g_json_node_free (node);
+	
+	g_object_unref (gen);
+	json_node_free (root);
 }
 
 

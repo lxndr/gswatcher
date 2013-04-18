@@ -11,6 +11,8 @@ find_package (PkgConfig)
 pkg_check_modules (GLIB REQUIRED glib-2.0>=2.32 gobject-2.0>=2.32
 		gio-2.0>=2.32 gmodule-2.0>=2.32)
 pkg_check_modules (GTK3 REQUIRED gtk+-3.0>=3.4)
+pkg_check_modules (JSON REQUIRED json-glib-1.0>=0.16)
+
 
 if (WIN32)
 	set (GEOIP_LIBRARIES GeoIP ws2_32)
