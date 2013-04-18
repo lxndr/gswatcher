@@ -2,7 +2,7 @@ if (APPLE)
 	add_definitions (-DG_OS_MACOSX)
 endif ()
 
-include_directories (${GLIB_INCLUDE_DIRS} ${GTK3_INCLUDE_DIRS})
+include_directories (${GLIB_INCLUDE_DIRS} ${JSON_INCLUDE_DIRS} ${GTK3_INCLUDE_DIRS})
 
 add_definitions (
 		-DGETTEXT_PACKAGE=\"gswatcher\"
@@ -35,7 +35,6 @@ add_executable (gswatcher
 		query/utils.c
 		platform.c
 		client.c
-		json.c
 		gswatcher.c
 		gui-buddy-list.c
 		gui-console.c
@@ -50,6 +49,7 @@ add_executable (gswatcher
 
 target_link_libraries (gswatcher
 		${GLIB_LIBRARIES}
+		${JSON_LIBRARIES}
 		${GTK3_LIBRARIES}
 		${GEOIP_LIBRARIES}
 		${GS_LIBRARIES})

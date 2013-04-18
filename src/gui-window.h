@@ -27,8 +27,8 @@
 
 
 #include <glib/gi18n-lib.h>
+#include <json-glib/json-glib.h>
 #include <gtk/gtk.h>
-#include "json.h"
 #include "gswatcher.h"
 
 
@@ -42,8 +42,8 @@ void gui_window_destroy ();
 void gui_window_show ();
 void gui_window_hide ();
 
-void gui_window_load_geometry (GJsonNode *geometry);
-GJsonNode *gui_window_save_geometry ();
+void gui_window_load_geometry (JsonObject *geometry);
+JsonObject *gui_window_save_geometry ();
 
 
 #endif
