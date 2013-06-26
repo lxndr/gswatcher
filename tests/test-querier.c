@@ -86,7 +86,7 @@ main (int argc, char **argv)
 		return 1;
 	
 	signal (SIGINT, sigint);
-	g_type_init ();
+	
 	gsq_init (0);
 	
 	loop = g_main_loop_new (NULL, TRUE);
