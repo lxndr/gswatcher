@@ -28,6 +28,7 @@
 #include "console-source.h"
 
 
+
 struct _GsqConsoleSourcePrivate {
 	/* packet */
 	gint32 size;
@@ -35,7 +36,6 @@ struct _GsqConsoleSourcePrivate {
 	gint32 type;
 	
 	/*  */
-	gchar key[14];	/* with this key we can found out if respond is complite */
 	GString *res;
 };
 
@@ -117,19 +117,10 @@ source_send_packet (GsqConsole *console, gint32 id, gint32 type,
 			source_send_packet (sock, 0, 3, pass, error)
 
 static gboolean
-gsq_console_source_command (GsqConsole *console, const gchar *msg,
-		GError **error)
+gsq_console_source_command (GsqConsole *console, const gchar *msg, GError **error)
 {
-	GsqConsoleSourcePrivate *pr = GSQ_CONSOLE_SOURCE (console)->priv;
-	gboolean ret;
-	
-	guint32 key = g_random_int ();
-	g_sprintf (pr->key, "END%X \n", key);
-	gchar *cmd = g_strdup_printf ("%s;echo END%X", msg, key);
-	ret = source_send_packet (console, 0, 2, cmd, NULL);
-	g_free (cmd);
-	
-	return ret;
+	return source_send_packet (console, 0, 2, msg, error) &&
+		source_send_packet (console, 1, 2, "", error);
 }
 
 
@@ -163,8 +154,8 @@ gsq_console_source_received (GsqConsole *console, const gchar *data,
 	} else {
 		if (pr->type == 2) {
 			if (pr->id == -1) {
-				g_set_error_literal (error, GSQ_CONSOLE_ERROR,
-						GSQ_CONSOLE_ERROR_AUTH, "Authentication attempt failed");
+				g_set_error_literal (error, GSQ_CONSOLE_ERROR, GSQ_CONSOLE_ERROR_AUTH,
+						"Authentication attempt failed");
 				return FALSE;
 			} else {
 				gsq_console_authenticate (console);
@@ -172,19 +163,13 @@ gsq_console_source_received (GsqConsole *console, const gchar *data,
 		} else {
 			if (gsq_console_is_authenticated (console)) {
 				g_string_append (pr->res, data);
-				if (pr->res->len >= 13) {
-					gsize mark_pos = pr->res->len - 13;
-					if (strncmp (pr->res->str + pr->res->len - 13, pr->key, 13) == 0) {
-						g_string_truncate (pr->res, mark_pos);
-						gsq_console_finish_respond (console, pr->res->str);
-					}
-				}
+				if (pr->id == 1)
+					gsq_console_finish_respond (console, pr->res->str);
 			}
 		}
 		
 		/* clear everything for next packet */
-		pr->size = 0;
-		gsq_console_set_chunk_size (console, 12);
+		gsq_console_source_reset (console);
 	}
 	
 	return TRUE;
