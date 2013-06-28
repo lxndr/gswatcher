@@ -98,19 +98,22 @@ gsq_console_source_new (const gchar *host, guint16 port)
 
 static gboolean
 source_send_packet (GsqConsole *console, gint32 id, gint32 type,
-		const gchar *command, GError **error)
+		const gchar *message, GError **error)
 {
-	id = GINT32_TO_LE (id);
-	type = GINT32_TO_LE (type);
+	gsize len = strlen (message);
+	gsize size = len + 10;
+	char *data = g_slice_alloc (size + 4);
 	
-	gsize len = strlen (command) + 1;
-	gint32 size = GINT32_TO_LE (len + 9);
+	* (gint32 *) (data + 0) = GINT32_TO_LE (size);
+	* (gint32 *) (data + 4) = GINT32_TO_LE (id);
+	* (gint32 *) (data + 8) = GINT32_TO_LE (type);
+	memcpy (data + 12, message, len);
+	* (gint16 *) (data + size + 2) = 0;
 	
-	return	gsq_console_send_data (console, (gchar *) &size, 4, error) &&
-			gsq_console_send_data (console, (gchar *) &id, 4, error) &&
-			gsq_console_send_data (console, (gchar *) &type, 4, error) &&
-			gsq_console_send_data (console, command, len, error) &&
-			gsq_console_send_data (console, "", 1, error);
+	gboolean ret = gsq_console_send_data (console, data, size + 4, error);
+	
+	g_slice_free1 (size + 4, data);
+	return ret;
 }
 
 #define source_send_password(sock, pass, error)	\
@@ -161,15 +164,23 @@ gsq_console_source_received (GsqConsole *console, const gchar *data,
 				gsq_console_authenticate (console);
 			}
 		} else {
+			GString *res = pr->res;
+			
 			if (gsq_console_is_authenticated (console)) {
-				g_string_append (pr->res, data);
-				if (pr->id == 1)
-					gsq_console_finish_respond (console, pr->res->str);
+				if (pr->id == 0)
+					g_string_append (res, data);
+				else if (pr->id == 1) {
+					int last = res->len - 1;
+					if (res->str[last] == '\n')
+						res->str[last] = 0;
+					gsq_console_finish_respond (console, res->str);
+				}
 			}
 		}
 		
 		/* clear everything for next packet */
-		gsq_console_source_reset (console);
+		gsq_console_set_chunk_size (console, 12);
+		pr->size = 0;
 	}
 	
 	return TRUE;
