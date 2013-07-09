@@ -54,6 +54,7 @@ static void gs_client_querier_info_updated (GsqQuerier *querier, GsClient *clien
 static void gs_client_querier_map_changed (GsqQuerier *querier, GsClient *client);
 static void gs_client_querier_gameid_changed (GsqQuerier *querier, GsClient *client);
 static void gs_client_querier_log (GsqQuerier *querier, const gchar *msg, GsClient *client);
+static void gs_client_querier_error (GsqQuerier *querier, const GError *error, GsClient *client);
 static void gs_client_console_connected (GsqConsole *console, GsClient *client);
 static void gs_client_console_authenticated (GsqConsole *console, GsClient* client);
 static void gs_client_console_disconnected (GsqConsole *console, GsClient *client);
@@ -183,6 +184,8 @@ gs_client_new (const gchar *address)
 			G_CALLBACK (gs_client_querier_gameid_changed), client);
 	g_signal_connect (client->querier, "log",
 			G_CALLBACK (gs_client_querier_log), client);
+	g_signal_connect (client->querier, "error",
+			G_CALLBACK (gs_client_querier_error), client);
 	
 	gui_console_init_context (client);
 	gui_log_init (client);
@@ -394,6 +397,15 @@ gs_client_querier_log (GsqQuerier *querier, const gchar *msg, GsClient *client)
 		}
 	}
 	g_strfreev (say_parts);
+}
+
+
+static void
+gs_client_querier_error (GsqQuerier *querier, const GError *error, GsClient *client)
+{
+	if (client->error)
+		g_error_free (client->error);
+	client->error = g_error_copy (error);
 }
 
 

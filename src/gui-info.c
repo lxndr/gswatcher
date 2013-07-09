@@ -59,12 +59,23 @@ gui_info_setup (GsClient *cl)
 		gtk_label_set_text (GTK_LABEL (ctl_location), cl->country);
 		gui_info_update (cl);
 		
-		gtk_widget_set_visible (ctl_message, !gsq_watcher_is_online (GSQ_WATCHER (cl->querier)));
+		if (cl->error) {
+			if (cl->error->domain == GSQ_QUERIER_ERROR && cl->error->code == GSQ_QUERIER_ERROR_TIMEOUT)
+				gtk_label_set_text (GTK_LABEL (ctl_message),
+						_("<span color=\"red\">This server is not responding and most likely offline.</span>"));
+			else
+				gtk_label_set_text (GTK_LABEL (ctl_message), cl->error->message);
+			gtk_widget_set_visible (ctl_message, TRUE);
+		} else {
+			gtk_widget_set_visible (ctl_message, FALSE);
+			gtk_label_set_text (GTK_LABEL (ctl_message), NULL);
+		}
 	} else {
 		/* none is selected. disable the toolbar and clear information grid */
 		gtk_widget_set_sensitive (toolbar, FALSE);
 		gtk_widget_set_sensitive (grid, FALSE);
 		gtk_widget_set_visible (ctl_message, FALSE);
+		gtk_label_set_text (GTK_LABEL (ctl_message), NULL);
 		
 		gtk_label_set_text (GTK_LABEL (ctl_address), _("N/A"));
 		gtk_label_set_text (GTK_LABEL (ctl_name), _("N/A"));
@@ -226,7 +237,7 @@ gui_info_create ()
 	
 	gtk_widget_show_all (grid);
 	
-	ctl_message = gtk_label_new (_("<span color=\"red\">This server is not responding and most likely offline.</span>"));
+	ctl_message = gtk_label_new (NULL);
 	g_object_set (G_OBJECT (ctl_message),
 			"visible", FALSE,
 			"use-markup", TRUE,

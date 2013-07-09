@@ -48,7 +48,7 @@ static guint signals[LAST_SIGNAL] = { 0 };
 
 
 static void gsq_watcher_info_updated (GsqQuerier *querier);
-static void gsq_watcher_timed_out (GsqQuerier *querier);
+static void gsq_watcher_error_occured (GsqQuerier *querier, const GError *error);
 
 
 G_DEFINE_TYPE (GsqWatcher, gsq_watcher, GSQ_TYPE_QUERIER);
@@ -78,7 +78,7 @@ gsq_watcher_class_init (GsqWatcherClass *class)
 	
 	GsqQuerierClass *querier_class = GSQ_QUERIER_CLASS (class);
 	querier_class->info_update = gsq_watcher_info_updated;
-	querier_class->timeout = gsq_watcher_timed_out;
+	querier_class->error = gsq_watcher_error_occured;
 }
 
 
@@ -139,8 +139,11 @@ gsq_watcher_info_updated (GsqQuerier *querier)
 
 
 static void
-gsq_watcher_timed_out (GsqQuerier *querier)
+gsq_watcher_error_occured (GsqQuerier *querier, const GError *error)
 {
+	if (!g_error_matches (error, GSQ_QUERIER_ERROR, GSQ_QUERIER_ERROR_TIMEOUT))
+		return;
+	
 	GsqWatcherPrivate *priv = GSQ_WATCHER (querier)->priv;
 	
 	if (priv->offline_time == 0) {

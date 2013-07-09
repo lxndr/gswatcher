@@ -294,44 +294,43 @@ format_date_time (gint64 time)
 
 
 static void
-server_error (GsqQuerier *querier, const gchar *msg, GsClient *client)
+server_error (GsqQuerier *querier, const GError *error, GsClient *client)
 {
-	gtk_list_store_set (liststore, &client->sliter,
-			COLUMN_PING, msg,
-			COLUMN_PING_COLOR, "red",
-			COLUMN_ONLINE, FALSE,
-			-1);
-}
-
-static void
-server_timed_out (GsqQuerier *querier, GsClient *client)
-{
-	GTimeVal tv;
-	g_get_current_time (&tv);
-	guint64 time = tv.tv_sec - gsq_watcher_get_offline_time (GSQ_WATCHER (querier));
-	
-	if (time < 15) {
-		gtk_list_store_set (liststore, &client->sliter,
-				COLUMN_PING, _("Timeout"),
-				COLUMN_PING_COLOR, "red",
-				COLUMN_PLAYERS_COLOR, NULL,
-				COLUMN_ONLINE, FALSE,
-				-1);
+	if (error->domain == GSQ_QUERIER_ERROR && error->code == GSQ_QUERIER_ERROR_TIMEOUT) {
+		GTimeVal tv;
+		g_get_current_time (&tv);
+		guint64 time = tv.tv_sec - gsq_watcher_get_offline_time (GSQ_WATCHER (querier));
+		
+		if (time < 15) {
+			gtk_list_store_set (liststore, &client->sliter,
+					COLUMN_PING, _("Timeout"),
+					COLUMN_PING_COLOR, "red",
+					COLUMN_PLAYERS_COLOR, NULL,
+					COLUMN_ONLINE, FALSE,
+					-1);
+		} else {
+			gchar *tmp = format_date_time (time);
+		
+			gtk_list_store_set (liststore, &client->sliter,
+					COLUMN_PING, tmp,
+					COLUMN_PING_COLOR, "red",
+					COLUMN_ONLINE, FALSE,
+					-1);
+		
+			g_free (tmp);
+		}
 	} else {
-		gchar *tmp = format_date_time (time);
-		
 		gtk_list_store_set (liststore, &client->sliter,
-				COLUMN_PING, tmp,
+				COLUMN_PING, _("Error"),
 				COLUMN_PING_COLOR, "red",
 				COLUMN_ONLINE, FALSE,
 				-1);
-		
-		g_free (tmp);
 	}
 	
 	if (client == selected)
 		gui_info_setup (client);
 }
+
 
 static void
 server_resolved (GsqQuerier *querier, GsClient *client)
@@ -343,6 +342,7 @@ server_resolved (GsqQuerier *querier, GsClient *client)
 	if (client == selected)
 		gui_info_update (client);
 }
+
 
 static void
 game_detected (GsqQuerier *querier, GsClient *client)
@@ -393,7 +393,6 @@ gui_slist_add (GsClient *cl)
 		gtk_tree_selection_select_iter (sel, &cl->sliter);
 	
 	g_signal_connect (cl->querier, "error", G_CALLBACK (server_error), cl);
-	g_signal_connect (cl->querier, "timeout", G_CALLBACK (server_timed_out), cl);
 	g_signal_connect (cl->querier, "resolve", G_CALLBACK (server_resolved), cl);
 	g_signal_connect (cl->querier, "gameid-changed", G_CALLBACK (game_detected), cl);
 	g_signal_connect (cl->querier, "info-update", G_CALLBACK (server_info_updated), cl);
