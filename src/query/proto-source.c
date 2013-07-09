@@ -398,6 +398,9 @@ source_process2 (GsqQuerier *querier, gchar *p, gssize size)
 	case 'R':
 		gsq_querier_emit_log (querier, p);
 		return TRUE;
+	case 'l':
+		gsq_querier_emit_error (querier, GSQ_QUERIER_ERROR, GSQ_QUERIER_ERROR_CUSTOM, p);
+		return FALSE;
 	}
 	
 	return FALSE;

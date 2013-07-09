@@ -34,6 +34,15 @@ G_BEGIN_DECLS
 
 /* Server querier */
 
+GQuark gsq_querier_error_quark (void);
+#define GSQ_QUERIER_ERROR gsq_querier_error_quark ()
+
+typedef enum {
+	GSQ_QUERIER_ERROR_TIMEOUT,
+	GSQ_QUERIER_ERROR_CUSTOM
+} GsqQuerierErrorEnum;
+
+
 #define GSQ_TYPE_QUERIER			(gsq_querier_get_type ())
 #define GSQ_QUERIER(obj)			(G_TYPE_CHECK_INSTANCE_CAST ((obj), GSQ_TYPE_QUERIER, GsqQuerier))
 #define GSQ_IS_QUERIER(obj)			(G_TYPE_CHECK_INSTANCE_TYPE ((obj), GSQ_TYPE_QUERIER))
@@ -70,8 +79,7 @@ struct _GsqQuerierClass {
 	void (*info_update) (GsqQuerier *querier);
 	void (*players_update) (GsqQuerier *querier);
 	void (*log) (GsqQuerier *querier, const gchar *msg);
-	void (*timeout) (GsqQuerier *querier);
-	void (*error) (GsqQuerier *querier, const gchar *msg);
+	void (*error) (GsqQuerier *querier, const GError *error);
 	void (*player_online) (GsqQuerier *querier, GsqPlayer *player);
 	void (*player_offline) (GsqQuerier *querier, GsqPlayer *player);
 };
