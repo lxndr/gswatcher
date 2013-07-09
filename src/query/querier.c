@@ -56,7 +56,6 @@ enum {
 	SIGNAL_INFO_UPDATE,
 	SIGNAL_PLAYER_UPDATE,
 	SIGNAL_LOG,
-	SIGNAL_TIMEOUT,
 	SIGNAL_ERROR,
 	SIGNAL_PLAYER_ONLINE,
 	SIGNAL_PLAYER_OFFLINE,
@@ -115,6 +114,13 @@ static gboolean gsq_socket_received (GSocket *socket,
 static GsqProtocol *gsq_find_protocol (const gchar *name);
 
 G_DEFINE_TYPE (GsqQuerier, gsq_querier, G_TYPE_OBJECT);
+
+
+GQuark
+gsq_querier_error_quark (void)
+{
+	return g_quark_from_static_string ("gsq-querier-error-quark");
+}
 
 
 static void
@@ -404,15 +410,10 @@ gsq_querier_class_init (GsqQuerierClass *klass)
 			G_STRUCT_OFFSET (GsqQuerierClass, log), NULL, NULL,
 			g_cclosure_marshal_VOID__STRING, G_TYPE_NONE, 1, G_TYPE_STRING);
 	
-	signals[SIGNAL_TIMEOUT] = g_signal_new ("timeout",
-			G_OBJECT_CLASS_TYPE (klass), G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-			G_STRUCT_OFFSET (GsqQuerierClass, timeout), NULL, NULL,
-			g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
-	
 	signals[SIGNAL_ERROR] = g_signal_new ("error",
 			G_OBJECT_CLASS_TYPE (klass), G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
 			G_STRUCT_OFFSET (GsqQuerierClass, error), NULL, NULL,
-			g_cclosure_marshal_VOID__STRING, G_TYPE_NONE, 1, G_TYPE_STRING);
+			g_cclosure_marshal_VOID__STRING, G_TYPE_NONE, 1, G_TYPE_ERROR);
 	
 	signals[SIGNAL_PLAYER_ONLINE] = g_signal_new ("player-online",
 			G_OBJECT_CLASS_TYPE (klass), G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
@@ -497,6 +498,20 @@ void
 gsq_querier_emit_log (GsqQuerier *querier, const gchar *msg)
 {
 	g_signal_emit (querier, signals[SIGNAL_LOG], 0, msg);
+}
+
+
+void
+gsq_querier_emit_error (GsqQuerier *querier, GQuark domain, gint code,
+        const gchar *format, ...)
+{
+	va_list va;
+	va_start (va, format);
+	GError *err = g_error_new_valist (domain, code, format, va);
+	va_end (va);
+	
+	g_signal_emit (querier, signals[SIGNAL_ERROR], 0, err);
+	g_error_free (err);
 }
 
 
@@ -709,12 +724,14 @@ gsq_querier_get_extra (GsqQuerier *querier, const gchar *key)
 static void
 gsq_querier_resolved (GResolver *resolver, GAsyncResult *result, GsqQuerier *querier)
 {
+	GError *error = NULL;
 	GsqQuerierPrivate *priv = querier->priv;
 	
-	GList *list = g_resolver_lookup_by_name_finish (resolver, result, NULL);
+	GList *list = g_resolver_lookup_by_name_finish (resolver, result, &error);
 	priv->working = FALSE;
 	if (!list) {
-		g_signal_emit (querier, signals[SIGNAL_ERROR], 0, "Host is unknown");
+		g_signal_emit (querier, signals[SIGNAL_ERROR], 0, error);
+		g_error_free (error);
 		return;
 	}
 	
@@ -1034,7 +1051,7 @@ check_timeout (gpointer udata)
 		if (querier->priv->iaddr && querier->priv->working) {
 			gdouble time = g_timer_elapsed (querier->priv->timer, NULL);
 			if (time >= 10) {
-				g_signal_emit (querier, signals[SIGNAL_TIMEOUT], 0);
+				gsq_querier_emit_error (querier, GSQ_QUERIER_ERROR, GSQ_QUERIER_ERROR_TIMEOUT, "Timed out");
 				gsq_querier_reset (querier);
 			} else if (time >= 3) {
 				gsq_querier_query (querier);
@@ -1180,6 +1197,7 @@ gsq_find_protocol (const gchar *name)
 	return NULL;
 }
 
+
 void
 gsq_register_protocol (const gchar *name, GsqQueryFunc query_fn,
 		GsqProcessFunc process_fn, GsqFreeFunc free_fn)
@@ -1200,6 +1218,7 @@ gsq_register_protocol (const gchar *name, GsqQueryFunc query_fn,
 	proto->free = free_fn;
 	protocols = g_list_append (protocols, proto);
 }
+
 
 void
 gsq_unregister_protocol (const gchar *name)
