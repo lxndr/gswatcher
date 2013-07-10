@@ -60,9 +60,9 @@ gui_info_setup (GsClient *cl)
 		gui_info_update (cl);
 		
 		if (cl->error) {
-			if (cl->error->domain == GSQ_QUERIER_ERROR && cl->error->code == GSQ_QUERIER_ERROR_TIMEOUT)
+			if (g_error_matches (cl->error, GSQ_QUERIER_ERROR, GSQ_QUERIER_ERROR_TIMEOUT))
 				gtk_label_set_text (GTK_LABEL (ctl_message),
-						_("<span color=\"red\">This server is not responding and most likely offline.</span>"));
+						_("This server is not responding and most likely offline."));
 			else
 				gtk_label_set_text (GTK_LABEL (ctl_message), cl->error->message);
 			gtk_widget_set_visible (ctl_message, TRUE);
@@ -237,13 +237,20 @@ gui_info_create ()
 	
 	gtk_widget_show_all (grid);
 	
+	PangoAttrList *attrs = pango_attr_list_new ();
+	PangoAttribute *attr = pango_attr_foreground_new (65535, 0, 0);
+	pango_attr_list_insert (attrs, attr);
+	attr = pango_attr_style_new (PANGO_STYLE_ITALIC);
+	pango_attr_list_insert (attrs, attr);
+	
 	ctl_message = gtk_label_new (NULL);
 	g_object_set (G_OBJECT (ctl_message),
 			"visible", FALSE,
-			"use-markup", TRUE,
+			"attributes", attrs,
 			"hexpand", TRUE,
 			NULL);
 	gtk_grid_attach (GTK_GRID (grid), ctl_message, 1, 8, 2, 1);
+	pango_attr_list_unref (attrs);
 	
 	return grid;
 }
