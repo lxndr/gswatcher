@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.7\n"
 "Report-Msgid-Bugs-To: lxndr87@users.sourceforge.net\n"
-"POT-Creation-Date: 2013-07-09 18:57+0400\n"
+"POT-Creation-Date: 2013-07-10 12:27+0400\n"
 "PO-Revision-Date: 2013-01-18 18:42+0400\n"
 "Last-Translator: Alexander AB\n"
 "Language-Team: Russian\n"
@@ -350,9 +350,8 @@ msgid "_Log address:"
 msgstr "Обратный адрес для _журнала"
 
 #: src/gui-info.c:65
-msgid ""
-"<span color=\"red\">This server is not responding and most likely offline.</"
-"span>"
+#, fuzzy
+msgid "This server is not responding and most likely offline."
 msgstr ""
 "<span color=\"red\">Этот сервер не отвечает и вероятно отключен.</span>"
 
@@ -402,19 +401,19 @@ msgstr "Версия:"
 msgid "Location:"
 msgstr "Положение:"
 
-#: src/gui-info.c:285
+#: src/gui-info.c:292
 msgid "Remove selected server"
 msgstr "Удалить выбранный сервер"
 
-#: src/gui-info.c:293
+#: src/gui-info.c:300
 msgid "Favor selected server"
 msgstr "Переместить в любимые"
 
-#: src/gui-info.c:299
+#: src/gui-info.c:306
 msgid "Connect"
 msgstr "Подключиться"
 
-#: src/gui-info.c:301
+#: src/gui-info.c:308
 msgid "Connect to selected server"
 msgstr "Подключиться к серверу"
 
