@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: lxndr87@users.sourceforge.net\n"
-"POT-Creation-Date: 2013-07-09 18:57+0400\n"
+"POT-Creation-Date: 2013-07-10 12:48+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -346,9 +346,7 @@ msgid "_Log address:"
 msgstr ""
 
 #: src/gui-info.c:65
-msgid ""
-"<span color=\"red\">This server is not responding and most likely offline.</"
-"span>"
+msgid "This server is not responding and most likely offline."
 msgstr ""
 
 #: src/gui-info.c:80 src/gui-info.c:81 src/gui-info.c:82 src/gui-info.c:83
@@ -397,19 +395,19 @@ msgstr ""
 msgid "Location:"
 msgstr ""
 
-#: src/gui-info.c:285
+#: src/gui-info.c:292
 msgid "Remove selected server"
 msgstr ""
 
-#: src/gui-info.c:293
+#: src/gui-info.c:300
 msgid "Favor selected server"
 msgstr ""
 
-#: src/gui-info.c:299
+#: src/gui-info.c:306
 msgid "Connect"
 msgstr ""
 
-#: src/gui-info.c:301
+#: src/gui-info.c:308
 msgid "Connect to selected server"
 msgstr ""
 
