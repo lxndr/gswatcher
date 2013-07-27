@@ -25,6 +25,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include <glib/gi18n.h>
 #include <glib/gprintf.h>
 #include <gobject/gvaluecollector.h>
 #include "proto-gamespy.h"
@@ -103,8 +104,10 @@ static GSource *ip4sock_source = NULL, *ip6sock_source = NULL;
 static GList *servers = NULL;
 static GList *protocols = NULL;
 static GsqDebugFlag debug_flags = GSQ_DEBUG_NONE;
+static guint16 default_local_port = 0;
 static guint signals[LAST_SIGNAL] = { 0 };
 
+static void gsq_init ();
 static void gsq_fini ();
 static void gsq_querier_resolve (GsqQuerier *querier);
 static void gsq_querier_query (GsqQuerier *querier);
@@ -430,7 +433,7 @@ gsq_querier_class_init (GsqQuerierClass *klass)
 
 static void
 gsq_querier_init (GsqQuerier *querier)
-{
+{	
 	querier->priv = G_TYPE_INSTANCE_GET_PRIVATE (querier, GSQ_TYPE_QUERIER,
 			GsqQuerierPrivate);
 	GsqQuerierPrivate *priv = querier->priv;
@@ -449,6 +452,8 @@ gsq_querier_init (GsqQuerier *querier)
 	priv->timer = g_timer_new ();
 	priv->fields = g_array_new (FALSE, FALSE, sizeof (GsqField));
 	
+	if (servers == NULL)
+		gsq_init ();
 	servers = g_list_append (servers, querier);
 }
 
@@ -806,7 +811,7 @@ gsq_querier_query (GsqQuerier *querier)
 			proto_iter = g_list_next (proto_iter);
 		}
 	} else {
-		g_warning ("Protocol auto-detection is disabled while no protocol is specified");
+		g_warning (_("Protocol auto-detection is disabled while no protocol is specified"));
 	}
 }
 
@@ -1063,8 +1068,8 @@ check_timeout (gpointer udata)
 }
 
 
-gboolean
-gsq_init (guint16 default_port)
+static void
+gsq_init ()
 {
 	GInetAddress *iaddr;
 	GSocketAddress *saddr;
@@ -1073,9 +1078,9 @@ gsq_init (guint16 default_port)
 	ip4sock = g_socket_new (G_SOCKET_FAMILY_IPV4, G_SOCKET_TYPE_DATAGRAM,
 			G_SOCKET_PROTOCOL_UDP, &error);
 	if (ip4sock) {
-		if (default_port) {
+		if (default_local_port) {
 			iaddr = g_inet_address_new_any (G_SOCKET_FAMILY_IPV4);
-			saddr = g_inet_socket_address_new (iaddr, default_port);
+			saddr = g_inet_socket_address_new (iaddr, default_local_port);
 			g_socket_bind (ip4sock, saddr, FALSE, NULL);
 			g_object_unref (saddr);
 			g_object_unref (iaddr);
@@ -1087,16 +1092,16 @@ gsq_init (guint16 default_port)
 		g_source_attach (ip4sock_source, NULL);
 		g_source_unref (ip4sock_source);
 	} else {
-		g_warning ("Could not create a IPv4 socket: %s", error->message);
+		g_warning (_("Failed to create a IPv4 UDP socket: %s"), error->message);
 		g_error_free (error);
 	}
 	
 	ip6sock = g_socket_new (G_SOCKET_FAMILY_IPV6, G_SOCKET_TYPE_DATAGRAM,
 			G_SOCKET_PROTOCOL_UDP, &error);
 	if (ip6sock) {
-		if (default_port) {
+		if (default_local_port) {
 			iaddr = g_inet_address_new_any (G_SOCKET_FAMILY_IPV6);
-			saddr = g_inet_socket_address_new (iaddr, default_port);
+			saddr = g_inet_socket_address_new (iaddr, default_local_port);
 			g_socket_bind (ip6sock, saddr, FALSE, NULL);
 			g_object_unref (saddr);
 			g_object_unref (iaddr);
@@ -1108,7 +1113,7 @@ gsq_init (guint16 default_port)
 		g_source_attach (ip6sock_source, NULL);
 		g_source_unref (ip6sock_source);
 	} else {
-		g_warning ("Could not create a IPv6 socket: %s", error->message);
+		g_warning (_("Failed to create a IPv6 UDP socket: %s"), error->message);
 		g_error_free (error);
 	}
 	
@@ -1139,7 +1144,8 @@ gsq_init (guint16 default_port)
 	
 	g_timeout_add_seconds (1, check_timeout, NULL);
 	
-	return ip4sock != NULL && ip6sock != NULL;
+	if (!(ip4sock || ip6sock))
+		g_error (_("No UDP socket was created"));
 }
 
 static void
@@ -1147,9 +1153,20 @@ gsq_fini ()
 {
 	g_source_destroy (ip4sock_source);
 	g_object_unref (ip4sock);
+	ip4sock = NULL;
+	
 	g_source_destroy (ip6sock_source);
 	g_object_unref (ip6sock);
+	ip6sock = NULL;
 }
+
+
+void
+gsq_set_default_local_port (guint16 port)
+{
+	
+}
+
 
 guint16
 gsq_get_local_ipv4_port ()
