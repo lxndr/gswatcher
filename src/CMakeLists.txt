@@ -45,7 +45,14 @@ add_executable (gswatcher
 		gui-window.c
 		gui-notification.c
 		gui-log.c
-		gui-chat.c)
+		gui-chat.c
+		resources.c)
+
+add_custom_command (OUTPUT resources.c
+		COMMAND glib-compile-resources --generate-source --target=resources.c gswatcher.gresource.xml
+		MAIN_DEPENDENCY gswatcher.gresource.xml
+		DEPENDS ui/info.ui
+		COMMENT "Generate resource file")
 
 target_link_libraries (gswatcher
 		${GLIB_LIBRARIES}
