@@ -87,8 +87,6 @@ main (int argc, char **argv)
 	
 	signal (SIGINT, sigint);
 	
-	gsq_init (0);
-	
 	loop = g_main_loop_new (NULL, TRUE);
 	
 	updater = gsq_updater_new ();
