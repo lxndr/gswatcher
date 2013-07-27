@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<gresources>
+	<gresource prefix="/org/gswatcher">
+		<file preprocess="xml-stripblanks" compressed="true">ui/info.ui</file>
+	</gresource>
+</gresources>
