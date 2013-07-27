@@ -328,7 +328,7 @@ gs_application_startup (GApplication *app)
 	
 	load_preferences (gsapp);
 	load_buddy_list (gsapp);
-	gsq_init (gsapp->default_port);
+	gsq_set_default_local_port (gsapp->default_port);
 	
 	if (gsapp->specific_servers)
 		add_servers (gsapp, gsapp->specific_servers);

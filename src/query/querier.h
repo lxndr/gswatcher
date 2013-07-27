@@ -95,67 +95,103 @@ struct _GsqPlayer {
 };
 
 
-GType			gsq_querier_get_type (void) G_GNUC_CONST;
-GsqQuerier *	gsq_querier_new (const gchar *address, guint16 gport,
-									guint16 qport, const gchar *protocol);
-GsqQuerier *	gsq_querier_new_parse (const gchar *address);
+GType           gsq_querier_get_type           () G_GNUC_CONST;
 
-void			gsq_querier_set_protocol (GsqQuerier *querier, const gchar *protocol);
-const gchar *	gsq_querier_get_protocol (GsqQuerier *querier);
+GsqQuerier *    gsq_querier_new                (const gchar    *address,
+                                                guint16         gport,
+                                                guint16         qport,
+                                                const gchar    *protocol);
 
-void			gsq_querier_set_protocol_auto (GsqQuerier *querier, gboolean value);
-gboolean		gsq_querier_get_protocol_auto (GsqQuerier *querier);
+GsqQuerier *    gsq_querier_new_parse          (const gchar    *address);
 
-void			gsq_querier_set_gport (GsqQuerier *querier, guint16 port);
-guint16			gsq_querier_get_gport (GsqQuerier *querier);
+void            gsq_querier_set_protocol       (GsqQuerier     *querier,
+                                                const gchar    *protocol);
 
-void			gsq_querier_set_gport_auto (GsqQuerier *querier, gboolean value);
-gboolean		gsq_querier_get_gport_auto (GsqQuerier *querier);
+const gchar *   gsq_querier_get_protocol       (GsqQuerier     *querier) G_GNUC_CONST;
 
-void			gsq_querier_set_qport (GsqQuerier *querier, guint16 port);
-guint16			gsq_querier_get_qport (GsqQuerier *querier);
+void            gsq_querier_set_protocol_auto  (GsqQuerier     *querier,
+                                                gboolean        value);
 
-void			gsq_querier_set_qport_auto (GsqQuerier *querier, gboolean value);
-gboolean		gsq_querier_get_qport_auto (GsqQuerier *querier);
+gboolean        gsq_querier_get_protocol_auto  (GsqQuerier     *querier) G_GNUC_CONST;
 
-const gchar *	gsq_querier_get_address (GsqQuerier *querier);
-GInetAddress *	gsq_querier_get_iaddr (GsqQuerier *querier);
-gchar *			gsq_querier_get_extra (GsqQuerier *querier, const gchar *key);
-glong			gsq_querier_get_ping (GsqQuerier *querier);
-gboolean		gsq_querier_is_detected (GsqQuerier *querier);
+void            gsq_querier_set_gport          (GsqQuerier     *querier,
+                                                guint16         port);
 
-GArray *		gsq_querier_get_fields (GsqQuerier *querier);
-GList *			gsq_querier_get_players (GsqQuerier *querier);
-GsqPlayer *		gsq_querier_find_player (GsqQuerier *querier, const gchar *name);
+guint16         gsq_querier_get_gport          (GsqQuerier     *querier) G_GNUC_CONST;
 
-void			gsq_querier_update (GsqQuerier *querier);
+void            gsq_querier_set_gport_auto     (GsqQuerier     *querier,
+                                                gboolean        value);
 
-/* Base functions */
+gboolean        gsq_querier_get_gport_auto     (GsqQuerier     *querier) G_GNUC_CONST;
+
+void            gsq_querier_set_qport          (GsqQuerier     *querier,
+                                                guint16         port);
+
+guint16         gsq_querier_get_qport          (GsqQuerier     *querier) G_GNUC_CONST;
+
+void            gsq_querier_set_qport_auto     (GsqQuerier     *querier,
+                                                gboolean        value);
+
+gboolean        gsq_querier_get_qport_auto     (GsqQuerier     *querier) G_GNUC_CONST;
+
+const gchar *   gsq_querier_get_address        (GsqQuerier     *querier) G_GNUC_CONST;
+
+GInetAddress *  gsq_querier_get_iaddr          (GsqQuerier     *querier) G_GNUC_CONST;
+
+gchar *         gsq_querier_get_extra          (GsqQuerier     *querier,
+                                                const gchar    *key) G_GNUC_CONST;
+
+glong           gsq_querier_get_ping           (GsqQuerier     *querier) G_GNUC_CONST;
+
+gboolean        gsq_querier_is_detected        (GsqQuerier     *querier) G_GNUC_CONST;
+
+GArray *        gsq_querier_get_fields         (GsqQuerier     *querier) G_GNUC_CONST;
+
+GList *         gsq_querier_get_players        (GsqQuerier     *querier) G_GNUC_CONST;
+
+GsqPlayer *     gsq_querier_find_player        (GsqQuerier     *querier,
+                                                const gchar    *name) G_GNUC_CONST;
+
+void            gsq_querier_update             (GsqQuerier     *querier);
+
+
+
+/* debug functions */
 
 typedef enum _GsqDebugFlag {
-	GSQ_DEBUG_NONE			= 1 << 0,
-	GSQ_DEBUG_INCOMING_DATA	= 1 << 1,
-	GSQ_DEBUG_OUTGOING_DATA	= 1 << 2,
-	GSQ_DEBUG_EVENT			= 1 << 3
+    GSQ_DEBUG_NONE            = 1 << 0,
+    GSQ_DEBUG_INCOMING_DATA   = 1 << 1,
+    GSQ_DEBUG_OUTGOING_DATA   = 1 << 2,
+    GSQ_DEBUG_EVENT           = 1 << 3
 } GsqDebugFlag;
 
 
-gboolean gsq_init (guint16 default_port);
+void            gsq_set_debug_flags            (GsqDebugFlag    flags);
+GsqDebugFlag    gsq_get_debug_flags            ();
 
-guint16 gsq_get_local_ipv4_port ();
-guint16 gsq_get_local_ipv6_port ();
 
-void gsq_set_debug_flags (GsqDebugFlag flags);
-GsqDebugFlag gsq_get_debug_flags ();
+/* local port information */
+guint16         gsq_get_default_local_port     () G_GNUC_CONST;
 
+void            gsq_set_default_local_port     (guint16         port);
+
+guint16         gsq_get_local_ipv4_port        ();
+
+guint16         gsq_get_local_ipv6_port        ();
+
+
+/* protocol registry */
 typedef void (*GsqQueryFunc) (GsqQuerier *querier);
 typedef gboolean (*GsqProcessFunc) (GsqQuerier *querier, guint16 qport,
 		const gchar *data, gssize size);
 typedef void (*GsqFreeFunc) (GsqQuerier *querier);
 
-void gsq_register_protocol (const gchar *name, GsqQueryFunc query_fn,
-		GsqProcessFunc process_fn, GsqFreeFunc free_fn);
-void gsq_unregister_protocol (const gchar *name);
+void            gsq_register_protocol          (const gchar    *name,
+                                                GsqQueryFunc    query_fn,
+                                                GsqProcessFunc  process_fn,
+                                                GsqFreeFunc     free_fn);
+
+void            gsq_unregister_protocol        (const gchar    *name);
 
 
 G_END_DECLS
