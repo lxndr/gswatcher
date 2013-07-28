@@ -36,7 +36,7 @@ extern GtkWidget *window;
 
 
 // window
-GtkWidget *gui_window_create ();
+GtkWidget *gui_window_create (GtkApplication *app);
 void gui_window_destroy ();
 
 void gui_window_show ();

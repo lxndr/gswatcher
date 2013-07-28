@@ -218,7 +218,7 @@ load_icon (const gchar *name, GError **error)
 	if ((pixbuf = g_hash_table_lookup (icons, name)))
 		return pixbuf;
 	
-	gchar *path = g_build_filename (app->icon_dir, name, NULL);
+	gchar *path = g_build_filename (gs_application_get_icon_dir (), name, NULL);
 	pixbuf = gdk_pixbuf_new_from_file (path, error);
 	if (!pixbuf) {
 		g_free (path);
@@ -421,9 +421,9 @@ gui_slist_set_game_column_mode (GuiGameColumnMode mode)
 {
 	gtk_tree_view_column_set_visible (gamecolumn, mode != GUI_GAME_COLUMN_ICON);
 	game_column_mode = mode;
-	gui_slist_update_list (app->server_list);
+	gui_slist_update_list (gs_application_server_list ());
 	
-	GList *server_iter = app->server_list;
+	GList *server_iter = gs_application_server_list ();
 	while (server_iter) {
 		GsClient *client = server_iter->data;
 		gtk_list_store_set (liststore, &client->sliter,
@@ -445,7 +445,7 @@ gui_slist_set_visible (gboolean seen)
 {
 	if (seen && !visible) {
 		visible = TRUE;
-		gui_slist_update_list (app->server_list);
+		gui_slist_update_list (gs_application_server_list ());
 	}
 	visible = seen;
 }
@@ -519,7 +519,7 @@ gs_address_activated (GtkEntry *entry, gpointer udata)
 {
 	gtk_entry_set_icon_sensitive (entry, GTK_ENTRY_ICON_SECONDARY, FALSE);
 	const gchar *address = gtk_entry_get_text (entry);
-	gs_application_add_server (app, address);
+	gs_application_add_server (address);
 }
 
 
@@ -538,7 +538,7 @@ gs_address_icon_clicked (GtkEntry *entry, GtkEntryIconPosition icon,
 		/* add new server */
 		gtk_entry_set_icon_sensitive (entry, GTK_ENTRY_ICON_SECONDARY, FALSE);
 		const gchar *address = gtk_entry_get_text (entry);
-		gs_application_add_server (app, address);
+		gs_application_add_server (address);
 	}
 }
 
@@ -552,7 +552,7 @@ gs_address_changed (GtkEntry *entry, gpointer udata)
 	gtk_entry_set_icon_sensitive (entry, GTK_ENTRY_ICON_PRIMARY, enabled);
 	gtk_entry_set_icon_activatable (entry, GTK_ENTRY_ICON_PRIMARY, enabled);
 	
-	enabled = *address && !gs_application_find_server (app, address);
+	enabled = *address && !gs_application_find_server (address);
 	gtk_entry_set_icon_sensitive (entry, GTK_ENTRY_ICON_SECONDARY, enabled);
 	gtk_entry_set_icon_activatable (entry, GTK_ENTRY_ICON_SECONDARY, enabled);
 }
@@ -562,7 +562,7 @@ static gboolean
 slist_key_pressed (GtkWidget *widget, GdkEventKey *event, gpointer udata)
 {
 	if (event->keyval == GDK_KEY_Delete) {
-		gs_application_remove_server_ask (app, selected);
+		gs_application_remove_server_ask (selected);
 	} else if (event->state == GDK_CONTROL_MASK &&
 			(event->keyval == GDK_KEY_C || event->keyval == GDK_KEY_c ||
 			event->keyval == GDK_KEY_Cyrillic_ES || event->keyval == GDK_KEY_Cyrillic_es)) {
@@ -572,7 +572,7 @@ slist_key_pressed (GtkWidget *widget, GdkEventKey *event, gpointer udata)
 			event->keyval == GDK_KEY_Cyrillic_A || event->keyval == GDK_KEY_Cyrillic_a)) {
 		gs_client_set_favorite (selected, !selected->favorite);
 		gui_slist_update (selected);
-		gs_application_save_server_list (app);
+		gs_application_save_server_list ();
 	}
 	
 	return TRUE;

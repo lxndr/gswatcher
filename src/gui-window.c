@@ -149,7 +149,7 @@ gs_window_about_clicked (GtkButton *button)
 static void
 gs_window_quit_clicked (GtkWidget *widget, gpointer udata)
 {
-	gs_application_shutdown (app);
+	gs_application_shutdown ();
 }
 
 
@@ -184,8 +184,8 @@ gs_window_show_toggled (GtkCheckMenuItem *menuitem, gpointer udata)
 static void
 gs_window_pause_toggled (GtkWidget *widget, gpointer udata)
 {
-	gboolean pause = !gs_application_get_pause (app);
-	gs_application_set_pause (app, pause);
+	gboolean pause = !gs_application_get_pause ();
+	gs_application_set_pause (pause);
 	
 	g_signal_handlers_block_by_func (traypause, gs_window_pause_toggled, NULL);
 	gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (traypause), pause);
@@ -322,7 +322,7 @@ gui_window_create_tablabel (const gchar *icon, const gchar *title)
 
 
 GtkWidget *
-gui_window_create ()
+gui_window_create (GtkApplication *app)
 {
 /* tray icon */
 	trayicon = gtk_status_icon_new_from_icon_name ("gswatcher");
@@ -563,7 +563,7 @@ gui_window_create ()
 	gtk_box_pack_start (GTK_BOX (box), toolbar, FALSE, TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (box), notebook, TRUE, TRUE, 0);
 	
-	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+	window = gtk_application_window_new (app);
 	g_object_set (G_OBJECT (window),
 			"title",			"Game Server Watcher",
 			"icon-name",		"gswatcher",

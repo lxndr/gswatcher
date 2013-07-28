@@ -37,182 +37,48 @@
 #include "gui-notification.h"
 
 
-enum {
-	PROP_0,
-	PROP_INTERVAL,
-	PROP_PAUSE
-};
+static gchar *buddy_list_path = NULL;
+static gchar *server_list_path = NULL;
+static gchar *preferences_path = NULL;
+static gchar *icon_dir = NULL;
+static gchar *pixmap_dir = NULL;
+static gchar *sound_dir = NULL;
 
+static GHashTable *buddy_list = NULL;
+static GList *server_list = NULL;
+static GList *server_iter = NULL;
+static gboolean dont_save_server_list = FALSE;
 
-GsApplication *app = NULL;
+static gdouble update_interval;
+static gboolean update_pause;
+static guint update_timer;
 
+static guint16 default_port = 27500;  /* mainly for save/load purpose */
 
-static GObject* gs_application_constructor (GType type, guint n_construct_params,
-		GObjectConstructParam *construct_params);
-static void gs_application_set_property (GObject *object, guint prop_id,
-		const GValue *value, GParamSpec *pspec);
-static void gs_application_get_property (GObject *object, guint prop_id,
-		GValue *value, GParamSpec *pspec);
-static void gs_application_finalize (GObject *object);
-static void gs_application_activate (GApplication *app);
-static gboolean gs_application_local_command_line (GApplication *app,
-		gchar ***argumnets, int *exit_status);
-static void gs_application_startup (GApplication *app);
-
-static void load_server_list (GsApplication *app);
-static void load_buddy_list (GsApplication *app);
-static void load_preferences (GsApplication *app);
-static void add_servers (GsApplication *app, gchar **servers);
-static void remove_server (GsApplication *app, GsClient *client);
+static void load_server_list ();
+static void load_buddy_list ();
+static void load_preferences ();
+static void add_servers (gchar **servers);
+static void remove_server (GsClient *client);
 static void free_buddy (GsBuddy *buddy);
 
 
-G_DEFINE_TYPE (GsApplication, gs_application, GTK_TYPE_APPLICATION);
-
 
 static void
-gs_application_class_init (GsApplicationClass *class)
+initialize_paths ()
 {
-	GObjectClass *object_class = G_OBJECT_CLASS (class);
-	object_class->constructor = gs_application_constructor;
-	object_class->set_property = gs_application_set_property;
-	object_class->get_property = gs_application_get_property;
-	object_class->finalize = gs_application_finalize;
-	
-	GApplicationClass *app_class = G_APPLICATION_CLASS (object_class);
-	app_class->startup = gs_application_startup;
-	app_class->activate = gs_application_activate;
-	app_class->local_command_line = gs_application_local_command_line;
-	
-	g_object_class_install_property (object_class, PROP_INTERVAL,
-			g_param_spec_double ("interval", "Interval", "Update interval",
-			0.5, 30.0, 2.5, G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT));
-	
-	g_object_class_install_property (object_class, PROP_PAUSE,
-			g_param_spec_boolean ("pause", "Pause", "Update pause",
-			FALSE, G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT));
-}
-
-
-static void
-gs_application_init (GsApplication *app)
-{
-	app->buddy_list = g_hash_table_new_full (g_str_hash, g_str_equal, NULL,
-			(GDestroyNotify) free_buddy);
-	app->default_port = 27500;
-}
-
-
-static GObject*
-gs_application_constructor (GType type, guint n_construct_params,
-		GObjectConstructParam *construct_params)
-{
-	static GObject *singleton = NULL;
-	
-	if (singleton)
-		return singleton;
-	
-	singleton = G_OBJECT_CLASS (gs_application_parent_class)->constructor (
-			type, n_construct_params, construct_params);
-	return singleton;
-}
-
-
-static void
-gs_application_finalize (GObject *object)
-{
-	GsApplication *app = GS_APPLICATION (object);
-	g_hash_table_destroy (app->buddy_list);
-	
-	g_free (app->buddy_list_path);
-	g_free (app->server_list_path);
-	g_free (app->preferences_path);
-	g_free (app->icon_dir);
-	g_free (app->pixmap_dir);
-	g_free (app->sound_dir);
-#ifdef ENABLE_NLS
-	g_free (app->locale_dir);
-#endif
-	
-	if (app->specific_servers)
-		g_strfreev (app->specific_servers);
-	
-	G_OBJECT_CLASS (gs_application_parent_class)->finalize (object);
-}
-
-
-static void
-gs_application_set_property (GObject *object, guint prop_id, const GValue *value,
-		GParamSpec *pspec)
-{
-	GsApplication *app = GS_APPLICATION (object);
-	
-	switch (prop_id) {
-	case PROP_INTERVAL:
-		app->interval = g_value_get_double (value);
-		break;
-	case PROP_PAUSE:
-		app->pause = g_value_get_boolean (value);
-		break;
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-		break;
-	}
-}
-
-static void
-gs_application_get_property (GObject *object, guint prop_id, GValue *value,
-		GParamSpec *pspec)
-{
-	GsApplication *app = GS_APPLICATION (object);
-	
-	switch (prop_id) {
-	case PROP_INTERVAL:
-		g_value_set_double (value, app->interval);
-		break;
-	case PROP_PAUSE:
-		g_value_set_boolean (value, app->pause);
-		break;
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-		break;
-    }
-}
-
-
-GsApplication *
-gs_application_new ()
-{
-	return g_object_new (GS_TYPE_APPLICATION, "application-id", "org.gswatcher",
-			"flags", G_APPLICATION_FLAGS_NONE, NULL);
-}
-
-
-static void
-gs_application_activate (GApplication *app)
-{
-	if (G_APPLICATION_CLASS (gs_application_parent_class)->activate)
-		G_APPLICATION_CLASS (gs_application_parent_class)->activate (app);
-}
-
-
-static void
-initialize_paths (GsApplication *app, const gchar *exe)
-{
-	GFile *fexe = g_file_new_for_commandline_arg (exe);
-	gchar *exepath = g_file_get_path (fexe);
+	gchar *exepath = gs_get_executable_path ();
 	gchar *bin_dir = g_path_get_dirname (exepath);
 	gchar *root_dir = g_path_get_dirname (bin_dir);
 	g_free (bin_dir);
 	g_free (exepath);
-	g_object_unref (fexe);
 	
 	gchar *config_dir = g_build_filename (g_get_user_config_dir (), "gswatcher", NULL);
 	g_mkdir_with_parents (config_dir, 0750);
 	
-	app->buddy_list_path = g_build_filename (config_dir, "buddylist.json", NULL);
-	app->server_list_path = g_build_filename (config_dir, "serverlist.json", NULL);
-	app->preferences_path = g_build_filename (config_dir, "preferences.json", NULL);
+	buddy_list_path = g_build_filename (config_dir, "buddylist.json", NULL);
+	server_list_path = g_build_filename (config_dir, "serverlist.json", NULL);
+	preferences_path = g_build_filename (config_dir, "preferences.json", NULL);
 	
 	g_free (config_dir);
 	
@@ -222,53 +88,53 @@ initialize_paths (GsApplication *app, const gchar *exe)
 	gchar *data_dir = g_build_filename (root_dir, "share", "gswatcher", NULL);
 #endif
 	
-	app->icon_dir = g_build_filename (data_dir, "icons", NULL);
-	app->sound_dir = g_build_filename (data_dir, "sounds", NULL);
-	app->pixmap_dir = g_build_filename (root_dir, "share", "pixmaps", NULL);
-	
-#ifdef ENABLE_NLS
-#ifdef GS_LOCALEDIR
-	app->locale_dir = g_strdup (GS_LOCALEDIR);
-#else
-	app->locale_dir = g_build_filename (root_dir, "share", "locale", NULL);
-#endif
-#endif
+	icon_dir = g_build_filename (data_dir, "icons", NULL);
+	sound_dir = g_build_filename (data_dir, "sounds", NULL);
+	pixmap_dir = g_build_filename (root_dir, "share", "pixmaps", NULL);
 	
 	g_free (data_dir);
 	g_free (root_dir);
 }
 
 
-static gboolean
-gs_application_local_command_line (GApplication *app, gchar ***argumnets,
-		int *exit_status)
+const gchar *
+gs_application_get_icon_dir ()
 {
-	/* count number of arguments */
-	gchar **argv = *argumnets;
-	gint argc = 0;
-	
-	while (argv[argc])
-		argc++;
-	
-	/*  */
-	GsApplication *gsapp = GS_APPLICATION (app);
-	initialize_paths (gsapp, *argv);
-	
+	return icon_dir;
+}
+
+
+const gchar *
+gs_application_get_sound_dir ()
+{
+	return sound_dir;
+}
+
+
+static gint
+application_command_line (GApplication *app, GApplicationCommandLine *cmdline, gpointer udata)
+{
+	gboolean help = FALSE;
 	gboolean version = FALSE;
+	gboolean minimized = FALSE;
 	gboolean debug = FALSE;
 	gboolean notifier = FALSE;
 	gchar *playbin = NULL;
+	gchar **servers = NULL;
+	
+	gint ret = 0, argc;
+	gchar **argv = g_application_command_line_get_arguments (cmdline, &argc);
 	
 	GError *error = NULL;
 	GOptionContext *context;
 	GOptionEntry options[] = {
 		{"version", 'v', 0, G_OPTION_ARG_NONE, &version,
 				N_("Show version number and exit"), NULL},
-		{"minimized", 'm', 0, G_OPTION_ARG_NONE, &gsapp->minimized,
+		{"minimized", 'm', 0, G_OPTION_ARG_NONE, &minimized,
 				N_("Start minimized in system tray"), NULL},
 		{"debug", 'd', 0, G_OPTION_ARG_NONE, &debug,
 				N_("Output all packets into stdout"), NULL},
-		{"server", 's', 0, G_OPTION_ARG_STRING_ARRAY, &gsapp->specific_servers,
+		{"server", 's', 0, G_OPTION_ARG_STRING_ARRAY, &servers,
 				N_("Watch only this server"), NULL},
 #ifndef G_OS_WIN32
 		{"notifier", 'n', 0, G_OPTION_ARG_NONE, &notifier,
@@ -276,89 +142,106 @@ gs_application_local_command_line (GApplication *app, gchar ***argumnets,
 #endif
 		{"playbin", 'p', 0, G_OPTION_ARG_STRING, &playbin,
 				N_("Command to play sounds"), NULL},
+		{"help", '?', 0, G_OPTION_ARG_NONE, &help, NULL, NULL},
 		{NULL}
 	};
 	
 	context = g_option_context_new (NULL);
+	g_option_context_set_help_enabled (context, FALSE);
 	g_option_context_add_group (context, gtk_get_option_group (TRUE));
 	g_option_context_add_main_entries (context, options, NULL);
 	
 	if (!g_option_context_parse (context, &argc, &argv, &error)) {
-		g_printerr ("%s\n", error->message);
-		exit (EXIT_FAILURE);
+		g_application_command_line_printerr (cmdline, "%s\n", error->message);
+		g_error_free (error);
+		ret = 1;
+	} else if (help) {
+		gchar *text;
+		text = g_option_context_get_help (context, FALSE, NULL);
+		g_application_command_line_print (cmdline, text);
+		g_free (text);
+	} else {
+		if (version)
+			g_application_command_line_print (cmdline, "Game Server Watcher v" GS_VERSION "\n");
+		
+		if (!g_application_command_line_get_is_remote (cmdline)) {
+			if (playbin)
+				gs_notification_set_playbin (playbin);
+			
+			if (!minimized)
+				gui_window_show ();
+			
+			gsq_set_debug_flags (debug ?
+					GSQ_DEBUG_INCOMING_DATA | GSQ_DEBUG_OUTGOING_DATA | GSQ_DEBUG_EVENT :
+					GSQ_DEBUG_NONE);
+			
+			gs_notification_init (notifier);
+			
+			if (servers) {
+				dont_save_server_list = TRUE;
+				add_servers (servers);
+			} else {
+				dont_save_server_list = FALSE;
+				load_server_list ();
+			}
+		}
 	}
 	
-	if (version) {
-		g_print ("Game Server Watcher v" GS_VERSION "\n");
-		exit (EXIT_SUCCESS);
-	}
-	
-	gs_notification_init (notifier);
-	gsq_set_debug_flags (debug ?
-			GSQ_DEBUG_INCOMING_DATA | GSQ_DEBUG_OUTGOING_DATA | GSQ_DEBUG_EVENT :
-			GSQ_DEBUG_NONE);
 	if (playbin)
-		gs_notification_set_playbin (playbin);
-	
+		g_free (playbin);
+	if (servers)
+		g_strfreev (servers);
+	g_strfreev (argv);
 	g_option_context_free (context);
-	return G_APPLICATION_CLASS (gs_application_parent_class)->
-			local_command_line (app, argumnets, exit_status);
+	
+	return ret;
 }
 
 
 static void
-gs_application_startup (GApplication *app)
+application_startup (GApplication *app)
 {
-	GsApplication *gsapp = GS_APPLICATION (app);
-	if (G_APPLICATION_CLASS (gs_application_parent_class)->startup)
-		G_APPLICATION_CLASS (gs_application_parent_class)->startup (app);
-	
-#ifdef ENABLE_NLS
-	bindtextdomain (GETTEXT_PACKAGE, gsapp->locale_dir);
-	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
-	textdomain (GETTEXT_PACKAGE);
-#endif
-	
+	initialize_paths ();
 	g_set_application_name ("Game Server Watcher");
-	gtk_icon_theme_append_search_path (gtk_icon_theme_get_default (),
-			gsapp->pixmap_dir);
+	gtk_icon_theme_append_search_path (gtk_icon_theme_get_default (), pixmap_dir);
 	
-	GtkWidget *window = gui_window_create ();
-	gtk_application_add_window (GTK_APPLICATION (app), GTK_WINDOW (window));
+	gui_window_create (GTK_APPLICATION (app));
 	
-	load_preferences (gsapp);
-	load_buddy_list (gsapp);
-	gsq_set_default_local_port (gsapp->default_port);
+	gsq_set_default_local_port (default_port);
+	load_preferences ();
 	
-	if (gsapp->specific_servers)
-		add_servers (gsapp, gsapp->specific_servers);
-	else
-		load_server_list (gsapp);
-	
-	if (!gsapp->minimized)
-		gui_window_show ();
+	buddy_list = g_hash_table_new_full (g_str_hash, g_str_equal, NULL,
+			(GDestroyNotify) free_buddy);
+	load_buddy_list ();
 }
 
 
 static gboolean
-gs_application_shutdown_shot (GsApplication *app)
+application_shutdown_real (GtkApplication *app)
 {
-	gs_application_save_preferences (app);
-	while (app->server_list)
-		remove_server (app, app->server_list->data);
-	if (app->timer)
-		g_source_remove (app->timer);
+	gs_application_save_preferences ();
+	while (server_list)
+		remove_server (server_list->data);
+	if (update_timer)
+		g_source_remove (update_timer);
 	gui_window_destroy ();
+	
+	g_hash_table_destroy (buddy_list);
+	
+	g_free (buddy_list_path);
+	g_free (server_list_path);
+	g_free (preferences_path);
+	g_free (icon_dir);
+	g_free (pixmap_dir);
+	g_free (sound_dir);
 	
 	return FALSE;
 }
 
-void
-gs_application_shutdown (GsApplication *app)
+void gs_application_shutdown ()
 {
-	g_idle_add ((GSourceFunc) gs_application_shutdown_shot, app);
+	g_idle_add ((GSourceFunc) application_shutdown_real, g_application_get_default ());
 }
-
 
 
 /* buddy list */
@@ -375,10 +258,10 @@ save_buddy_list_func (gchar *name, GsBuddy *buddy, JsonObject* list)
 }
 
 static void
-save_buddy_list (GsApplication *app)
+save_buddy_list ()
 {
 	JsonObject* list = json_object_new ();
-	g_hash_table_foreach (app->buddy_list, (GHFunc) save_buddy_list_func, list);
+	g_hash_table_foreach (buddy_list, (GHFunc) save_buddy_list_func, list);
 	
 	JsonNode *root = json_node_alloc ();
 	json_node_init_object (root, list);
@@ -388,7 +271,7 @@ save_buddy_list (GsApplication *app)
 	json_generator_set_pretty (gen, TRUE);
 	json_generator_set_root (gen, root);
 	
-	if (!json_generator_to_file (gen, app->buddy_list_path, &error)) {
+	if (!json_generator_to_file (gen, buddy_list_path, &error)) {
 		g_warning (_("Couldn't save buddy list: %s"), error->message);
 		g_error_free (error);
 	}
@@ -399,21 +282,20 @@ save_buddy_list (GsApplication *app)
 
 
 GsBuddy *
-gs_application_find_buddy (GsApplication *app, const gchar *name)
+gs_application_find_buddy (const gchar *name)
 {
-	g_return_val_if_fail (GS_IS_APPLICATION (app), NULL);
 	g_return_val_if_fail (name != NULL, NULL);
-	return g_hash_table_lookup (app->buddy_list, name);
+	return g_hash_table_lookup (buddy_list, name);
 }
 
 
 static void
-update_buddy (GsApplication *app, GsBuddy *buddy)
+update_buddy (GsBuddy *buddy)
 {
 	g_list_free (buddy->servers);
 	buddy->servers = NULL;
 	
-	GList *isrv = app->server_list;
+	GList *isrv = server_list;
 	while (isrv) {
 		GsClient *client = isrv->data;
 		if (gsq_querier_find_player (client->querier, buddy->name))
@@ -436,66 +318,59 @@ free_buddy (GsBuddy *buddy)
 
 
 void
-gs_application_remove_buddy (GsApplication *app, const gchar *name)
+gs_application_remove_buddy (const gchar *name)
 {
-	g_return_if_fail (GS_IS_APPLICATION (app));
 	g_return_if_fail (name && *name);
 	
-	g_hash_table_remove (app->buddy_list, name);
-	save_buddy_list (app);
+	g_hash_table_remove (buddy_list, name);
+	save_buddy_list ();
 }
 
 
 void
-gs_application_change_buddy (GsApplication *app, const gchar *name,
-		gboolean notify)
+gs_application_change_buddy (const gchar *name, gboolean notify)
 {
-	g_return_if_fail (GS_IS_APPLICATION (app));
 	g_return_if_fail (name && *name);
 	
-	GsBuddy *buddy = gs_application_find_buddy (app, name);
+	GsBuddy *buddy = gs_application_find_buddy (name);
 	buddy->notify = notify;
-	save_buddy_list (app);
+	save_buddy_list ();
 }
 
 
 static GsBuddy *
-add_buddy_real (GsApplication *app, const gchar *name, gint64 lastseen,
-		const gchar *lastaddr, gboolean notify)
+add_buddy_real (const gchar *name, gint64 lastseen, const gchar *lastaddr, gboolean notify)
 {
 	GsBuddy *buddy = g_slice_new0 (GsBuddy);
 	buddy->name = g_strdup (name);
 	buddy->lastseen = g_date_time_new_from_unix_local (lastseen);
 	buddy->lastaddr = lastaddr ? g_strdup (lastaddr) : NULL;
 	buddy->notify = notify;
-	update_buddy (app, buddy);
-	g_hash_table_insert (app->buddy_list, buddy->name, buddy);
+	update_buddy (buddy);
+	g_hash_table_insert (buddy_list, buddy->name, buddy);
 	return buddy;
 }
 
 
 GsBuddy *
-gs_application_add_buddy (GsApplication *app, const gchar *name, gint64 lastseen,
-		const gchar *lastaddr, gboolean notify)
+gs_application_add_buddy (const gchar *name, gint64 lastseen, const gchar *lastaddr, gboolean notify)
 {
-	g_return_val_if_fail (GS_IS_APPLICATION (app), NULL);
 	g_return_val_if_fail (name && *name, NULL);
 	
-	GsBuddy *buddy = add_buddy_real (app, name, lastseen, lastaddr, notify);
-	save_buddy_list (app);
+	GsBuddy *buddy = add_buddy_real (name, lastseen, lastaddr, notify);
+	save_buddy_list ();
 	return buddy;
 }
 
 
 static void
-load_buddy_list_func (JsonObject *list, const gchar *name, JsonNode *node,
-		GsApplication* app)
+load_buddy_list_func (JsonObject *list, const gchar *name, JsonNode *node, gpointer udata)
 {
 	if (!JSON_NODE_HOLDS_OBJECT (node))
 		return;
 	
 	JsonObject* obj = json_node_get_object (node);
-	GsBuddy *buddy = add_buddy_real (app, name,
+	GsBuddy *buddy = add_buddy_real (name,
 			json_object_get_int_member (obj, "lastseen"),
 			json_object_get_string_member (obj, "lastaddr"),
 			json_object_get_boolean_member (obj, "notify"));
@@ -504,11 +379,11 @@ load_buddy_list_func (JsonObject *list, const gchar *name, JsonNode *node,
 
 
 static void
-load_buddy_list (GsApplication *app)
+load_buddy_list ()
 {
 	GError *error = NULL;
 	JsonParser* parser = json_parser_new ();
-	if (!(json_parser_load_from_file (parser, app->buddy_list_path, &error))) {
+	if (!(json_parser_load_from_file (parser, buddy_list_path, &error))) {
 		g_warning (_("Couldn't load buddy list: %s"), error->message);
 		g_error_free (error);
 		return;
@@ -517,7 +392,7 @@ load_buddy_list (GsApplication *app)
 	JsonNode *root = json_parser_get_root (parser);
 	if (JSON_NODE_HOLDS_OBJECT (root)) {
 		JsonObject* list = json_node_get_object (root);
-		json_object_foreach_member (list, (JsonObjectForeach) load_buddy_list_func, app);
+		json_object_foreach_member (list, (JsonObjectForeach) load_buddy_list_func, NULL);
 	}
 	
 	g_object_unref (parser);
@@ -542,14 +417,14 @@ save_server_list_func (GsClient *client, JsonArray *list)
 }
 
 void
-gs_application_save_server_list (GsApplication *app)
+gs_application_save_server_list ()
 {
 	/* do not save server list if the user has specified servers */
-	if (app->specific_servers)
+	if (dont_save_server_list)
 		return;
 	
 	JsonArray* list = json_array_new ();
-	g_list_foreach (app->server_list, (GFunc) save_server_list_func, list);
+	g_list_foreach (server_list, (GFunc) save_server_list_func, list);
 	
 	JsonNode *root = json_node_alloc ();
 	json_node_init_array (root, list);
@@ -559,7 +434,7 @@ gs_application_save_server_list (GsApplication *app)
 	json_generator_set_pretty (gen, TRUE);
 	json_generator_set_root (gen, root);
 	
-	if (!json_generator_to_file (gen, app->server_list_path, &error)) {
+	if (!json_generator_to_file (gen, server_list_path, &error)) {
 		g_warning (_("Couldn't save server list: %s"), error->message);
 		g_error_free (error);
 	}
@@ -570,84 +445,91 @@ gs_application_save_server_list (GsApplication *app)
 
 
 static gboolean
-updater_func (GsApplication *app)
+updater_func ()
 {
-	if (app->pause || !app->server_list)
+	if (update_pause || !server_list)
 		return TRUE;
 	
-	if (app->server_iter == NULL)
-		app->server_iter = app->server_list;
+	if (server_iter == NULL)
+		server_iter = server_list;
 	
-	gsq_querier_update (((GsClient *) app->server_iter->data)->querier);
-	app->server_iter = g_list_next (app->server_iter);
+	gsq_querier_update (((GsClient *) server_iter->data)->querier);
+	server_iter = g_list_next (server_iter);
 	
 	return TRUE;
 }
 
 static void
-update_timer (GsApplication *app)
+refresh_timer ()
 {
-	if (app->timer) {
-		g_source_remove (app->timer);
-		app->timer = 0;
+	if (update_timer) {
+		g_source_remove (update_timer);
+		update_timer = 0;
 	}
 	
-	guint count = g_list_length (app->server_list);
+	guint count = g_list_length (server_list);
 	if (count > 0) {
-		glong interval = (glong) (app->interval * 1000);
-		app->timer = g_timeout_add (interval / count,
-				(GSourceFunc) updater_func, app);
+		glong interval = (glong) (update_interval * 1000);
+		update_timer = g_timeout_add (interval / count, (GSourceFunc) updater_func, NULL);
 	}
 }
 
 
 void
-gs_application_set_interval (GsApplication *app, gdouble interval)
+gs_application_set_interval (gdouble interval)
 {
-	g_return_if_fail (GS_IS_APPLICATION (app));
-	
 	interval = CLAMP (interval, 0.5, 30.0);
-	app->interval = interval;
-	update_timer (app);
+	update_interval = interval;
+	refresh_timer ();
 }
 
 gdouble
-gs_application_get_interval (GsApplication *app)
+gs_application_get_interval ()
 {
-	g_return_val_if_fail (GS_IS_APPLICATION (app), 0);
-	return app->interval;
+	return update_interval;
 }
 
 
 void
-gs_application_set_pause (GsApplication *app, gboolean pause)
+gs_application_set_pause (gboolean pause)
 {
-	g_return_if_fail (GS_IS_APPLICATION (app));
-	app->pause = pause;
+	update_pause = pause;
 }
 
 gboolean
-gs_application_get_pause (GsApplication *app)
+gs_application_get_pause ()
 {
-	g_return_val_if_fail (GS_IS_APPLICATION (app), FALSE);
-	return app->pause;
+	return update_pause;
+}
+
+
+void
+gs_application_set_default_port (guint16 port)
+{
+	default_port = port;
+}
+
+guint16
+gs_application_get_default_port ()
+{
+	return default_port;
 }
 
 
 static void
 player_online (GsqQuerier *querier, GsqPlayer *player, GsClient *client)
 {
-	GsBuddy *buddy = gs_application_find_buddy (app, player->name);
+	GsBuddy *buddy = gs_application_find_buddy (player->name);
 	
 	if (buddy) {
-		update_buddy (app, buddy);
+		update_buddy (buddy);
 		g_date_time_unref (buddy->lastseen);
 		buddy->lastseen = g_date_time_new_now_local ();
 		if (buddy->lastaddr)
 			g_free (buddy->lastaddr);
 		buddy->lastaddr = g_strdup (gs_client_get_address (client));
 		gui_blist_update (buddy);
-		save_buddy_list (app);
+		save_buddy_list ();
 		
 		if (buddy->notify) {
 			gchar *title = g_strdup_printf (_("Player %s has connected"), buddy->name);
@@ -666,9 +548,9 @@ player_online (GsqQuerier *querier, GsqPlayer *player, GsClient *client)
 static void
 player_offline (GsqQuerier *querier, GsqPlayer *player, GsClient *client)
 {
-	GsBuddy *buddy = gs_application_find_buddy (app, player->name);
+	GsBuddy *buddy = gs_application_find_buddy (player->name);
 	if (buddy) {
-		update_buddy (app, buddy);
+		update_buddy (buddy);
 		gui_blist_update (buddy);
 		return;
 	}
@@ -676,7 +558,7 @@ player_offline (GsqQuerier *querier, GsqPlayer *player, GsClient *client)
 	GList *l = gsq_querier_get_players (querier);
 	while (l) {
 		GsqPlayer *pl = l->data;
-		buddy = gs_application_find_buddy (app, pl->name);
+		buddy = gs_application_find_buddy (pl->name);
 		
 		if (buddy && buddy->notify && querier->maxplayers - querier->numplayers == 1) {
 			gchar *title = g_strdup_printf (_("Server with %s has free slot"), buddy->name);
@@ -695,12 +577,12 @@ player_offline (GsqQuerier *querier, GsqPlayer *player, GsClient *client)
 
 
 static GsClient *
-add_server (GsApplication *app, const gchar *address)
+add_server (const gchar *address)
 {
 	if (!(address && *address))
 		return NULL;
 	
-	if (gs_application_find_server (app, address))
+	if (gs_application_find_server (address))
 		return NULL;
 	
 	GsClient *client = gs_client_new (address);
@@ -708,9 +590,9 @@ add_server (GsApplication *app, const gchar *address)
 			G_CALLBACK (player_online), client);
 	g_signal_connect (client->querier, "player-offline",
 			G_CALLBACK (player_offline), client);
-	app->server_list = g_list_append (app->server_list, client);
+	server_list = g_list_append (server_list, client);
 	gui_slist_add (client);
-	update_timer (app);
+	refresh_timer ();
 	gsq_querier_update (client->querier);
 	
 	return client;
@@ -718,53 +600,50 @@ add_server (GsApplication *app, const gchar *address)
 
 
 GsClient *
-gs_application_add_server (GsApplication *app, const gchar *address)
+gs_application_add_server (const gchar *address)
 {
-	g_return_val_if_fail (GS_IS_APPLICATION (app), NULL);
 	g_return_val_if_fail (address != NULL, NULL);
 	
-	GsClient *client = add_server (app, address);
-	gs_application_save_server_list (app);
+	GsClient *client = add_server (address);
+	gs_application_save_server_list ();
 	return client;
 }
 
 
 static void
-add_servers (GsApplication *app, gchar **servers)
+add_servers (gchar **servers)
 {
 	while (*servers) {
-		add_server (app, *servers);
+		add_server (*servers);
 		servers++;
 	}
 }
 
 
 static void
-remove_server (GsApplication *app, GsClient *client)
+remove_server (GsClient *client)
 {
-	if (app->server_iter && client == app->server_iter->data)
-		app->server_iter = g_list_next (app->server_iter);
-	app->server_list = g_list_remove (app->server_list, client);
+	if (server_iter && client == server_iter->data)
+		server_iter = g_list_next (server_iter);
+	server_list = g_list_remove (server_list, client);
 	g_object_unref (client);
-	update_timer (app);
+	refresh_timer ();
 }
 
 
 void
-gs_application_remove_server (GsApplication *app, GsClient *client)
+gs_application_remove_server (GsClient *client)
 {
-	g_return_if_fail (GS_IS_APPLICATION (app));
 	g_return_if_fail (GS_IS_CLIENT (client));
 	
-	remove_server (app, client);
-	gs_application_save_server_list (app);
+	remove_server (client);
+	gs_application_save_server_list ();
 }
 
 
 void
-gs_application_remove_server_ask (GsApplication *app, GsClient *client)
+gs_application_remove_server_ask (GsClient *client)
 {
-	g_return_if_fail (GS_IS_APPLICATION (app));
 	g_return_if_fail (GS_IS_CLIENT (client));
 	
 	GtkWidget *dialog = gtk_message_dialog_new (GTK_WINDOW (window),
@@ -773,7 +652,7 @@ gs_application_remove_server_ask (GsApplication *app, GsClient *client)
 			client->querier->name->str, gs_client_get_address (client));
 	if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_YES) {
 		gui_slist_remove (client);
-		gs_application_remove_server (app, client);
+		gs_application_remove_server (client);
 	}
 	
 	gtk_widget_destroy (dialog);
@@ -781,9 +660,8 @@ gs_application_remove_server_ask (GsApplication *app, GsClient *client)
 
 
 GsClient *
-gs_application_find_server (GsApplication *app, const gchar *address)
+gs_application_find_server (const gchar *address)
 {
-	g_return_val_if_fail (GS_IS_APPLICATION (app), NULL);
 	g_return_val_if_fail (address != NULL, NULL);
 	
 	GsClient *found = NULL;
@@ -793,7 +671,7 @@ gs_application_find_server (GsApplication *app, const gchar *address)
 		return NULL;
 	
 	GList *iter;
-	for (iter = app->server_list; iter; iter = iter->next) {
+	for (iter = server_list; iter; iter = iter->next) {
 		GsClient *client = iter->data;
 		
 		/* compare host names */
@@ -833,14 +711,14 @@ gs_application_find_server (GsApplication *app, const gchar *address)
 
 
 GList *
-gs_application_server_list (GsApplication *app)
+gs_application_server_list ()
 {
-	return app->server_list;
+	return server_list;
 }
 
 
 static void
-load_server_list_func (JsonArray *list, guint index, JsonNode *node, GsApplication* app)
+load_server_list_func (JsonArray *list, guint index, JsonNode *node, gpointer udata)
 {
 	if (!JSON_NODE_HOLDS_OBJECT (node))
 		return;
@@ -848,7 +726,7 @@ load_server_list_func (JsonArray *list, guint index, JsonNode *node, GsApplicati
 	JsonObject* obj = json_node_get_object (node);
 	
 	const gchar *address = json_object_get_string_member (obj, "address");
-	GsClient *client = add_server (app, address);
+	GsClient *client = add_server (address);
 	if (client) {
 		g_string_assign (client->querier->name, json_object_get_string_member (obj, "name"));
 		client->favorite = json_object_get_boolean_member (obj, "favorite");
@@ -862,11 +740,11 @@ load_server_list_func (JsonArray *list, guint index, JsonNode *node, GsApplicati
 
 
 static void
-load_server_list (GsApplication *app)
+load_server_list ()
 {
 	GError *error = NULL;
 	JsonParser* parser = json_parser_new ();
-	if (!(json_parser_load_from_file (parser, app->server_list_path, &error))) {
+	if (!(json_parser_load_from_file (parser, server_list_path, &error))) {
 		g_warning (_("Couldn't load server list: %s"), error->message);
 		g_error_free (error);
 		return;
@@ -875,7 +753,7 @@ load_server_list (GsApplication *app)
 	JsonNode *root = json_parser_get_root (parser);
 	if (JSON_NODE_HOLDS_ARRAY (root)) {
 		JsonArray* list = json_node_get_array(root);
-		json_array_foreach_element (list, (JsonArrayForeach) load_server_list_func, app);
+		json_array_foreach_element (list, (JsonArrayForeach) load_server_list_func, NULL);
 	}
 	
 	g_object_unref (parser);
@@ -884,11 +762,11 @@ load_server_list (GsApplication *app)
 
 
 static void
-load_preferences (GsApplication *app)
+load_preferences ()
 {
 	GError *error = NULL;
 	JsonParser* parser = json_parser_new ();
-	if (!(json_parser_load_from_file (parser, app->preferences_path, &error))) {
+	if (!(json_parser_load_from_file (parser, preferences_path, &error))) {
 		g_warning (_("Couldn't load user preferences: %s"), error->message);
 		g_error_free (error);
 		return;
@@ -904,13 +782,13 @@ load_preferences (GsApplication *app)
 	JsonObject* obj = json_node_get_object (root);
 	/* update interval */
 	if ((node = json_object_get_member (obj, "interval")))
-		gs_application_set_interval (app, json_node_get_double (node));
+		gs_application_set_interval (json_node_get_double (node));
 	/* game column mode */
 	if ((node = json_object_get_member (obj, "game-column")))
 		gui_slist_set_game_column_mode (json_node_get_int (node));
 	/* outgoing port */
 	if ((node = json_object_get_member (obj, "port")))
-		app->default_port = json_node_get_int (node);
+		default_port = json_node_get_int (node);
 	/* connect command */
 	if ((node = json_object_get_member (obj, "connect-command")))
 		gs_client_set_connect_command (json_node_get_string (node));
@@ -938,9 +816,9 @@ load_preferences (GsApplication *app)
 	g_object_unref (parser);
 	
 	/* initialize preference widgets */
-	gui_prefs_set_interval (gs_application_get_interval (app));
+	gui_prefs_set_interval (gs_application_get_interval ());
 	gui_prefs_set_game_column_mode (gui_slist_get_game_column_mode ());
-	gui_prefs_set_port (app->default_port);
+	gui_prefs_set_port (default_port);
 	gui_prefs_set_connect_command (gs_client_get_connect_command ());
 	gui_prefs_set_enable_notifications (gs_notification_get_enable ());
 	gui_prefs_set_notification_sound (gs_notification_get_sound ());
@@ -951,19 +829,19 @@ load_preferences (GsApplication *app)
 
 
 void
-gs_application_save_preferences (GsApplication *app)
+gs_application_save_preferences ()
 {
 	JsonObject* obj = json_object_new ();
 	
 	/* update interval */
 	json_object_set_double_member (obj, "interval",
-			gs_application_get_interval (app));
+			gs_application_get_interval ());
 	/* game column mode */
 	json_object_set_int_member (obj, "game-column",
 			gui_slist_get_game_column_mode ());
 	/* outgoing port */
 	json_object_set_int_member (obj, "port",
-			app->default_port);
+			default_port);
 	/* connect command */
 	json_object_set_string_member (obj, "connect-command",
 			gs_client_get_connect_command ());
@@ -994,7 +872,7 @@ gs_application_save_preferences (GsApplication *app)
 	json_generator_set_pretty (gen, TRUE);
 	json_generator_set_root (gen, root);
 	
-	if (!json_generator_to_file (gen, app->preferences_path, &error)) {
+	if (!json_generator_to_file (gen, preferences_path, &error)) {
 		g_warning (_("Couldn't save user preferences: %s"), error->message);
 		g_error_free (error);
 	}
@@ -1008,10 +886,27 @@ gs_application_save_preferences (GsApplication *app)
 int
 main (int argc, char **argv)
 {
+#ifdef ENABLE_NLS
+#ifdef GS_LOCALEDIR
+	gchar *locale_dir = g_strdup (GS_LOCALEDIR);
+#else
+	gchar *locale_dir = g_build_filename (root_dir, "share", "locale", NULL);
+#endif
+	
+	bindtextdomain (GETTEXT_PACKAGE, locale_dir);
+	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+	textdomain (GETTEXT_PACKAGE);
+	
+	g_free (locale_dir);
+#endif /* ENABLE_NLS */
+	
 #if GLIB_MINOR_VERSION < 36
 	g_type_init ();
 #endif
-	app = gs_application_new ();
+	
+	GtkApplication *app = gtk_application_new ("org.gswatcher", G_APPLICATION_HANDLES_COMMAND_LINE);
+	g_signal_connect (app, "startup", G_CALLBACK (application_startup), NULL);
+	g_signal_connect (app, "command-line", G_CALLBACK (application_command_line), NULL);
 	int ret = g_application_run (G_APPLICATION (app), argc, argv);
 	g_object_unref (app);
 	return ret;
