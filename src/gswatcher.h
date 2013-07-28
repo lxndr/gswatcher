@@ -31,48 +31,7 @@
 #include "client.h"
 
 
-#define GS_TYPE_APPLICATION				(gs_application_get_type ())
-#define GS_APPLICATION(obj)				(G_TYPE_CHECK_INSTANCE_CAST ((obj), GS_TYPE_APPLICATION, GsApplication))
-#define GS_IS_APPLICATION(obj)			(G_TYPE_CHECK_INSTANCE_TYPE ((obj), GS_TYPE_APPLICATION))
-#define GS_APPLICATION_CLASS(klass)		(G_TYPE_CHECK_CLASS_CAST ((klass), GS_TYPE_APPLICATION, GsApplicationClass))
-#define GS_IS_APPLICATION_CLASS(klass)	(G_TYPE_CHECK_CLASS_TYPE ((klass), GS_TYPE_APPLICATION))
-#define GS_APPLICATION_GET_CLASS(obj)	(G_TYPE_INSTANCE_GET_CLASS ((obj), GS_TYPE_APPLICATION, GsApplicationClass))
-
-
-typedef struct _GsApplication		GsApplication;
-typedef struct _GsApplicationClass	GsApplicationClass;
 typedef struct _GsBuddy GsBuddy;
-
-struct _GsApplication {
-	GtkApplication parent_instance;
-	
-	gchar *buddy_list_path;
-	gchar *server_list_path;
-	gchar *preferences_path;
-	gchar *icon_dir;
-	gchar *pixmap_dir;
-	gchar *sound_dir;
-#ifdef ENABLE_NLS
-	gchar *locale_dir;
-#endif
-	
-	GHashTable *buddy_list;
-	guint16 default_port;
-	gdouble interval;
-	gboolean pause;
-	guint timer;
-	GList *server_list;
-	GList *server_iter;
-	
-	/* startup variables */
-	gchar **specific_servers;
-	gboolean minimized;
-};
-
-struct _GsApplicationClass {
-	GtkApplicationClass parent_class;
-};
-
 struct _GsBuddy {
 	gchar *name;
 	GDateTime *lastseen;
@@ -82,34 +41,35 @@ struct _GsBuddy {
 };
 
 
-extern GsApplication *app;
 
+void gs_application_shutdown ();
 
-GType gs_application_get_type (void) G_GNUC_CONST;
-GsApplication* gs_application_new ();
-void gs_application_shutdown (GsApplication *app);
+void gs_application_set_interval (gdouble interval);
+gdouble gs_application_get_interval ();
 
-void gs_application_set_interval (GsApplication *app, gdouble interval);
-gdouble gs_application_get_interval (GsApplication *app);
+void gs_application_set_pause (gboolean pause);
+gboolean gs_application_get_pause ();
 
-void gs_application_set_pause (GsApplication *app, gboolean pause);
-gboolean gs_application_get_pause (GsApplication *app);
+void gs_application_set_default_port (guint16 port);
+guint16 gs_application_get_default_port ();
 
-GsClient *gs_application_add_server (GsApplication *app, const gchar *address);
-void gs_application_remove_server (GsApplication *app, GsClient *client);
-void gs_application_remove_server_ask (GsApplication *app, GsClient *client);
-GsClient *gs_application_find_server (GsApplication *app, const gchar *address);
-GList *gs_application_server_list (GsApplication *app);
-void gs_application_save_server_list (GsApplication *app);
+GsClient *gs_application_add_server (const gchar *address);
+void gs_application_remove_server (GsClient *client);
+void gs_application_remove_server_ask (GsClient *client);
+GsClient *gs_application_find_server (const gchar *address);
+GList *gs_application_server_list ();
+void gs_application_save_server_list ();
 
-GsBuddy *gs_application_add_buddy (GsApplication *app, const gchar *name,
-		gint64 lastseen, const gchar *lastaddr, gboolean notify);
-void gs_application_change_buddy (GsApplication *app, const gchar *name,
-		gboolean notify);
-void gs_application_remove_buddy (GsApplication *app, const gchar *name);
-GsBuddy *gs_application_find_buddy (GsApplication *app, const gchar *name);
+GsBuddy *gs_application_add_buddy (const gchar *name, gint64 lastseen,
+		const gchar *lastaddr, gboolean notify);
+void gs_application_change_buddy (const gchar *name, gboolean notify);
+void gs_application_remove_buddy (const gchar *name);
+GsBuddy *gs_application_find_buddy (const gchar *name);
 
-void gs_application_save_preferences (GsApplication *app);
+const gchar *gs_application_get_icon_dir ();
+const gchar *gs_application_get_sound_dir ();
+void gs_application_save_preferences ();
+
 
 
 #endif

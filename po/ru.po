@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.7\n"
 "Report-Msgid-Bugs-To: lxndr87@users.sourceforge.net\n"
-"POT-Creation-Date: 2013-07-10 12:27+0400\n"
+"POT-Creation-Date: 2013-07-28 22:28+0400\n"
 "PO-Revision-Date: 2013-01-18 18:42+0400\n"
 "Last-Translator: Alexander AB\n"
 "Language-Team: Russian\n"
@@ -38,51 +38,51 @@ msgstr "Протокол сервера не определён"
 msgid "You have to provide a log address"
 msgstr "Укажите адрес для лога"
 
-#: src/gswatcher.c:266
+#: src/gswatcher.c:132
 msgid "Show version number and exit"
 msgstr "Показать версию и выйти"
 
-#: src/gswatcher.c:268
+#: src/gswatcher.c:134
 msgid "Start minimized in system tray"
 msgstr "Запустить свёрнутым"
 
-#: src/gswatcher.c:270
+#: src/gswatcher.c:136
 msgid "Output all packets into stdout"
 msgstr "Выводить пакеты в стандартный вывод"
 
-#: src/gswatcher.c:272
+#: src/gswatcher.c:138
 msgid "Watch only this server"
 msgstr "Следить только за этим сервером"
 
-#: src/gswatcher.c:275
+#: src/gswatcher.c:141
 msgid "Use internal notifier"
 msgstr "Использовать свой уведомитель"
 
-#: src/gswatcher.c:278
+#: src/gswatcher.c:144
 msgid "Command to play sounds"
 msgstr "Путь к проигрывателю"
 
-#: src/gswatcher.c:392
+#: src/gswatcher.c:275
 #, c-format
 msgid "Couldn't save buddy list: %s"
 msgstr "Не удалось сохранить список друзей: %s"
 
-#: src/gswatcher.c:512
+#: src/gswatcher.c:387
 #, c-format
 msgid "Couldn't load buddy list: %s"
 msgstr "Не удалось загрузить список друзей: %s"
 
-#: src/gswatcher.c:563
+#: src/gswatcher.c:438
 #, c-format
 msgid "Couldn't save server list: %s"
 msgstr "Не удалось сохранить список серверов: %s"
 
-#: src/gswatcher.c:653
+#: src/gswatcher.c:535
 #, c-format
 msgid "Player %s has connected"
 msgstr "Игрок %s подключился"
 
-#: src/gswatcher.c:654 src/gswatcher.c:683
+#: src/gswatcher.c:536 src/gswatcher.c:565
 #, c-format
 msgid ""
 "Address: %s\n"
@@ -93,27 +93,27 @@ msgstr ""
 "Сервер: %s\n"
 "Игроки: %d / %d"
 
-#: src/gswatcher.c:682
+#: src/gswatcher.c:564
 #, c-format
 msgid "Server with %s has free slot"
 msgstr "На сервере с %s есть свободный слот"
 
-#: src/gswatcher.c:772
+#: src/gswatcher.c:651
 #, c-format
 msgid "Are you sure you want to remove \"%s\" ( %s) from the list?"
 msgstr "Вы уверены, что хотите удалить \"%s\" (%s) из списка?"
 
-#: src/gswatcher.c:870
+#: src/gswatcher.c:748
 #, fuzzy, c-format
 msgid "Couldn't load server list: %s"
 msgstr "Не удалось сохранить список серверов: %s"
 
-#: src/gswatcher.c:892
+#: src/gswatcher.c:770
 #, fuzzy, c-format
 msgid "Couldn't load user preferences: %s"
 msgstr "Настройки не сохранены"
 
-#: src/gswatcher.c:998
+#: src/gswatcher.c:876
 #, fuzzy, c-format
 msgid "Couldn't save user preferences: %s"
 msgstr "Настройки не сохранены"
@@ -369,54 +369,6 @@ msgstr "Да"
 msgid "No"
 msgstr "Нет"
 
-#: src/gui-info.c:131
-msgid "Name:"
-msgstr "Название:"
-
-#: src/gui-info.c:147
-msgid "Address:"
-msgstr "Адрес:"
-
-#: src/gui-info.c:160
-msgid "Game:"
-msgstr "Игра:"
-
-#: src/gui-info.c:173
-msgid "Map:"
-msgstr "Карта:"
-
-#: src/gui-info.c:186
-msgid "Players:"
-msgstr "Игроки:"
-
-#: src/gui-info.c:199
-msgid "Password:"
-msgstr "Пароль:"
-
-#: src/gui-info.c:212
-msgid "Version:"
-msgstr "Версия:"
-
-#: src/gui-info.c:225
-msgid "Location:"
-msgstr "Положение:"
-
-#: src/gui-info.c:292
-msgid "Remove selected server"
-msgstr "Удалить выбранный сервер"
-
-#: src/gui-info.c:300
-msgid "Favor selected server"
-msgstr "Переместить в любимые"
-
-#: src/gui-info.c:306
-msgid "Connect"
-msgstr "Подключиться"
-
-#: src/gui-info.c:308
-msgid "Connect to selected server"
-msgstr "Подключиться к серверу"
-
 #: src/query/proto-gamespy.c:102
 msgid "Frags"
 msgstr "Убито"
@@ -462,3 +414,39 @@ msgstr "Убито"
 #: src/query/proto-source.c:370
 msgid "Time"
 msgstr "Время"
+
+#~ msgid "Name:"
+#~ msgstr "Название:"
+
+#~ msgid "Address:"
+#~ msgstr "Адрес:"
+
+#~ msgid "Game:"
+#~ msgstr "Игра:"
+
+#~ msgid "Map:"
+#~ msgstr "Карта:"
+
+#~ msgid "Players:"
+#~ msgstr "Игроки:"
+
+#~ msgid "Password:"
+#~ msgstr "Пароль:"
+
+#~ msgid "Version:"
+#~ msgstr "Версия:"
+
+#~ msgid "Location:"
+#~ msgstr "Положение:"
+
+#~ msgid "Remove selected server"
+#~ msgstr "Удалить выбранный сервер"
+
+#~ msgid "Favor selected server"
+#~ msgstr "Переместить в любимые"
+
+#~ msgid "Connect"
+#~ msgstr "Подключиться"
+
+#~ msgid "Connect to selected server"
+#~ msgstr "Подключиться к серверу"

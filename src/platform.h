@@ -38,5 +38,6 @@
 
 gchar *gs_get_system_font ();
 gchar *gs_quote_win32_file_name (const gchar *fname);
+gchar *gs_get_executable_path ();
 
 #endif

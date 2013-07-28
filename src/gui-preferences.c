@@ -40,8 +40,8 @@ static void
 gui_prefs_interval_changed (GtkAdjustment *adjustment, gpointer udata)
 {
 	gdouble value = gtk_adjustment_get_value (adjustment);
-	gs_application_set_interval (app, value);
-	gs_application_save_preferences (app);
+	gs_application_set_interval (value);
+	gs_application_save_preferences ();
 }
 
 
@@ -49,7 +49,7 @@ static void
 gui_prefs_gamecolumn_changed (GtkComboBox *widget, gpointer udata)
 {
 	gui_slist_set_game_column_mode (gtk_combo_box_get_active (widget));
-	gs_application_save_preferences (app);
+	gs_application_save_preferences ();
 }
 
 
@@ -57,8 +57,8 @@ static void
 gui_prefs_port_changed (GtkAdjustment *adjustment, gpointer udata)
 {
 	guint16 value = (guint16) gtk_adjustment_get_value (adjustment);
-	app->default_port = value;
-	gs_application_save_preferences (app);
+	gs_application_set_default_port (value);
+	gs_application_save_preferences ();
 }
 
 
@@ -67,7 +67,7 @@ gui_prefs_enable_toggled (GtkToggleButton *togglebutton, gpointer udata)
 {
 	gboolean value = gtk_toggle_button_get_active (togglebutton);
 	gs_notification_set_enable (value);
-	gs_application_save_preferences (app);
+	gs_application_save_preferences ();
 }
 
 
@@ -77,7 +77,7 @@ gs_prefs_sound_changed (GtkFileChooserButton *widget, gpointer udata)
 	gchar *fname = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (widget));
 	gs_notification_set_sound (fname);
 	g_free (fname);
-	gs_application_save_preferences (app);
+	gs_application_save_preferences ();
 }
 
 
@@ -95,7 +95,7 @@ gui_prefs_sysfont_toggled (GtkToggleButton *togglebutton, gpointer udata)
 	gtk_widget_set_sensitive (ctl_font, !value);
 	gtk_widget_set_sensitive (ctl_fontlabel, !value);
 	gui_console_set_use_system_font (value);
-	gs_application_save_preferences (app);
+	gs_application_save_preferences ();
 }
 
 
@@ -105,7 +105,7 @@ gui_prefs_font_changed (GtkFontButton *widget, gpointer udata)
 	gchar *fontname = gtk_font_chooser_get_font (GTK_FONT_CHOOSER (ctl_font));
 	gui_console_set_font (fontname);
 	g_free (fontname);
-	gs_application_save_preferences (app);
+	gs_application_save_preferences ();
 }
 
 
@@ -114,7 +114,7 @@ gui_prefs_logaddress_changed (GtkEntry *entry, gpointer user_data)
 {
 	const gchar *address = gtk_entry_get_text (entry);
 	gs_client_set_logaddress (address);
-	gs_application_save_preferences (app);
+	gs_application_save_preferences ();
 }
 
 
@@ -123,7 +123,7 @@ gui_prefs_connect_changed (GtkEntry *entry, gpointer user_data)
 {
 	const gchar *command = gtk_entry_get_text (entry);
 	gs_client_set_connect_command (command);
-	gs_application_save_preferences (app);
+	gs_application_save_preferences ();
 }
 
 														

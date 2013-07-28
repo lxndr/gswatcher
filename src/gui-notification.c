@@ -178,7 +178,7 @@ gs_notification_set_sound (const gchar *sound)
 	if (sound)
 		sound_file = g_strdup (sound);
 	else
-		sound_file = g_build_filename (app->sound_dir, "alert01.ogg", NULL);
+		sound_file = g_build_filename (gs_application_get_sound_dir (), "alert01.ogg", NULL);
 	
 	update_playbin_cmd ();
 }
@@ -579,7 +579,7 @@ gs_notification_message (const gchar *summary, const gchar *body)
 void
 gs_notification_init (gboolean notifier)
 {
-	sound_file = g_build_filename (app->sound_dir, "alert01.ogg", NULL);
+	sound_file = g_build_filename (gs_application_get_sound_dir (), "alert01.ogg", NULL);
 	
 #if defined (G_OS_UNIX) && !defined (G_OS_MACOSX)
 	internal = notifier;

@@ -148,7 +148,7 @@ void G_MODULE_EXPORT
 gui_info_remove_clicked (GtkButton *button, gpointer udata)
 {
 	GsClient *client = gui_slist_get_selected ();
-	gs_application_remove_server_ask (app, client);
+	gs_application_remove_server_ask (client);
 }
 
 void G_MODULE_EXPORT
@@ -158,7 +158,7 @@ gui_info_favorite_toggled (GtkToggleButton *button, gpointer udata)
 	gboolean favorite = gtk_toggle_button_get_active (button);
 	gs_client_set_favorite (client, favorite);
 	gui_slist_update (client);
-	gs_application_save_server_list (app);
+	gs_application_save_server_list ();
 }
 
 void G_MODULE_EXPORT

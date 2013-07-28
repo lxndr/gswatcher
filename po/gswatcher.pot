@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: lxndr87@users.sourceforge.net\n"
-"POT-Creation-Date: 2013-07-10 12:48+0400\n"
+"POT-Creation-Date: 2013-07-28 22:28+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -37,51 +37,51 @@ msgstr ""
 msgid "You have to provide a log address"
 msgstr ""
 
-#: src/gswatcher.c:266
+#: src/gswatcher.c:132
 msgid "Show version number and exit"
 msgstr ""
 
-#: src/gswatcher.c:268
+#: src/gswatcher.c:134
 msgid "Start minimized in system tray"
 msgstr ""
 
-#: src/gswatcher.c:270
+#: src/gswatcher.c:136
 msgid "Output all packets into stdout"
 msgstr ""
 
-#: src/gswatcher.c:272
+#: src/gswatcher.c:138
 msgid "Watch only this server"
 msgstr ""
 
-#: src/gswatcher.c:275
+#: src/gswatcher.c:141
 msgid "Use internal notifier"
 msgstr ""
 
-#: src/gswatcher.c:278
+#: src/gswatcher.c:144
 msgid "Command to play sounds"
 msgstr ""
 
-#: src/gswatcher.c:392
+#: src/gswatcher.c:275
 #, c-format
 msgid "Couldn't save buddy list: %s"
 msgstr ""
 
-#: src/gswatcher.c:512
+#: src/gswatcher.c:387
 #, c-format
 msgid "Couldn't load buddy list: %s"
 msgstr ""
 
-#: src/gswatcher.c:563
+#: src/gswatcher.c:438
 #, c-format
 msgid "Couldn't save server list: %s"
 msgstr ""
 
-#: src/gswatcher.c:653
+#: src/gswatcher.c:535
 #, c-format
 msgid "Player %s has connected"
 msgstr ""
 
-#: src/gswatcher.c:654 src/gswatcher.c:683
+#: src/gswatcher.c:536 src/gswatcher.c:565
 #, c-format
 msgid ""
 "Address: %s\n"
@@ -89,27 +89,27 @@ msgid ""
 "Players: %d / %d"
 msgstr ""
 
-#: src/gswatcher.c:682
+#: src/gswatcher.c:564
 #, c-format
 msgid "Server with %s has free slot"
 msgstr ""
 
-#: src/gswatcher.c:772
+#: src/gswatcher.c:651
 #, c-format
 msgid "Are you sure you want to remove \"%s\" ( %s) from the list?"
 msgstr ""
 
-#: src/gswatcher.c:870
+#: src/gswatcher.c:748
 #, c-format
 msgid "Couldn't load server list: %s"
 msgstr ""
 
-#: src/gswatcher.c:892
+#: src/gswatcher.c:770
 #, c-format
 msgid "Couldn't load user preferences: %s"
 msgstr ""
 
-#: src/gswatcher.c:998
+#: src/gswatcher.c:876
 #, c-format
 msgid "Couldn't save user preferences: %s"
 msgstr ""
@@ -361,54 +361,6 @@ msgstr ""
 
 #: src/gui-info.c:109
 msgid "No"
-msgstr ""
-
-#: src/gui-info.c:131
-msgid "Name:"
-msgstr ""
-
-#: src/gui-info.c:147
-msgid "Address:"
-msgstr ""
-
-#: src/gui-info.c:160
-msgid "Game:"
-msgstr ""
-
-#: src/gui-info.c:173
-msgid "Map:"
-msgstr ""
-
-#: src/gui-info.c:186
-msgid "Players:"
-msgstr ""
-
-#: src/gui-info.c:199
-msgid "Password:"
-msgstr ""
-
-#: src/gui-info.c:212
-msgid "Version:"
-msgstr ""
-
-#: src/gui-info.c:225
-msgid "Location:"
-msgstr ""
-
-#: src/gui-info.c:292
-msgid "Remove selected server"
-msgstr ""
-
-#: src/gui-info.c:300
-msgid "Favor selected server"
-msgstr ""
-
-#: src/gui-info.c:306
-msgid "Connect"
-msgstr ""
-
-#: src/gui-info.c:308
-msgid "Connect to selected server"
 msgstr ""
 
 #: src/query/proto-gamespy.c:102
