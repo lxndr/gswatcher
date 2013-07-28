@@ -285,7 +285,7 @@ gui_console_settings_popdown (GtkPopupButton *popup_button, gpointer udata)
 	GsClient *client = gui_slist_get_selected ();
 	gs_client_set_console_password (client, gtk_entry_get_text (GTK_ENTRY (password)));
 	gs_client_set_console_port (client, atoi (gtk_entry_get_text (GTK_ENTRY (port))));
-	gs_application_save_server_list (app);
+	gs_application_save_server_list ();
 }
 
 
