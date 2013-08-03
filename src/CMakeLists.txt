@@ -51,7 +51,7 @@ add_executable (gswatcher
 add_custom_command (OUTPUT resources.c
 		COMMAND glib-compile-resources --generate-source --target=resources.c gswatcher.gresource.xml
 		MAIN_DEPENDENCY gswatcher.gresource.xml
-		DEPENDS ui/info.ui
+		DEPENDS ui/info.ui ui/preferences.ui
 		COMMENT "Generate resource file")
 
 target_link_libraries (gswatcher
