@@ -70,6 +70,8 @@ static GtkListStore *liststore;
 static GuiGameColumnMode game_column_mode;
 static GsClient *selected = NULL;
 static gboolean visible = FALSE;
+static gulong sinfo_signal_handler = 0, plist_signal_handler = 0;
+
 
 
 static gint
@@ -187,7 +189,12 @@ gui_slist_selection_changed (GtkTreeSelection *selection, gpointer udata)
 	GtkTreeModel *model;
 	GtkTreeIter iter;
 	
-	selected = NULL;
+	if (selected) {
+		g_signal_handler_disconnect (selected->querier, sinfo_signal_handler);
+		g_signal_handler_disconnect (selected->querier, plist_signal_handler);
+		selected = NULL;
+	}
+	
 	if (gtk_tree_selection_get_selected (selection, &model, &iter))
 		gtk_tree_model_get (model, &iter, COLUMN_SERVER, &selected, -1);
 	
@@ -199,6 +206,14 @@ gui_slist_selection_changed (GtkTreeSelection *selection, gpointer udata)
 	gui_console_setup (selected);
 	gui_log_setup (selected);
 	gui_chat_setup (selected);
+	
+	if (selected) {
+		sinfo_signal_handler = g_signal_connect_swapped (selected->querier,
+				"info-update", G_CALLBACK (gui_slist_update_list),
+				gs_application_server_list ());
+		plist_signal_handler = 	g_signal_connect_swapped (selected->querier,
+				"players-update", G_CALLBACK (gui_plist_update), selected);
+	}
 }
 
 
@@ -350,24 +365,9 @@ game_detected (GsqQuerier *querier, GsClient *client)
 	gtk_list_store_set (liststore, &client->sliter,
 			COLUMN_ICON, get_game_icon (client->querier->gameid->str),
 			-1);
-	
+	gui_slist_update (client);
 	if (client == selected)
 		gui_plist_setup (client);
-}
-
-
-static void
-server_info_updated (GsqQuerier *querier, GsClient *client)
-{
-	gui_slist_update (client);
-}
-
-
-static void
-server_players_updated (GsqQuerier *querier, GsClient *cl)
-{
-	if (cl == selected)
-		gui_plist_update (cl);
 }
 
 
@@ -395,8 +395,6 @@ gui_slist_add (GsClient *cl)
 	g_signal_connect (cl->querier, "error", G_CALLBACK (server_error), cl);
 	g_signal_connect (cl->querier, "resolve", G_CALLBACK (server_resolved), cl);
 	g_signal_connect (cl->querier, "gameid-changed", G_CALLBACK (game_detected), cl);
-	g_signal_connect (cl->querier, "info-update", G_CALLBACK (server_info_updated), cl);
-	g_signal_connect (cl->querier, "players-update", G_CALLBACK (server_players_updated), cl);
 }
 
 
