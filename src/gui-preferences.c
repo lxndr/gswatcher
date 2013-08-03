@@ -152,83 +152,65 @@ gui_prefs_create ()
 	ctl_logaddress     = gtk_builder_get_object (builder, "log-address");
 	ctl_connect        = gtk_builder_get_object (builder, "connect-command");
 	
+	gtk_builder_connect_signals (builder, NULL);
 	root = g_object_ref (root);
 	g_object_unref (builder);
 	return GTK_WIDGET (root);
 }
 
 
-void
-gui_prefs_set_interval (gdouble interval)
-{
-	g_signal_handlers_block_by_func (ctl_interval, gui_prefs_interval_changed, NULL);
-	gtk_adjustment_set_value (GTK_ADJUSTMENT (ctl_interval), interval);
-	g_signal_handlers_unblock_by_func (ctl_interval, gui_prefs_interval_changed, NULL);
-}
 
 void
-gui_prefs_set_game_column_mode (GuiGameColumnMode mode)
+gui_prefs_init ()
 {
-	g_signal_handlers_block_by_func (ctl_game_column, gui_prefs_gamecolumn_changed, NULL);
-	gtk_combo_box_set_active (GTK_COMBO_BOX (ctl_game_column), mode);
-	g_signal_handlers_unblock_by_func (ctl_game_column, gui_prefs_gamecolumn_changed, NULL);
-}
-
-void
-gui_prefs_set_port (guint16 port)
-{
-	g_signal_handlers_block_by_func (ctl_port, gui_prefs_port_changed, NULL);
-	gtk_adjustment_set_value (GTK_ADJUSTMENT (ctl_port), port);
-	g_signal_handlers_unblock_by_func (ctl_port, gui_prefs_port_changed, NULL);
-}
-
-void
-gui_prefs_set_enable_notifications (gboolean enable)
-{
-	g_signal_handlers_block_by_func (ctl_nenable, gui_prefs_enable_toggled, NULL);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ctl_nenable), enable);
-	g_signal_handlers_unblock_by_func (ctl_nenable, gui_prefs_enable_toggled, NULL);
-}
-
-void
-gui_prefs_set_notification_sound (const gchar *filename)
-{
-	g_signal_handlers_block_by_func (ctl_nsound, gui_prefs_sound_changed, NULL);
-	gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (ctl_nsound), filename);
-	g_signal_handlers_unblock_by_func (ctl_nsound, gui_prefs_sound_changed, NULL);
-}
-
-void
-gui_prefs_set_use_system_font (gboolean use)
-{
-	g_signal_handlers_block_by_func (ctl_sysfont, gui_prefs_sysfont_toggled, NULL);
+	struct {
+		gpointer obj, fn;
+	} *signal, signals[] = {
+		{ctl_interval,     gui_prefs_interval_changed},
+		{ctl_game_column,  gui_prefs_gamecolumn_changed},
+		{ctl_port,         gui_prefs_port_changed},
+		{ctl_nenable,      gui_prefs_enable_toggled},
+		{ctl_nsound,       gui_prefs_sound_changed},
+		{ctl_sysfont,      gui_prefs_sysfont_toggled},
+		{ctl_font,         gui_prefs_font_changed},
+		{ctl_font,         gui_prefs_logaddress_changed},
+		{ctl_connect,      gui_prefs_connect_changed},
+		{NULL,             NULL}
+	};
+	
+	for (signal = signals; signal->obj; signal++)
+		g_signal_handlers_block_by_func (signal->obj, signal->fn, NULL);
+	
+	gtk_adjustment_set_value (GTK_ADJUSTMENT (ctl_interval),
+			gs_application_get_interval ());
+	
+	gtk_combo_box_set_active (GTK_COMBO_BOX (ctl_game_column),
+			gui_slist_get_game_column_mode ());
+	
+	gtk_adjustment_set_value (GTK_ADJUSTMENT (ctl_port),
+			gs_application_get_default_port ());
+	
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ctl_nenable),
+			gs_notification_get_enable ());
+	
+	gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (ctl_nsound),
+			gs_notification_get_sound ());
+	
+	const gchar *fontname = gui_console_get_font ();
+	gtk_font_chooser_set_font (GTK_FONT_CHOOSER (ctl_font),
+			fontname ? fontname : GS_DEFAULT_MONOSPACE_FONT);
+	
+	const gchar *address = gs_client_get_logaddress ();
+	gtk_entry_set_text (GTK_ENTRY (ctl_logaddress), address ? address : "");
+	
+	const gchar *command = gs_client_get_connect_command ();
+	gtk_entry_set_text (GTK_ENTRY (ctl_connect), command ? command : "");
+	
+	gboolean use = gui_console_get_use_system_font ();
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ctl_sysfont), use);
 	gtk_widget_set_sensitive (GTK_WIDGET (ctl_font), !use);
 	gtk_widget_set_sensitive (GTK_WIDGET (ctl_fontlabel), !use);
-	g_signal_handlers_unblock_by_func (ctl_sysfont, gui_prefs_sysfont_toggled, NULL);
-}
-
-void
-gui_prefs_set_font (const gchar *fontname)
-{
-	g_signal_handlers_block_by_func (ctl_font, gui_prefs_font_changed, NULL);
-	gtk_font_chooser_set_font (GTK_FONT_CHOOSER (ctl_font),
-			fontname ? fontname : GS_DEFAULT_MONOSPACE_FONT);
-	g_signal_handlers_unblock_by_func (ctl_font, gui_prefs_font_changed, NULL);
-}
-
-void
-gui_prefs_set_logaddress (const gchar *address)
-{
-	g_signal_handlers_block_by_func (ctl_font, gui_prefs_logaddress_changed, NULL);
-	gtk_entry_set_text (GTK_ENTRY (ctl_logaddress), address ? address : "");
-	g_signal_handlers_unblock_by_func (ctl_font, gui_prefs_logaddress_changed, NULL);
-}
-
-void
-gui_prefs_set_connect_command (const gchar *command)
-{
-	g_signal_handlers_block_by_func (ctl_connect, gui_prefs_connect_changed, NULL);
-	gtk_entry_set_text (GTK_ENTRY (ctl_connect), command ? command : "");
-	g_signal_handlers_unblock_by_func (ctl_connect, gui_prefs_connect_changed, NULL);
+	
+	for (signal = signals; signal->obj; signal++)
+		g_signal_handlers_unblock_by_func (signal->obj, signal->fn, NULL);
 }
