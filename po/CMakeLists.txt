@@ -27,6 +27,8 @@ add_custom_command (
 		src/query/proto-gamespy3.c
 		src/query/proto-quake.c
 		src/query/proto-source.c
+		src/ui/info.ui
+		src/ui/preferences.ui
 	DEPENDS
 		../src/client.c
 		../src/gswatcher.c
@@ -42,6 +44,8 @@ add_custom_command (
 		../src/query/proto-gamespy3.c
 		../src/query/proto-quake.c
 		../src/query/proto-source.c
+		../src/ui/info.ui
+		../src/ui/preferences.ui
 	COMMENT
 		"Generating PO template file")
 

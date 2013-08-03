@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: lxndr87@users.sourceforge.net\n"
-"POT-Creation-Date: 2013-07-28 22:28+0400\n"
+"POT-Creation-Date: 2013-08-03 19:12+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -35,6 +35,16 @@ msgstr ""
 
 #: src/client.c:491
 msgid "You have to provide a log address"
+msgstr ""
+
+#: src/client.c:600
+#, c-format
+msgid "ShellExecute error: code %d"
+msgstr ""
+
+#: src/client.c:604
+#, c-format
+msgid "Could not run connect command: %s"
 msgstr ""
 
 #: src/gswatcher.c:132
@@ -109,7 +119,7 @@ msgstr ""
 msgid "Couldn't load user preferences: %s"
 msgstr ""
 
-#: src/gswatcher.c:876
+#: src/gswatcher.c:880
 #, c-format
 msgid "Couldn't save user preferences: %s"
 msgstr ""
@@ -158,7 +168,7 @@ msgstr ""
 msgid "Information"
 msgstr ""
 
-#: src/gui-window.c:488 src/gui-preferences.c:287
+#: src/gui-window.c:488 src/ui/preferences.ui:334
 msgid "Console"
 msgstr ""
 
@@ -170,11 +180,11 @@ msgstr ""
 msgid "Chat"
 msgstr ""
 
-#: src/gui-server-list.c:306
+#: src/gui-server-list.c:321
 msgid "Timeout"
 msgstr ""
 
-#: src/gui-server-list.c:324
+#: src/gui-server-list.c:339
 msgid "Error"
 msgstr ""
 
@@ -182,36 +192,36 @@ msgstr ""
 msgid "Querying"
 msgstr ""
 
-#: src/gui-server-list.c:484 src/gui-server-list.c:485
+#: src/gui-server-list.c:482 src/gui-server-list.c:483
 msgid "unknown"
 msgstr ""
 
-#: src/gui-server-list.c:634
+#: src/gui-server-list.c:632
 msgid "Favorite servers"
 msgstr ""
 
-#: src/gui-server-list.c:646
+#: src/gui-server-list.c:644
 msgid "Other servers"
 msgstr ""
 
-#: src/gui-server-list.c:668
+#: src/gui-server-list.c:666
 msgctxt "Server"
 msgid "Name"
 msgstr ""
 
-#: src/gui-server-list.c:713
+#: src/gui-server-list.c:711
 msgid "Game"
 msgstr ""
 
-#: src/gui-server-list.c:735
+#: src/gui-server-list.c:733
 msgid "Map"
 msgstr ""
 
-#: src/gui-server-list.c:751
+#: src/gui-server-list.c:749
 msgid "Players"
 msgstr ""
 
-#: src/gui-server-list.c:767 src/query/proto-gamespy.c:104
+#: src/gui-server-list.c:765 src/query/proto-gamespy.c:104
 #: src/query/proto-gamespy.c:108 src/query/proto-gamespy.c:112
 #: src/query/proto-gamespy.c:115 src/query/proto-gamespy3.c:378
 #: src/query/proto-gamespy3.c:390 src/query/proto-gamespy3.c:401
@@ -285,66 +295,6 @@ msgstr ""
 msgid "Keep on"
 msgstr ""
 
-#: src/gui-preferences.c:147
-msgid "General"
-msgstr ""
-
-#: src/gui-preferences.c:167
-msgid "Update _interval:"
-msgstr ""
-
-#: src/gui-preferences.c:179
-msgid "Icon only"
-msgstr ""
-
-#: src/gui-preferences.c:181
-msgid "Game name"
-msgstr ""
-
-#: src/gui-preferences.c:183
-msgid "Game name and game mode if known"
-msgstr ""
-
-#: src/gui-preferences.c:189
-msgid "_Game column:"
-msgstr ""
-
-#: src/gui-preferences.c:210
-msgid "Port:"
-msgstr ""
-
-#: src/gui-preferences.c:228
-msgid "Connect command:"
-msgstr ""
-
-#: src/gui-preferences.c:238
-msgid "Notifications"
-msgstr ""
-
-#: src/gui-preferences.c:252
-msgid "E_nable"
-msgstr ""
-
-#: src/gui-preferences.c:261
-msgid "Choose notification sound"
-msgstr ""
-
-#: src/gui-preferences.c:277
-msgid "_Sound:"
-msgstr ""
-
-#: src/gui-preferences.c:301
-msgid "Use s_ystem monospace font"
-msgstr ""
-
-#: src/gui-preferences.c:318
-msgid "_Font:"
-msgstr ""
-
-#: src/gui-preferences.c:335
-msgid "_Log address:"
-msgstr ""
-
 #: src/gui-info.c:65
 msgid "This server is not responding and most likely offline."
 msgstr ""
@@ -407,4 +357,112 @@ msgstr ""
 
 #: src/query/proto-source.c:370
 msgid "Time"
+msgstr ""
+
+#: src/ui/info.ui:16
+msgid "Name:"
+msgstr ""
+
+#: src/ui/info.ui:31
+msgid "Address:"
+msgstr ""
+
+#: src/ui/info.ui:46
+msgid "Game:"
+msgstr ""
+
+#: src/ui/info.ui:61
+msgid "Map:"
+msgstr ""
+
+#: src/ui/info.ui:76
+msgid "Private:"
+msgstr ""
+
+#: src/ui/info.ui:91
+msgid "Players:"
+msgstr ""
+
+#: src/ui/info.ui:106
+msgid "Location:"
+msgstr ""
+
+#: src/ui/info.ui:121
+msgid "Version:"
+msgstr ""
+
+#: src/ui/info.ui:279
+msgid "Remove selected server(s)"
+msgstr ""
+
+#: src/ui/info.ui:307
+msgid "Favor selected server"
+msgstr ""
+
+#: src/ui/info.ui:324
+msgid "Connect to selected server"
+msgstr ""
+
+#: src/ui/info.ui:349
+msgid "Connect"
+msgstr ""
+
+#: src/ui/preferences.ui:19
+msgid "Icon only"
+msgstr ""
+
+#: src/ui/preferences.ui:23
+msgid "Game name"
+msgstr ""
+
+#: src/ui/preferences.ui:27
+msgid "Game name and game mode if known"
+msgstr ""
+
+#: src/ui/preferences.ui:56
+msgid "General"
+msgstr ""
+
+#: src/ui/preferences.ui:109
+msgid "Update _interval:"
+msgstr ""
+
+#: src/ui/preferences.ui:126
+msgid "_Game column:"
+msgstr ""
+
+#: src/ui/preferences.ui:143
+msgid "_Port:"
+msgstr ""
+
+#: src/ui/preferences.ui:160
+msgid "_Connect command:"
+msgstr ""
+
+#: src/ui/preferences.ui:212
+msgid "Notifications"
+msgstr ""
+
+#: src/ui/preferences.ui:244
+msgid "E_nable"
+msgstr ""
+
+#: src/ui/preferences.ui:268
+msgid "_Sound:"
+msgstr ""
+
+#: src/ui/preferences.ui:291
+msgid "Choose notification sound"
+msgstr ""
+
+#: src/ui/preferences.ui:366
+msgid "Use s_ystem monospace font"
+msgstr ""
+
+#: src/ui/preferences.ui:390
+msgid "_Font:"
+msgstr ""
+
+#: src/ui/preferences.ui:407
+msgid "_Log address:"
 msgstr ""

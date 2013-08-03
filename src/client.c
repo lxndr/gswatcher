@@ -597,11 +597,11 @@ gs_client_connect_to_game (GsClient *client)
 #if defined (G_OS_WIN32)
 	int ret = (int) ShellExecute (NULL, "open", command, NULL, NULL, SW_SHOWNORMAL);
 	if (ret <= 32)
-		g_warning ("ShellExecute error: code %d", (int) ret);
+		g_warning (_("ShellExecute error: code %d"), (int) ret);
 #elif defined (G_OS_UNIX)
 	GError *error = NULL;
 	if (!g_app_info_launch_default_for_uri (command, NULL, &error)) {
-		g_warning ("Could not run commact command: %s", error->message);
+		g_warning (_("Could not run connect command: %s"), error->message);
 		g_error_free (error);
 	}
 #endif

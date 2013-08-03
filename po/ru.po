@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.7\n"
 "Report-Msgid-Bugs-To: lxndr87@users.sourceforge.net\n"
-"POT-Creation-Date: 2013-07-28 22:28+0400\n"
-"PO-Revision-Date: 2013-01-18 18:42+0400\n"
+"POT-Creation-Date: 2013-08-03 19:12+0400\n"
+"PO-Revision-Date: 2013-08-03 18:42+0400\n"
 "Last-Translator: Alexander AB\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -37,6 +37,16 @@ msgstr "Протокол сервера не определён"
 #: src/client.c:491
 msgid "You have to provide a log address"
 msgstr "Укажите адрес для лога"
+
+#: src/client.c:600
+#, c-format
+msgid "ShellExecute error: code %d"
+msgstr ""
+
+#: src/client.c:604
+#, fuzzy, c-format
+msgid "Could not run connect command: %s"
+msgstr "Команда подключения:"
 
 #: src/gswatcher.c:132
 msgid "Show version number and exit"
@@ -104,7 +114,7 @@ msgid "Are you sure you want to remove \"%s\" ( %s) from the list?"
 msgstr "Вы уверены, что хотите удалить \"%s\" (%s) из списка?"
 
 #: src/gswatcher.c:748
-#, fuzzy, c-format
+#, c-format
 msgid "Couldn't load server list: %s"
 msgstr "Не удалось сохранить список серверов: %s"
 
@@ -113,7 +123,7 @@ msgstr "Не удалось сохранить список серверов: %s
 msgid "Couldn't load user preferences: %s"
 msgstr "Настройки не сохранены"
 
-#: src/gswatcher.c:876
+#: src/gswatcher.c:880
 #, fuzzy, c-format
 msgid "Couldn't save user preferences: %s"
 msgstr "Настройки не сохранены"
@@ -162,7 +172,7 @@ msgstr "Выйти"
 msgid "Information"
 msgstr "Информация"
 
-#: src/gui-window.c:488 src/gui-preferences.c:287
+#: src/gui-window.c:488 src/ui/preferences.ui:334
 msgid "Console"
 msgstr "Консоль"
 
@@ -174,48 +184,48 @@ msgstr "Журнал"
 msgid "Chat"
 msgstr "Чат"
 
-#: src/gui-server-list.c:306
+#: src/gui-server-list.c:321
 msgid "Timeout"
 msgstr "Таймаут"
 
-#: src/gui-server-list.c:324
+#: src/gui-server-list.c:339
 msgid "Error"
-msgstr ""
+msgstr "Ошибка"
 
 #: src/gui-server-list.c:384
 msgid "Querying"
-msgstr ""
+msgstr "Опрос"
 
-#: src/gui-server-list.c:484 src/gui-server-list.c:485
+#: src/gui-server-list.c:482 src/gui-server-list.c:483
 msgid "unknown"
 msgstr "неизвестно"
 
-#: src/gui-server-list.c:634
+#: src/gui-server-list.c:632
 msgid "Favorite servers"
 msgstr "Любимые сервера"
 
-#: src/gui-server-list.c:646
+#: src/gui-server-list.c:644
 msgid "Other servers"
 msgstr "Другие сервера"
 
-#: src/gui-server-list.c:668
+#: src/gui-server-list.c:666
 msgctxt "Server"
 msgid "Name"
 msgstr "Название"
 
-#: src/gui-server-list.c:713
+#: src/gui-server-list.c:711
 msgid "Game"
 msgstr "Игра"
 
-#: src/gui-server-list.c:735
+#: src/gui-server-list.c:733
 msgid "Map"
 msgstr "Карта"
 
-#: src/gui-server-list.c:751
+#: src/gui-server-list.c:749
 msgid "Players"
 msgstr "Игроки"
 
-#: src/gui-server-list.c:767 src/query/proto-gamespy.c:104
+#: src/gui-server-list.c:765 src/query/proto-gamespy.c:104
 #: src/query/proto-gamespy.c:108 src/query/proto-gamespy.c:112
 #: src/query/proto-gamespy.c:115 src/query/proto-gamespy3.c:378
 #: src/query/proto-gamespy3.c:390 src/query/proto-gamespy3.c:401
@@ -289,71 +299,9 @@ msgstr "Выключить журнал"
 msgid "Keep on"
 msgstr "Держать включенным"
 
-#: src/gui-preferences.c:147
-msgid "General"
-msgstr "Основные"
-
-#: src/gui-preferences.c:167
-msgid "Update _interval:"
-msgstr "_Частота обновления:"
-
-#: src/gui-preferences.c:179
-msgid "Icon only"
-msgstr "Только значки"
-
-#: src/gui-preferences.c:181
-msgid "Game name"
-msgstr "Название игры"
-
-#: src/gui-preferences.c:183
-msgid "Game name and game mode if known"
-msgstr "Название игры и игровой режим"
-
-#: src/gui-preferences.c:189
-msgid "_Game column:"
-msgstr "Колонка \"_Игра\""
-
-#: src/gui-preferences.c:210
-msgid "Port:"
-msgstr "Порт:"
-
-#: src/gui-preferences.c:228
-msgid "Connect command:"
-msgstr "Команда подключения:"
-
-#: src/gui-preferences.c:238
-msgid "Notifications"
-msgstr "Уведомления"
-
-#: src/gui-preferences.c:252
-msgid "E_nable"
-msgstr "_Включить"
-
-#: src/gui-preferences.c:261
-msgid "Choose notification sound"
-msgstr "Выберите звук уведомлений"
-
-#: src/gui-preferences.c:277
-msgid "_Sound:"
-msgstr "_Звук"
-
-#: src/gui-preferences.c:301
-msgid "Use s_ystem monospace font"
-msgstr "Использовать _системный шрифт"
-
-#: src/gui-preferences.c:318
-msgid "_Font:"
-msgstr "_Шрифт"
-
-#: src/gui-preferences.c:335
-msgid "_Log address:"
-msgstr "Обратный адрес для _журнала"
-
 #: src/gui-info.c:65
-#, fuzzy
 msgid "This server is not responding and most likely offline."
-msgstr ""
-"<span color=\"red\">Этот сервер не отвечает и вероятно отключен.</span>"
+msgstr "Этот сервер не отвечает и вероятно отключен."
 
 #: src/gui-info.c:80 src/gui-info.c:81 src/gui-info.c:82 src/gui-info.c:83
 #: src/gui-info.c:84 src/gui-info.c:85 src/gui-info.c:86 src/gui-info.c:87
@@ -415,38 +363,111 @@ msgstr "Убито"
 msgid "Time"
 msgstr "Время"
 
-#~ msgid "Name:"
-#~ msgstr "Название:"
+#: src/ui/info.ui:16
+msgid "Name:"
+msgstr "Название:"
 
-#~ msgid "Address:"
-#~ msgstr "Адрес:"
+#: src/ui/info.ui:31
+msgid "Address:"
+msgstr "Адрес:"
 
-#~ msgid "Game:"
-#~ msgstr "Игра:"
+#: src/ui/info.ui:46
+msgid "Game:"
+msgstr "Игра:"
 
-#~ msgid "Map:"
-#~ msgstr "Карта:"
+#: src/ui/info.ui:61
+msgid "Map:"
+msgstr "Карта:"
 
-#~ msgid "Players:"
-#~ msgstr "Игроки:"
+#: src/ui/info.ui:76
+msgid "Private:"
+msgstr "Закрытый:"
 
-#~ msgid "Password:"
-#~ msgstr "Пароль:"
+#: src/ui/info.ui:91
+msgid "Players:"
+msgstr "Игроки:"
 
-#~ msgid "Version:"
-#~ msgstr "Версия:"
+#: src/ui/info.ui:106
+msgid "Location:"
+msgstr "Положение:"
 
-#~ msgid "Location:"
-#~ msgstr "Положение:"
+#: src/ui/info.ui:121
+msgid "Version:"
+msgstr "Версия:"
 
-#~ msgid "Remove selected server"
-#~ msgstr "Удалить выбранный сервер"
+#: src/ui/info.ui:279
+msgid "Remove selected server(s)"
+msgstr "Удалить выбранный сервер"
 
-#~ msgid "Favor selected server"
-#~ msgstr "Переместить в любимые"
+#: src/ui/info.ui:307
+msgid "Favor selected server"
+msgstr "Переместить в любимые"
 
-#~ msgid "Connect"
-#~ msgstr "Подключиться"
+#: src/ui/info.ui:324
+msgid "Connect to selected server"
+msgstr "Подключиться к серверу"
 
-#~ msgid "Connect to selected server"
-#~ msgstr "Подключиться к серверу"
+#: src/ui/info.ui:349
+msgid "Connect"
+msgstr "Подключиться"
+
+#: src/ui/preferences.ui:19
+msgid "Icon only"
+msgstr "Только значки"
+
+#: src/ui/preferences.ui:23
+msgid "Game name"
+msgstr "Название игры"
+
+#: src/ui/preferences.ui:27
+msgid "Game name and game mode if known"
+msgstr "Название игры и игровой режим"
+
+#: src/ui/preferences.ui:56
+msgid "General"
+msgstr "Основные"
+
+#: src/ui/preferences.ui:109
+msgid "Update _interval:"
+msgstr "_Частота обновления:"
+
+#: src/ui/preferences.ui:126
+msgid "_Game column:"
+msgstr "Колонка \"_Игра\""
+
+#: src/ui/preferences.ui:143
+msgid "_Port:"
+msgstr "_Порт:"
+
+#: src/ui/preferences.ui:160
+#, fuzzy
+msgid "_Connect command:"
+msgstr "Команда подключения:"
+
+#: src/ui/preferences.ui:212
+msgid "Notifications"
+msgstr "Уведомления"
+
+#: src/ui/preferences.ui:244
+msgid "E_nable"
+msgstr "_Включить"
+
+#: src/ui/preferences.ui:268
+msgid "_Sound:"
+msgstr "_Звук"
+
+#: src/ui/preferences.ui:291
+msgid "Choose notification sound"
+msgstr "Выберите звук уведомлений"
+
+#: src/ui/preferences.ui:366
+msgid "Use s_ystem monospace font"
+msgstr "Использовать _системный шрифт"
+
+#: src/ui/preferences.ui:390
+msgid "_Font:"
+msgstr "_Шрифт"
+
+#: src/ui/preferences.ui:407
+msgid "_Log address:"
+msgstr "Обратный адрес для _журнала"
