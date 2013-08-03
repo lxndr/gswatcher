@@ -304,6 +304,7 @@
           <object class="GtkImage" id="image2">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="tooltip_text" translatable="yes">Favor selected server</property>
             <property name="pixel_size">16</property>
             <property name="icon_name">emblem-favorite</property>
           </object>
