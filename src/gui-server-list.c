@@ -371,6 +371,15 @@ game_detected (GsqQuerier *querier, GsClient *client)
 }
 
 
+static gboolean
+select_iter (GsClient *client)
+{
+	GtkTreeSelection *sel = gtk_tree_view_get_selection (GTK_TREE_VIEW (listview));
+	gtk_tree_selection_select_iter (sel, &client->sliter);
+	return FALSE;
+}
+
+
 void
 gui_slist_add (GsClient *cl)
 {
@@ -390,7 +399,8 @@ gui_slist_add (GsClient *cl)
 	
 	GtkTreeSelection *sel = gtk_tree_view_get_selection (GTK_TREE_VIEW (listview));
 	if (gtk_tree_selection_count_selected_rows (sel) == 0)
-		gtk_tree_selection_select_iter (sel, &cl->sliter);
+		/* for some reason selecting doesn't work here */
+		g_idle_add ((GSourceFunc) select_iter, cl);
 	
 	g_signal_connect (cl->querier, "error", G_CALLBACK (server_error), cl);
 	g_signal_connect (cl->querier, "resolve", G_CALLBACK (server_resolved), cl);
