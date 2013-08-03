@@ -816,6 +816,9 @@ load_preferences ()
 	g_object_unref (parser);
 	
 	/* initialize preference widgets */
+	gui_prefs_init ();
+	
+#if 0
 	gui_prefs_set_interval (gs_application_get_interval ());
 	gui_prefs_set_game_column_mode (gui_slist_get_game_column_mode ());
 	gui_prefs_set_port (default_port);
@@ -825,6 +828,7 @@ load_preferences ()
 	gui_prefs_set_use_system_font (gui_console_get_use_system_font ());
 	gui_prefs_set_font (gui_console_get_font ());
 	gui_prefs_set_logaddress (gs_client_get_logaddress ());
+#endif
 }
 
 
