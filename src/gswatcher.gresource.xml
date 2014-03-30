@@ -3,6 +3,8 @@
 <gresources>
 	<gresource prefix="/org/gswatcher">
 		<file preprocess="xml-stripblanks" compressed="true">ui/info.ui</file>
+		<file preprocess="xml-stripblanks" compressed="true">ui/console.ui</file>
+		<file preprocess="xml-stripblanks" compressed="true">ui/buddy-list.ui</file>
 		<file preprocess="xml-stripblanks" compressed="true">ui/preferences.ui</file>
 	</gresource>
 </gresources>
