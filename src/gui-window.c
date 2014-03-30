@@ -310,7 +310,7 @@ gui_window_save_geometry ()
 static GtkWidget *
 gui_window_create_tablabel (const gchar *icon, const gchar *title)
 {
-	GtkWidget *i = gtk_image_new_from_stock (icon, GTK_ICON_SIZE_MENU);
+	GtkWidget *i = gtk_image_new_from_icon_name (icon, GTK_ICON_SIZE_MENU);
 	GtkWidget *l = gtk_label_new (title);
 	
 	GtkWidget *b = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
@@ -368,7 +368,7 @@ gui_window_create (GtkApplication *app)
 	
 	GtkWidget *slist_button = gtk_radio_button_new_with_label (
 			NULL, _("Server list"));
-	image = gtk_image_new_from_stock (GTK_STOCK_CONNECT, GTK_ICON_SIZE_MENU);
+	image = gtk_image_new_from_icon_name (GTK_STOCK_CONNECT, GTK_ICON_SIZE_MENU);
 	gtk_button_set_image (GTK_BUTTON (slist_button), image);
 	gtk_toggle_button_set_mode (GTK_TOGGLE_BUTTON (slist_button), FALSE);
 	context = gtk_widget_get_style_context (GTK_WIDGET (slist_button));
@@ -378,7 +378,7 @@ gui_window_create (GtkApplication *app)
 	
 	GtkWidget *blist_button = gtk_radio_button_new_with_label_from_widget (
 			GTK_RADIO_BUTTON (slist_button), _("Buddy list"));
-	image = gtk_image_new_from_stock (GTK_STOCK_ORIENTATION_PORTRAIT, GTK_ICON_SIZE_MENU);
+	image = gtk_image_new_from_icon_name (GTK_STOCK_ORIENTATION_PORTRAIT, GTK_ICON_SIZE_MENU);
 	gtk_button_set_image (GTK_BUTTON (blist_button), image);
 	gtk_toggle_button_set_mode (GTK_TOGGLE_BUTTON (blist_button), FALSE);
 	context = gtk_widget_get_style_context (GTK_WIDGET (blist_button));
@@ -388,7 +388,7 @@ gui_window_create (GtkApplication *app)
 	
 	GtkWidget *prefs_button = gtk_radio_button_new_with_label_from_widget (
 			GTK_RADIO_BUTTON (slist_button), _("Preferences"));
-	image = gtk_image_new_from_stock (GTK_STOCK_PREFERENCES, GTK_ICON_SIZE_MENU);
+	image = gtk_image_new_from_icon_name (GTK_STOCK_PREFERENCES, GTK_ICON_SIZE_MENU);
 	gtk_button_set_image (GTK_BUTTON (prefs_button), image);
 	gtk_toggle_button_set_mode (GTK_TOGGLE_BUTTON (prefs_button), FALSE);
 	context = gtk_widget_get_style_context (GTK_WIDGET (prefs_button));
@@ -412,7 +412,7 @@ gui_window_create (GtkApplication *app)
 			G_CALLBACK (gs_window_layout_toggled), NULL);
 	
 	pause_button = gtk_toggle_button_new_with_label (_("_Pause"));
-	image = gtk_image_new_from_stock (GTK_STOCK_MEDIA_PAUSE, GTK_ICON_SIZE_MENU);
+	image = gtk_image_new_from_icon_name (GTK_STOCK_MEDIA_PAUSE, GTK_ICON_SIZE_MENU);
 	g_object_set (G_OBJECT (pause_button),
 			"use-underline", TRUE,
 			"image", image,
@@ -423,7 +423,7 @@ gui_window_create (GtkApplication *app)
 			G_CALLBACK (gs_window_pause_toggled), NULL);
 	
 	GtkWidget *about_button = gtk_button_new_with_label (_("About"));
-	image = gtk_image_new_from_stock (GTK_STOCK_ABOUT, GTK_ICON_SIZE_MENU);
+	image = gtk_image_new_from_icon_name (GTK_STOCK_ABOUT, GTK_ICON_SIZE_MENU);
 	g_object_set (G_OBJECT (about_button),
 			"image", image,
 			NULL);
@@ -433,7 +433,7 @@ gui_window_create (GtkApplication *app)
 			G_CALLBACK (gs_window_about_clicked), NULL);
 	
 	GtkWidget *quit_button = gtk_button_new_with_label (_("Quit"));
-	image = gtk_image_new_from_stock (GTK_STOCK_QUIT, GTK_ICON_SIZE_MENU);
+	image = gtk_image_new_from_icon_name (GTK_STOCK_QUIT, GTK_ICON_SIZE_MENU);
 	g_object_set (G_OBJECT (quit_button),
 			"image", image,
 			NULL);

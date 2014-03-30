@@ -37,8 +37,7 @@ enum {
 };
 
 
-static GtkWidget *nickname;
-static GtkWidget *listview;
+static GObject *ctl_nickname, *ctl_listview;
 static GtkListStore *liststore;
 
 
@@ -68,7 +67,7 @@ gui_blist_update_real (GsBuddy *buddy, GtkTreeIter *iter)
 {
 	gchar *lastseen = NULL, *place = NULL;
 	
-	GtkTreeSelection *sel = gtk_tree_view_get_selection (GTK_TREE_VIEW (listview));
+	GtkTreeSelection *sel = gtk_tree_view_get_selection (GTK_TREE_VIEW (ctl_listview));
 	if (gtk_tree_selection_iter_is_selected (sel, iter)) {
 		if (buddy->lastseen && buddy->lastaddr) {
 			gchar *time = g_date_time_format (buddy->lastseen, "%x %X");
@@ -137,7 +136,7 @@ gui_blist_add (GsBuddy *buddy)
 			COLUMN_NOTIFY, buddy->notify,
 			-1);
 	
-	GtkTreeSelection *sel = gtk_tree_view_get_selection (GTK_TREE_VIEW (listview));
+	GtkTreeSelection *sel = gtk_tree_view_get_selection (GTK_TREE_VIEW (ctl_listview));
 	if (gtk_tree_selection_count_selected_rows (sel) == 0)
 		gtk_tree_selection_select_iter (sel, &iter);
 	
@@ -145,7 +144,7 @@ gui_blist_add (GsBuddy *buddy)
 }
 
 
-static void
+void G_MODULE_EXPORT
 gui_blist_selection_changed (GtkTreeSelection *selection, gpointer udata)
 {
 	GtkTreeIter iter;
@@ -156,18 +155,18 @@ gui_blist_selection_changed (GtkTreeSelection *selection, gpointer udata)
 		do {
 			gtk_tree_model_get (GTK_TREE_MODEL (liststore), &iter, 0, &name, -1);
 			if (gtk_tree_selection_iter_is_selected (selection, &iter))
-				gtk_entry_set_text (GTK_ENTRY (nickname), name);
+				gtk_entry_set_text (GTK_ENTRY (ctl_nickname), name);
 			buddy = gs_application_find_buddy (name);
 			g_free (name);
 			gui_blist_update_real (buddy, &iter);
 		} while (gtk_tree_model_iter_next (GTK_TREE_MODEL (liststore), &iter));
 	} else {
-		gtk_entry_set_text (GTK_ENTRY (nickname), "");
+		gtk_entry_set_text (GTK_ENTRY (ctl_nickname), "");
 	}
 }
 
 
-static void
+void G_MODULE_EXPORT
 gui_blist_name_activated (GtkEntry *entry, gpointer udata)
 {
 	const gchar *name = gtk_entry_get_text (entry);
@@ -179,7 +178,7 @@ gui_blist_name_activated (GtkEntry *entry, gpointer udata)
 }
 
 
-static void
+void G_MODULE_EXPORT
 gui_blist_name_icon_clicked (GtkEntry *entry, GtkEntryIconPosition icon_pos,
 		GdkEvent *event, gpointer udata)
 {
@@ -194,7 +193,7 @@ gui_blist_name_icon_clicked (GtkEntry *entry, GtkEntryIconPosition icon_pos,
 }
 
 
-static void
+void G_MODULE_EXPORT
 gui_blist_name_changed (GtkEntry *entry, gpointer udata)
 {
 	const gchar *name = gtk_entry_get_text (entry);
@@ -204,7 +203,7 @@ gui_blist_name_changed (GtkEntry *entry, gpointer udata)
 }
 
 
-static gboolean
+gboolean G_MODULE_EXPORT
 gui_blist_clicked (GtkTreeView *treeview, GdkEventButton *event, gpointer udata)
 {
 	if (!(event->type == GDK_BUTTON_RELEASE && event->button == 1))
@@ -244,7 +243,7 @@ gui_blist_clicked (GtkTreeView *treeview, GdkEventButton *event, gpointer udata)
 }
 
 
-static void
+void G_MODULE_EXPORT
 gui_blist_notify_toggled (GtkCellRendererToggle *cell, gchar *p, gpointer udata)
 {
 	GtkTreeIter iter;
@@ -267,130 +266,27 @@ gui_blist_notify_toggled (GtkCellRendererToggle *cell, gchar *p, gpointer udata)
 
 
 GtkWidget *
-gui_blist_create (GtkBuilder *builder)
+gui_blist_create ()
 {
-	GtkTreeViewColumn *column;
-	GtkCellRenderer *cell;
+	GError *error = NULL;
+	GtkBuilder *builder = gtk_builder_new ();
+	if (gtk_builder_add_from_resource (builder, "/org/gswatcher/ui/buddy-list.ui", &error) == 0) {
+		g_warning (error->message);
+		g_object_unref (builder);
+		g_error_free (error);
+		return NULL;
+	}
 	
-/* nickname entry */
-	nickname = gtk_entry_new ();
-	g_object_set (G_OBJECT (nickname),
-			"secondary-icon-stock", GTK_STOCK_ADD,
-			"secondary-icon-sensitive", FALSE,
-			NULL);
-	g_signal_connect (nickname, "activate",
-			G_CALLBACK (gui_blist_name_activated), NULL);
-	g_signal_connect (nickname, "icon-release",
-			G_CALLBACK (gui_blist_name_icon_clicked), NULL);
-	g_signal_connect (nickname, "changed",
-			G_CALLBACK (gui_blist_name_changed), NULL);
+	GObject *root = gtk_builder_get_object (builder, "root");
+	liststore = GTK_LIST_STORE (gtk_builder_get_object (builder, "liststore"));
 	
-/* buddy list model */
-	liststore = gtk_list_store_new (COLUMN_NUMBER, G_TYPE_STRING, G_TYPE_STRING,
-			G_TYPE_STRING, G_TYPE_BOOLEAN);
-	gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (liststore),
-			COLUMN_NAME, GTK_SORT_ASCENDING);
+	ctl_nickname = gtk_builder_get_object (builder, "nickname");
+	ctl_listview = gtk_builder_get_object (builder, "listview");
 	
-/* buddy list view */
-	listview = gtk_tree_view_new ();
-	g_object_set (G_OBJECT (listview),
-			"model", liststore,
-			NULL);
-	g_signal_connect (listview, "button-release-event",
-			G_CALLBACK (gui_blist_clicked), NULL);
+	gtk_builder_connect_signals (builder, NULL);
 	
-	GtkTreeSelection *sel = gtk_tree_view_get_selection (GTK_TREE_VIEW (listview));
-	gtk_tree_selection_set_mode (sel, GTK_SELECTION_MULTIPLE);
-	g_signal_connect (sel, "changed",
-			G_CALLBACK (gui_blist_selection_changed), NULL);
-	
-/* "name" column */
-	column = gtk_tree_view_column_new ();
-	g_object_set (G_OBJECT (column),
-			"title", C_("Player", "Name"),
-			"clickable", TRUE,
-			"expand", TRUE,
-			"sort-column-id", COLUMN_NAME,
-			NULL);
-	cell = gtk_cell_renderer_text_new ();
-	g_object_set (G_OBJECT (cell), "yalign", 0.0f, NULL);
-	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (column), cell, TRUE);
-	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (column), cell,
-			"text", COLUMN_NAME,
-			NULL);
-	gtk_tree_view_column_set_sort_order (GTK_TREE_VIEW_COLUMN (column),
-			GTK_SORT_ASCENDING);
-	gtk_tree_view_insert_column (GTK_TREE_VIEW (listview), column, -1);
-	
-/* "last seen" column */
-	column = gtk_tree_view_column_new ();
-	g_object_set (G_OBJECT (column),
-			"title", _("Last seen"),
-			"clickable", TRUE,
-			"expand", TRUE,
-			"sort-column-id", COLUMN_LAST_SEEN,
-			NULL);
-	cell = gtk_cell_renderer_text_new ();
-	g_object_set (G_OBJECT (cell), "yalign", 0.0f, NULL);
-	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (column), cell, TRUE);
-	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (column), cell,
-			"markup", COLUMN_LAST_SEEN,
-			NULL);
-	gtk_tree_view_insert_column (GTK_TREE_VIEW (listview), column, -1);
-	
-/* "place" column */
-	column = gtk_tree_view_column_new ();
-	g_object_set (G_OBJECT (column),
-			"title", _("Place"),
-			"clickable", TRUE,
-			"expand", TRUE,
-			"sort-column-id", COLUMN_PLACE,
-			NULL);
-	cell = gtk_cell_renderer_text_new ();
-	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (column), cell, TRUE);
-	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (column), cell,
-			"markup", COLUMN_PLACE,
-			NULL);
-	gtk_tree_view_insert_column (GTK_TREE_VIEW (listview), column, -1);
-	
-/* "notify" column */
-	column = gtk_tree_view_column_new ();
-	g_object_set (G_OBJECT (column),
-			"title", _("Notify"),
-			"clickable", TRUE,
-			"sort-column-id", COLUMN_NOTIFY,
-			NULL);
-	cell = gtk_cell_renderer_toggle_new ();
-	g_object_set (G_OBJECT (cell), "yalign", 0.0f, NULL);
-	g_signal_connect (cell, "toggled",
-			G_CALLBACK (gui_blist_notify_toggled), NULL);
-	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (column), cell, TRUE);
-	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (column), cell,
-			"active", COLUMN_NOTIFY,
-			NULL);
-	gtk_tree_view_insert_column (GTK_TREE_VIEW (listview), column, -1);
-	
-/* "remove" column */
-	column = gtk_tree_view_column_new ();
-	cell = gtk_cell_renderer_pixbuf_new ();
-	g_object_set (G_OBJECT (cell),
-			"stock-id", GTK_STOCK_REMOVE,
-			"yalign", 0.0f,
-			NULL);
-	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (column), cell, FALSE);
-	gtk_tree_view_insert_column (GTK_TREE_VIEW (listview), column, -1);
-	
-	GtkWidget *scrolled = gtk_scrolled_window_new (NULL, NULL);
-	g_object_set (G_OBJECT (scrolled),
-			"shadow-type", GTK_SHADOW_IN,
-			"hscrollbar-policy", GTK_POLICY_NEVER,
-			NULL);
-	gtk_container_add (GTK_CONTAINER (scrolled), listview);
-	
-	GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
-	gtk_box_pack_start (GTK_BOX (box), nickname, FALSE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (box), scrolled, TRUE, TRUE, 0);
-	gtk_widget_show_all (box);
-	
-	return box;
+	g_object_ref (root);
+	g_object_unref (builder);
+	g_object_force_floating (root);
+	return GTK_WIDGET (root);
 }
