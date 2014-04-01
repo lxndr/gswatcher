@@ -26,6 +26,11 @@
 #include "platform.h"
 
 
+#if defined (G_OS_WIN32)
+	#include <windows.h>
+#endif
+
+
 gchar *
 gs_get_system_font ()
 {
@@ -73,7 +78,13 @@ gs_quote_win32_file_name (const gchar *fname)
 gchar *
 gs_get_executable_path ()
 {
+	gchar *path = NULL;
+	
 #if defined (G_OS_WIN32)
+	wchar_t buf[MAX_PATH];
+	if (!GetModuleFileNameW (NULL, buf, MAX_PATH))
+		return NULL;
+	path = g_utf16_to_utf8 (buf, -1, NULL, NULL, NULL);
 #else
 	GFile *link = g_file_new_for_path ("/proc/self/exe");
 	GFileInfo *info = g_file_query_info (link, G_FILE_ATTRIBUTE_STANDARD_SYMLINK_TARGET,
@@ -81,6 +92,7 @@ gs_get_executable_path ()
 	gchar *path = g_strdup (g_file_info_get_symlink_target (info));
 	g_object_unref (info);
 	g_object_unref (link);
-	return path;
 #endif
+	
+	return path;
 }
