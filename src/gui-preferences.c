@@ -36,7 +36,7 @@ static GObject *ctl_game_column, *ctl_nenable, *ctl_nsound, *ctl_sysfont,
 		*ctl_fontlabel, *ctl_font, *ctl_logaddress, *ctl_connect;
 
 
-void
+void G_MODULE_EXPORT
 gui_prefs_interval_changed (GtkAdjustment *adjustment, gpointer udata)
 {
 	gdouble value = gtk_adjustment_get_value (adjustment);
@@ -45,7 +45,7 @@ gui_prefs_interval_changed (GtkAdjustment *adjustment, gpointer udata)
 }
 
 
-void
+void G_MODULE_EXPORT
 gui_prefs_gamecolumn_changed (GtkComboBox *widget, gpointer udata)
 {
 	gui_slist_set_game_column_mode (gtk_combo_box_get_active (widget));
@@ -53,7 +53,7 @@ gui_prefs_gamecolumn_changed (GtkComboBox *widget, gpointer udata)
 }
 
 
-void
+void G_MODULE_EXPORT
 gui_prefs_port_changed (GtkAdjustment *adjustment, gpointer udata)
 {
 	guint16 value = (guint16) gtk_adjustment_get_value (adjustment);
@@ -62,7 +62,7 @@ gui_prefs_port_changed (GtkAdjustment *adjustment, gpointer udata)
 }
 
 
-void
+void G_MODULE_EXPORT
 gui_prefs_enable_toggled (GtkToggleButton *togglebutton, gpointer udata)
 {
 	gboolean value = gtk_toggle_button_get_active (togglebutton);
@@ -71,7 +71,7 @@ gui_prefs_enable_toggled (GtkToggleButton *togglebutton, gpointer udata)
 }
 
 
-void
+void G_MODULE_EXPORT
 gui_prefs_sound_changed (GtkFileChooserButton *widget, gpointer udata)
 {
 	gchar *fname = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (widget));
@@ -81,14 +81,14 @@ gui_prefs_sound_changed (GtkFileChooserButton *widget, gpointer udata)
 }
 
 
-void
+void G_MODULE_EXPORT
 gui_prefs_sound_test_clicked (GtkButton *button, gpointer udata)
 {
 	gs_notification_sound ();
 }
 
 
-void
+void G_MODULE_EXPORT
 gui_prefs_sysfont_toggled (GtkToggleButton *togglebutton, gpointer udata)
 {
 	gboolean value = gtk_toggle_button_get_active (togglebutton);
@@ -99,7 +99,7 @@ gui_prefs_sysfont_toggled (GtkToggleButton *togglebutton, gpointer udata)
 }
 
 
-void
+void G_MODULE_EXPORT
 gui_prefs_font_changed (GtkFontButton *widget, gpointer udata)
 {
 	gchar *fontname = gtk_font_chooser_get_font (GTK_FONT_CHOOSER (ctl_font));
@@ -109,7 +109,7 @@ gui_prefs_font_changed (GtkFontButton *widget, gpointer udata)
 }
 
 
-void
+void G_MODULE_EXPORT
 gui_prefs_logaddress_changed (GtkEntry *entry, gpointer user_data)
 {
 	const gchar *address = gtk_entry_get_text (entry);
@@ -118,7 +118,7 @@ gui_prefs_logaddress_changed (GtkEntry *entry, gpointer user_data)
 }
 
 
-void
+void G_MODULE_EXPORT
 gui_prefs_connect_changed (GtkEntry *entry, gpointer user_data)
 {
 	const gchar *command = gtk_entry_get_text (entry);
