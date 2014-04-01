@@ -432,6 +432,9 @@ gui_console_create ()
 	
 	/* log tag table */
 	tag_table = GTK_TEXT_TAG_TABLE (g_object_ref (gtk_builder_get_object (builder, "tagtable")));
+	tags[GUI_CONSOLE_INFO] = GTK_TEXT_TAG (gtk_builder_get_object (builder, "inf"));
+	tags[GUI_CONSOLE_COMMAND] = GTK_TEXT_TAG (gtk_builder_get_object (builder, "cmd"));
+	tags[GUI_CONSOLE_ERROR] = GTK_TEXT_TAG (gtk_builder_get_object (builder, "err"));
 	
 	/* history */
 	history = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_object_unref);
