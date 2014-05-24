@@ -42,15 +42,9 @@ player_updated (GsqQuerier *querier, gpointer udata)
 }
 
 static void
-timed_out (GsqQuerier *querier, gpointer udata)
+error_occured (GsqQuerier *querier, const GError *error, gpointer udata)
 {
-	g_print (">> Timed out\n");
-}
-
-static void
-error_occured (GsqQuerier *querier, const gchar *msg, gpointer udata)
-{
-	g_print (">> Error: %s\n", msg);
+	g_print (">> Error: %s\n", error->message);
 }
 
 
@@ -69,7 +63,6 @@ add_server (GsqUpdater *updater, const gchar *address)
 	g_signal_connect (querier, "detect", G_CALLBACK (detected), NULL);
 	g_signal_connect (querier, "info-update", G_CALLBACK (info_updated), NULL);
 	g_signal_connect (querier, "players-update", G_CALLBACK (player_updated), NULL);
-	g_signal_connect (querier, "timeout", G_CALLBACK (timed_out), NULL);
 	g_signal_connect (querier, "error", G_CALLBACK (error_occured), NULL);
 	gsq_updater_take (updater, querier);
 	return querier;
