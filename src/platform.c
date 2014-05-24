@@ -89,7 +89,7 @@ gs_get_executable_path ()
 	GFile *link = g_file_new_for_path ("/proc/self/exe");
 	GFileInfo *info = g_file_query_info (link, G_FILE_ATTRIBUTE_STANDARD_SYMLINK_TARGET,
 			G_FILE_QUERY_INFO_NONE, NULL, NULL);
-	gchar *path = g_strdup (g_file_info_get_symlink_target (info));
+	path = g_strdup (g_file_info_get_symlink_target (info));
 	g_object_unref (info);
 	g_object_unref (link);
 #endif

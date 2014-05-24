@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.7\n"
 "Report-Msgid-Bugs-To: lxndr87@users.sourceforge.net\n"
-"POT-Creation-Date: 2013-08-03 19:12+0400\n"
+"POT-Creation-Date: 2014-05-24 11:46+0400\n"
 "PO-Revision-Date: 2013-08-03 18:42+0400\n"
 "Last-Translator: Alexander AB\n"
 "Language-Team: Russian\n"
@@ -140,47 +140,51 @@ msgstr "Game Server Tool"
 msgid "_Show"
 msgstr "_Показать"
 
-#: src/gui-window.c:344 src/gui-window.c:414
+#: src/gui-window.c:344 src/gui-window.c:415
 msgid "_Pause"
 msgstr "_Преостановить"
 
-#: src/gui-window.c:370 src/gui-window.c:536
+#: src/gui-window.c:353
+msgid "Exit"
+msgstr ""
+
+#: src/gui-window.c:371 src/gui-window.c:537
 msgid "Server list"
 msgstr "Список серверов"
 
-#: src/gui-window.c:380 src/gui-window.c:541
+#: src/gui-window.c:381 src/gui-window.c:542
 msgid "Buddy list"
 msgstr "Список друзей"
 
-#: src/gui-window.c:390 src/gui-window.c:546
+#: src/gui-window.c:391 src/gui-window.c:547
 msgid "Preferences"
 msgstr "Настройки"
 
-#: src/gui-window.c:405
+#: src/gui-window.c:406
 msgid "_Layout"
 msgstr "_Вид"
 
-#: src/gui-window.c:425
+#: src/gui-window.c:426
 msgid "About"
 msgstr "О программе"
 
-#: src/gui-window.c:435
+#: src/gui-window.c:436
 msgid "Quit"
 msgstr "Выйти"
 
-#: src/gui-window.c:479
+#: src/gui-window.c:480
 msgid "Information"
 msgstr "Информация"
 
-#: src/gui-window.c:488 src/ui/preferences.ui:334
+#: src/gui-window.c:489 src/ui/preferences.ui:334
 msgid "Console"
 msgstr "Консоль"
 
-#: src/gui-window.c:497
+#: src/gui-window.c:498
 msgid "Log"
 msgstr "Журнал"
 
-#: src/gui-window.c:506
+#: src/gui-window.c:507
 msgid "Chat"
 msgstr "Чат"
 
@@ -192,40 +196,40 @@ msgstr "Таймаут"
 msgid "Error"
 msgstr "Ошибка"
 
-#: src/gui-server-list.c:384
+#: src/gui-server-list.c:393
 msgid "Querying"
 msgstr "Опрос"
 
-#: src/gui-server-list.c:482 src/gui-server-list.c:483
+#: src/gui-server-list.c:492 src/gui-server-list.c:493
 msgid "unknown"
 msgstr "неизвестно"
 
-#: src/gui-server-list.c:632
+#: src/gui-server-list.c:642
 msgid "Favorite servers"
 msgstr "Любимые сервера"
 
-#: src/gui-server-list.c:644
+#: src/gui-server-list.c:654
 msgid "Other servers"
 msgstr "Другие сервера"
 
-#: src/gui-server-list.c:666
+#: src/gui-server-list.c:676
 msgctxt "Server"
 msgid "Name"
 msgstr "Название"
 
-#: src/gui-server-list.c:711
+#: src/gui-server-list.c:721
 msgid "Game"
 msgstr "Игра"
 
-#: src/gui-server-list.c:733
+#: src/gui-server-list.c:743
 msgid "Map"
 msgstr "Карта"
 
-#: src/gui-server-list.c:749
+#: src/gui-server-list.c:759
 msgid "Players"
 msgstr "Игроки"
 
-#: src/gui-server-list.c:765 src/query/proto-gamespy.c:104
+#: src/gui-server-list.c:775 src/query/proto-gamespy.c:104
 #: src/query/proto-gamespy.c:108 src/query/proto-gamespy.c:112
 #: src/query/proto-gamespy.c:115 src/query/proto-gamespy3.c:378
 #: src/query/proto-gamespy3.c:390 src/query/proto-gamespy3.c:401
@@ -233,26 +237,9 @@ msgstr "Игроки"
 msgid "Ping"
 msgstr "Пинг"
 
-#: src/gui-player-list.c:170 src/gui-buddy-list.c:310
-msgctxt "Player"
-msgid "Name"
-msgstr "Имя"
-
-#: src/gui-player-list.c:244
+#: src/gui-player-list.c:216
 msgid "Add player to your buddy list"
 msgstr "Добавить игрока в список друзей"
-
-#: src/gui-buddy-list.c:328
-msgid "Last seen"
-msgstr "Последнее подключение"
-
-#: src/gui-buddy-list.c:344
-msgid "Place"
-msgstr "Место"
-
-#: src/gui-buddy-list.c:359
-msgid "Notify"
-msgstr "Ув."
 
 #: src/gui-console.c:174
 msgid ""
@@ -471,3 +458,16 @@ msgstr "_Шрифт"
 #: src/ui/preferences.ui:407
 msgid "_Log address:"
 msgstr "Обратный адрес для _журнала"
+
+#~ msgctxt "Player"
+#~ msgid "Name"
+#~ msgstr "Имя"
+
+#~ msgid "Last seen"
+#~ msgstr "Последнее подключение"
+
+#~ msgid "Place"
+#~ msgstr "Место"
+
+#~ msgid "Notify"
+#~ msgstr "Ув."

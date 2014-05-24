@@ -28,7 +28,8 @@
 #include "gui-server-list.h"
 
 
-static GtkWidget *listview, *add, *add_image;
+static GObject *ctl_listview;
+static GtkWidget *ctl_add;
 
 
 void
@@ -37,16 +38,16 @@ gui_plist_setup (GsClient *client)
 	GtkTreeViewColumn *column;
 	
 	/* remove columns */
-	GList *columns = gtk_tree_view_get_columns (GTK_TREE_VIEW (listview));
+	GList *columns = gtk_tree_view_get_columns (GTK_TREE_VIEW (ctl_listview));
 	GList *icolumn = g_list_next (columns); /* skip name column */
 	while (icolumn) {
-		gtk_tree_view_remove_column (GTK_TREE_VIEW (listview), icolumn->data);
+		gtk_tree_view_remove_column (GTK_TREE_VIEW (ctl_listview), icolumn->data);
 		icolumn = g_list_next (icolumn);
 	}
 	g_list_free (columns);
 	
 	/* remove players */
-	gtk_tree_view_set_model (GTK_TREE_VIEW (listview), NULL);
+	gtk_tree_view_set_model (GTK_TREE_VIEW (ctl_listview), NULL);
 	
 	if (!client)
 		return;
@@ -65,12 +66,12 @@ gui_plist_setup (GsClient *client)
 		column = gtk_tree_view_column_new_with_attributes (
 				gettext (field->name), cell, "text", i + 1, NULL);
 		gtk_tree_view_column_set_sort_column_id (column, i + 1);
-		gtk_tree_view_append_column (GTK_TREE_VIEW (listview), column);
+		gtk_tree_view_append_column (GTK_TREE_VIEW (ctl_listview), column);
 		types[i + 1] = field->type;
 	}
 	
 	GtkListStore *store = gtk_list_store_newv (fields->len + 1, types);
-	gtk_tree_view_set_model (GTK_TREE_VIEW (listview), GTK_TREE_MODEL (store));
+	gtk_tree_view_set_model (GTK_TREE_VIEW (ctl_listview), GTK_TREE_MODEL (store));
 	g_object_unref (store);
 	g_free (types);
 }
@@ -92,7 +93,7 @@ gui_plist_update (GsClient *client)
 		return;
 	
 	/* store selected player */
-	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (listview));
+	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (ctl_listview));
 	if (gtk_tree_selection_get_selected (selection, &model, &iter))
 		gtk_tree_model_get (model, &iter, 0, &selected, -1);
 	liststore = GTK_LIST_STORE (model);
@@ -120,7 +121,7 @@ gui_plist_update (GsClient *client)
 }
 
 
-static void
+void G_MODULE_EXPORT
 gui_plist_selection_changed (GtkTreeSelection *selection, gpointer udata)
 {
 	GtkTreeModel *model;
@@ -128,22 +129,22 @@ gui_plist_selection_changed (GtkTreeSelection *selection, gpointer udata)
 	gchar *name;
 	
 	if (!gtk_tree_selection_get_selected (selection, &model, &iter)) {
-		gtk_widget_set_sensitive (add, FALSE);
+		gtk_widget_set_sensitive (GTK_WIDGET (ctl_add), FALSE);
 		return;
 	}
 	
 	gtk_tree_model_get (model, &iter, 0, &name, -1);
 	if (!*name) {
-		gtk_widget_set_sensitive (add, FALSE);
+		gtk_widget_set_sensitive (GTK_WIDGET (ctl_add), FALSE);
 		goto finish;
 	}
 	
 	if (gs_application_find_buddy (name)) {
-		gtk_widget_set_sensitive (add, FALSE);
+		gtk_widget_set_sensitive (GTK_WIDGET (ctl_add), FALSE);
 		goto finish;
 	}
 	
-	gtk_widget_set_sensitive (add, TRUE);
+	gtk_widget_set_sensitive (GTK_WIDGET (ctl_add), TRUE);
 
 finish:
 	g_free (name);
@@ -153,72 +154,43 @@ finish:
 GtkWidget *
 gui_plist_create ()
 {
-	GtkTreeViewColumn *column;
-	GtkCellRenderer *cell;
+	GError *error = NULL;
+	GtkBuilder *builder = gtk_builder_new ();
+	if (gtk_builder_add_from_resource (builder, "/org/gswatcher/ui/player-list.ui", &error) == 0)
+		g_error (error->message);
 	
-	GtkListStore *model = gtk_list_store_new (3, G_TYPE_STRING, G_TYPE_INT,
-			G_TYPE_STRING);
-	listview = gtk_tree_view_new_with_model (GTK_TREE_MODEL (model));
-	g_object_unref (model);
+	GObject *root = gtk_builder_get_object (builder, "root");
+	ctl_listview  = gtk_builder_get_object (builder, "listview");
 	
-	GtkTreeSelection *sel = gtk_tree_view_get_selection (GTK_TREE_VIEW (listview));
-	g_signal_connect (sel,
-			"changed", G_CALLBACK (gui_plist_selection_changed), NULL);
-	
-	column = gtk_tree_view_column_new ();
-	g_object_set (G_OBJECT (column),
-			"title", C_("Player", "Name"),
-			"clickable", TRUE,
-			"expand", TRUE,
-			"sizing", GTK_TREE_VIEW_COLUMN_FIXED,
-			"sort-column-id", 0,
-			"min-width", 80,
-			NULL);
-	cell = gtk_cell_renderer_text_new ();
-	g_object_set (G_OBJECT (cell),
-			"ellipsize", PANGO_ELLIPSIZE_END,
-			NULL);
-	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (column), cell, TRUE);
-	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (column), cell,
-			"text", 0,
-			NULL);
-	gtk_tree_view_append_column (GTK_TREE_VIEW (listview), column);
-	
-	GtkWidget *scrolled = gtk_scrolled_window_new (NULL, NULL);
-	g_object_set (G_OBJECT (scrolled),
-			"visible", TRUE,
-			"shadow-type", GTK_SHADOW_IN,
-			"hscrollbar-policy", GTK_POLICY_NEVER,
-			NULL);
-	gtk_container_add (GTK_CONTAINER (scrolled), listview);
-	gtk_widget_show_all (scrolled);
-	
-	return scrolled;
+	gtk_builder_connect_signals (builder, NULL);
+	root = g_object_ref (root);
+	g_object_unref (builder);
+	return GTK_WIDGET (root);
 }
 
 
-static void
+void G_MODULE_EXPORT
 gui_plist_add_clicked (GtkButton *button, gpointer udata)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
 	gchar *name;
 	
-	GtkTreeSelection * selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (listview));
+	GtkTreeSelection * selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (ctl_listview));
 	if (!gtk_tree_selection_get_selected (selection, &model, &iter)) {
-		gtk_widget_set_sensitive (add, FALSE);
+		gtk_widget_set_sensitive (GTK_WIDGET (ctl_add), FALSE);
 		return;
 	}
 	
 	gtk_tree_model_get (model, &iter, 0, &name, -1);
 	if (name && !*name) {
-		gtk_widget_set_sensitive (add, FALSE);
+		gtk_widget_set_sensitive (GTK_WIDGET (ctl_add), FALSE);
 		g_free (name);
 		return;
 	}
 	
 	if (gs_application_find_buddy (name)) {
-		gtk_widget_set_sensitive (add, FALSE);
+		gtk_widget_set_sensitive (GTK_WIDGET (ctl_add), FALSE);
 		g_free (name);
 		return;
 	}
@@ -229,22 +201,22 @@ gui_plist_add_clicked (GtkButton *button, gpointer udata)
 			gsq_querier_get_address (srv->querier), TRUE);
 	gui_blist_add (buddy);
 	g_free (name);
-	gtk_widget_set_sensitive (add, FALSE);
+	gtk_widget_set_sensitive (GTK_WIDGET (ctl_add), FALSE);
 }
 
 
 GtkWidget *
 gui_plist_create_bar ()
 {
-	add_image = gtk_image_new_from_stock (GTK_STOCK_ADD, GTK_ICON_SIZE_MENU);
+	GtkWidget *add_image = gtk_image_new_from_icon_name ("list-add", GTK_ICON_SIZE_MENU);
 	
-	add = gtk_button_new ();
-	g_object_set (G_OBJECT (add),
+	ctl_add = gtk_button_new ();
+	g_object_set (G_OBJECT (ctl_add),
 			"image", add_image,
 			"tooltip-text", _("Add player to your buddy list"),
 			"sensitive", FALSE,
 			NULL);
-	g_signal_connect (add, "clicked", G_CALLBACK (gui_plist_add_clicked), NULL);
+	g_signal_connect (ctl_add, "clicked", G_CALLBACK (gui_plist_add_clicked), NULL);
 	
-	return add;
+	return ctl_add;
 }
