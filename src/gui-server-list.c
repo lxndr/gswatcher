@@ -593,9 +593,9 @@ gui_slist_create ()
 /* address */
 	entry = gtk_entry_new ();
 	g_object_set (G_OBJECT (entry),
-			"primary-icon-stock", GTK_STOCK_COPY,
+			"primary-icon-name", "edit-copy",
 			"primary-icon-sensitive", FALSE,
-			"secondary-icon-stock", GTK_STOCK_ADD,
+			"secondary-icon-name", "list-add",
 			"secondary-icon-sensitive", FALSE,
 			NULL);
 	g_signal_connect (entry, "activate", G_CALLBACK (gs_address_activated), NULL);
