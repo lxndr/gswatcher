@@ -116,7 +116,7 @@ static gboolean gsq_socket_received (GSocket *socket,
 		GIOCondition condition, gpointer udata);
 static GsqProtocol *gsq_find_protocol (const gchar *name);
 
-G_DEFINE_TYPE (GsqQuerier, gsq_querier, G_TYPE_OBJECT);
+G_DEFINE_TYPE_WITH_CODE (GsqQuerier, gsq_querier, G_TYPE_OBJECT, G_ADD_PRIVATE (GsqQuerier));
 
 
 GQuark
@@ -345,8 +345,6 @@ gsq_querier_class_init (GsqQuerierClass *klass)
 	object_class->get_property = gsq_querier_get_property;
 	object_class->finalize = gsq_querier_finalize;
 	
-	g_type_class_add_private (object_class, sizeof (GsqQuerierPrivate));
-	
 	g_object_class_install_property (object_class, PROP_ADDRESS,
 			g_param_spec_string ("address", "Address",
 			"The server's address",
@@ -434,8 +432,7 @@ gsq_querier_class_init (GsqQuerierClass *klass)
 static void
 gsq_querier_init (GsqQuerier *querier)
 {	
-	querier->priv = G_TYPE_INSTANCE_GET_PRIVATE (querier, GSQ_TYPE_QUERIER,
-			GsqQuerierPrivate);
+	querier->priv = gsq_querier_get_instance_private (querier);
 	GsqQuerierPrivate *priv = querier->priv;
 	
 	querier->name = g_string_sized_new (32);

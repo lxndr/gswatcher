@@ -40,7 +40,7 @@ struct _GsqUpdaterPrivate {
 };
 
 
-G_DEFINE_TYPE (GsqUpdater, gsq_updater, G_TYPE_OBJECT);
+G_DEFINE_TYPE_WITH_CODE (GsqUpdater, gsq_updater, G_TYPE_OBJECT, G_ADD_PRIVATE (GsqUpdater));
 
 
 static void
@@ -104,8 +104,6 @@ gsq_updater_class_init (GsqUpdaterClass *class)
 	gobject_class->get_property = gsq_updater_get_property;
 	gobject_class->finalize = gsq_updater_finalize;
 	
-	g_type_class_add_private (gobject_class, sizeof (GsqUpdaterPrivate));
-	
 	g_object_class_install_property (gobject_class, PROP_INTERVAL,
 			g_param_spec_float ("interval", "Interval", "Update interval",
 			0.5f, 30.0f, 2.5f, G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT));
@@ -118,8 +116,7 @@ gsq_updater_class_init (GsqUpdaterClass *class)
 static void
 gsq_updater_init (GsqUpdater *updater)
 {
-	updater->priv = G_TYPE_INSTANCE_GET_PRIVATE (updater, GSQ_TYPE_UPDATER,
-			GsqUpdaterPrivate);
+	updater->priv = gsq_updater_get_instance_private (updater);
 }
 
 GsqUpdater *

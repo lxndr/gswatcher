@@ -79,7 +79,7 @@ gsq_console_error_quark (void)
 static void establish_connection (GsqConsole *console);
 
 
-G_DEFINE_TYPE (GsqConsole, gsq_console, G_TYPE_OBJECT);
+G_DEFINE_TYPE_WITH_CODE (GsqConsole, gsq_console, G_TYPE_OBJECT, G_ADD_PRIVATE (GsqConsole));
 
 
 static void
@@ -177,8 +177,6 @@ gsq_console_class_init (GsqConsoleClass *class)
 	object_class->get_property = gsq_console_get_property;
 	object_class->finalize = gsq_console_finalize;
 	
-	g_type_class_add_private (object_class, sizeof (GsqConsolePrivate));
-	
 	g_object_class_install_property (object_class, PROP_HOST,
 			g_param_spec_string ("host", "Host", "Host name",
 			NULL, G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
@@ -214,8 +212,7 @@ gsq_console_class_init (GsqConsoleClass *class)
 static void
 gsq_console_init (GsqConsole *console)
 {
-	GsqConsolePrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE (console,
-			GSQ_TYPE_CONSOLE, GsqConsolePrivate);
+	GsqConsolePrivate *priv = gsq_console_get_instance_private (console);
 	priv->chunk = g_byte_array_new ();
 	console->priv = priv;
 }

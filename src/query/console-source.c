@@ -49,7 +49,7 @@ static gboolean gsq_console_source_received (GsqConsole *console,
 static void gsq_console_source_reset (GsqConsole *console);
 
 
-G_DEFINE_TYPE (GsqConsoleSource, gsq_console_source, GSQ_TYPE_CONSOLE);
+G_DEFINE_TYPE_WITH_CODE (GsqConsoleSource, gsq_console_source, GSQ_TYPE_CONSOLE, G_ADD_PRIVATE (GsqConsoleSource));
 
 
 static void
@@ -63,16 +63,13 @@ gsq_console_source_class_init (GsqConsoleSourceClass *class)
 	console_class->command = gsq_console_source_command;
 	console_class->received = gsq_console_source_received;
 	console_class->reset = gsq_console_source_reset;
-	
-	g_type_class_add_private (gobject_class, sizeof (GsqConsoleSourcePrivate));
 }
 
 
 static void
 gsq_console_source_init (GsqConsoleSource *console)
 {
-	console->priv = G_TYPE_INSTANCE_GET_PRIVATE (console,
-			GSQ_TYPE_CONSOLE_SOURCE, GsqConsoleSourcePrivate);
+	console->priv = gsq_console_source_get_instance_private (console);
 	gsq_console_set_chunk_size (GSQ_CONSOLE (console), 12);
 	console->priv->res = g_string_sized_new (64);
 }
