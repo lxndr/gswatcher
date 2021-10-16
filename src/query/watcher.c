@@ -51,15 +51,13 @@ static void gsq_watcher_info_updated (GsqQuerier *querier);
 static void gsq_watcher_error_occured (GsqQuerier *querier, const GError *error);
 
 
-G_DEFINE_TYPE (GsqWatcher, gsq_watcher, GSQ_TYPE_QUERIER);
+G_DEFINE_TYPE_WITH_CODE (GsqWatcher, gsq_watcher, GSQ_TYPE_QUERIER, G_ADD_PRIVATE (GsqWatcher));
 
 
 static void
 gsq_watcher_class_init (GsqWatcherClass *class)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS (class);
-	
-	g_type_class_add_private (object_class, sizeof (GsqWatcherPrivate));
 	
 	signals[SIGNAL_NAME_CHANGED] = g_signal_new ("name-changed",
 			G_OBJECT_CLASS_TYPE (class), G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
@@ -85,8 +83,7 @@ gsq_watcher_class_init (GsqWatcherClass *class)
 static void
 gsq_watcher_init (GsqWatcher *watcher)
 {
-	watcher->priv = G_TYPE_INSTANCE_GET_PRIVATE (watcher,
-			GSQ_TYPE_WATCHER, GsqWatcherPrivate);
+	watcher->priv = gsq_watcher_get_instance_private (watcher);
 }
 
 
