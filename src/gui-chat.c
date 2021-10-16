@@ -154,7 +154,7 @@ gui_chat_create ()
 	
 	entry = gtk_entry_new ();
 	g_object_set (G_OBJECT (entry),
-			"secondary-icon-stock", GTK_STOCK_MEDIA_PLAY,
+			"secondary-icon-name", "media-playback-start",
 			NULL);
 	g_signal_connect (entry, "activate", G_CALLBACK (gui_chat_entry_activated), NULL);
 	g_signal_connect (entry, "icon-release", G_CALLBACK (gui_chat_entry_icon_clicked), NULL);

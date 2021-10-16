@@ -29,7 +29,7 @@ static gboolean dock_key_release_event (GtkWidget *widget,
 		GdkEventKey *event, gpointer udata);
 
 
-G_DEFINE_TYPE (GtkPopupButton, gtk_popup_button, GTK_TYPE_TOGGLE_BUTTON);
+G_DEFINE_TYPE_WITH_CODE (GtkPopupButton, gtk_popup_button, GTK_TYPE_TOGGLE_BUTTON, G_ADD_PRIVATE (GtkPopupButton));
 
 
 static void
@@ -37,7 +37,6 @@ gtk_popup_button_class_init (GtkPopupButtonClass *klass)
 {
 	GObjectClass *object_class = (GObjectClass *) klass;
 	object_class->dispose = gtk_popup_button_dispose;
-	g_type_class_add_private (object_class, sizeof (GtkPopupButtonPrivate));
 	
 	GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 	widget_class->button_press_event = gtk_popup_button_press_event;
@@ -57,8 +56,7 @@ gtk_popup_button_class_init (GtkPopupButtonClass *klass)
 static void
 gtk_popup_button_init (GtkPopupButton *popup_button)
 {
-	popup_button->priv = G_TYPE_INSTANCE_GET_PRIVATE (popup_button,
-			GTK_TYPE_POPUP_BUTTON, GtkPopupButtonPrivate);
+	popup_button->priv = gtk_popup_button_get_instance_private (popup_button);
 	GtkPopupButtonPrivate *priv = popup_button->priv;
 	
 	/* popup window */
