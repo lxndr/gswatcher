@@ -1,0 +1,12 @@
+CMakeFiles
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+src/resources.c
+
+po/*.pot
+po/*.mo
+
+gswatcher
+test-querier
