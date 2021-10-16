@@ -1,0 +1,386 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the gswatcher package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: gswatcher\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-10-16 14:08+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/query/proto-gamespy.c:102
+msgid "Frags"
+msgstr ""
+
+#: src/query/proto-gamespy.c:104 src/query/proto-gamespy.c:108
+#: src/query/proto-gamespy.c:112 src/query/proto-gamespy.c:115
+#: src/query/proto-gamespy2.c:107 src/query/proto-gamespy2.c:115
+#: src/query/proto-gamespy3.c:378 src/query/proto-gamespy3.c:390
+#: src/query/proto-gamespy3.c:401 src/query/proto-quake.c:221
+#: src/gui-server-list.c:775
+msgid "Ping"
+msgstr ""
+
+#: src/query/proto-gamespy.c:106 src/query/proto-gamespy2.c:113
+#: src/query/proto-gamespy2.c:122 src/query/proto-gamespy3.c:376
+#: src/query/proto-gamespy3.c:387 src/query/proto-gamespy3.c:398
+#: src/query/proto-gamespy3.c:416
+msgid "Deaths"
+msgstr ""
+
+#: src/query/proto-gamespy.c:107 src/query/proto-gamespy2.c:106
+#: src/query/proto-gamespy2.c:114 src/query/proto-gamespy2.c:121
+#: src/query/proto-gamespy3.c:375 src/query/proto-gamespy3.c:386
+#: src/query/proto-gamespy3.c:397 src/query/proto-gamespy3.c:415
+#: src/query/proto-quake.c:220
+msgid "Score"
+msgstr ""
+
+#: src/query/proto-gamespy.c:109 src/query/proto-gamespy.c:113
+#: src/query/proto-gamespy2.c:116 src/query/proto-gamespy3.c:377
+#: src/query/proto-gamespy3.c:389 src/query/proto-gamespy3.c:400
+msgid "Team"
+msgstr ""
+
+#: src/query/proto-gamespy.c:124
+msgid "Special Forces"
+msgstr ""
+
+#: src/query/proto-gamespy.c:125
+msgid "Terrorists"
+msgstr ""
+
+#: src/query/proto-gamespy.c:126
+msgid "Spectators"
+msgstr ""
+
+#: src/query/proto-gamespy2.c:103
+msgid "Leader"
+msgstr ""
+
+#: src/query/proto-gamespy2.c:104
+msgid "Goal"
+msgstr ""
+
+#: src/query/proto-gamespy2.c:105
+msgid "Honor"
+msgstr ""
+
+#: src/query/proto-gamespy2.c:112 src/query/proto-source.c:369
+msgid "Kills"
+msgstr ""
+
+#: src/query/proto-gamespy3.c:388 src/query/proto-gamespy3.c:399
+msgid "Skill"
+msgstr ""
+
+#: src/query/proto-source.c:370
+msgid "Time"
+msgstr ""
+
+#: src/query/querier.c:811
+msgid "Protocol auto-detection is disabled while no protocol is specified"
+msgstr ""
+
+#: src/query/querier.c:1092
+#, c-format
+msgid "Failed to create a IPv4 UDP socket: %s"
+msgstr ""
+
+#: src/query/querier.c:1113
+#, c-format
+msgid "Failed to create a IPv6 UDP socket: %s"
+msgstr ""
+
+#: src/query/querier.c:1145
+msgid "No UDP socket was created"
+msgstr ""
+
+#: src/client.c:415
+msgid "Connected"
+msgstr ""
+
+#: src/client.c:421
+msgid "Authenticated"
+msgstr ""
+
+#: src/client.c:427
+msgid "Disconnected"
+msgstr ""
+
+#: src/client.c:447
+msgid "Server's protocol is not determined"
+msgstr ""
+
+#: src/client.c:491
+msgid "You have to provide a log address"
+msgstr ""
+
+#: src/client.c:600
+#, c-format
+msgid "ShellExecute error: code %d"
+msgstr ""
+
+#: src/client.c:604
+#, c-format
+msgid "Could not run connect command: %s"
+msgstr ""
+
+#: src/gswatcher.c:132
+msgid "Show version number and exit"
+msgstr ""
+
+#: src/gswatcher.c:134
+msgid "Start minimized in system tray"
+msgstr ""
+
+#: src/gswatcher.c:136
+msgid "Output all packets into stdout"
+msgstr ""
+
+#: src/gswatcher.c:138
+msgid "Watch only this server"
+msgstr ""
+
+#: src/gswatcher.c:141
+msgid "Use internal notifier"
+msgstr ""
+
+#: src/gswatcher.c:144
+msgid "Command to play sounds"
+msgstr ""
+
+#: src/gswatcher.c:275
+#, c-format
+msgid "Couldn't save buddy list: %s"
+msgstr ""
+
+#: src/gswatcher.c:387
+#, c-format
+msgid "Couldn't load buddy list: %s"
+msgstr ""
+
+#: src/gswatcher.c:438
+#, c-format
+msgid "Couldn't save server list: %s"
+msgstr ""
+
+#: src/gswatcher.c:535
+#, c-format
+msgid "Player %s has connected"
+msgstr ""
+
+#: src/gswatcher.c:536 src/gswatcher.c:565
+#, c-format
+msgid ""
+"Address: %s\n"
+"Server: %s\n"
+"Players: %d / %d"
+msgstr ""
+
+#: src/gswatcher.c:564
+#, c-format
+msgid "Server with %s has free slot"
+msgstr ""
+
+#: src/gswatcher.c:651
+#, c-format
+msgid "Are you sure you want to remove \"%s\" ( %s) from the list?"
+msgstr ""
+
+#: src/gswatcher.c:748
+#, c-format
+msgid "Couldn't load server list: %s"
+msgstr ""
+
+#: src/gswatcher.c:770
+#, c-format
+msgid "Couldn't load user preferences: %s"
+msgstr ""
+
+#: src/gswatcher.c:880
+#, c-format
+msgid "Couldn't save user preferences: %s"
+msgstr ""
+
+#: src/gui-console.c:174
+msgid ""
+"This command will shut down the server. Are you sure you want to continue?"
+msgstr ""
+
+#: src/gui-console.c:354
+msgid "P_ort:"
+msgstr ""
+
+#: src/gui-console.c:366
+msgid "_Password:"
+msgstr ""
+
+#. settings button
+#: src/gui-console.c:383 src/gui-log.c:226
+msgid "Settings"
+msgstr ""
+
+#: src/gui-info.c:65
+msgid "This server is not responding and most likely offline."
+msgstr ""
+
+#: src/gui-info.c:80 src/gui-info.c:81 src/gui-info.c:82 src/gui-info.c:83
+#: src/gui-info.c:84 src/gui-info.c:85 src/gui-info.c:86 src/gui-info.c:87
+#: src/gui-info.c:106 src/gui-info.c:107
+msgid "N/A"
+msgstr ""
+
+#: src/gui-info.c:109
+msgid "Yes"
+msgstr ""
+
+#: src/gui-info.c:109
+msgid "No"
+msgstr ""
+
+#. view panel
+#: src/gui-log.c:176
+msgid "Show output"
+msgstr ""
+
+#: src/gui-log.c:177
+msgid "Text wrapping"
+msgstr ""
+
+#: src/gui-log.c:179
+msgid "Clear log"
+msgstr ""
+
+#. view button
+#: src/gui-log.c:191
+msgid "View"
+msgstr ""
+
+#. settings
+#: src/gui-log.c:208
+msgid "Enable logging"
+msgstr ""
+
+#: src/gui-log.c:211
+msgid "Disable logging"
+msgstr ""
+
+#: src/gui-log.c:214
+msgid "Keep on"
+msgstr ""
+
+#: src/gui-player-list.c:216
+msgid "Add player to your buddy list"
+msgstr ""
+
+#: src/gui-server-list.c:321
+msgid "Timeout"
+msgstr ""
+
+#: src/gui-server-list.c:339
+msgid "Error"
+msgstr ""
+
+#: src/gui-server-list.c:393
+msgid "Querying"
+msgstr ""
+
+#: src/gui-server-list.c:492 src/gui-server-list.c:493
+msgid "unknown"
+msgstr ""
+
+#: src/gui-server-list.c:642
+msgid "Favorite servers"
+msgstr ""
+
+#: src/gui-server-list.c:654
+msgid "Other servers"
+msgstr ""
+
+#: src/gui-server-list.c:676
+msgctxt "Server"
+msgid "Name"
+msgstr ""
+
+#: src/gui-server-list.c:721
+msgid "Game"
+msgstr ""
+
+#: src/gui-server-list.c:743
+msgid "Map"
+msgstr ""
+
+#: src/gui-server-list.c:759
+msgid "Players"
+msgstr ""
+
+#: src/gui-window.c:144
+msgid "Offical Web Page"
+msgstr ""
+
+#: src/gui-window.c:330 src/gui-window.c:331
+msgid "Game Server Tool"
+msgstr ""
+
+#. tray menu
+#: src/gui-window.c:337
+msgid "_Show"
+msgstr ""
+
+#: src/gui-window.c:344 src/gui-window.c:415
+msgid "_Pause"
+msgstr ""
+
+#: src/gui-window.c:353
+msgid "Exit"
+msgstr ""
+
+#: src/gui-window.c:371 src/gui-window.c:537
+msgid "Server list"
+msgstr ""
+
+#: src/gui-window.c:381 src/gui-window.c:542
+msgid "Buddy list"
+msgstr ""
+
+#: src/gui-window.c:391 src/gui-window.c:547
+msgid "Preferences"
+msgstr ""
+
+#: src/gui-window.c:406
+msgid "_Layout"
+msgstr ""
+
+#: src/gui-window.c:426
+msgid "About"
+msgstr ""
+
+#: src/gui-window.c:436
+msgid "Quit"
+msgstr ""
+
+#: src/gui-window.c:480
+msgid "Information"
+msgstr ""
+
+#: src/gui-window.c:489
+msgid "Console"
+msgstr ""
+
+#: src/gui-window.c:498
+msgid "Log"
+msgstr ""
+
+#: src/gui-window.c:507
+msgid "Chat"
+msgstr ""
