@@ -34,7 +34,6 @@
 #include "gui-console.h"
 #include "gui-buddy-list.h"
 #include "gui-preferences.h"
-#include "gui-notification.h"
 
 
 static gchar *buddy_list_path = NULL;
@@ -42,7 +41,6 @@ static gchar *server_list_path = NULL;
 static gchar *preferences_path = NULL;
 static gchar *icon_dir = NULL;
 static gchar *pixmap_dir = NULL;
-static gchar *sound_dir = NULL;
 
 static GHashTable *buddy_list = NULL;
 static GList *server_list = NULL;
@@ -52,6 +50,7 @@ static gboolean dont_save_server_list = FALSE;
 static gdouble update_interval;
 static gboolean update_pause;
 static guint update_timer;
+static gboolean notification_enabled = FALSE;
 
 static guint16 default_port = 27500;  /* mainly for save/load purpose */
 
@@ -89,7 +88,6 @@ initialize_paths ()
 #endif
 	
 	icon_dir = g_build_filename (data_dir, "icons", NULL);
-	sound_dir = g_build_filename (data_dir, "sounds", NULL);
 	pixmap_dir = g_build_filename (root_dir, "share", "pixmaps", NULL);
 	
 	g_free (data_dir);
@@ -104,13 +102,6 @@ gs_application_get_icon_dir ()
 }
 
 
-const gchar *
-gs_application_get_sound_dir ()
-{
-	return sound_dir;
-}
-
-
 static gint
 application_command_line (GApplication *app, GApplicationCommandLine *cmdline, gpointer udata)
 {
@@ -118,8 +109,6 @@ application_command_line (GApplication *app, GApplicationCommandLine *cmdline, g
 	gboolean version = FALSE;
 	gboolean minimized = FALSE;
 	gboolean debug = FALSE;
-	gboolean notifier = FALSE;
-	gchar *playbin = NULL;
 	gchar **servers = NULL;
 	
 	gint ret = 0, argc;
@@ -136,12 +125,6 @@ application_command_line (GApplication *app, GApplicationCommandLine *cmdline, g
 				N_("Output all packets into stdout"), NULL},
 		{"server", 's', 0, G_OPTION_ARG_STRING_ARRAY, &servers,
 				N_("Watch only this server"), NULL},
-#ifndef G_OS_WIN32
-		{"notifier", 'n', 0, G_OPTION_ARG_NONE, &notifier,
-				N_("Use internal notifier"), NULL},
-#endif
-		{"playbin", 'p', 0, G_OPTION_ARG_STRING, &playbin,
-				N_("Command to play sounds"), NULL},
 		{"help", '?', 0, G_OPTION_ARG_NONE, &help, NULL, NULL},
 		{NULL}
 	};
@@ -165,17 +148,12 @@ application_command_line (GApplication *app, GApplicationCommandLine *cmdline, g
 			g_application_command_line_print (cmdline, "Game Server Watcher v" GS_VERSION "\n");
 		
 		if (!g_application_command_line_get_is_remote (cmdline)) {
-			if (playbin)
-				gs_notification_set_playbin (playbin);
-			
 			if (!minimized)
 				gui_window_show ();
 			
 			gsq_set_debug_flags (debug ?
 					GSQ_DEBUG_INCOMING_DATA | GSQ_DEBUG_OUTGOING_DATA | GSQ_DEBUG_EVENT :
 					GSQ_DEBUG_NONE);
-			
-			gs_notification_init (notifier);
 			
 			if (servers) {
 				dont_save_server_list = TRUE;
@@ -187,8 +165,6 @@ application_command_line (GApplication *app, GApplicationCommandLine *cmdline, g
 		}
 	}
 	
-	if (playbin)
-		g_free (playbin);
 	if (servers)
 		g_strfreev (servers);
 	g_strfreev (argv);
@@ -233,7 +209,6 @@ application_shutdown_real (GtkApplication *app)
 	g_free (preferences_path);
 	g_free (icon_dir);
 	g_free (pixmap_dir);
-	g_free (sound_dir);
 	
 	return FALSE;
 }
@@ -515,6 +490,18 @@ gs_application_get_default_port ()
 	return default_port;
 }
 
+gboolean
+gs_notification_get_enable ()
+{
+	return notification_enabled;
+}
+
+void
+gs_notification_set_enable (gboolean enable)
+{
+	notification_enabled = enable;
+}
+
 
 static void
 player_online (GsqQuerier *querier, GsqPlayer *player, GsClient *client)
@@ -538,7 +525,13 @@ player_online (GsqQuerier *querier, GsqPlayer *player, GsClient *client)
 					querier->name->str,
 					querier->numplayers,
 					querier->maxplayers);
-			gs_notification_message (title, text);
+
+			GNotification *notification = g_notification_new (title);
+			g_notification_set_body (notification, text);
+			GApplication *app = g_application_get_default ();
+			g_application_send_notification (app, NULL, notification);
+			g_object_unref (G_OBJECT (notification));
+
 			g_free (title);
 			g_free (text);
 		}
@@ -567,7 +560,13 @@ player_offline (GsqQuerier *querier, GsqPlayer *player, GsClient *client)
 					querier->name->str,
 					querier->numplayers,
 					querier->maxplayers);
-			gs_notification_message (title, text);
+
+			GNotification *notification = g_notification_new (title);
+			g_notification_set_body (notification, text);
+			GApplication *app = g_application_get_default ();
+			g_application_send_notification (app, NULL, notification);
+			g_object_unref (G_OBJECT (notification));
+
 			g_free (title);
 			g_free (text);
 		}
@@ -795,9 +794,6 @@ load_preferences ()
 	/* enable notifications */
 	if ((node = json_object_get_member (obj, "notification-enable")))
 		gs_notification_set_enable (json_node_get_boolean (node));
-	/* enable sound notifications */
-	if ((node = json_object_get_member (obj, "notification-sound")))
-		gs_notification_set_sound (json_node_get_string (node));
 	/* font */
 	if ((node = json_object_get_member (obj, "font")))
 		gui_console_set_font (json_node_get_string (node));
@@ -824,7 +820,6 @@ load_preferences ()
 	gui_prefs_set_port (default_port);
 	gui_prefs_set_connect_command (gs_client_get_connect_command ());
 	gui_prefs_set_enable_notifications (gs_notification_get_enable ());
-	gui_prefs_set_notification_sound (gs_notification_get_sound ());
 	gui_prefs_set_use_system_font (gui_console_get_use_system_font ());
 	gui_prefs_set_font (gui_console_get_font ());
 	gui_prefs_set_logaddress (gs_client_get_logaddress ());
@@ -852,9 +847,6 @@ gs_application_save_preferences ()
 	/* enable notifications */
 	json_object_set_boolean_member (obj, "notification-enable",
 			gs_notification_get_enable ());
-	/* notification sound */
-	json_object_set_string_member (obj, "notification-sound",
-			gs_notification_get_sound ());
 	/* use system monospace font */
 	json_object_set_boolean_member (obj, "system-font",
 			gui_console_get_use_system_font ());

@@ -25,14 +25,13 @@
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 #include "gui-server-list.h"
-#include "gui-notification.h"
 #include "gui-preferences.h"
 #include "gui-console.h"
 #include "platform.h"
 
 
 static GObject *ctl_interval, *ctl_port;
-static GObject *ctl_game_column, *ctl_nenable, *ctl_nsound, *ctl_sysfont,
+static GObject *ctl_game_column, *ctl_nenable, *ctl_sysfont,
 		*ctl_fontlabel, *ctl_font, *ctl_logaddress, *ctl_connect;
 
 
@@ -68,23 +67,6 @@ gui_prefs_enable_toggled (GtkToggleButton *togglebutton, gpointer udata)
 	gboolean value = gtk_toggle_button_get_active (togglebutton);
 	gs_notification_set_enable (value);
 	gs_application_save_preferences ();
-}
-
-
-void G_MODULE_EXPORT
-gui_prefs_sound_changed (GtkFileChooserButton *widget, gpointer udata)
-{
-	gchar *fname = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (widget));
-	gs_notification_set_sound (fname);
-	g_free (fname);
-	gs_application_save_preferences ();
-}
-
-
-void G_MODULE_EXPORT
-gui_prefs_sound_test_clicked (GtkButton *button, gpointer udata)
-{
-	gs_notification_sound ();
 }
 
 
@@ -145,7 +127,6 @@ gui_prefs_create ()
 	ctl_game_column    = gtk_builder_get_object (builder, "game-column");
 	ctl_port           = gtk_builder_get_object (builder, "port");
 	ctl_nenable        = gtk_builder_get_object (builder, "notification-enable");
-	ctl_nsound         = gtk_builder_get_object (builder, "notification-sound");
 	ctl_sysfont        = gtk_builder_get_object (builder, "system-font");
 	ctl_fontlabel      = gtk_builder_get_object (builder, "font-label");
 	ctl_font           = gtk_builder_get_object (builder, "font");
@@ -170,7 +151,6 @@ gui_prefs_init ()
 		{ctl_game_column,  gui_prefs_gamecolumn_changed},
 		{ctl_port,         gui_prefs_port_changed},
 		{ctl_nenable,      gui_prefs_enable_toggled},
-		{ctl_nsound,       gui_prefs_sound_changed},
 		{ctl_sysfont,      gui_prefs_sysfont_toggled},
 		{ctl_font,         gui_prefs_font_changed},
 		{ctl_font,         gui_prefs_logaddress_changed},
@@ -192,9 +172,6 @@ gui_prefs_init ()
 	
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ctl_nenable),
 			gs_notification_get_enable ());
-	
-	gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (ctl_nsound),
-			gs_notification_get_sound ());
 	
 	const gchar *fontname = gui_console_get_font ();
 	gtk_font_chooser_set_font (GTK_FONT_CHOOSER (ctl_font),

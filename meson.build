@@ -1,7 +1,5 @@
 project('gswatcher', 'c', version : '1.5.1')
 
-subdir('po')
-
 gnome = import('gnome')
 
 cc = meson.get_compiler('c')
@@ -43,7 +41,6 @@ sources = [
   'src/gui-console.c',
   'src/gui-info.c',
   'src/gui-log.c',
-  'src/gui-notification.c',
   'src/gui-player-list.c',
   'src/gui-player-list.c',
   'src/gui-preferences.c',
@@ -64,3 +61,6 @@ executable(
   dependencies : dependencies,
   install: true,
 )
+
+subdir('po')
+# subdir('tests')
