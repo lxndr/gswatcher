@@ -312,9 +312,7 @@ static void
 server_error (GsqQuerier *querier, const GError *error, GsClient *client)
 {
 	if (error->domain == GSQ_QUERIER_ERROR && error->code == GSQ_QUERIER_ERROR_TIMEOUT) {
-		GTimeVal tv;
-		g_get_current_time (&tv);
-		guint64 time = tv.tv_sec - gsq_watcher_get_offline_time (GSQ_WATCHER (querier));
+		guint64 time = (g_get_real_time () - gsq_watcher_get_offline_time (GSQ_WATCHER (querier))) / 1000;
 		
 		if (time < 15) {
 			gtk_list_store_set (liststore, &client->sliter,
