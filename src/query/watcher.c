@@ -57,8 +57,6 @@ G_DEFINE_TYPE_WITH_CODE (GsqWatcher, gsq_watcher, GSQ_TYPE_QUERIER, G_ADD_PRIVAT
 static void
 gsq_watcher_class_init (GsqWatcherClass *class)
 {
-	GObjectClass *object_class = G_OBJECT_CLASS (class);
-	
 	signals[SIGNAL_NAME_CHANGED] = g_signal_new ("name-changed",
 			G_OBJECT_CLASS_TYPE (class), G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
 			G_STRUCT_OFFSET (GsqWatcherClass, name_changed), NULL, NULL,
@@ -144,9 +142,7 @@ gsq_watcher_error_occured (GsqQuerier *querier, const GError *error)
 	GsqWatcherPrivate *priv = GSQ_WATCHER (querier)->priv;
 	
 	if (priv->offline_time == 0) {
-		GTimeVal tv;
-		g_get_current_time (&tv);
-		priv->offline_time = tv.tv_sec;
+		priv->offline_time = g_get_real_time ();
 	}
 }
 

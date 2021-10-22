@@ -66,8 +66,10 @@ void gs_application_change_buddy (const gchar *name, gboolean notify);
 void gs_application_remove_buddy (const gchar *name);
 GsBuddy *gs_application_find_buddy (const gchar *name);
 
+gboolean gs_notification_get_enable ();
+void gs_notification_set_enable (gboolean enable);
+
 const gchar *gs_application_get_icon_dir ();
-const gchar *gs_application_get_sound_dir ();
 void gs_application_save_preferences ();
 
 

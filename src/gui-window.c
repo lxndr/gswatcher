@@ -68,13 +68,7 @@ gs_trayicon_button_press (GtkStatusIcon *trayicon, GdkEventButton *event,
 	}
 	
 	if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
-		gtk_menu_popup (GTK_MENU (traymenu), NULL, NULL,
-#ifdef G_OS_WIN32
-				NULL, NULL,
-#else
-				gtk_status_icon_position_menu, trayicon,
-#endif
-				event->button, event->time);
+		gtk_menu_popup_at_pointer (GTK_MENU (traymenu), event);
 	}
 	
 	return FALSE;
