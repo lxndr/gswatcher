@@ -13,7 +13,6 @@ add_project_arguments(
 dependencies = [
   dependency('gtk4'),
   dependency('gee-0.8'),
-  dependency('json-glib-1.0'),
   dependency('duktape'),
 ]
 
