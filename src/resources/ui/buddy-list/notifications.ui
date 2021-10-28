@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<interface>
+  <template class="GtkListItem">
+    <property name="child">
+      <object class="GtkCheckButton">
+        <property name="name">address_cell</property>
+        <property name="halign">GTK_ALIGN_CENTER</property>
+        <binding name="active">
+          <lookup name="notifications" type="GswBuddy">
+            <lookup name="item">GtkListItem</lookup>
+          </lookup>
+        </binding>
+      </object>
+    </property>
+  </template>
+</interface>

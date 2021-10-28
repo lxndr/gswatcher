@@ -1,14 +1,8 @@
-dependencies = [
-  dependency('glib-2.0', version : '>=2.70.0'),
-]
-
-testUtils = executable(
-  'test-utils',
-  [
-    'test-utils.vala',
-    '../src/query/utils.vala',
-  ],
+js_protocol = executable(
+  'test-js-protocol',
+  sources,
+  'test-js-protocol.vala',
   dependencies : dependencies,
 )
 
-test('utils', testUtils)
+test('JsProtocol', js_protocol)

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<interface>
+  <requires lib="gtk+" version="4.0"/>
+
+  <template class="GswUiPreferences" parent="GtkWidget">
+    <property name="hexpand">true</property>
+    <property name="vexpand">false</property>
+    <property name="margin-top">8</property>
+    <property name="margin-bottom">8</property>
+    <property name="margin-start">8</property>
+    <property name="margin-end">8</property>
+
+    <child>
+      <object class="GtkGrid">
+        <property name="column-spacing">8</property>
+        <property name="row-spacing">2</property>
+        <child>
+          <object class="GtkBox">
+            <layout>
+              <property name="column">0</property>
+              <property name="row">0</property>
+            </layout>
+            <child>
+              <object class="GtkLabel">
+                <property name="halign">GTK_ALIGN_START</property>
+                <property name="label">General</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="label">Query interval:</property>
+            <property name="halign">GTK_ALIGN_START</property>
+            <property name="margin-start">8</property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">1</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkSpinButton">
+            <property name="hexpand">true</property>
+            <property name="adjustment">
+              <object class="GtkAdjustment">
+                <property name="lower">500</property>
+                <property name="page-increment">500</property>
+              </object>
+            </property>
+            <layout>
+              <property name="column">1</property>
+              <property name="row">1</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="label">Local UDP port:</property>
+            <property name="halign">GTK_ALIGN_START</property>
+            <property name="margin-start">8</property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">2</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="GtkSpinButton">
+            <property name="hexpand">true</property>
+            <layout>
+              <property name="column">1</property>
+              <property name="row">2</property>
+            </layout>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

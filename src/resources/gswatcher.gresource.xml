@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<gresources>
+	<gresource prefix="/org/lxndr/gswatcher">
+		<file preprocess="xml-stripblanks" compressed="true">ui/main-window.ui</file>
+		<file preprocess="xml-stripblanks" compressed="true">ui/preferences.ui</file>
+		<file preprocess="xml-stripblanks" compressed="true">ui/server-list.ui</file>
+		<file preprocess="xml-stripblanks" compressed="true">ui/server-list/name.ui</file>
+		<file preprocess="xml-stripblanks" compressed="true">ui/server-list/game.ui</file>
+		<file preprocess="xml-stripblanks" compressed="true">ui/server-list/map.ui</file>
+		<file preprocess="xml-stripblanks" compressed="true">ui/server-list/players.ui</file>
+		<file preprocess="xml-stripblanks" compressed="true">ui/server-list/ping.ui</file>
+		<file preprocess="xml-stripblanks" compressed="true">ui/buddy-list.ui</file>
+		<file preprocess="xml-stripblanks" compressed="true">ui/buddy-list/name.ui</file>
+		<file preprocess="xml-stripblanks" compressed="true">ui/buddy-list/notifications.ui</file>
+		<file preprocess="xml-stripblanks" compressed="true">ui/buddy-list/address.ui</file>
+
+		<file compressed="true">css/server-list.css</file>
+	</gresource>
+</gresources>

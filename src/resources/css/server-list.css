@@ -1,0 +1,12 @@
+#name_cell.new-entry {
+  color: lightgrey;
+  font-style: italic;
+}
+
+#players_cell.no-slots {
+  color:  red;
+}
+
+#players_cell.not-empty {
+  color: green;
+}

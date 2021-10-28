@@ -1,0 +1,17 @@
+<schemalist>
+  <schema id="org.lxndr.gswatcher.Preferences" path="/org/lxndr/gswatcher/preferences/">
+    <key name="query-interval" type="u">
+      <range min="500" />
+      <default>2000</default>
+      <summary>Query interval in ms</summary>
+    </key>
+    <key name="local-udp-port" type="q">
+      <default>27100</default>
+      <summary>Local UDP port for incoming messages</summary>
+    </key>
+    <key name="enable-notifications" type="b">
+      <default>true</default>
+      <summary>Enable buddy notifications</summary>
+    </key>
+  </schema>
+</schemalist>

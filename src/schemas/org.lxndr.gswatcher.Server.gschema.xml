@@ -1,0 +1,12 @@
+<schemalist>
+  <schema id="org.lxndr.gswatcher.Server">
+    <key name="name" type="s">
+      <default>""</default>
+      <summary>Server name</summary>
+    </key>
+    <key name="favorite" type="b">
+      <default>false</default>
+      <summary>Server is favorite</summary>
+    </key>
+  </schema>
+</schemalist>

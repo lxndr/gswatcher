@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<interface>
+  <template class="GtkListItem">
+    <property name="child">
+      <object class="GtkBox">
+        <child>
+          <object class="GtkImage">
+            <property name="icon-size">GTK_ICON_SIZE_NORMAL</property>
+            <property name="file">icons/games/aa.png</property>
+            <property name="margin-end">6</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkEditableLabel">
+            <property name="name">name_cell</property>
+            <property name="xalign">0</property>
+            <binding name="text">
+              <lookup name="name" type="GswUiServerListItem">
+                <lookup name="item">GtkListItem</lookup>
+              </lookup>
+            </binding>
+            <binding name="editable">
+              <lookup name="name_editable" type="GswUiServerListItem">
+                <lookup name="item">GtkListItem</lookup>
+              </lookup>
+            </binding>
+            <binding name="css_classes">
+              <lookup name="name_css_classes" type="GswUiServerListItem">
+                <lookup name="item">GtkListItem</lookup>
+              </lookup>
+            </binding>
+          </object>
+        </child>
+      </object>
+    </property>
+  </template>
+</interface>
