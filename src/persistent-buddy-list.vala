@@ -50,15 +50,29 @@ namespace Gsw {
     }
 
     private string[] get_names () throws Error {
-      var kf = new KeyFile ();
-      kf.load_from_file (config_file, KeyFileFlags.NONE);
-      return kf.get_groups ();
+      try {
+        var kf = new KeyFile ();
+        kf.load_from_file (config_file, KeyFileFlags.NONE);
+        return kf.get_groups ();
+      } catch (FileError err) {
+        if (err.code == FileError.NOENT) {
+          return {};
+        }
+
+        throw err;
+      }
     }
 
     private void remove_name (string name) throws Error {
-      var kf = new KeyFile ();
-      kf.load_from_file (config_file, KeyFileFlags.NONE);
-      kf.remove_group (name);
+      try {
+        var kf = new KeyFile ();
+        kf.load_from_file (config_file, KeyFileFlags.NONE);
+        kf.remove_group (name);
+      } catch (FileError err) {
+        if (err.code != FileError.NOENT) {
+          throw err;
+        }
+      }
     }
   }
 
