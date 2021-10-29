@@ -67,6 +67,7 @@
                     GswUiMainWindow
                   </lookup>
                 </binding>
+                <signal name="remove" handler="remove_server" />
               </object>
             </property>
           </object>

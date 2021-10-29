@@ -8,16 +8,30 @@ namespace Gsw.Ui {
     public Gtk.MapListModel? server_item_list { get; private set; }
 
     [GtkChild]
+    private unowned SingleSelection selection;
+
+    [GtkChild]
     private unowned ColumnView view;
 
     [GtkChild]
     private unowned ColumnViewColumn name_column;
+
+    public signal void remove (Server server);
 
     class construct {
       typeof (ServerListItem).ensure ();
       typeof (NewServerListItem).ensure ();
 
       set_layout_manager_type (typeof (BinLayout));
+
+      add_binding (Gdk.Key.Delete, 0, (widget, args) => {
+        var server_list = (ServerList) widget;
+        var server = (Server) server_list.selection.selected_item;
+
+        if (server != null) {
+          server_list.remove (server);
+        }
+      }, null);
     }
 
     construct {

@@ -22,6 +22,22 @@ namespace Gsw.Ui {
     }
 
     [GtkCallback]
+    private void remove_server (Server server) {
+      var dialog = new MessageDialog (this, DialogFlags.DESTROY_WITH_PARENT | DialogFlags.MODAL, MessageType.QUESTION, ButtonsType.YES_NO,
+        _("Are you sure you want to remove \"%s\" from the server list?"), server.address);
+
+      dialog.response.connect ((response_id) => {
+        if (response_id == ResponseType.YES) {
+          querier_manager.server_list.remove (server);
+        }
+
+        dialog.destroy ();
+      });
+
+      dialog.show ();
+    }
+
+    [GtkCallback]
     private void remove_buddy (Buddy buddy) {
       var dialog = new MessageDialog (this, DialogFlags.DESTROY_WITH_PARENT | DialogFlags.MODAL, MessageType.QUESTION, ButtonsType.YES_NO,
         _("Are you sure you want to remove \"%s\" the list?"), buddy.name);
