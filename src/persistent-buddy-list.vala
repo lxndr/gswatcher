@@ -44,7 +44,7 @@ namespace Gsw {
     }
 
     private string[] get_names () throws Error {
-      // TODO: is there a better way to get names instead of directly read key files?
+      // TODO: is there a better way to get names instead of directly read key file?
       try {
         var kf = new KeyFile ();
         kf.load_from_file (config_file, KeyFileFlags.NONE);

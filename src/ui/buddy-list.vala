@@ -23,7 +23,10 @@ namespace Gsw.Ui {
       add_binding (Gdk.Key.Delete, 0, (widget, args) => {
         var buddy_list = (BuddyList) widget;
         var buddy = (Buddy) buddy_list.selection.selected_item;
-        buddy_list.remove (buddy);
+
+        if (buddy != null) {
+          buddy_list.remove (buddy);
+        }
       }, null);
     }
 
@@ -34,6 +37,12 @@ namespace Gsw.Ui {
     protected override void dispose () {
       get_first_child ().unparent ();
       base.dispose ();
+    }
+
+    [GtkCallback]
+    public void notify_toggled (CheckButton check) {
+      // TODO: how to tell what check button toggled?
+      print ("toggled %d\n", (int) check.active);
     }
   }
 

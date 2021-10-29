@@ -19,14 +19,14 @@ namespace Gsw {
       return list.size;
     }
 
-    public Server add (string address) {
+    public virtual Server add (string address) {
       var server = new Server (address);
       list.add (server);
       items_changed (list.size - 1, 0, 1);
       return server;
     }
 
-    public void remove (Server server) {
+    public virtual void remove (Server server) {
       var idx = list.index_of (server);
 
       if (idx > -1) {

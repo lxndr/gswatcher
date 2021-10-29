@@ -4,6 +4,7 @@ namespace Gsw {
     public string host;
     public uint16 gport;
     public uint16 qport;
+    public string name { get; set; }
     public bool favorite { get; set; }
 
     public Server (string address) {
