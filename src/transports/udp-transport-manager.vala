@@ -13,6 +13,10 @@ namespace Gsw {
       open_socket ();
     }
 
+    UdpTransportManager () {
+      Object ();
+    }
+
     ~UdpTransportManager () {
       try {
         socket_source.destroy ();
@@ -20,6 +24,10 @@ namespace Gsw {
       } catch (Error err) {
         error (err);
       }
+    }
+
+    public static UdpTransportManager get_default () {
+      return new UdpTransportManager ();
     }
 
     public uint16 local_port {

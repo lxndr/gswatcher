@@ -6,7 +6,7 @@ namespace Gsw {
 
     construct {
       try {
-        manager = new UdpTransportManager ();
+        manager = UdpTransportManager.get_default ();
         manager.register (this);
 
         var resolver = Resolver.get_default ();

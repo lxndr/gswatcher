@@ -1,7 +1,6 @@
 namespace Gsw {
 
   class Application : Gtk.Application {
-    private Settings preferences;
     private ServerList server_list;
     private BuddyList buddy_list;
     private QuerierManager querier_manager;
@@ -9,7 +8,7 @@ namespace Gsw {
 
     construct {
       // udp transport manager
-      var udp_transport_manager = new UdpTransportManager ();
+      var udp_transport_manager = UdpTransportManager.get_default ();
       udp_transport_manager.error.connect((err) => {
         log (Config.LOG_DOMAIN, LEVEL_ERROR, err.message);
       });
@@ -24,7 +23,7 @@ namespace Gsw {
       // settings
       var settings_file = Path.build_filename (Environment.get_user_config_dir (), "gswatcher", "preferences.ini");
       var settings_backend = SettingsBackend.keyfile_settings_backend_new (settings_file, "/org/lxndr/gswatcher/", null);
-      preferences = new Settings.with_backend ("org.lxndr.gswatcher.Preferences", settings_backend);
+      var preferences = new Settings.with_backend ("org.lxndr.gswatcher.Preferences", settings_backend);
       preferences.bind ("local-udp-port", udp_transport_manager, "local-port", SettingsBindFlags.DEFAULT);
       preferences.bind ("query-interval", querier_manager, "update-interval", SettingsBindFlags.DEFAULT);
 
