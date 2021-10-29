@@ -1,6 +1,6 @@
 js_protocol = executable(
   'test-js-protocol',
-  sources,
+  core_sources,
   'test-js-protocol.vala',
   dependencies : dependencies,
 )

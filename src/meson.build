@@ -16,20 +16,11 @@ dependencies = [
   dependency('duktape'),
 ]
 
-sources = files(
+core_sources = files(
   'protocols/js-protocol.vala',
   'transports/udp-transport-manager.vala',
   'transports/udp-transport.vala',
-  'ui/about.vala',
-  'ui/buddy-list.vala',
-  'ui/main-window.vala',
-  'ui/preferences.vala',
-  'ui/server-list-item.vala',
-  'ui/server-list.vala',
-  'application.vala',
   'buddy-list.vala',
-  'persistent-buddy-list.vala',
-  'persistent-server-list.vala',
   'buddy.vala',
   'player.vala',
   'protocol.vala',
@@ -40,6 +31,24 @@ sources = files(
   'server.vala',
   'transport.vala',
   'util.vala',
+)
+
+ui_sources = files(
+  'ui/about.vala',
+  'ui/buddy-list.vala',
+  'ui/main-window.vala',
+  'ui/preferences.vala',
+  'ui/server-list-item.vala',
+  'ui/server-list.vala',
+)
+
+sources = core_sources
+sources += ui_sources
+
+sources += files(
+  'application.vala',
+  'persistent-buddy-list.vala',
+  'persistent-server-list.vala',
 )
 
 conf_data = configuration_data()
@@ -58,8 +67,7 @@ sources += configure_file(
 
 sources += gnome.compile_resources(
     'resources',
-    'resources/gswatcher.gresource.xml',
-    source_dir: 'resources',
+    'gswatcher.gresource.xml',
 )
 
 executable(

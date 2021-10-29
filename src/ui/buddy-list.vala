@@ -28,7 +28,7 @@ namespace Gsw.Ui {
     }
 
     construct {
-      view.sort_by_column (name_column, SortType.DESCENDING);
+      view.sort_by_column (name_column, SortType.ASCENDING);
     }
 
     protected override void dispose () {

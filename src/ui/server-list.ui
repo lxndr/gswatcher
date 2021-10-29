@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<interface>
+  <requires lib="gtk+" version="4.0"/>
+
+  <object class="GtkStringSorter" id="name_column_sorter">
+    <property name="ignore_case">1</property>
+    <property name="expression">
+      <lookup type="GswUiBaseServerListItem" name="name" />
+    </property>
+  </object>
+
+  <object class="GtkStringSorter" id="game_column_sorter">
+    <property name="ignore_case">1</property>
+    <property name="expression">
+      <lookup type="GswUiBaseServerListItem" name="game" />
+    </property>
+  </object>
+
+  <object class="GtkStringSorter" id="map_column_sorter">
+    <property name="ignore_case">1</property>
+    <property name="expression">
+      <lookup type="GswUiBaseServerListItem" name="map" />
+    </property>
+  </object>
+
+  <object class="GtkStringSorter" id="players_column_sorter">
+    <property name="ignore_case">1</property>
+    <property name="expression">
+      <lookup type="GswUiBaseServerListItem" name="num_players" />
+    </property>
+  </object>
+
+  <object class="GtkSortListModel" id="sort_model">
+    <binding name="model">
+      <lookup type="GswUiServerList" name="server_item_list">
+        GswUiServerList
+      </lookup>
+    </binding>
+    <binding name="sorter">
+      <lookup type="GtkColumnView" name="sorter">view</lookup>
+    </binding>
+  </object>
+
+  <object class="GtkSingleSelection" id="selection">
+    <property name="model">sort_model</property>
+    <property name="autoselect">1</property>
+    <property name="can-unselect">0</property>
+  </object>
+
+  <template class="GswUiServerList" parent="GtkWidget">
+    <property name="hexpand">true</property>
+    <property name="vexpand">true</property>
+
+    <child>
+      <object class="GtkScrolledWindow">
+        <property name="hscrollbar_policy">never</property>
+        <property name="hexpand">true</property>
+        <property name="hexpand-set">true</property>
+
+        <child>
+          <object class="GtkColumnView" id="view">
+            <property name="visible">1</property>
+            <property name="model">selection</property>
+            <property name="show-column-separators">1</property>
+
+            <child>
+              <object class="GtkColumnViewColumn" id="name_column">
+                <property name="title">Name</property>
+                <property name="sorter">name_column_sorter</property>
+                <property name="expand">1</property>
+                <property name="factory">
+                  <object class="GtkBuilderListItemFactory">
+                    <property name="bytes">
+                      <![CDATA[
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <interface>
+                          <template class="GtkListItem">
+                            <property name="child">
+                              <object class="GtkBox">
+                                <child>
+                                  <object class="GtkImage">
+                                    <property name="icon-size">GTK_ICON_SIZE_NORMAL</property>
+                                    <property name="file">icons/games/aa.png</property>
+                                    <property name="margin-end">6</property>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkEditableLabel">
+                                    <property name="name">name_cell</property>
+                                    <property name="xalign">0</property>
+                                    <binding name="text">
+                                      <lookup name="name" type="GswUiServerListItem">
+                                        <lookup name="item">GtkListItem</lookup>
+                                      </lookup>
+                                    </binding>
+                                    <binding name="editable">
+                                      <lookup name="name_editable" type="GswUiServerListItem">
+                                        <lookup name="item">GtkListItem</lookup>
+                                      </lookup>
+                                    </binding>
+                                    <binding name="css_classes">
+                                      <lookup name="name_css_classes" type="GswUiServerListItem">
+                                        <lookup name="item">GtkListItem</lookup>
+                                      </lookup>
+                                    </binding>
+                                  </object>
+                                </child>
+                              </object>
+                            </property>
+                          </template>
+                        </interface>                      
+                      ]]>
+                    </property>
+                  </object>
+                </property>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkColumnViewColumn" id="game_column">
+                <property name="title">Game</property>
+                <property name="sorter">game_column_sorter</property>
+                <property name="factory">
+                  <object class="GtkBuilderListItemFactory">
+                    <property name="bytes">
+                      <![CDATA[
+                        <?xml version="1.0" encoding="UTF-8"?>
+
+                        <interface>
+                          <template class="GtkListItem">
+                            <property name="child">
+                              <object class="GtkBox">
+                                <child>
+                                  <object class="GtkImage">
+                                    <property name="icon-size">GTK_ICON_SIZE_NORMAL</property>
+                                    <property name="margin-end">6</property>
+                                    <binding name="file">
+                                      <lookup name="game_icon" type="GswUiServerListItem">
+                                        <lookup name="item">GtkListItem</lookup>
+                                      </lookup>
+                                    </binding>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="name">game_cell</property>
+                                    <property name="xalign">0</property>
+                                    <binding name="label">
+                                      <lookup name="game" type="GswUiServerListItem">
+                                        <lookup name="item">GtkListItem</lookup>
+                                      </lookup>
+                                    </binding>
+                                  </object>
+                                </child>
+                              </object>
+                            </property>
+                          </template>
+                        </interface>                      
+                      ]]>
+                    </property>
+                  </object>
+                </property>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkColumnViewColumn" id="map_column">
+                <property name="title">Map</property>
+                <property name="sorter">map_column_sorter</property>
+                <property name="factory">
+                  <object class="GtkBuilderListItemFactory">
+                    <property name="bytes">
+                      <![CDATA[
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <interface>
+                          <template class="GtkListItem">
+                            <property name="child">
+                              <object class="GtkLabel">
+                                <property name="xalign">0</property>
+                                <binding name="label">
+                                  <lookup name="map" type="GswUiServerListItem">
+                                    <lookup name="item">GtkListItem</lookup>
+                                  </lookup>
+                                </binding>
+                              </object>
+                            </property>
+                          </template>
+                        </interface>                      
+                      ]]>
+                    </property>
+                  </object>
+                </property>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkColumnViewColumn" id="players_column">
+                <property name="title">Players</property>
+                <property name="sorter">players_column_sorter</property>
+                <property name="factory">
+                  <object class="GtkBuilderListItemFactory">
+                    <property name="bytes">
+                      <![CDATA[
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <interface>
+                          <template class="GtkListItem">
+                            <property name="child">
+                              <object class="GtkLabel">
+                                <property name="name">players_cell</property>
+                                <property name="xalign">0</property>
+                                <binding name="label">
+                                  <lookup name="players" type="GswUiServerListItem">
+                                    <lookup name="item">GtkListItem</lookup>
+                                  </lookup>
+                                </binding>
+                                <binding name="css_classes">
+                                  <lookup name="players_css_classes" type="GswUiServerListItem">
+                                    <lookup name="item">GtkListItem</lookup>
+                                  </lookup>
+                                </binding>
+                              </object>
+                            </property>
+                          </template>
+                        </interface>
+                      ]]>
+                    </property>
+                  </object>
+                </property>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkColumnViewColumn">
+                <property name="title">Ping</property>
+                <property name="factory">
+                  <object class="GtkBuilderListItemFactory">
+                    <property name="bytes">
+                      <![CDATA[
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <interface>
+                          <template class="GtkListItem">
+                            <property name="child">
+                              <object class="GtkLabel">
+                                <property name="name">ping_cell</property>
+                                <property name="xalign">1</property>
+                                <binding name="label">
+                                  <lookup name="ping" type="GswUiServerListItem">
+                                    <lookup name="item">GtkListItem</lookup>
+                                  </lookup>
+                                </binding>
+                              </object>
+                            </property>
+                          </template>
+                        </interface>
+                      ]]>
+                    </property>
+                  </object>
+                </property>
+              </object>
+            </child>
+
+          </object>
+        </child>
+
+      </object>
+    </child>
+
+  </template>
+</interface>

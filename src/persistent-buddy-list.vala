@@ -21,7 +21,6 @@ namespace Gsw {
           var path = root_path + buddy.name + "/";
           var buddy_settings = new Settings.with_backend_and_path ("org.lxndr.gswatcher.Buddy", settings_backend, path);
           buddy_settings.bind ("notifications", buddy, "notifications", SettingsBindFlags.DEFAULT);
-          buddy.notifications = buddy_settings.get_boolean ("notifications");
         }
       }
 

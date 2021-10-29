@@ -61,7 +61,7 @@
             <property name="title">Server list</property>
             <property name="icon-name">network-wired</property>
             <property name="child">
-              <object class="GswUiServerList" id="server_list_ctl">
+              <object class="GswUiServerList">
                 <binding name="querier-manager">
                   <lookup type="GswUiMainWindow" name="querier-manager">
                     GswUiMainWindow
@@ -78,7 +78,7 @@
             <property name="title">Buddy list</property>
             <property name="icon-name">contact-new</property>
             <property name="child">
-              <object class="GswUiBuddyList" id="buddy_list_ctl">
+              <object class="GswUiBuddyList">
                 <binding name="buddy-list">
                   <lookup type="GswUiMainWindow" name="buddy-list">
                     GswUiMainWindow

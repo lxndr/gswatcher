@@ -1,0 +1,12 @@
+GswUiServerList #name_cell.new-entry {
+  color: lightgrey;
+  font-style: italic;
+}
+
+GswUiServerList #players_cell.no-slots {
+  color:  red;
+}
+
+GswUiServerList #players_cell.not-empty {
+  color: green;
+}

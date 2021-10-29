@@ -1,11 +1,12 @@
 <schemalist>
   <schema id="org.lxndr.gswatcher.Preferences" path="/org/lxndr/gswatcher/preferences/">
     <key name="query-interval" type="u">
-      <range min="500" />
+      <range min="500" max="60000" />
       <default>2000</default>
       <summary>Query interval in ms</summary>
     </key>
     <key name="local-udp-port" type="q">
+      <range min="1024" max="49151" />
       <default>27100</default>
       <summary>Local UDP port for incoming messages</summary>
     </key>

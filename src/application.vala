@@ -5,31 +5,28 @@ namespace Gsw {
     private ServerList server_list;
     private BuddyList buddy_list;
     private QuerierManager querier_manager;
-
-    private Gtk.Window? main_window;
+    private Gtk.Window main_window;
 
     construct {
-      var settings_backend = SettingsBackend.keyfile_settings_backend_new ("preferences.ini", "/org/lxndr/gswatcher/", null);
-      preferences = new Settings.with_backend ("org.lxndr.gswatcher.Preferences", settings_backend);
-
       // udp transport manager
       var udp_transport_manager = new UdpTransportManager ();
       udp_transport_manager.error.connect((err) => {
         log (Config.LOG_DOMAIN, LEVEL_ERROR, err.message);
       });
 
-      preferences.changed["local-udp-port"].connect(restore_local_udp_port_setting);
-      restore_local_udp_port_setting ();
-
       // queriers
       server_list = new PersistentServerList ();
       querier_manager = new QuerierManager (server_list);
 
-      preferences.changed["query-interval"].connect(restore_query_interval_setting);
-      restore_query_interval_setting ();
-
       // buddies
       buddy_list = new PersistentBuddyList ();
+
+      // settings
+      var settings_file = Path.build_filename (Environment.get_user_config_dir (), "gswatcher", "preferences.ini");
+      var settings_backend = SettingsBackend.keyfile_settings_backend_new (settings_file, "/org/lxndr/gswatcher/", null);
+      preferences = new Settings.with_backend ("org.lxndr.gswatcher.Preferences", settings_backend);
+      preferences.bind ("local-udp-port", udp_transport_manager, "local-port", SettingsBindFlags.DEFAULT);
+      preferences.bind ("query-interval", querier_manager, "update-interval", SettingsBindFlags.DEFAULT);
 
       // command line options
       add_main_option_entries ({
@@ -39,6 +36,7 @@ namespace Gsw {
       // app actions
       ActionEntry[] action_entries = {
         { "about", activate_about },
+        { "show-notification", show_notification }
       };
 
       add_action_entries (action_entries, this);
@@ -68,31 +66,6 @@ namespace Gsw {
       }
     }
 
-    private string server_list_path {
-      owned get {
-        var config_dir = Environment.get_user_config_dir ();
-        return Path.build_filename (config_dir, "serverlist.json");
-      }
-    }
-
-    private string buddy_list_path {
-      owned get {
-        var config_dir = Environment.get_user_config_dir ();
-        return Path.build_filename (config_dir, "buddylist.json");
-      }
-    }
-
-    private string preferences_path {
-      owned get {
-        var config_dir = Environment.get_user_config_dir ();
-        return Path.build_filename (config_dir, "preferences.json");
-      }
-    }
-
-    public double interval { get; set; }
-    public bool pause { get; set; }
-    public bool enable_notifications { get; set; }
-
     public override int handle_local_options (VariantDict options) {
       var version = options.lookup_value ("version", VariantType.BOOLEAN);
 
@@ -115,10 +88,6 @@ namespace Gsw {
     public override void startup () {
       base.startup ();
 
-      var style_provider = new Gtk.CssProvider();
-      style_provider.load_from_resource("/org/lxndr/gswatcher/css/server-list.css");
-      Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default (), style_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
-
       // Gtk.IconTheme.get_default ().append_search_path (pixmap_dir);
 
       // Gsq.set_default_local_port (default_port);
@@ -129,17 +98,13 @@ namespace Gsw {
       Ui.show_about (main_window);
     }
 
-    private void restore_local_udp_port_setting () {
-      uint16 local_udp_port;
-      preferences.get("local-udp-port", "q", out local_udp_port);
-
-      var udp_transport_manager = new UdpTransportManager ();
-      udp_transport_manager.local_port = local_udp_port;
-    }
-
-    private void restore_query_interval_setting () {
-      var query_interval = preferences.get_uint ("query-interval");
-      querier_manager.update_interval = query_interval;
+    private void show_notification (SimpleAction action, Variant? parameter) {
+      string title, body;
+      parameter.get_child (0, "s", out title);
+      parameter.get_child (1, "s", out body);
+      var n = new Notification (title);
+      n.set_body (body);
+      send_notification (null, n);
     }
 
     /*

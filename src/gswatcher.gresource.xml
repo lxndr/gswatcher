@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<gresources>
+	<gresource prefix="/org/lxndr/gswatcher">
+		<file preprocess="xml-stripblanks" compressed="true">ui/main-window.ui</file>
+		<file preprocess="xml-stripblanks" compressed="true">ui/preferences.ui</file>
+		<file preprocess="xml-stripblanks" compressed="true">ui/server-list.ui</file>
+		<file preprocess="xml-stripblanks" compressed="true">ui/buddy-list.ui</file>
+
+		<file compressed="true">ui/server-list.css</file>
+		<file compressed="true">ui/preferences.css</file>
+	</gresource>
+</gresources>
