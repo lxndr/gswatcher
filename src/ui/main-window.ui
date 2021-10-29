@@ -84,6 +84,7 @@
                     GswUiMainWindow
                   </lookup>
                 </binding>
+                <signal name="remove" handler="remove_buddy" />
               </object>
             </property>
           </object>

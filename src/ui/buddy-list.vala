@@ -20,10 +20,10 @@ namespace Gsw.Ui {
     class construct {
       set_layout_manager_type (typeof (BinLayout));
 
-      add_binding (Gdk.Key.D, 0, (widget, args) => {
-        print ("Shortcut triggered\n");
-        var server_list = (BuddyList) widget;
-        server_list.remove ((Buddy) server_list.selection.selected_item);
+      add_binding (Gdk.Key.Delete, 0, (widget, args) => {
+        var buddy_list = (BuddyList) widget;
+        var buddy = (Buddy) buddy_list.selection.selected_item;
+        buddy_list.remove (buddy);
       }, null);
     }
 

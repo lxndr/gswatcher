@@ -13,15 +13,6 @@ namespace Gsw.Ui {
       typeof (Ui.Preferences).ensure ();
     }
 
-    construct {
-      // app actions
-      ActionEntry[] action_entries = {
-        { "remove-buddy", remove_buddy },
-      };
-  
-      add_action_entries (action_entries, this);
-    }
-
     public MainWindow (Application application, QuerierManager querier_manager, Gsw.BuddyList buddy_list) {
       Object (
         application : application,
@@ -30,15 +21,17 @@ namespace Gsw.Ui {
       );
     }
 
-    private void remove_buddy (SimpleAction action, Variant? parameter) {
-      var buddy_name = parameter.get_string ();
-      var dialog = new MessageDialog (this, DialogFlags.DESTROY_WITH_PARENT | DialogFlags.MODAL, MessageType.ERROR, ButtonsType.YES_NO,
-        _("Are you sure you want to remove \"%s\" the list?"), buddy_name);
+    [GtkCallback]
+    private void remove_buddy (Buddy buddy) {
+      var dialog = new MessageDialog (this, DialogFlags.DESTROY_WITH_PARENT | DialogFlags.MODAL, MessageType.QUESTION, ButtonsType.YES_NO,
+        _("Are you sure you want to remove \"%s\" the list?"), buddy.name);
 
       dialog.response.connect ((response_id) => {
         if (response_id == ResponseType.YES) {
-          buddy_list.remove_by_name (buddy_name);
+          buddy_list.remove (buddy);
         }
+
+        dialog.destroy ();
       });
 
       dialog.show ();

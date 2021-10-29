@@ -9,30 +9,25 @@ namespace Gsw {
     construct {
       config_file = Path.build_filename (Environment.get_user_config_dir (), "gswatcher", "buddies.ini");
       settings_backend = SettingsBackend.keyfile_settings_backend_new (config_file, root_path, null);
-
-      items_changed.connect (on_items_changed);
       reload ();
     }
 
-    public void on_items_changed (uint position, uint removed, uint added) {
-      if (added > 0) {
-        for (var i = position; i < position + added; i++) {
-          var buddy = (Buddy) get_item (i);
-          var path = root_path + buddy.name + "/";
-          var buddy_settings = new Settings.with_backend_and_path ("org.lxndr.gswatcher.Buddy", settings_backend, path);
-          buddy_settings.bind ("notifications", buddy, "notifications", SettingsBindFlags.DEFAULT);
-        }
-      }
+    public override Buddy add (string name) {
+      var buddy = base.add (name);
 
-      if (removed > 0) {
-        try {
-          for (var i = position; i < position + removed; i++) {
-            var buddy = (Buddy) get_item (i);
-            remove_name (buddy.name);
-          }
-        } catch (Error err) {
-          log (Config.LOG_DOMAIN, LEVEL_WARNING, "failed to save buddy list to '%s': %s", config_file, err.message);
-        }
+      var path = root_path + buddy.name + "/";
+      var buddy_settings = new Settings.with_backend_and_path ("org.lxndr.gswatcher.Buddy", settings_backend, path);
+      buddy_settings.bind ("notifications", buddy, "notifications", SettingsBindFlags.DEFAULT);
+
+      return buddy;
+    }
+
+    public override void remove (Buddy buddy) {
+      try {
+        remove_name (buddy.name);
+        base.remove (buddy);
+      } catch (Error err) {
+        log (Config.LOG_DOMAIN, LEVEL_WARNING, "failed to save buddy list to '%s': %s", config_file, err.message);
       }
     }
 
@@ -49,6 +44,7 @@ namespace Gsw {
     }
 
     private string[] get_names () throws Error {
+      // TODO: is there a better way to get names instead of directly read key files?
       try {
         var kf = new KeyFile ();
         kf.load_from_file (config_file, KeyFileFlags.NONE);
@@ -63,15 +59,11 @@ namespace Gsw {
     }
 
     private void remove_name (string name) throws Error {
-      try {
-        var kf = new KeyFile ();
-        kf.load_from_file (config_file, KeyFileFlags.NONE);
-        kf.remove_group (name);
-      } catch (FileError err) {
-        if (err.code != FileError.NOENT) {
-          throw err;
-        }
-      }
+      // TODO: is there a better way to remove name besides directly editing ini file?
+      var kf = new KeyFile ();
+      kf.load_from_file (config_file, KeyFileFlags.NONE);
+      kf.remove_group (name);
+      kf.save_to_file (config_file);
     }
   }
 

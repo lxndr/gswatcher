@@ -19,29 +19,19 @@ namespace Gsw {
       return list.size;
     }
 
-    public Buddy add (string name) {
+    public virtual Buddy add (string name) {
       var buddy = new Buddy (name);
       list.add (buddy);
       items_changed (list.size - 1, 0, 1);
       return buddy;
     }
 
-    public void remove (Buddy buddy) {
+    public virtual void remove (Buddy buddy) {
       var idx = list.index_of (buddy);
 
       if (idx > -1) {
         list.remove_at (idx);
         items_changed (idx, 1, 0);
-      }
-    }
-
-    public void remove_by_name (string name) {
-      var buddy = list.first_match ((buddy) => {
-        return buddy.name == name;
-      });
-
-      if (buddy != null) {
-        remove (buddy);
       }
     }
   }
