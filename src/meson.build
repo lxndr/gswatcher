@@ -22,7 +22,7 @@ core_sources = files(
   'transports/udp-transport.vala',
   'buddy-list.vala',
   'buddy.vala',
-  'player.vala',
+  'player-list.vala',
   'protocol.vala',
   'querier-manager.vala',
   'querier.vala',
@@ -33,11 +33,27 @@ core_sources = files(
   'util.vala',
 )
 
+conf_data = configuration_data()
+conf_data.set_quoted('GSW_APPID', 'org.lxndr.gswatcher')
+conf_data.set_quoted('GSW_APPNAME', 'Game Server Watcher')
+conf_data.set_quoted('GSW_VERSION', meson.project_version())
+conf_data.set_quoted('GSW_HOMEPAGE', 'http://gswatcher.sourceforge.net')
+conf_data.set_quoted('GSW_LOG_DOMAIN', 'Gsw')
+conf_data.set_quoted('GETTEXT_PACKAGE', meson.project_name())
+
+core_sources += configure_file(
+  input: 'config.vala.in',
+  output: 'config.vala',
+  configuration: conf_data
+)
+
 ui_sources = files(
   'ui/about.vala',
   'ui/buddy-list.vala',
   'ui/main-window.vala',
+  'ui/player-list.vala',
   'ui/preferences.vala',
+  'ui/server-info.vala',
   'ui/server-list-item.vala',
   'ui/server-list.vala',
 )
@@ -49,20 +65,6 @@ sources += files(
   'application.vala',
   'persistent-buddy-list.vala',
   'persistent-server-list.vala',
-)
-
-conf_data = configuration_data()
-conf_data.set_quoted('GSW_APPID', 'org.lxndr.gswatcher')
-conf_data.set_quoted('GSW_APPNAME', 'Game Server Watcher')
-conf_data.set_quoted('GSW_VERSION', meson.project_version())
-conf_data.set_quoted('GSW_HOMEPAGE', 'http://gswatcher.sourceforge.net')
-conf_data.set_quoted('GSW_LOG_DOMAIN', 'Gsw')
-conf_data.set_quoted('GETTEXT_PACKAGE', meson.project_name())
-
-sources += configure_file(
-  input: 'config.vala.in',
-  output: 'config.vala',
-  configuration: conf_data
 )
 
 sources += gnome.compile_resources(

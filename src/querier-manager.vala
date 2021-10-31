@@ -16,6 +16,7 @@ namespace Gsw {
 
       notify["update_interval"].connect (update_timer);
       notify["paused"].connect (update_timer);
+      update_timer ();
     }
 
     public QuerierManager (ServerList server_list) {

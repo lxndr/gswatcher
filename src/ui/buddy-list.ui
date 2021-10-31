@@ -4,7 +4,7 @@
   <requires lib="gtk+" version="4.0"/>
 
   <object class="GtkStringSorter" id="name_column_sorter">
-    <property name="ignore_case">1</property>
+    <property name="ignore_case">true</property>
     <property name="expression">
       <lookup type="GswBuddy" name="name" />
     </property>

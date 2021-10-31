@@ -484,8 +484,8 @@ var readPlayerList = function (r, inf) {
         if (inf && inf.appid == 2400) { // The Ship
             player.deaths = r.u32le();
             player.money = r.u32le();
-            players.push(player);
         }
+        players.push(player);
     }
     return players;
 };

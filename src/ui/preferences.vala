@@ -32,8 +32,8 @@ namespace Gsw.Ui {
     }
 
     construct {
-      var style_provider = new Gtk.CssProvider();
-      style_provider.load_from_resource("/org/lxndr/gswatcher/ui/preferences.css");
+      var style_provider = new CssProvider ();
+      style_provider.load_from_resource ("/org/lxndr/gswatcher/ui/preferences.css");
       get_style_context ().add_provider (style_provider, uint.MAX);
 
       var settings_file = Path.build_filename (Environment.get_user_config_dir (), "gswatcher", "preferences.ini");

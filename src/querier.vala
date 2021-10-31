@@ -5,7 +5,8 @@ namespace Gsw {
     public UdpTransport transport { get; construct set; }
 
     public ServerInfo sinfo { get; private set; }
-    public Gee.List<Player> plist { get; private set; }
+    public PlayerList plist { get; private set; }
+    public ListStore plist_fields { get; private set; }
     public int64 ping { get; private set; default = -1; }
 
     private int64 query_time;
@@ -14,6 +15,8 @@ namespace Gsw {
       try {
         transport = new UdpTransport (server.host, server.qport);
         protocol = new JsProtocol("../src/scripts/dist/source.js");
+        plist = new PlayerList ();
+        plist_fields = new ListStore (typeof (PlayerField));
 
         transport.receive.connect ((data) => {
           try {
@@ -39,7 +42,28 @@ namespace Gsw {
         });
 
         protocol.plist_update.connect ((plist) => {
-          this.plist = plist;
+          this.plist.apply (plist);
+        });
+
+        plist_fields.append (new Gsw.PlayerField () {
+          title = "Name",
+          field = "name",
+          kind = PlayerFieldType.STRING,
+          main = true
+        });
+
+        plist_fields.append (new Gsw.PlayerField () {
+          title = "Score",
+          field = "score",
+          kind = PlayerFieldType.NUMBER,
+          main = false
+        });
+
+        plist_fields.append (new Gsw.PlayerField () {
+          title = "Time",
+          field = "duration",
+          kind = PlayerFieldType.TIME,
+          main = false
         });
       } catch (Error err) {
         error (err.message);

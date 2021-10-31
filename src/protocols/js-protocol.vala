@@ -84,20 +84,17 @@ namespace Gsw {
       vm.get_prop_index (0, i);
       var player = new Player ();
 
-      vm.get_prop_string (0, "name");
-      player.name = vm.get_string (-1);
-      vm.pop ();
+      vm.enum (-1, Duktape.Enum.OWN_PROPERTIES_ONLY);
 
-      vm.get_prop_string (0, "score");
-      player.score = vm.to_int (-1);
-      vm.pop ();
-
-      vm.get_prop_string (0, "duration");
-      player.duration = (float) vm.get_number (-1);
-      vm.pop ();
+      while (vm.next (-1, true)) {
+        var key = vm.get_string (-2);
+        var val = vm.safe_to_string (-1);
+        player.set (key, val);
+        vm.pop_2 ();
+      }
 
       players.add (player);
-      vm.pop ();
+      vm.pop_2 ();
     }
 
     Idle.add (() => {
@@ -216,18 +213,5 @@ namespace Gsw {
       vm.pop_2();
     }
   }
-
-/*
-  private void print_value_stack (Duktape.Duktape vm) {
-    var len = vm.get_top ();
-    print ("value stack\n");
-
-    for (int idx = len - 1; idx >= 0; idx--) {
-      vm.dup (idx);
-      print ("| %d: %s = %s\n", idx, vm.get_type (-1).to_string (), vm.safe_to_string (-1));
-      vm.pop ();
-    }
-  }
-*/
 
 }

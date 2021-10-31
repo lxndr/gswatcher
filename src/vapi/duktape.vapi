@@ -83,6 +83,18 @@ namespace Duktape {
 		FLOAT64ARRAY,
 	}
 
+	[CCode (cname = "duk_uint_t", has_type_id = false, cprefix = "DUK_ENUM_")]
+	public enum Enum {
+		INCLUDE_NONENUMERABLE,
+		INCLUDE_HIDDEN,
+		INCLUDE_SYMBOLS,
+		EXCLUDE_STRINGS,
+		OWN_PROPERTIES_ONLY,
+		ARRAY_INDICES_ONLY,
+		SORT_ARRAY_INDICES,
+		NO_PROXY_BEHAVIOR,
+	}
+
 	[CCode (cname = "duk_c_function", has_target = false)]
 	public delegate Return CFunction (Duktape vm);
 
@@ -116,6 +128,8 @@ namespace Duktape {
 		public void require_object (Index idx);
 		public Bool get_prop_string (Index idx, string key);
 		public Bool get_prop_index (Index obj, ArrayIndex idx);
+		public void enum (Index obj, Enum flags);
+		public Bool next (Index enum_idx, Bool get_value);
 
 		// get array
 		public Bool is_array (Index idx);

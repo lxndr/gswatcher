@@ -35,7 +35,7 @@ namespace Gsw {
     private void reload () {
       try {
         var names = get_names ();
-  
+
         foreach (var name in names) {
           add (name);
         }

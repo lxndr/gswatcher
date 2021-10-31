@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<interface>
+  <requires lib="gtk+" version="4.0"/>
+
+  <template class="GswUiServerInfo" parent="GtkWidget">
+    <property name="name">server-info</property>
+    <property name="hexpand">true</property>
+
+    <child>
+      <object class="GtkGrid">
+        <property name="column-spacing">8</property>
+        <property name="row-spacing">2</property>
+        <child>
+          <object class="GtkLabel">
+            <layout>
+              <property name="column">0</property>
+              <property name="row">0</property>
+            </layout>
+            <property name="xalign">0</property>
+            <property name="label" translatable="yes">Name:</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <layout>
+              <property name="column">1</property>
+              <property name="row">0</property>
+            </layout>
+            <property name="hexpand">true</property>
+            <property name="xalign">0</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <layout>
+              <property name="column">0</property>
+              <property name="row">1</property>
+            </layout>
+            <property name="xalign">0</property>
+            <property name="label" translatable="yes">Address:</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <layout>
+              <property name="column">1</property>
+              <property name="row">1</property>
+            </layout>
+            <property name="hexpand">true</property>
+            <property name="xalign">0</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+  </template>
+</interface>

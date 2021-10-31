@@ -33,7 +33,7 @@
 
   <object class="GtkSortListModel" id="sort_model">
     <binding name="model">
-      <lookup type="GswUiServerList" name="server_item_list">
+      <lookup type="GswUiServerList" name="item-list">
         GswUiServerList
       </lookup>
     </binding>
@@ -46,6 +46,7 @@
     <property name="model">sort_model</property>
     <property name="autoselect">1</property>
     <property name="can-unselect">0</property>
+    <signal name="notify::selected-item" handler="handle_selection_change" />
   </object>
 
   <template class="GswUiServerList" parent="GtkWidget">
@@ -60,15 +61,13 @@
 
         <child>
           <object class="GtkColumnView" id="view">
-            <property name="visible">1</property>
             <property name="model">selection</property>
-            <property name="show-column-separators">1</property>
 
             <child>
               <object class="GtkColumnViewColumn" id="name_column">
                 <property name="title">Name</property>
                 <property name="sorter">name_column_sorter</property>
-                <property name="expand">1</property>
+                <property name="expand">true</property>
                 <property name="factory">
                   <object class="GtkBuilderListItemFactory">
                     <property name="bytes">

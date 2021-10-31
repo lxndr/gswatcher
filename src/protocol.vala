@@ -15,7 +15,7 @@ namespace Gsw {
 
     public signal void data_send (uint8[] data);
     public signal void sinfo_update (ServerInfo sinfo);
-    public signal void plist_update (Gee.List<Player> plist);
+    public signal void plist_update (Gee.ArrayList<Player> plist);
 
     public abstract void query () throws ProtocolError;
     public abstract void process_response (uint8[] data) throws ProtocolError;

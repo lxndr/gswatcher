@@ -53,7 +53,7 @@
 
     <child>
       <object class="GtkStack" id="stack">
-        <property name="vexpand">1</property>
+        <property name="vexpand">true</property>
 
         <child>
           <object class="GtkStackPage">
@@ -61,13 +61,40 @@
             <property name="title">Server list</property>
             <property name="icon-name">network-wired</property>
             <property name="child">
-              <object class="GswUiServerList">
-                <binding name="querier-manager">
-                  <lookup type="GswUiMainWindow" name="querier-manager">
-                    GswUiMainWindow
-                  </lookup>
-                </binding>
-                <signal name="remove" handler="remove_server" />
+              <object class="GtkPaned">
+                <property name="orientation">GTK_ORIENTATION_VERTICAL</property>
+                <property name="shrink-start-child">false</property>
+                <property name="position">400</property>
+                <child>
+                  <object class="GswUiServerList">
+                    <binding name="querier-manager">
+                      <lookup type="GswUiMainWindow" name="querier-manager">
+                        GswUiMainWindow
+                      </lookup>
+                    </binding>
+                    <signal name="remove" handler="remove_server" />
+                    <signal name="selection-change" handler="querier_selection_change" />
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">GTK_ORIENTATION_HORIZONTAL</property>
+                    <child>
+                      <object class="GswUiServerInfo">
+
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GswUiPlayerList">
+                        <binding name="querier">
+                          <lookup type="GswUiMainWindow" name="selected-querier">
+                            GswUiMainWindow
+                          </lookup>
+                        </binding>
+                      </object>
+                    </child>
+                  </object>
+                </child>
               </object>
             </property>
           </object>

@@ -41,4 +41,28 @@ namespace Gsw {
     return true;
   }
 
+  public void print_duktape_stack (Duktape.Duktape vm) {
+    var len = vm.get_top ();
+    print ("Duktape stack:\n");
+
+    for (int idx = len - 1; idx >= 0; idx--) {
+      vm.dup (idx);
+      print ("| %d: %s = %s\n", idx, vm.get_type (-1).to_string (), vm.safe_to_string (-1));
+      vm.pop ();
+    }
+  }
+
+  string format_time_duration (int64 microseconds) {
+    var hours = microseconds / TimeSpan.HOUR;
+    microseconds -= hours * TimeSpan.HOUR;
+    var minutes = microseconds / TimeSpan.MINUTE;
+    microseconds -= minutes * TimeSpan.MINUTE;
+    var seconds = microseconds / TimeSpan.SECOND;
+
+    if (hours > 0) {
+      return "%lld:%02lld:%02lld".printf (hours, minutes, seconds);
+    }
+
+    return "%lld:%02lld".printf (minutes, seconds);
+  }
 }

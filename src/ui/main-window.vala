@@ -4,12 +4,16 @@ namespace Gsw.Ui {
 
   [GtkTemplate (ui = "/org/lxndr/gswatcher/ui/main-window.ui")]
   class MainWindow : ApplicationWindow {
-    public QuerierManager querier_manager { get; construct set; }
-    public Gsw.BuddyList buddy_list { get; construct set; }
+    public QuerierManager querier_manager { get; construct; }
+    public Gsw.BuddyList buddy_list { get; construct; }
+
+    protected Querier selected_querier { get; private set; }
 
     class construct {
       typeof (Ui.ServerList).ensure ();
+      typeof (Ui.ServerInfo).ensure ();
       typeof (Ui.BuddyList).ensure ();
+      typeof (Ui.PlayerList).ensure ();
       typeof (Ui.Preferences).ensure ();
     }
 
@@ -51,6 +55,11 @@ namespace Gsw.Ui {
       });
 
       dialog.show ();
+    }
+
+    [GtkCallback]
+    private void querier_selection_change (Querier querier) {
+      selected_querier = querier;
     }
   }
 
