@@ -27,9 +27,11 @@ namespace Gsw {
       preferences.bind ("local-udp-port", udp_transport_manager, "local-port", SettingsBindFlags.DEFAULT);
       preferences.bind ("query-interval", querier_manager, "update-interval", SettingsBindFlags.DEFAULT);
 
+
       // command line options
       add_main_option_entries ({
-        { "version", 'v', OptionFlags.NONE, OptionArg.NONE, null, "Display version number", null }
+        { "version", 'v', OptionFlags.NONE, OptionArg.NONE, null, "Display version number", null },
+        { null }
       });
 
       // app actions

@@ -10,6 +10,6 @@ public static int main (string[] args) {
     Intl.textdomain (Gsw.Config.GETTEXT_PACKAGE);
   }
 
-   var app = new Gsw.Application ();
+  var app = new Gsw.Application ();
   return app.run (args);
 }
