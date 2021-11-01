@@ -19,6 +19,12 @@ class ServerInfo : Gee.HashMap<string, string> {
     }
   }
 
+  public string? game_mode {
+    owned get {
+      return get ("game_mode");
+    }
+  }
+
   public string map {
     owned get {
       return get ("map");

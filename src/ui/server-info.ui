@@ -31,6 +31,7 @@
             <property name="xalign">0</property>
           </object>
         </child>
+
         <child>
           <object class="GtkLabel">
             <layout>
@@ -46,6 +47,27 @@
             <layout>
               <property name="column">1</property>
               <property name="row">1</property>
+            </layout>
+            <property name="hexpand">true</property>
+            <property name="xalign">0</property>
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkLabel">
+            <layout>
+              <property name="column">0</property>
+              <property name="row">2</property>
+            </layout>
+            <property name="xalign">0</property>
+            <property name="label" translatable="yes">Game mode:</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <layout>
+              <property name="column">1</property>
+              <property name="row">2</property>
             </layout>
             <property name="hexpand">true</property>
             <property name="xalign">0</property>

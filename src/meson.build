@@ -14,6 +14,7 @@ dependencies = [
   dependency('gtk4'),
   dependency('gee-0.8'),
   dependency('duktape'),
+  dependency('geoip'),
 ]
 
 core_sources = files(
@@ -23,6 +24,7 @@ core_sources = files(
   'buddy-list.vala',
   'buddy.vala',
   'game-resolver.vala',
+  'geoip-resolver.vala',
   'player-list.vala',
   'protocol.vala',
   'querier-manager.vala',

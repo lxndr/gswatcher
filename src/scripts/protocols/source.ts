@@ -113,10 +113,11 @@ export const query = () => {
 
 const getGameMode = (inf: ServerInfoExended): (string | null) => {
   switch (inf.appid) {
-    case 500:
+    case 500: { // Left 4 Dead
       const m = inf.desc.match(/^L4D - ([a-z-]+)/i)
-      return m?.[0] || null
-    case 550:
+      return m?.[1] || null
+    }
+    case 550: { // Left 4 Dead 2
       const modes: Record<string, string> = {
         coop: 'Co-op',
         realism: 'Realism',
@@ -128,6 +129,19 @@ const getGameMode = (inf: ServerInfoExended): (string | null) => {
       const keywords = inf.keywords?.split(',') || []
       const mode = keywords.find(keyword => keyword in modes)
       return mode ? modes[mode] : null
+    }
+    case 2400: { // The Ship
+      const modes = [
+        'Hunt',
+        'Elimination',
+        'Duel',
+        'Deathmatch',
+        'VIP Team',
+        'Team Elimination',
+      ]
+
+      return modes[inf.theShip?.mode!] || null
+    }
   }
 
   return null
@@ -193,7 +207,7 @@ const readServerInfo = (r: DataReader) => {
   }
 
   inf.version = r.zstring()
-  const edf = r.u8()
+  const edf = r.is_end() ? 0 : r.u8()
 
   if (edf & 0x80) {
     inf.server_port = r.u16le()

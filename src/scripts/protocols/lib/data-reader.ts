@@ -23,6 +23,10 @@ export class DataReader {
     return this
   }
 
+  is_end() {
+    return this.pos >= this._buf.length
+  }
+
   u8() {
     const ret = this._buf.readUInt8(this.pos)
     this.pos += 1

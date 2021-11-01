@@ -78,16 +78,10 @@
                             <property name="child">
                               <object class="GtkBox">
                                 <child>
-                                  <object class="GtkImage">
-                                    <property name="icon-size">GTK_ICON_SIZE_NORMAL</property>
-                                    <property name="file">icons/games/aa.png</property>
-                                    <property name="margin-end">6</property>
-                                  </object>
-                                </child>
-                                <child>
                                   <object class="GtkEditableLabel">
                                     <property name="name">name_cell</property>
                                     <property name="xalign">0</property>
+                                    <property name="hexpand">1</property>
                                     <binding name="text">
                                       <lookup name="name" type="GswUiServerListItem">
                                         <lookup name="item">GtkListItem</lookup>
@@ -100,6 +94,17 @@
                                     </binding>
                                     <binding name="css_classes">
                                       <lookup name="name_css_classes" type="GswUiServerListItem">
+                                        <lookup name="item">GtkListItem</lookup>
+                                      </lookup>
+                                    </binding>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkImage">
+                                    <property name="margin-start">6</property>
+                                    <property name="icon-size">GTK_ICON_SIZE_NORMAL</property>
+                                    <binding name="file">
+                                      <lookup name="country_icon" type="GswUiServerListItem">
                                         <lookup name="item">GtkListItem</lookup>
                                       </lookup>
                                     </binding>
@@ -125,7 +130,6 @@
                     <property name="bytes">
                       <![CDATA[
                         <?xml version="1.0" encoding="UTF-8"?>
-
                         <interface>
                           <template class="GtkListItem">
                             <property name="child">

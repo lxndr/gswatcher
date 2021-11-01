@@ -4410,6 +4410,11 @@ var DataReader = /*#__PURE__*/function () {
       return this;
     }
   }, {
+    key: "is_end",
+    value: function is_end() {
+      return this.pos >= this._buf.length;
+    }
+  }, {
     key: "u8",
     value: function u8() {
       var ret = this._buf.readUInt8(this.pos);
@@ -4689,26 +4694,41 @@ var query = function query() {
 };
 
 var getGameMode = function getGameMode(inf) {
-  var _inf$keywords;
-
   switch (inf.appid) {
     case 500:
-      var m = inf.desc.match(/^L4D - ([a-z-]+)/i);
-      return (m === null || m === void 0 ? void 0 : m[0]) || null;
+      {
+        // Left 4 Dead
+        var m = inf.desc.match(/^L4D - ([a-z-]+)/i);
+        return (m === null || m === void 0 ? void 0 : m[1]) || null;
+      }
 
     case 550:
-      var modes = {
-        coop: 'Co-op',
-        realism: 'Realism',
-        survival: 'Survival',
-        versus: 'Versus',
-        scavenge: 'Scavenge'
-      };
-      var keywords = ((_inf$keywords = inf.keywords) === null || _inf$keywords === void 0 ? void 0 : _inf$keywords.split(',')) || [];
-      var mode = keywords.find(function (keyword) {
-        return keyword in modes;
-      });
-      return mode ? modes[mode] : null;
+      {
+        var _inf$keywords;
+
+        // Left 4 Dead 2
+        var modes = {
+          coop: 'Co-op',
+          realism: 'Realism',
+          survival: 'Survival',
+          versus: 'Versus',
+          scavenge: 'Scavenge'
+        };
+        var keywords = ((_inf$keywords = inf.keywords) === null || _inf$keywords === void 0 ? void 0 : _inf$keywords.split(',')) || [];
+        var mode = keywords.find(function (keyword) {
+          return keyword in modes;
+        });
+        return mode ? modes[mode] : null;
+      }
+
+    case 2400:
+      {
+        var _inf$theShip;
+
+        // The Ship
+        var _modes = ['Hunt', 'Elimination', 'Duel', 'Deathmatch', 'VIP Team', 'Team Elimination'];
+        return _modes[(_inf$theShip = inf.theShip) === null || _inf$theShip === void 0 ? void 0 : _inf$theShip.mode] || null;
+      }
   }
 
   return null;
@@ -4773,7 +4793,7 @@ var readServerInfo = function readServerInfo(r) {
   }
 
   inf.version = r.zstring();
-  var edf = r.u8();
+  var edf = r.is_end() ? 0 : r.u8();
 
   if (edf & 0x80) {
     inf.server_port = r.u16le();
