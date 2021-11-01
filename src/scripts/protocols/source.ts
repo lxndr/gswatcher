@@ -1,3 +1,5 @@
+import 'core-js/features/array/find'
+import jsbi from 'jsbi'
 import { DataReader } from './lib/data-reader'
 import { DataWriter } from './lib/data-writer'
 
@@ -9,21 +11,21 @@ interface PacketHeader {
   compressed?: boolean
   dataSize?: number
   crc32?: number
-  payload: Uint8Array
+  payload: Buffer
 }
 
 interface ServerInfoExended extends ServerInfo {
   appid?: number
-  protocolVersion: number
+  protocol_version: number
   dir: string
   desc: string
-  numBots: number
+  num_bots: number
   address?: string
   keywords?: string
-  serverPort?: number
+  server_port?: number
   steamid?: string
-  sourcetvPort?: number
-  sourcetvName?: string
+  sourcetv_port?: number
+  sourcetv_name?: string
   theShip?: {
     mode: number
     witnesses: number
@@ -38,15 +40,14 @@ interface ServerInfoExended extends ServerInfo {
   }
 }
 
-type GameDef = Partial<ServerInfo> | ((inf: ServerInfoExended) => Partial<ServerInfo>)
-
 interface Request {
-  packets: Uint8Array[]
+  packets: Buffer[]
   firstPacketTime: number
   total: number
 }
 
 export const info: ProtocolInfo = {
+  id: 'source',
   name: 'Source Engine',
   version: '1.0',
   transport: 'udp',
@@ -58,110 +59,8 @@ let gotChallenge = -1
 let gotServerInfo: ServerInfoExended | null = null
 let gotPlayerList: (Player[] | null) = null
 
-const games: Record<number, GameDef> = {
-  0: inf => {
-    if (inf.dir === 'cstrike') {
-      return {
-        gameId: 'cs',
-        gameName: 'Counter-Strike',
-      }
-    } else {
-      return {}
-    }
-  },
-  10: inf => {
-    if (inf.dir === 'cstrike') {
-      return {
-        gameId: 'cs',
-        gameName: 'Counter-Strike',
-      }
-    } else {
-      return {
-        gameId: 'hl',
-        gameName: 'Half-Life',
-      }
-    }
-  },
-  20: {
-    gameId: 'tf',
-    gameName: 'Team Fortress',
-  },
-  30: {
-    gameId: 'dod',
-    gameName: 'Day of Defeat',
-  },
-  80: {
-    gameId: 'czero',
-    gameName: 'Counter-Strike: Condition Zero',
-  },
-  240: {
-    gameId:'css',
-    gameName: 'Counter-Strike: Source',
-  },
-  300: {
-    gameId: 'dods',
-    gameName: 'Day of Defeat: Source',
-  },
-  320: {
-    gameId: 'hl2dm',
-    gameName: 'Half-Life 2: Deathmatch',
-  },
-  440: {
-    gameId: 'tf2',
-    gameName: 'Team Fortress 2',
-  },
-  500: inf => ({
-    gameId: 'l4d',
-    gameName: 'Left 4 Dead',
-    gameMode: inf.desc.substr(6),
-  }),
-  550: inf => {
-    const modes: Record<string, string> = {
-      coop: 'Co-op',
-      realism: 'Realism',
-      survival: 'Survival',
-      versus: 'Versus',
-      scavenge: 'Scavenge',
-    }
-
-    return {
-      gameId: 'l4d2',
-      gameName: 'Left 4 Dead ',
-      gameMode: modes[inf.keywords || 'coop'],
-    }
-  },
-  630: {
-    gameId: 'as',
-    gameName: 'Alien Swarm',
-  },
-  730: {
-    gameId: 'csgo',
-    gameName: 'Counter-Strike: Global Offensive',
-  },
-  17500: {
-    gameId: 'zp',
-    gameName: 'Zombie Panic!',
-  },
-  17520: {
-    gameId: 'syn',
-    gameName: 'Synergy',
-  },
-  17700: {
-    gameId: 'ins',
-    gameName: 'Insurgency',
-  },
-  17710: {
-    gameId: 'nd',
-    gameName: 'Nuclear Dawn',
-  },
-  41070: {
-    gameId: 'ss3',
-    gameName: 'Serious Sam 3',
-  },
-}
-
-const sendPacket = (type: string, payload?: Uint8Array) => {
-  const w = new DataWriter();
+const sendPacket = (type: string, payload?: Buffer) => {
+  const w = new DataWriter()
 
   w.i32le(-1)
   w.lstring(type, 1)
@@ -212,56 +111,48 @@ export const query = () => {
   nextQuery ()
 }
 
-const normalizeServerInfo = (inf: ServerInfoExended) => {
-  const ret: ServerInfo = {
-    gameId: 'unknown',
-    gameName: 'Unknown Game',
-    name: inf.name,
-    map: inf.map,
-    numPlayers: inf.numPlayers,
-    maxPlayers: inf.maxPlayers,
-    version: inf.version,
-    private: inf.private,
-    secure: inf.secure,
+const getGameMode = (inf: ServerInfoExended): (string | null) => {
+  switch (inf.appid) {
+    case 500:
+      const m = inf.desc.match(/^L4D - ([a-z-]+)/i)
+      return m?.[0] || null
+    case 550:
+      const modes: Record<string, string> = {
+        coop: 'Co-op',
+        realism: 'Realism',
+        survival: 'Survival',
+        versus: 'Versus',
+        scavenge: 'Scavenge',
+      }
+
+      const keywords = inf.keywords?.split(',') || []
+      const mode = keywords.find(keyword => keyword in modes)
+      return mode ? modes[mode] : null
   }
 
-  const getMoreInfo = games[inf.appid || 0] || games[0]
-
-  if (getMoreInfo) {
-    const moreInfo = typeof getMoreInfo === 'function'
-      ? getMoreInfo(inf)
-      : getMoreInfo
-
-    if (moreInfo) {
-      Object.assign(ret, moreInfo)
-    }
-  }
-
-  return ret
+  return null
 }
 
 const readServerInfoGold = (r: DataReader) => {
-  const ret: ServerInfoExended = {
-    gameId: 'unknown',
-    gameName: 'Unknown Game',
+  const inf: ServerInfoExended = {
     address: r.zstring(),
     name: r.zstring(),
     map: r.zstring(),
     dir: r.zstring(),
     desc: r.zstring(),
-    numPlayers: r.u8(),
-    maxPlayers: r.u8(),
-    numBots: 0,
-    protocolVersion: r.u8(),
-    serverType: r.lstring(1),
-    osType: r.lstring(1),
-    private: Boolean(r.u8()),
+    num_players: r.u8(),
+    max_players: r.u8(),
+    num_bots: 0,
+    protocol_version: r.u8(),
+    server_type: r.lstring(1),
+    os: r.lstring(1),
+    has_password: Boolean(r.u8()),
   }
 
   const mod = r.u8()
 
-  if (ret.mod) {
-    ret.mod = {
+  if (mod) {
+    inf.mod = {
       link: r.zstring(),
       download: r.zstring(),
       null: r.u8(),
@@ -270,28 +161,26 @@ const readServerInfoGold = (r: DataReader) => {
     }
   }
 
-  ret.secure = Boolean(r.u8())
-  ret.numBots = r.u8()
+  inf.secure = Boolean(r.u8())
+  inf.num_bots = r.u8()
 
-  return ret
+  return inf
 }
 
 const readServerInfo = (r: DataReader) => {
   const inf: ServerInfoExended = {
-    gameId: 'unknown',
-    gameName: 'Unknown Game',
-    protocolVersion: r.u8(),
+    protocol_version: r.u8(),
     name: r.zstring(),
     map: r.zstring(),
     dir: r.zstring(),
     desc: r.zstring(),
     appid: r.u16le(),
-    numPlayers: r.u8(),
-    maxPlayers: r.u8(),
-    numBots: r.u8(),
-    serverType: r.lstring(1),
-    osType: r.lstring(1),
-    private: Boolean(r.u8()),
+    num_players: r.u8(),
+    max_players: r.u8(),
+    num_bots: r.u8(),
+    server_type: r.lstring(1),
+    os: r.lstring(1),
+    has_password: Boolean(r.u8()),
     secure: Boolean(r.u8()),
   }
 
@@ -307,18 +196,18 @@ const readServerInfo = (r: DataReader) => {
   const edf = r.u8()
 
   if (edf & 0x80) {
-    inf.serverPort = r.u16le()
+    inf.server_port = r.u16le()
   }
 
   if (edf & 0x10) {
-    gsw.print('warn: need to read \'inf.steamid\'')
-    // inf.steamid = r.u64le()
-    r.skip (8)
+    // unneeded field, skip it for performance's sake
+    // inf.steamid = String(r.u64le())
+    r.skip(8)
   }
 
   if (edf & 0x40) {
-    inf.sourcetvPort = r.u16le()
-    inf.sourcetvName = r.zstring()
+    inf.sourcetv_port = r.u16le()
+    inf.sourcetv_name = r.zstring()
   }
 
   if (edf & 0x20) {
@@ -326,9 +215,15 @@ const readServerInfo = (r: DataReader) => {
   }
 
   if (edf & 0x01) {
-    gsw.print('warn: need to read \'inf.gameId\'')
-    // inf.gameId = r.i64le()
-    r.skip(8)
+    const gameId = r.u64le()
+    const appid = jsbi.bitwiseAnd(gameId, jsbi.BigInt(0xffffff))
+    inf.appid = jsbi.toNumber(appid)
+  }
+
+  const mode = getGameMode (inf)
+
+  if (mode) {
+    inf.game_mode = mode
   }
 
   return inf
@@ -367,13 +262,13 @@ const readPayload = (r: DataReader) => {
     case 'I':
       gotServerInfo = readServerInfo(r)
       gotChallenge = -1
-      gsw.sinfo(normalizeServerInfo(gotServerInfo))
+      gsw.sinfo(gotServerInfo)
       nextQuery ()
       break
     case 'm':
       gotServerInfo = readServerInfoGold(r)
       gotChallenge = -1
-      gsw.sinfo(normalizeServerInfo(gotServerInfo))
+      gsw.sinfo(gotServerInfo)
       nextQuery ()
       break
     case 'D':
@@ -473,20 +368,7 @@ const storePacket = (pak: PacketHeader) => {
 const gotAllPackets = (req: Request) =>
   req.packets.every(pak => pak)
 
-const concatBuffers = (bufs: Uint8Array[]) => {
-  const size = bufs.reduce((acc, buf) => acc + buf.byteLength, 0)
-  let result = new Uint8Array(size)
-  let offset = 0
-
-  bufs.forEach(buf => {
-    result.set(buf, offset)
-    offset += buf.byteLength
-  })
-
-  return result
-}
-
-export const processResponse = (data: Uint8Array) => {
+export const processResponse = (data: Buffer) => {
   const r = new DataReader(data)
   const format = r.i32le()
 
@@ -506,7 +388,7 @@ export const processResponse = (data: Uint8Array) => {
     const req = storePacket(pak)
 
     if (gotAllPackets(req)) {
-      const data = concatBuffers(req.packets)
+      const data = Buffer.concat(req.packets)
       const r = new DataReader(data)
       readPayload(r)
       delete requests[pak.reqid]

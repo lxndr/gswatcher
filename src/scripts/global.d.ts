@@ -2,22 +2,22 @@ export {}
 
 declare global {
   interface ProtocolInfo {
+    id: string;
     name: string
     version: string
     transport: string
   }
 
   interface ServerInfo {
-    gameId: string
-    gameName: string
     name: string
+    game_mode?: string
     map?: string
     version?: string
-    numPlayers?: number
-    maxPlayers?: number
-    serverType?: string
-    osType?: string
-    private?: boolean
+    num_players?: number
+    max_players?: number
+    server_type?: string
+    os?: string
+    has_password?: boolean
     secure?: boolean
   }
 
@@ -33,7 +33,7 @@ declare global {
   class Gsw {
     sinfo(inf: ServerInfo): void
     plist(pl: Player[]): void
-    send(data: Uint8Array): void
+    send(data: Buffer): void
     print(str: string): void
   }
 

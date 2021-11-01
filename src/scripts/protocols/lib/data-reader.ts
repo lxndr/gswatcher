@@ -1,81 +1,84 @@
-const getUint64BigInt = (dataview: DataView, byteOffset: number, littleEndian: boolean) => {
-  const left =  dataview.getUint32(byteOffset, littleEndian);
-  const right = dataview.getUint32(byteOffset + 4, littleEndian);
+import 'core-js/features/reflect/construct'
+import jsbi from 'jsbi'
 
-  return littleEndian
-    ? left + 2 ** 32 * right
-    : 2 ** 32 * left + right;
+const { BigInt } = jsbi
+const big32 = BigInt(32)
+
+const readUInt64LE = (buf: Buffer, byteOffset: number) => {
+  const wh = BigInt(buf.readUInt32LE(byteOffset + 4))
+  const wl = BigInt(buf.readUInt32LE(byteOffset))
+  return jsbi.add(jsbi.leftShift(wh, big32), wl)
 }
 
 export class DataReader {
-  private _view: DataView
+  private _buf: Buffer
   public pos = 0
 
-  constructor(private _buf: Uint8Array) {
-    this._view = new DataView(_buf.buffer);
+  constructor(buf: Buffer) {
+    this._buf = buf
   }
 
-  public skip(length: number) {
+  skip(length: number) {
     this.pos += length
     return this
   }
 
-  public u8() {
-    const ret = this._view.getUint8(this.pos)
+  u8() {
+    const ret = this._buf.readUInt8(this.pos)
     this.pos += 1
     return ret
   }
 
-  public u16le() {
-    const ret = this._view.getUint16(this.pos, true)
+  u16le() {
+    const ret = this._buf.readUInt16LE(this.pos)
     this.pos += 2
     return ret
   }
 
-  public u32le() {
-    const ret = this._view.getUint32(this.pos, true)
+  u32le() {
+    const ret = this._buf.readUInt32LE(this.pos)
     this.pos += 4
     return ret
   }
 
-  public u64le() {
-    const ret = getUint64BigInt(this._view, this.pos, true)
+  u64le() {
+    const ret = readUInt64LE(this._buf, this.pos)
     this.pos += 8
     return ret
   }
 
-  public i8() {
-    const ret = this._view.getInt8(this.pos)
+  i8() {
+    const ret = this._buf.readInt8(this.pos)
     this.pos += 1
     return ret
   }
 
-  public i16le() {
-    const ret = this._view.getInt16(this.pos, true)
+  i16le() {
+    const ret = this._buf.readInt16LE(this.pos)
     this.pos += 2
     return ret
   }
 
-  public i32le() {
-    const ret = this._view.getInt32(this.pos, true)
+  i32le() {
+    const ret = this._buf.readInt32LE(this.pos)
     this.pos += 4
     return ret
   }
 
-  public f32le() {
-    const ret = this._view.getFloat32(this.pos, true)
+  f32le() {
+    const ret = this._buf.readFloatLE(this.pos)
     this.pos += 4
     return ret
   }
 
-  public f64le() {
-    const ret = this._view.getFloat64(this.pos, true)
+  f64le() {
+    const ret = this._buf.readDoubleLE(this.pos)
     this.pos += 8
     return ret
   }
 
-  public zstring() {
-    const idx = Array.prototype.indexOf.call(this._buf, 0, this.pos);
+  zstring() {
+    const idx = Array.prototype.indexOf.call(this._buf, 0, this.pos)
 
     if (idx == -1) {
       return this.lstring(this._buf.length - this.pos)
@@ -84,15 +87,13 @@ export class DataReader {
     return this.lstring(idx - this.pos + 1)
   }
 
-  public lstring(length: number) {
-    const decoder = new TextDecoder('utf8')
-    const offset = this._view.byteOffset + this.pos;
-    const ret = decoder.decode(new DataView(this._view.buffer, offset, length))
+  lstring(length: number) {
+    const ret = this._buf.toString('binary', this.pos, this.pos + length)
     this.pos += length
     return ret
   }
 
-  public data() {
+  data() {
     const ret = this._buf.slice(this.pos)
     this.pos += ret.byteLength
     return ret

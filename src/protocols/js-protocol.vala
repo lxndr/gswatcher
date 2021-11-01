@@ -15,48 +15,20 @@ namespace Gsw {
   }
 
   static Duktape.Return js_sinfo(Duktape.Duktape vm) {
-    var sinfo = ServerInfo ();
+    var sinfo = new ServerInfo ();
 
     vm.get_global_string (THIS_PROTOCOL_POINTER_KEY);
     var proto = (Protocol) vm.require_pointer (-1);
 
     vm.require_object (0);
+    vm.enum (0, OWN_PROPERTIES_ONLY);
 
-    vm.get_prop_string (0, "gameId");
-    sinfo.game_id = vm.get_string (-1);
-
-    vm.get_prop_string (0, "gameName");
-    sinfo.game_name = vm.get_string (-1);
-
-    vm.get_prop_string (0, "gameMode");
-    sinfo.game_mode = vm.get_string (-1);
-
-    vm.get_prop_string (0, "name");
-    sinfo.name = vm.get_string (-1);
-
-    vm.get_prop_string (0, "map");
-    sinfo.map = vm.get_string (-1);
-
-    vm.get_prop_string (0, "version");
-    sinfo.version = vm.get_string (-1);
-
-    vm.get_prop_string (0, "serverType");
-    sinfo.server_type = vm.get_string (-1);
-
-    vm.get_prop_string (0, "osType");
-    sinfo.os_type = vm.get_string (-1);
-
-    vm.get_prop_string (0, "numPlayers");
-    sinfo.num_players = vm.to_int (-1);
-
-    vm.get_prop_string (0, "maxPlayers");
-    sinfo.max_players = vm.to_int (-1);
-
-    vm.get_prop_string (0, "private");
-    sinfo.private = vm.get_boolean_default (-1, false);
-
-    vm.get_prop_string (0, "secure");
-    sinfo.secure = vm.get_boolean_default (-1, false);
+    while (vm.next (-1, true)) {
+      var key = vm.get_string (-2);
+      var val = vm.safe_to_string (-1);
+      sinfo.set (key, val);
+      vm.pop_2 ();
+    }
 
     Idle.add (() => {
       proto.sinfo_update (sinfo);
@@ -73,7 +45,7 @@ namespace Gsw {
     vm.require_object (0);
 
     if (!vm.is_array (0)) {
-      vm.push_error_object (Duktape.Error.TYPE_ERROR, "gsw.plist() argument must be an array");
+      vm.push_error_object (TYPE_ERROR, "gsw.plist() argument must be an array");
       return vm.throw ();
     }
 
@@ -84,7 +56,7 @@ namespace Gsw {
       vm.get_prop_index (0, i);
       var player = new Player ();
 
-      vm.enum (-1, Duktape.Enum.OWN_PROPERTIES_ONLY);
+      vm.enum (-1, OWN_PROPERTIES_ONLY);
 
       while (vm.next (-1, true)) {
         var key = vm.get_string (-2);
@@ -129,13 +101,13 @@ namespace Gsw {
       vm.push_string (filename);
 
       if (vm.pcompile_string_filename (0, script) != Duktape.Exec.SUCCESS) {
-        throw new ProtocolError.UNKNOWN ("Failed to compile '%s': %s", filename, vm.safe_to_string (-1));
+        throw new ProtocolError.UNKNOWN ("Failed to compile '%s': %s", filename, vm.safe_to_stacktrace (-1));
       }
     }
 
     private void exec_script (string filename) throws Error {
       if (vm.pcall(0) != Duktape.Exec.SUCCESS) {
-        throw new ProtocolError.UNKNOWN ("Failed to execute '%s': %s", filename, vm.safe_to_string (-1));
+        throw new ProtocolError.UNKNOWN ("Failed to execute '%s': %s", filename, vm.safe_to_stacktrace (-1));
       }
 
       vm.pop();
@@ -164,6 +136,10 @@ namespace Gsw {
       }
 
       vm.get_prop_string (-1, "info");
+
+      vm.get_prop_string (-1, "id");
+      info.id = vm.require_string (-1);
+      vm.pop ();
 
       vm.get_prop_string (-1, "name");
       info.name = vm.require_string (-1);
@@ -205,6 +181,8 @@ namespace Gsw {
 
       vm.push_external_buffer ();
       vm.config_buffer (-1, data);
+      vm.push_buffer_object (-1, 0, data.length, NODEJS_BUFFER);
+      vm.remove(-2);
 
       if (vm.pcall(1) != Duktape.Exec.SUCCESS) {
         throw new ProtocolError.UNKNOWN ("Failed to call 'processResponse()': %s", vm.safe_to_stacktrace (-1));
