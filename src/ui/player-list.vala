@@ -41,11 +41,10 @@ class PlayerList : Widget {
 
   private ColumnViewColumn create_column (PlayerField field) {
     var factory = new SignalListItemFactory ();
-    factory.bind.connect ((factory, listitem) => bind_listitem (listitem, field));
     factory.setup.connect ((factory, listitem) => setup_listitem (listitem, field));
+    factory.bind.connect ((factory, listitem) => bind_listitem (listitem, field));
 
     var col = new ColumnViewColumn (field.title, factory);
-
     col.expand = field.main;
     return col;
   }
@@ -70,15 +69,19 @@ class PlayerList : Widget {
     var player = (Player) listitem.item;
     var label = (Label) listitem.child;
 
-    switch (field.kind) {
-      case PlayerFieldType.TIME:
-        var duration = double.parse (player.get (field.field));
-        label.label = format_time_duration ((int64) (duration * 1000000));
-        break;
-      default:
-        label.label = player.get (field.field);
-        break;
-    }
+    player.change.connect(() => {
+      switch (field.kind) {
+        case PlayerFieldType.TIME:
+          var duration = double.parse (player.get (field.field));
+          label.label = format_time_duration ((int64) (duration * 1000000));
+          break;
+        default:
+          label.label = player.get (field.field);
+          break;
+      }
+    });
+
+    player.change ();
   }
 }
 
