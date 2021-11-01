@@ -22,6 +22,7 @@ core_sources = files(
   'transports/udp-transport.vala',
   'buddy-list.vala',
   'buddy.vala',
+  'game-resolver.vala',
   'player-list.vala',
   'protocol.vala',
   'querier-manager.vala',

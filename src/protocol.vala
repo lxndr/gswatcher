@@ -5,6 +5,7 @@ namespace Gsw {
   }
 
   struct ProtocolInfo {
+    public string id;
     public string name;
     public string version;
     public string transport;

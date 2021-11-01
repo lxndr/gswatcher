@@ -2,15 +2,17 @@
 
 <gresources>
 	<gresource prefix="/org/lxndr/gswatcher">
-		<file preprocess="xml-stripblanks" compressed="true">ui/main-window.ui</file>
-		<file preprocess="xml-stripblanks" compressed="true">ui/player-list.ui</file>
-		<file preprocess="xml-stripblanks" compressed="true">ui/preferences.ui</file>
-		<file preprocess="xml-stripblanks" compressed="true">ui/server-info.ui</file>
-		<file preprocess="xml-stripblanks" compressed="true">ui/server-list.ui</file>
-		<file preprocess="xml-stripblanks" compressed="true">ui/buddy-list.ui</file>
+		<file compressed="true" preprocess="xml-stripblanks">ui/main-window.ui</file>
+		<file compressed="true" preprocess="xml-stripblanks">ui/player-list.ui</file>
+		<file compressed="true" preprocess="xml-stripblanks">ui/preferences.ui</file>
+		<file compressed="true" preprocess="xml-stripblanks">ui/server-info.ui</file>
+		<file compressed="true" preprocess="xml-stripblanks">ui/server-list.ui</file>
+		<file compressed="true" preprocess="xml-stripblanks">ui/buddy-list.ui</file>
 
 		<file compressed="true">ui/server-list.css</file>
 		<file compressed="true">ui/server-info.css</file>
 		<file compressed="true">ui/preferences.css</file>
+
+		<file compressed="true">games.ini</file>
 	</gresource>
 </gresources>

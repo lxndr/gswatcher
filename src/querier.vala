@@ -38,6 +38,7 @@ namespace Gsw {
 
         protocol.sinfo_update.connect ((sinfo) => {
           ping = (get_monotonic_time () - query_time) / 1000;
+          GameResolver.get_instance ().resolve (protocol, sinfo);
           this.sinfo = sinfo;
         });
 

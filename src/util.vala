@@ -52,7 +52,7 @@ namespace Gsw {
     }
   }
 
-  string format_time_duration (int64 microseconds) {
+  public string format_time_duration (int64 microseconds) {
     var hours = microseconds / TimeSpan.HOUR;
     microseconds -= hours * TimeSpan.HOUR;
     var minutes = microseconds / TimeSpan.MINUTE;
