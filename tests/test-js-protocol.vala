@@ -11,17 +11,16 @@ public static int main (string[] args) {
     }
   });
 
-/*
   Test.add_data_func ("/JsProtocol/info", () => {
     try {
-      var proto = new LuaProtocol ("../src/scripts/dist/source.lua");
+      var proto = new JsProtocol ("../src/scripts/dist/source.js");
+      assert (proto.info.id == "source");
       assert (proto.info.name == "Source Engine");
-      assert (proto.info.version == "1.0.0");
+      assert (proto.info.version == "1.0");
     } catch (Error err) {
       assert_no_error (err);
     }
   });
-*/
 
   Test.add_data_func ("/JsProtocol/query", () => {
     try {
@@ -32,17 +31,16 @@ public static int main (string[] args) {
     }
   });
 
-/*
   Test.add_data_func ("/LuaProtocol/process_response", () => {
     try {
-      var proto = new LuaProtocol ("../src/scripts/dist/source.lua");
+      var proto = new JsProtocol ("../src/scripts/dist/source.js");
       bool signal_called = false;
 
       proto.sinfo_update.connect ((sinfo) => {
         signal_called = true;
         assert (sinfo.name == "game2xs.com Counter-Strike Source #1");
         assert (sinfo.map == "de_dust");
-        assert (sinfo.version == "1.0.0.22");
+        assert (sinfo["version"] == "1.0.0.22");
       });
 
       uint8[] data = {
@@ -52,7 +50,7 @@ public static int main (string[] args) {
         0x73, 0x74, 0x00, 0x63, 0x73, 0x74, 0x72, 0x69, 0x6B, 0x65, 0x00, 0x43, 0x6F, 0x75, 0x6E, 0x74, // st.cstrike.Count
         0x65, 0x72, 0x2D, 0x53, 0x74, 0x72, 0x69, 0x6B, 0x65, 0x3A, 0x20, 0x53, 0x6F, 0x75, 0x72, 0x63, // er-Strike: Sourc
         0x65, 0x00, 0xF0, 0x00, 0x05, 0x10, 0x04, 0x64, 0x6C, 0x00, 0x00, 0x31, 0x2E, 0x30, 0x2E, 0x30, // e......dl..1.0.0
-        0x2E, 0x32, 0x32, 0x00, 0x00                                                                    // .22.
+        0x2E, 0x32, 0x32, 0x00                                                                          // .22.
       };
 
       proto.process_response (data);
@@ -62,7 +60,6 @@ public static int main (string[] args) {
       assert_no_error (err);
     }
   });
-*/
 
   Test.run ();
 	return 0;

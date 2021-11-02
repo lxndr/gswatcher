@@ -18,22 +18,22 @@ dependencies = [
 ]
 
 core_sources = files(
+  'core/buddy-list.vala',
+  'core/buddy.vala',
+  'core/game-resolver.vala',
+  'core/geoip-resolver.vala',
+  'core/player-list.vala',
+  'core/protocol.vala',
+  'core/querier-manager.vala',
+  'core/querier.vala',
+  'core/server-info.vala',
+  'core/server-list.vala',
+  'core/server.vala',
+  'core/transport.vala',
+  'core/utils.vala',
   'protocols/js-protocol.vala',
   'transports/udp-transport-manager.vala',
   'transports/udp-transport.vala',
-  'buddy-list.vala',
-  'buddy.vala',
-  'game-resolver.vala',
-  'geoip-resolver.vala',
-  'player-list.vala',
-  'protocol.vala',
-  'querier-manager.vala',
-  'querier.vala',
-  'server-info.vala',
-  'server-list.vala',
-  'server.vala',
-  'transport.vala',
-  'util.vala',
 )
 
 conf_data = configuration_data()
@@ -68,6 +68,7 @@ sources += files(
   'application.vala',
   'persistent-buddy-list.vala',
   'persistent-server-list.vala',
+  'utils.vala',
 )
 
 sources += gnome.compile_resources(
