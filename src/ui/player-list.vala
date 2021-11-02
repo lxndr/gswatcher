@@ -54,7 +54,7 @@ class PlayerList : Widget {
 
     switch (field.kind) {
       case PlayerFieldType.NUMBER:
-      case PlayerFieldType.TIME:
+      case PlayerFieldType.DURATION:
         label.halign = Align.END;
         break;
       default:
@@ -71,7 +71,7 @@ class PlayerList : Widget {
 
     player.change.connect(() => {
       switch (field.kind) {
-        case PlayerFieldType.TIME:
+        case PlayerFieldType.DURATION:
           var duration = double.parse (player.get (field.field));
           label.label = format_time_duration ((int64) (duration * 1000000));
           break;

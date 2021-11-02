@@ -38,33 +38,17 @@ namespace Gsw {
 
         protocol.sinfo_update.connect ((sinfo) => {
           ping = (get_monotonic_time () - query_time) / 1000;
-          GameResolver.get_instance ().resolve (protocol, sinfo);
+          Gee.List<PlayerField> pfields;
+          GameResolver.get_instance ().resolve (protocol, sinfo, out pfields);
           this.sinfo = sinfo;
+
+          if (plist_fields.get_n_items () == 0)
+            foreach (var field in pfields)
+              plist_fields.append (field);
         });
 
         protocol.plist_update.connect ((plist) => {
           this.plist.apply (plist);
-        });
-
-        plist_fields.append (new Gsw.PlayerField () {
-          title = "Name",
-          field = "name",
-          kind = PlayerFieldType.STRING,
-          main = true
-        });
-
-        plist_fields.append (new Gsw.PlayerField () {
-          title = "Score",
-          field = "score",
-          kind = PlayerFieldType.NUMBER,
-          main = false
-        });
-
-        plist_fields.append (new Gsw.PlayerField () {
-          title = "Time",
-          field = "duration",
-          kind = PlayerFieldType.TIME,
-          main = false
         });
       } catch (Error err) {
         error (err.message);

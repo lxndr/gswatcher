@@ -3,14 +3,23 @@ namespace Gsw {
 enum PlayerFieldType {
   STRING,
   NUMBER,
-  TIME
+  DURATION;
+
+  public static PlayerFieldType parse_nick (string nick) {
+    var enumc = (EnumClass) typeof (PlayerFieldType).class_ref ();
+    var eval = enumc.get_value_by_nick (nick);
+
+    return eval == null
+      ? PlayerFieldType.STRING
+      : (PlayerFieldType) eval.value;
+  }
 }
 
 class PlayerField : Object {
   public string title { get; set; }
   public string field { get; set; }
-  public PlayerFieldType kind {get; set; }
-  public bool main { get; set; }
+  public PlayerFieldType kind {get; set; default = STRING; }
+  public bool main { get; set; default = false; }
 }
 
 class Player : Gee.HashMap<string, string> {
