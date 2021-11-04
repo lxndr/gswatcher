@@ -24,8 +24,7 @@
     </property>
   </object>
 
-  <object class="GtkStringSorter" id="players_column_sorter">
-    <property name="ignore_case">1</property>
+  <object class="GtkNumericSorter" id="players_column_sorter">
     <property name="expression">
       <lookup type="GswUiBaseServerListItem" name="num_players" />
     </property>
@@ -62,6 +61,7 @@
         <child>
           <object class="GtkColumnView" id="view">
             <property name="model">selection</property>
+            <property name="reorderable">false</property>
 
             <child>
               <object class="GtkColumnViewColumn" id="name_column">

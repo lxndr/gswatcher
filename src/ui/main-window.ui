@@ -85,10 +85,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkSeparator"></object>
-                    </child>
-                    <child>
-                      <object class="GswUiPlayerList">
+                      <object class="GswUiPlayerList" id="player_list">
                         <binding name="querier">
                           <lookup type="GswUiMainWindow" name="selected-querier">
                             GswUiMainWindow
