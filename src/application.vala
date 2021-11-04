@@ -7,40 +7,10 @@ namespace Gsw {
     private Gtk.Window main_window;
 
     construct {
-      // udp transport manager
-      var udp_transport_manager = UdpTransportManager.get_default ();
-      udp_transport_manager.error.connect((err) => {
-        log (Config.LOG_DOMAIN, LEVEL_ERROR, err.message);
-      });
-
-      // queriers
-      server_list = new PersistentServerList ();
-      querier_manager = new QuerierManager (server_list);
-
-      // buddies
-      buddy_list = new PersistentBuddyList ();
-
-      // settings
-      var settings_file = Path.build_filename (Environment.get_user_config_dir (), "gswatcher", "preferences.ini");
-      var settings_backend = SettingsBackend.keyfile_settings_backend_new (settings_file, "/org/lxndr/gswatcher/", null);
-      var preferences = new Settings.with_backend ("org.lxndr.gswatcher.Preferences", settings_backend);
-      preferences.bind ("local-udp-port", udp_transport_manager, "local-port", SettingsBindFlags.DEFAULT);
-      preferences.bind ("query-interval", querier_manager, "update-interval", SettingsBindFlags.DEFAULT);
-
-
-      // command line options
       add_main_option_entries ({
         { "version", 'v', OptionFlags.NONE, OptionArg.NONE, null, "Display version number", null },
         { null }
       });
-
-      // app actions
-      ActionEntry[] action_entries = {
-        { "about", activate_about },
-        { "show-notification", show_notification }
-      };
-
-      add_action_entries (action_entries, this);
     }
 
     public Application () {
@@ -89,7 +59,33 @@ namespace Gsw {
     public override void startup () {
       base.startup ();
 
-      // Gtk.IconTheme.get_default ().append_search_path (pixmap_dir);
+      // udp transport manager
+      var udp_transport_manager = UdpTransportManager.get_default ();
+      udp_transport_manager.error.connect((err) => {
+        log (Config.LOG_DOMAIN, LEVEL_ERROR, err.message);
+      });
+
+      // queriers
+      server_list = new PersistentServerList ();
+      querier_manager = new QuerierManager (server_list);
+
+      // buddies
+      buddy_list = new PersistentBuddyList ();
+
+      // settings
+      var settings_file = Path.build_filename (Environment.get_user_config_dir (), "gswatcher", "preferences.ini");
+      var settings_backend = SettingsBackend.keyfile_settings_backend_new (settings_file, "/org/lxndr/gswatcher/", null);
+      var preferences = new Settings.with_backend ("org.lxndr.gswatcher.Preferences", settings_backend);
+      preferences.bind ("local-udp-port", udp_transport_manager, "local-port", SettingsBindFlags.DEFAULT);
+      preferences.bind ("query-interval", querier_manager, "update-interval", SettingsBindFlags.DEFAULT);
+
+      // app actions
+      ActionEntry[] action_entries = {
+        { "about", activate_about },
+        { "show-notification", show_notification }
+      };
+
+      add_action_entries (action_entries, this);
     }
 
     private void activate_about (SimpleAction action, Variant? parameter) {
