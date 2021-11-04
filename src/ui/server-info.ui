@@ -63,11 +63,11 @@
               <property name="row">2</property>
             </layout>
             <property name="xalign">0</property>
-            <property name="label" translatable="yes">Game:</property>
+            <property name="label" translatable="yes">Location:</property>
           </object>
         </child>
         <child>
-          <object class="GtkLabel" id="game_ctl">
+          <object class="GtkLabel" id="location_ctl">
             <layout>
               <property name="column">1</property>
               <property name="row">2</property>
@@ -85,11 +85,11 @@
               <property name="row">3</property>
             </layout>
             <property name="xalign">0</property>
-            <property name="label" translatable="yes">Mode:</property>
+            <property name="label" translatable="yes">Game:</property>
           </object>
         </child>
         <child>
-          <object class="GtkLabel" id="game_mode_ctl">
+          <object class="GtkLabel" id="game_ctl">
             <layout>
               <property name="column">1</property>
               <property name="row">3</property>
@@ -107,11 +107,11 @@
               <property name="row">4</property>
             </layout>
             <property name="xalign">0</property>
-            <property name="label" translatable="yes">Map:</property>
+            <property name="label" translatable="yes">Mode:</property>
           </object>
         </child>
         <child>
-          <object class="GtkLabel" id="map_ctl">
+          <object class="GtkLabel" id="game_mode_ctl">
             <layout>
               <property name="column">1</property>
               <property name="row">4</property>
@@ -129,11 +129,11 @@
               <property name="row">5</property>
             </layout>
             <property name="xalign">0</property>
-            <property name="label" translatable="yes">Players:</property>
+            <property name="label" translatable="yes">Map:</property>
           </object>
         </child>
         <child>
-          <object class="GtkLabel" id="players_ctl">
+          <object class="GtkLabel" id="map_ctl">
             <layout>
               <property name="column">1</property>
               <property name="row">5</property>
@@ -151,11 +151,11 @@
               <property name="row">6</property>
             </layout>
             <property name="xalign">0</property>
-            <property name="label" translatable="yes">Private:</property>
+            <property name="label" translatable="yes">Players:</property>
           </object>
         </child>
         <child>
-          <object class="GtkLabel" id="has_password_ctl">
+          <object class="GtkLabel" id="players_ctl">
             <layout>
               <property name="column">1</property>
               <property name="row">6</property>
@@ -173,6 +173,28 @@
               <property name="row">7</property>
             </layout>
             <property name="xalign">0</property>
+            <property name="label" translatable="yes">Private:</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="has_password_ctl">
+            <layout>
+              <property name="column">1</property>
+              <property name="row">7</property>
+            </layout>
+            <property name="hexpand">true</property>
+            <property name="xalign">0</property>
+            <property name="selectable">true</property>
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkLabel">
+            <layout>
+              <property name="column">0</property>
+              <property name="row">8</property>
+            </layout>
+            <property name="xalign">0</property>
             <property name="label" translatable="yes">Version:</property>
           </object>
         </child>
@@ -180,7 +202,7 @@
           <object class="GtkLabel" id="version_ctl">
             <layout>
               <property name="column">1</property>
-              <property name="row">7</property>
+              <property name="row">8</property>
             </layout>
             <property name="hexpand">true</property>
             <property name="xalign">0</property>
