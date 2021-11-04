@@ -67,18 +67,7 @@ class ServerInfo : Gee.HashMap<string, string> {
     }
 
     var value = @get (key);
-    bool as_bool;
-    int as_int;
-
-    if (bool.try_parse (value, out as_bool)) {
-      return as_bool;
-    }
-
-    if (int.try_parse (value, out as_int)) {
-      return as_int != 0;
-    }
-
-    return def;
+    return string_to_bool (value, def);
   }
 }
 

@@ -41,4 +41,17 @@ namespace Gsw {
     return true;
   }
 
+  public bool string_to_bool (string value, bool def) {
+    bool as_bool;
+    int as_int;
+
+    if (bool.try_parse (value, out as_bool))
+      return as_bool;
+
+    if (int.try_parse (value, out as_int))
+      return as_int != 0;
+
+    return def;
+  }
+
 }

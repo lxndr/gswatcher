@@ -1,16 +1,34 @@
 namespace Gsw {
 
-struct Game {
+class Game {
   public string id;
   public string name;
   public string protocol;
+  public bool phony;
   public Gee.Map<string, string> inf;
+  public Gee.List<PlayerField> pfields;
+
+  public Game (string id) {
+    this.id = id;
+    inf = new Gee.HashMap<string, string> ();
+    pfields = new Gee.ArrayList<PlayerField> ();
+  }
+
+  public void extend (Game game) {
+    if (name == null)
+      name = game.name;
+
+    if (protocol == null)
+      protocol = game.protocol;
+
+    inf.set_all (game.inf);
+    pfields.add_all (game.pfields);
+  }
 }
 
 [SingleInstance]
 class GameResolver : Object {
-  private Gee.List<Game?> games;
-  private Gee.Map<string, Gee.List<PlayerField>> player_fields_map;
+  private Gee.Map<string, Game> games;
 
   public static GameResolver get_instance () {
     return new GameResolver ();
@@ -18,123 +36,110 @@ class GameResolver : Object {
 
   construct {
     try {
-      games = new Gee.ArrayList<Game?> ();
-      player_fields_map = new Gee.HashMap<string, Gee.List<PlayerField>> ();
+      games = new Gee.HashMap<string, Game> ();
 
       var kf_file = File.new_for_uri ("resource:///org/lxndr/gswatcher/games.ini");
       var kf = new KeyFile ();
       kf.load_from_bytes (kf_file.load_bytes (), NONE);
 
       foreach (var ini_group in kf.get_groups ()) {
-        var ids = ini_group.split (".");
+        var ini_group_parts = ini_group.split (".");
+        var id = ini_group_parts[0];
+        var game = ensure_game (id);
 
-        if (ids.length == 1) {
-          var game = load_game (kf, ini_group);
-
-          if (game != null)
-            games.add (game);
-        } else if (ids.length == 2 && ids[1] == "player") {
-          var id = ids[0];
-          player_fields_map.set (id, load_player_fields (kf, ini_group, id));
-        }
+        if (ini_group_parts.length == 1)
+          load_game (kf, ref game);
+        else if (ini_group_parts.length == 2 && ini_group_parts[1] == "player")
+          load_player_fields (kf, ref game, ini_group);
       }
     } catch (Error err) {
       log (Config.LOG_DOMAIN, LEVEL_ERROR, "Failed to load game definitions: %s", err.message);
     }
   }
 
-  private Game? load_game (KeyFile kf, string ini_group) throws Error {
-    var name = "";
-    var protocol = "";
-    var inf = new Gee.HashMap<string, string> ();
+  private Game ensure_game (string id) {
+    if (!games.has_key (id))
+      games.set (id, new Game (id));
+    return games.get (id);
+  }
 
-    foreach (var key in kf.get_keys (ini_group)) {
-      var value = kf.get_string (ini_group, key);
-      var parts = key.split (".");
+  private void load_game (KeyFile kf, ref Game game) throws Error {
+    foreach (var key in kf.get_keys (game.id)) {
+      var value = kf.get_string (game.id, key);
+      var parts = key.split (".", 2);
       var key1 = parts[0];
       var key2 = parts[1];
 
       switch (key1) {
+        case "extends":
+          var base_game = games[value];
+
+          if (base_game == null)
+            log (Config.LOG_DOMAIN, LEVEL_WARNING, "Could not find '%s' to extend '%s'", value, game.id);
+          else
+            game.extend (base_game);
+
+          break;
         case "name":
-          name = value;
+          game.name = value;
           break;
         case "protocol":
-          protocol = value;
+          game.protocol = value;
+          break;
+        case "phony":
+          game.phony = kf.get_boolean (game.id, key);
           break;
         case "inf":
-          inf.set (key2, value);
+          game.inf.set (key2, value);
           break;
       }
     }
-
-    if (name == "") {
-      return null;
-    }
-
-    if (protocol == "") {
-      return null;
-    }
-
-    return Game () {
-      id = ini_group,
-      name = name,
-      protocol = protocol,
-      inf = inf
-    };
   }
 
-  private Gee.List<PlayerField> load_player_fields (KeyFile kf, string ini_group, string id) throws Error {
-    var fields = new Gee.ArrayList<PlayerField> ();
-
+  private void load_player_fields (KeyFile kf, ref Game game, string ini_group) throws Error {
     foreach (var key in kf.get_keys (ini_group)) {
-      var options = kf.get_string (ini_group, key).split (",");
-      var field = new PlayerField ();
-      field.field = key;
-      field.title = options[0];
+      // field = title;type;main
+      var options = kf.get_string_list (ini_group, key);
 
-      if (options.length >= 2) {
+      var field = new PlayerField () {
+        field = key,
+        title = options[0]
+      };
+
+      if (options.length >= 2)
         field.kind = PlayerFieldType.parse_nick (options[1]);
-      }
 
-      if (options.length >= 3 && options[2] == "main") {
+      if (options.length >= 3 && options[2] == "main")
         field.main = true;
-      }
 
-      fields.add (field);
+      game.pfields.add (field);
     }
-
-    return fields;
   }
 
-  public void resolve (Protocol protocol, ServerInfo inf, out Gee.List<PlayerField> player_fields) {
-    var game = games.first_match ((game) => {
-      if (game.protocol != protocol.info.id) {
+  public bool resolve (Protocol protocol, ServerInfo inf) {
+    var game = games.values.first_match ((game) => {
+      if (game.phony || game.protocol != protocol.info.id)
         return false;
-      }
 
-      foreach (var entry in game.inf.entries) {
-        if (inf.get (entry.key) != entry.value) {
+      foreach (var entry in game.inf.entries)
+        if (inf.get (entry.key) != entry.value)
           return false;
-        }
-      }
 
       return true;
     });
 
-    if (game != null) {
-      inf.set ("game_id", game.id);
-      inf.set ("game_name", game.name);
-    }
+    if (game == null)
+      return false;
 
-    player_fields = player_fields_map[game.id];
+    inf.set ("game_id", game.id);
+    inf.set ("game_name", game.name);
+    return true;
+  }
 
-    if (player_fields == null) {
-      player_fields = player_fields_map[protocol.info.id];
-
-      if (player_fields == null) {
-        player_fields = new Gee.ArrayList<PlayerField> ();
-      }
-    }
+  public Gee.List<PlayerField>? get_player_fields (string game_id) {
+    return games.has_key (game_id)
+      ? games[game_id].pfields
+      : null;
   }
 }
 
