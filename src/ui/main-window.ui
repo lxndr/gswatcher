@@ -85,7 +85,11 @@
                     <property name="orientation">GTK_ORIENTATION_HORIZONTAL</property>
                     <child>
                       <object class="GswUiServerInfo">
-
+                        <binding name="querier">
+                          <lookup type="GswUiMainWindow" name="selected-querier">
+                            GswUiMainWindow
+                          </lookup>
+                        </binding>
                       </object>
                     </child>
                     <child>

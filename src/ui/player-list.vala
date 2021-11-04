@@ -4,7 +4,7 @@ namespace Gsw.Ui {
 
 [GtkTemplate (ui = "/org/lxndr/gswatcher/ui/player-list.ui")]
 class PlayerList : Widget {
-  private Querier _querier;
+  private Querier? _querier;
 
   [GtkChild]
   private unowned ColumnView view;
@@ -18,7 +18,7 @@ class PlayerList : Widget {
     base.dispose ();
   }
 
-  public Querier querier {
+  public Querier? querier {
     get {
       return _querier;
     }

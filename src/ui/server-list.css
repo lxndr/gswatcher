@@ -1,12 +1,12 @@
-GswUiServerList #name_cell.new-entry {
+#name_cell.new-entry {
   color: lightgrey;
   font-style: italic;
 }
 
-GswUiServerList #players_cell.no-slots {
+#players_cell.no-slots {
   color:  red;
 }
 
-GswUiServerList #players_cell.not-empty {
+#players_cell.not-empty {
   color: green;
 }
