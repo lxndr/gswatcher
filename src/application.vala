@@ -82,6 +82,7 @@ namespace Gsw {
       // app actions
       ActionEntry[] action_entries = {
         { "about", activate_about },
+        { "pause", activate_pause, null, "false" },
         { "show-notification", show_notification }
       };
 
@@ -90,6 +91,12 @@ namespace Gsw {
 
     private void activate_about (SimpleAction action, Variant? parameter) {
       Ui.show_about (main_window);
+    }
+
+    private void activate_pause (SimpleAction action, Variant? parameter) {
+      var paused = !action.get_state ().get_boolean ();
+      action.set_state (new Variant.boolean (paused));
+      querier_manager.paused = paused;
     }
 
     private void show_notification (SimpleAction action, Variant? parameter) {
