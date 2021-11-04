@@ -52,13 +52,11 @@ namespace Gsw.Ui {
         players = format_players (sinfo.num_players, sinfo.max_players);
         players_css_classes = format_players_css_classes (sinfo.num_players, sinfo.max_players);
 
-        if (querier?.transport?.saddr?.address != null) {
-          var addr = querier.transport.saddr.address.to_string ();
-          var geoip_resolver = GeoIPResolver.get_instance ();
-          var country_id = geoip_resolver.id_by_addr (addr);
-          var country_code = GeoIP.GeoIP.code_by_id (country_id);
-          country_icon = find_file_in_data_dirs ("./icons/flags/" + country_code + ".png");
-        }
+        var addr = querier.transport.saddr.address.to_string ();
+        var geoip_resolver = GeoIPResolver.get_instance ();
+        var country_id = geoip_resolver.id_by_addr (addr);
+        var country_code = GeoIP.GeoIP.code_by_id (country_id);
+        country_icon = find_file_in_data_dirs ("./icons/flags/" + country_code + ".png");
       });
 
       querier.notify["ping"].connect(() => {

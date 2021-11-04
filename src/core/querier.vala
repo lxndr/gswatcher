@@ -1,9 +1,9 @@
 namespace Gsw {
 
-class Querier : Object {
+public class Querier : Object {
   public Server server { get; construct; }
   public Protocol protocol { get; construct; }
-  public UdpTransport transport { get; construct; }
+  public Transport transport { get; construct; }
 
   public ServerInfo sinfo { get; private set; }
   public PlayerList plist { get; private set; }

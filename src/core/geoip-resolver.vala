@@ -1,7 +1,7 @@
 namespace Gsw {
 
 [SingleInstance]
-class GeoIPResolver : Object {
+public class GeoIPResolver : Object {
   private GeoIP.GeoIP geoip;
 
   public static GeoIPResolver get_instance () {

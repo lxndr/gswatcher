@@ -1,57 +1,57 @@
 namespace Gsw {
 
-  static Regex address_re;
+static Regex address_re;
 
-  Regex create_address_re () ensures (result != null) {
-    if (address_re == null) {
-      try {
-        address_re = new Regex ("^([a-z0-9\\.\\-]+):(\\d{1,5})(?::(\\d{1,5}))?$", RegexCompileFlags.CASELESS);
-      } catch (Error err) {
-        log (Config.LOG_DOMAIN, LEVEL_CRITICAL, "failed to create Regex: %s", err.message);
-      }
+Regex create_address_re () ensures (result != null) {
+  if (address_re == null) {
+    try {
+      address_re = new Regex ("^([a-z0-9\\.\\-]+):(\\d{1,5})(?::(\\d{1,5}))?$", RegexCompileFlags.CASELESS);
+    } catch (Error err) {
+      log (Config.LOG_DOMAIN, LEVEL_CRITICAL, "failed to create Regex: %s", err.message);
     }
-
-    return address_re;
   }
 
-  bool parse_address (string address, out string host, out uint16 gport, out uint16 qport) {
-    host = address;
-    gport = 0;
-    qport = 0;
+  return address_re;
+}
 
-    MatchInfo match_info;
-    var address_re = create_address_re ();
+public bool parse_address (string address, out string host, out uint16 gport, out uint16 qport) {
+  host = address;
+  gport = 0;
+  qport = 0;
 
-    if (!address_re.match (address, 0, out match_info))
-      return false;
+  MatchInfo match_info;
+  var address_re = create_address_re ();
 
-    if (!match_info.matches ())
-      return false;
+  if (!address_re.match (address, 0, out match_info))
+    return false;
 
-    var p1 = match_info.fetch (1);
-    var p2 = match_info.fetch (2);
-    var p3 = match_info.fetch (3);
+  if (!match_info.matches ())
+    return false;
 
-    host = p1;
-    gport = qport = (uint16) uint.parse (p2);
+  var p1 = match_info.fetch (1);
+  var p2 = match_info.fetch (2);
+  var p3 = match_info.fetch (3);
 
-    if (p3 != null && p3.length > 0)
-      qport = (uint16) uint.parse (p3);
+  host = p1;
+  gport = qport = (uint16) uint.parse (p2);
 
-    return true;
-  }
+  if (p3 != null && p3.length > 0)
+    qport = (uint16) uint.parse (p3);
 
-  public bool string_to_bool (string value, bool def) {
-    bool as_bool;
-    int as_int;
+  return true;
+}
 
-    if (bool.try_parse (value, out as_bool))
-      return as_bool;
+public bool string_to_bool (string value, bool def) {
+  bool as_bool;
+  int as_int;
 
-    if (int.try_parse (value, out as_int))
-      return as_int != 0;
+  if (bool.try_parse (value, out as_bool))
+    return as_bool;
 
-    return def;
-  }
+  if (int.try_parse (value, out as_int))
+    return as_int != 0;
+
+  return def;
+}
 
 }

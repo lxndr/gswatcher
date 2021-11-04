@@ -1,6 +1,6 @@
 namespace Gsw {
 
-class ServerInfo : Gee.HashMap<string, string> {
+public class ServerInfo : Gee.HashMap<string, string> {
   public string name {
     owned get {
       return get ("name");

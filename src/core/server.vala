@@ -1,28 +1,28 @@
 namespace Gsw {
 
-  class Server : Object {
-    public string host;
-    public uint16 gport;
-    public uint16 qport;
-    public string name { get; set; }
-    public bool favorite { get; set; }
+public class Server : Object {
+  public string host;
+  public uint16 gport;
+  public uint16 qport;
+  public string name { get; set; }
+  public bool favorite { get; set; }
 
-    public Server (string address) {
-      parse_address (address, out host, out gport, out qport);
-    }
+  public Server (string address) {
+    parse_address (address, out host, out gport, out qport);
+  }
 
-    public string address {
-      owned get {
-        var builder = new StringBuilder (host);
-        builder.append_printf (":%d", gport);
+  public string address {
+    owned get {
+      var builder = new StringBuilder (host);
+      builder.append_printf (":%d", gport);
 
-        if (gport != qport) {
-          builder.append_printf (":%d", qport);
-        }
-
-        return builder.str;
+      if (gport != qport) {
+        builder.append_printf (":%d", qport);
       }
+
+      return builder.str;
     }
   }
+}
 
 }

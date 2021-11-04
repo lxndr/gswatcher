@@ -27,7 +27,7 @@ class Game {
 }
 
 [SingleInstance]
-class GameResolver : Object {
+public class GameResolver : Object {
   private Gee.Map<string, Game> games;
 
   public static GameResolver get_instance () {

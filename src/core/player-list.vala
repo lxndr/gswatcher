@@ -1,6 +1,6 @@
 namespace Gsw {
 
-enum PlayerFieldType {
+public enum PlayerFieldType {
   STRING,
   NUMBER,
   DURATION;
@@ -15,14 +15,18 @@ enum PlayerFieldType {
   }
 }
 
-class PlayerField : Object {
-  public string title { get; set; }
-  public string field { get; set; }
-  public PlayerFieldType kind { get; set; default = STRING; }
-  public bool main { get; set; default = false; }
+public class PlayerField : Object {
+  public string title;
+  public string field;
+  public PlayerFieldType kind;
+  public bool main;
+
+  public PlayerField () {
+    kind = STRING;
+  }
 }
 
-class Player : Gee.HashMap<string, string> {
+public class Player : Gee.HashMap<string, string> {
   public signal void change ();
 
   public override void @set (string key, string value) {
@@ -32,7 +36,7 @@ class Player : Gee.HashMap<string, string> {
   }
 }
 
-class PlayerList : Object, ListModel {
+public class PlayerList : Object, ListModel {
   private Gee.List<Player> _list;
 
   construct {
