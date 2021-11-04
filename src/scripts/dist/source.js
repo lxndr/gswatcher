@@ -4704,8 +4704,6 @@ var getGameMode = function getGameMode(inf) {
 
     case 550:
       {
-        var _inf$keywords;
-
         // Left 4 Dead 2
         var modes = {
           coop: 'Co-op',
@@ -4714,11 +4712,24 @@ var getGameMode = function getGameMode(inf) {
           versus: 'Versus',
           scavenge: 'Scavenge'
         };
-        var keywords = ((_inf$keywords = inf.keywords) === null || _inf$keywords === void 0 ? void 0 : _inf$keywords.split(',')) || [];
-        var mode = keywords.find(function (keyword) {
+        var mode = inf.keywords.find(function (keyword) {
           return keyword in modes;
         });
         return mode ? modes[mode] : null;
+      }
+
+    case 730:
+      {
+        // CS: GO
+        var _modes = {
+          competitive: 'Competitive'
+        };
+
+        var _mode = inf.keywords.find(function (keyword) {
+          return keyword in _modes;
+        });
+
+        return _mode ? _modes[_mode] : null;
       }
 
     case 2400:
@@ -4726,8 +4737,8 @@ var getGameMode = function getGameMode(inf) {
         var _inf$theShip;
 
         // The Ship
-        var _modes = ['Hunt', 'Elimination', 'Duel', 'Deathmatch', 'VIP Team', 'Team Elimination'];
-        return _modes[(_inf$theShip = inf.theShip) === null || _inf$theShip === void 0 ? void 0 : _inf$theShip.mode] || null;
+        var _modes2 = ['Hunt', 'Elimination', 'Duel', 'Deathmatch', 'VIP Team', 'Team Elimination'];
+        return _modes2[(_inf$theShip = inf.theShip) === null || _inf$theShip === void 0 ? void 0 : _inf$theShip.mode] || null;
       }
   }
 
@@ -4780,7 +4791,8 @@ var readServerInfo = function readServerInfo(r) {
     server_type: r.lstring(1),
     os: r.lstring(1),
     has_password: Boolean(r.u8()),
-    secure: Boolean(r.u8())
+    secure: Boolean(r.u8()),
+    keywords: []
   };
 
   if (inf.appid === 2400) {
@@ -4811,7 +4823,7 @@ var readServerInfo = function readServerInfo(r) {
   }
 
   if (edf & 0x20) {
-    inf.keywords = r.zstring();
+    inf.keywords = r.zstring().split(',').filter(Boolean);
   }
 
   if (edf & 0x01) {

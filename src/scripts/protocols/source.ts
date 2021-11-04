@@ -21,7 +21,7 @@ interface ServerInfoExended extends ServerInfo {
   desc: string
   num_bots: number
   address?: string
-  keywords?: string
+  keywords: string[]
   server_port?: number
   steamid?: string
   sourcetv_port?: number
@@ -126,8 +126,15 @@ const getGameMode = (inf: ServerInfoExended): (string | null) => {
         scavenge: 'Scavenge',
       }
 
-      const keywords = inf.keywords?.split(',') || []
-      const mode = keywords.find(keyword => keyword in modes)
+      const mode = inf.keywords.find(keyword => keyword in modes)
+      return mode ? modes[mode] : null
+    }
+    case 730: { // CS: GO
+      const modes: Record<string, string> = {
+        competitive: 'Competitive',
+      }
+
+      const mode = inf.keywords.find(keyword => keyword in modes)
       return mode ? modes[mode] : null
     }
     case 2400: { // The Ship
@@ -196,6 +203,7 @@ const readServerInfo = (r: DataReader) => {
     os: r.lstring(1),
     has_password: Boolean(r.u8()),
     secure: Boolean(r.u8()),
+    keywords: [],
   }
 
   if (inf.appid === 2400) { // The Ship
@@ -225,7 +233,7 @@ const readServerInfo = (r: DataReader) => {
   }
 
   if (edf & 0x20) {
-    inf.keywords = r.zstring()
+    inf.keywords = r.zstring().split(',').filter(Boolean);
   }
 
   if (edf & 0x01) {
