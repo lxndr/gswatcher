@@ -11,10 +11,10 @@ add_project_arguments(
 )
 
 dependencies = [
-  dependency('gtk4'),
-  dependency('gee-0.8'),
-  dependency('duktape'),
-  dependency('geoip'),
+  dependency('gtk4', version : '>=4.0.3'),
+  dependency('gee-0.8', version : '>=0.20.4'),
+  dependency('duktape', version : '>=2.5.0'),
+  dependency('geoip', version : '>=1.6.12'),
 ]
 
 core_sources = files(
