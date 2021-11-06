@@ -84,30 +84,39 @@ namespace Gsw {
   }
 
   class JsProtocol : Protocol {
-    private Duktape.Duktape vm;
+    public string script_path { get; construct; }
 
-    public JsProtocol (string filename) throws Error {
-      vm = new Duktape.Duktape.default ();
-      load_script (filename);
-      register_globals ();
-      exec_script (filename);
-      fetch_info ();
+    private Duktape.Duktape vm = new Duktape.Duktape.default ();
+
+    public JsProtocol (string script_path) throws Error {
+      Object (script_path : script_path);
+      initialize ();
     }
 
-    private void load_script (string filename) throws Error {
-      string script;
-      FileUtils.get_contents (filename, out script);
-
-      vm.push_string (filename);
-
-      if (vm.pcompile_string_filename (0, script) != Duktape.Exec.SUCCESS) {
-        throw new ProtocolError.UNKNOWN ("Failed to compile '%s': %s", filename, vm.safe_to_stacktrace (-1));
+    public override void initialize () throws Error {
+      if (!initialized) {
+        load_script ();
+        register_globals ();
+        exec_script ();
+        info = fetch_info ();
+        initialized = true;
       }
     }
 
-    private void exec_script (string filename) throws Error {
+    private void load_script () throws Error {
+      string script;
+      FileUtils.get_contents (script_path, out script);
+
+      vm.push_string (script_path);
+
+      if (vm.pcompile_string_filename (0, script) != Duktape.Exec.SUCCESS) {
+        throw new ProtocolError.UNKNOWN ("failed to compile '%s': %s", script_path, vm.safe_to_stacktrace (-1));
+      }
+    }
+
+    private void exec_script () throws Error {
       if (vm.pcall(0) != Duktape.Exec.SUCCESS) {
-        throw new ProtocolError.UNKNOWN ("Failed to execute '%s': %s", filename, vm.safe_to_stacktrace (-1));
+        throw new ProtocolError.UNKNOWN ("failed to execute '%s': %s", script_path, vm.safe_to_stacktrace (-1));
       }
 
       vm.pop();
@@ -127,56 +136,62 @@ namespace Gsw {
       vm.put_global_string ("gsw");
 
       vm.push_pointer (this);
-      vm.put_global_string ("__thisProtocolPointer");
+      vm.put_global_string (THIS_PROTOCOL_POINTER_KEY);
     }
 
-    private void fetch_info () throws Error {
-      if (!vm.get_global_string ("module")) {
-        throw new ProtocolError.UNKNOWN ("Could not file global 'module'");
-      }
+    private ProtocolInfo fetch_info () throws Error {
+      var info = new ProtocolInfo ();
 
-      vm.get_prop_string (-1, "info");
+      if (!vm.get_global_string ("module"))
+        throw new ProtocolError.UNKNOWN ("could not find global '%s'", "module");
 
-      vm.get_prop_string (-1, "id");
-      info.id = vm.require_string (-1);
+      if (!vm.get_prop_string (-1, "info"))
+        throw new ProtocolError.UNKNOWN ("could not find global '%s'", "module.info");
+
+      if (!vm.is_object (-1))
+        throw new ProtocolError.UNKNOWN ("global 'module.info' is not object");
+
+      if (!vm.get_prop_string (-1, "id"))
+        throw new ProtocolError.UNKNOWN ("could not find global '%s'", "module.info.id");
+      info.id = vm.safe_to_string (-1);
       vm.pop ();
 
-      vm.get_prop_string (-1, "name");
-      info.name = vm.require_string (-1);
+      if (!vm.get_prop_string (-1, "name"))
+        throw new ProtocolError.UNKNOWN ("could not find global '%s'", "module.info.name");
+      info.name = vm.safe_to_string (-1);
       vm.pop ();
 
-      vm.get_prop_string (-1, "version");
-      info.version = vm.require_string (-1);
+      if (!vm.get_prop_string (-1, "transport"))
+        throw new ProtocolError.UNKNOWN ("could not find global '%s'", "module.info.transport");
+      info.transport = vm.get_string (-1);
       vm.pop ();
 
-      vm.get_prop_string (-1, "transport");
-      info.transport = vm.require_string (-1);
-      vm.pop ();
+      return info;
     }
 
-    public override void query () throws ProtocolError {
+    public override void query () throws Error {
       if (!vm.get_global_string ("module")) {
-        throw new ProtocolError.UNKNOWN ("Could not file global 'module'");
+        throw new ProtocolError.UNKNOWN ("could not file global 'module'");
       }
 
       if (!vm.get_prop_string (-1, "query")) {
-        throw new ProtocolError.UNKNOWN ("Function 'query' does not exist");
+        throw new ProtocolError.UNKNOWN ("function 'query' does not exist");
       }
 
       if (vm.pcall(0) != Duktape.Exec.SUCCESS) {
-        throw new ProtocolError.UNKNOWN ("Failed to call 'query()':\n%s", vm.safe_to_stacktrace (-1));
+        throw new ProtocolError.UNKNOWN ("failed to call 'query()':\n%s", vm.safe_to_stacktrace (-1));
       }
 
       vm.pop_2();
     }
 
-    public override void process_response (uint8[] data) throws ProtocolError {
+    public override void process_response (uint8[] data) throws Error {
       if (!vm.get_global_string ("module")) {
-        throw new ProtocolError.UNKNOWN ("Could not file global 'module'");
+        throw new ProtocolError.UNKNOWN ("could not file global 'module'");
       }
 
       if (!vm.get_prop_string (-1, "processResponse")) {
-        throw new ProtocolError.UNKNOWN ("Function 'query' does not exist");
+        throw new ProtocolError.UNKNOWN ("function 'query' does not exist");
       }
 
       vm.push_external_buffer ();
@@ -185,7 +200,7 @@ namespace Gsw {
       vm.remove(-2);
 
       if (vm.pcall(1) != Duktape.Exec.SUCCESS) {
-        throw new ProtocolError.UNKNOWN ("Failed to call 'processResponse()': %s", vm.safe_to_stacktrace (-1));
+        throw new ProtocolError.UNKNOWN ("failed to call 'processResponse()': %s", vm.safe_to_stacktrace (-1));
       }
 
       vm.pop_2();

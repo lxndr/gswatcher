@@ -14,8 +14,6 @@ public class Querier : Object {
 
   construct {
     try {
-      transport = new UdpTransport (server.host, server.qport);
-      protocol = new JsProtocol ("../src/scripts/dist/source.js");
       plist = new PlayerList ();
       plist_fields = new ListStore (typeof (PlayerField));
 
@@ -41,7 +39,7 @@ public class Querier : Object {
         ping = (get_monotonic_time () - query_time) / 1000;
 
         var game_resolver = GameResolver.get_instance ();
-        game_resolver.resolve (protocol, sinfo);
+        game_resolver.resolve (protocol.info.id, sinfo);
         this.sinfo = sinfo;
 
         if (plist_fields.get_n_items () == 0)
@@ -57,8 +55,8 @@ public class Querier : Object {
     }
   }
 
-  public Querier (Server server) {
-    Object (server : server);
+  public Querier (Server server, Protocol protocol, Transport transport) {
+    Object (server : server, protocol : protocol, transport : transport);
   }
 
   public void query () {

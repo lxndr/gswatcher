@@ -609,7 +609,7 @@ module.exports = ['constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsE
 
 var global = __webpack_require__(/*! ../internals/global */ 7583);
 
-var getOwnPropertyDescriptor = __webpack_require__(/*! ../internals/object-get-own-property-descriptor */ 6683).f;
+var getOwnPropertyDescriptor = (__webpack_require__(/*! ../internals/object-get-own-property-descriptor */ 6683).f);
 
 var createNonEnumerableProperty = __webpack_require__(/*! ../internals/create-non-enumerable-property */ 57);
 
@@ -1625,7 +1625,7 @@ var hasOwn = __webpack_require__(/*! ../internals/has-own-property */ 2870);
 
 var toIndexedObject = __webpack_require__(/*! ../internals/to-indexed-object */ 2977);
 
-var indexOf = __webpack_require__(/*! ../internals/array-includes */ 5766).indexOf;
+var indexOf = (__webpack_require__(/*! ../internals/array-includes */ 5766).indexOf);
 
 var hiddenKeys = __webpack_require__(/*! ../internals/hidden-keys */ 4639);
 
@@ -1782,7 +1782,7 @@ var inspectSource = __webpack_require__(/*! ../internals/inspect-source */ 9734)
 
 var InternalStateModule = __webpack_require__(/*! ../internals/internal-state */ 2743);
 
-var CONFIGURABLE_FUNCTION_NAME = __webpack_require__(/*! ../internals/function-name */ 4340).CONFIGURABLE;
+var CONFIGURABLE_FUNCTION_NAME = (__webpack_require__(/*! ../internals/function-name */ 4340).CONFIGURABLE);
 
 var getInternalState = InternalStateModule.get;
 var enforceInternalState = InternalStateModule.enforce;
@@ -1918,7 +1918,7 @@ var store = __webpack_require__(/*! ../internals/shared-store */ 1314);
 (module.exports = function (key, value) {
   return store[key] || (store[key] = value !== undefined ? value : {});
 })('versions', []).push({
-  version: '3.19.0',
+  version: '3.19.1',
   mode: IS_PURE ? 'pure' : 'global',
   copyright: '© 2021 Denis Pushkarev (zloirock.ru)'
 });
@@ -2195,7 +2195,7 @@ module.exports = function (name) {
 
 var $ = __webpack_require__(/*! ../internals/export */ 7263);
 
-var $find = __webpack_require__(/*! ../internals/array-iteration */ 4805).find;
+var $find = (__webpack_require__(/*! ../internals/array-iteration */ 4805).find);
 
 var addToUnscopables = __webpack_require__(/*! ../internals/add-to-unscopables */ 6288);
 
@@ -4635,7 +4635,6 @@ var DataWriter = /*#__PURE__*/function () {
 var info = {
   id: 'source',
   name: 'Source Engine',
-  version: '1.0',
   transport: 'udp'
 };
 var requests = {};
@@ -4758,7 +4757,8 @@ var readServerInfoGold = function readServerInfoGold(r) {
     protocol_version: r.u8(),
     server_type: r.lstring(1),
     os: r.lstring(1),
-    has_password: Boolean(r.u8())
+    has_password: Boolean(r.u8()),
+    keywords: []
   };
   var mod = r.u8();
 

@@ -16,7 +16,6 @@ public static int main (string[] args) {
       var proto = new JsProtocol ("../src/scripts/dist/source.js");
       assert (proto.info.id == "source");
       assert (proto.info.name == "Source Engine");
-      assert (proto.info.version == "1.0");
     } catch (Error err) {
       assert_no_error (err);
     }

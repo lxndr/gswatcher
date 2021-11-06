@@ -1,17 +1,43 @@
 namespace Gsw {
 
+public class ProtocolDesc : ProtocolInfo {
+  public Type class_type;
+  public string[] class_params;
+  public Value[] class_values;
+}
+
+public class TransportDesc {
+  public string id;
+  public Type class_type;
+}
+
 public class QuerierManager : Object {
   public ServerList server_list { get; construct set; }
   public Gtk.MapListModel querier_list { get; private construct set; }
   public uint update_interval { get; set; default = 5000; }
   public bool paused { get; set; }
 
+  private Gee.Map<string, ProtocolDesc> protocols;
+  private Gee.Map<string, TransportDesc> transports;
+
   private uint timer_source;
   private int querier_iter = -1;
 
   construct {
-    querier_list = new Gtk.MapListModel(server_list, (server) => {
-      return new Querier ((Server) server);
+    protocols = new Gee.HashMap<string, ProtocolDesc> ();
+    transports = new Gee.HashMap<string, TransportDesc> ();
+
+    querier_list = new Gtk.MapListModel(server_list, (item) => {
+      var protocol_id = "source";
+
+      try {
+        var server = (Server) item;
+        var protocol = create_protocol (protocol_id);
+        var transport = create_transport (protocol.info.transport, server.host, server.qport);
+        return new Querier (server, protocol, transport);
+      } catch (Error err) {
+        log (Config.LOG_DOMAIN, LEVEL_ERROR, "failed to create protocol '%s': %s", protocol_id, err.message);
+      }
     });
 
     notify["update_interval"].connect (update_timer);
@@ -56,6 +82,57 @@ public class QuerierManager : Object {
     if (querier_iter >= last_iter)
       querier_iter = -1;
     querier_iter++;
+  }
+
+  public void register_protocol (ProtocolDesc desc)
+    ensures (desc.id != null && desc.id != "")
+    ensures (desc.name != null && desc.name != "")
+    ensures (desc.transport != null && desc.transport != "")
+    ensures (desc.class_type.is_a (typeof (Protocol)))
+  {
+    protocols.set (desc.id, desc);
+  }
+
+  public Protocol? create_protocol (string id) throws Error {
+    if (!protocols.has_key (id)) {
+      log (Config.LOG_DOMAIN, LEVEL_ERROR, "unknown protocol '%s'", id);
+      return null;
+    }
+
+    var desc = protocols[id];
+    var protocol = (Protocol) Object.new_with_properties (desc.class_type, desc.class_params, desc.class_values);
+    protocol.initialize ();
+    return protocol;
+  }
+
+  public Gee.Collection<TransportDesc> get_transports () {
+    return transports.values.read_only_view;
+  }
+
+  public Gee.Collection<ProtocolDesc> get_protocols () {
+    return protocols.values.read_only_view;
+  }
+
+  public void register_transport (TransportDesc desc) {
+    var id = desc.id;
+    var type = desc.class_type;
+
+    if (!type.is_a (typeof (Transport))) {
+      log (Config.LOG_DOMAIN, LEVEL_ERROR, "failed to register transport '%s'", type.name ());
+      return;
+    }
+
+    transports.set (id, desc);
+  }
+
+  public Transport? create_transport (string id, string host, uint16 port) {
+    if (!transports.has_key (id)) {
+      log (Config.LOG_DOMAIN, LEVEL_ERROR, "unknown transport '%s'", id);
+      return null;
+    }
+
+    var desc = transports[id];
+    return (Transport) Object.new (desc.class_type, "host", host, "port", port);
   }
 }
 

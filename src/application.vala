@@ -68,6 +68,12 @@ namespace Gsw {
       // queriers
       server_list = new PersistentServerList ();
       querier_manager = new QuerierManager (server_list);
+      querier_manager.register_transport (new TransportDesc () {
+        id = "udp",
+        class_type = typeof (UdpTransport)
+      });
+
+      register_protocols ();
 
       // buddies
       buddy_list = new PersistentBuddyList ();
@@ -90,7 +96,7 @@ namespace Gsw {
     }
 
     private void activate_about (SimpleAction action, Variant? parameter) {
-      Ui.show_about (main_window);
+      Ui.show_about (main_window, querier_manager.get_transports (), querier_manager.get_protocols ());
     }
 
     private void activate_pause (SimpleAction action, Variant? parameter) {
@@ -106,6 +112,45 @@ namespace Gsw {
       var n = new Notification (title);
       n.set_body (body);
       send_notification (null, n);
+    }
+
+    private void register_protocols () {
+      foreach (var data_dir in get_data_dirs ()) {
+        var dir = data_dir.get_child ("protocols");
+
+        if (!dir.query_exists ())
+          continue;
+
+        try {
+          FileInfo info;
+          var enumerator = dir.enumerate_children ("standard::*", NONE);
+
+          while ((info = enumerator.next_file ()) != null) {
+            var script = dir.get_child (info.get_name ()).get_path ();
+
+            try {
+              var desc = new ProtocolDesc ();
+              desc.class_type = typeof (JsProtocol);
+              desc.class_params = { "script-path" };
+              desc.class_values = { Value (typeof (string)) };
+              desc.class_values[0].set_string (script);
+
+              var protocol = (Protocol) Object.new_with_properties (desc.class_type, desc.class_params, desc.class_values);
+              protocol.initialize ();
+
+              desc.id = protocol.info.id;
+              desc.name = protocol.info.name;
+              desc.transport = protocol.info.transport;
+
+              querier_manager.register_protocol (desc);
+            } catch (Error err) {
+              log (Config.LOG_DOMAIN, LEVEL_WARNING, "failed to load protocol script '%s': %s", script, err.message);
+            }
+          }
+        } catch (Error err) {
+          log (Config.LOG_DOMAIN, LEVEL_WARNING, "failed to enumerate directory '%s'", dir.get_path ());
+        }
+      }
     }
   }
 

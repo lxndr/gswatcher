@@ -1,9 +1,12 @@
 [CCode (lower_case_cprefix = "duk_", cheader_filename = "duktape.h")]
 namespace Duktape {
-
 	[SimpleType]
   [CCode (cname = "duk_int_t", has_type_id = false)]
   public struct Int : int {}
+
+	[SimpleType]
+  [CCode (cname = "duk_uint32_t", has_type_id = false)]
+  public struct UInt32 : uint32 {}
 
 	[SimpleType]
   [CCode (cname = "duk_size_t", has_type_id = false)]
@@ -95,6 +98,9 @@ namespace Duktape {
 		NO_PROXY_BEHAVIOR,
 	}
 
+	[CCode (cname = "DUK_VERSION")]
+	public UInt32 VERSION;
+
 	[CCode (cname = "duk_c_function", has_target = false)]
 	public delegate Return CFunction (Duktape vm);
 
@@ -128,6 +134,7 @@ namespace Duktape {
 		public void require_object (Index idx);
 		public Bool get_prop_string (Index idx, string key);
 		public Bool get_prop_index (Index obj, ArrayIndex idx);
+		public Bool is_object (Index idx);
 		public void enum (Index obj, Enum flags);
 		public Bool next (Index enum_idx, Bool get_value);
 
@@ -151,6 +158,7 @@ namespace Duktape {
 		public Double get_number (Index idx);
 		public Double get_number_default (Index idx, Double def);
 		public Int to_int (Index idx);
+		public UInt32 to_uint32 (Index idx);
 
 		// get number
 		public Bool get_boolean (Index idx);

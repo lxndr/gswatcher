@@ -49,7 +49,6 @@ interface Request {
 export const info: ProtocolInfo = {
   id: 'source',
   name: 'Source Engine',
-  version: '1.0',
   transport: 'udp',
 }
 
@@ -168,6 +167,7 @@ const readServerInfoGold = (r: DataReader) => {
     server_type: r.lstring(1),
     os: r.lstring(1),
     has_password: Boolean(r.u8()),
+    keywords: [],
   }
 
   const mod = r.u8()

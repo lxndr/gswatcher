@@ -2,9 +2,8 @@ export {}
 
 declare global {
   interface ProtocolInfo {
-    id: string;
+    id: string
     name: string
-    version: string
     transport: string
   }
 

@@ -1,7 +1,6 @@
 export const info: ProtocolInfo = {
   id: 'gamespy',
   name: 'GameSpy',
-  version: '1.0',
   transport: 'udp',
 }
 

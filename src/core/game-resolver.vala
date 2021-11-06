@@ -116,9 +116,9 @@ public class GameResolver : Object {
     }
   }
 
-  public bool resolve (Protocol protocol, ServerInfo inf) {
+  public bool resolve (string protocol_id, ServerInfo inf) {
     var game = games.values.first_match ((game) => {
-      if (game.phony || game.protocol != protocol.info.id)
+      if (game.phony || game.protocol != protocol_id)
         return false;
 
       foreach (var entry in game.inf.entries)

@@ -46,7 +46,6 @@ __webpack_require__.r(__webpack_exports__);
 var info = {
   id: 'gamespy',
   name: 'GameSpy',
-  version: '1.0',
   transport: 'udp'
 };
 var query = function query() {
