@@ -1,14 +1,15 @@
 namespace Gsw {
   const string THIS_PROTOCOL_POINTER_KEY = "__thisProtocolPointer"; // FIXME: use DUK_HIDDEN_SYMBOL
 
+  delegate void Callback ();
+
   static Duktape.Return js_send(Duktape.Duktape vm) {
     vm.get_global_string (THIS_PROTOCOL_POINTER_KEY);
-    var proto = (Protocol) vm.require_pointer (-1);
+    var proto = (JsProtocol) vm.require_pointer (-1);
     var data = vm.require_buffer_data (0);
 
-    Idle.add (() => {
+    proto.enqueue_callback (() => {
       proto.data_send (data);
-      return Source.REMOVE;
     });
 
     return 0;
@@ -18,7 +19,7 @@ namespace Gsw {
     var sinfo = new ServerInfo ();
 
     vm.get_global_string (THIS_PROTOCOL_POINTER_KEY);
-    var proto = (Protocol) vm.require_pointer (-1);
+    var proto = (JsProtocol) vm.require_pointer (-1);
 
     vm.require_object (0);
     vm.enum (0, OWN_PROPERTIES_ONLY);
@@ -30,17 +31,13 @@ namespace Gsw {
       vm.pop_2 ();
     }
 
-    Idle.add (() => {
-      proto.sinfo_update (sinfo);
-      return Source.REMOVE;
-    });
-
+    proto.enqueue_callback (() => proto.sinfo_update (sinfo));
     return 0;
   }
 
   static Duktape.Return js_plist(Duktape.Duktape vm) {
     vm.get_global_string (THIS_PROTOCOL_POINTER_KEY);
-    var proto = (Protocol) vm.require_pointer (-1);
+    var proto = (JsProtocol) vm.require_pointer (-1);
 
     vm.require_object (0);
 
@@ -69,11 +66,7 @@ namespace Gsw {
       vm.pop_2 ();
     }
 
-    Idle.add (() => {
-      proto.plist_update (players);
-      return Source.REMOVE;
-    });
-
+    proto.enqueue_callback (() => proto.plist_update (players));
     return 0;
   }
 
@@ -86,11 +79,19 @@ namespace Gsw {
   class JsProtocol : Protocol {
     public string script_path { get; construct; }
 
+    private Gee.List<Source> callback_sources = new Gee.LinkedList<Source>();
+
     private Duktape.Duktape vm = new Duktape.Duktape.default ();
 
     public JsProtocol (string script_path) throws Error {
       Object (script_path : script_path);
       initialize ();
+    }
+
+    ~JsProtocol() {
+      foreach (var source in callback_sources) {
+        source.destroy ();
+      }
     }
 
     public override void initialize () throws Error {
@@ -204,6 +205,20 @@ namespace Gsw {
       }
 
       vm.pop_2();
+    }
+
+    public void enqueue_callback (owned Callback cb) {
+      var source = new IdleSource ();
+
+      source.set_callback(() => {
+        cb ();
+        source.destroy ();
+        callback_sources.remove (source);
+        return Source.REMOVE;
+      });
+
+      callback_sources.add (source);
+      source.attach ();
     }
   }
 
