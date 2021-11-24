@@ -29,13 +29,10 @@ namespace Gsw.Ui {
 
     class construct {
       set_layout_manager_type (typeof (BinLayout));
+      set_css_name ("preferences");
     }
 
     construct {
-      var style_provider = new CssProvider ();
-      style_provider.load_from_resource ("/org/lxndr/gswatcher/ui/preferences.css");
-      get_style_context ().add_provider (style_provider, uint.MAX);
-
       var settings_file = Path.build_filename (Environment.get_user_config_dir (), "gswatcher", "preferences.ini");
       var settings_backend = SettingsBackend.keyfile_settings_backend_new (settings_file, "/org/lxndr/gswatcher/", null);
       var settings = new GLib.Settings.with_backend ("org.lxndr.gswatcher.Preferences", settings_backend);

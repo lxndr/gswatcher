@@ -4,7 +4,6 @@
   <requires lib="gtk+" version="4.0"/>
 
   <template class="GswUiServerInfo" parent="GtkWidget">
-    <property name="name">server-info</property>
     <property name="hexpand">true</property>
 
     <child>
@@ -218,7 +217,7 @@
               <property name="column-span">2</property>
             </layout>
             <property name="name">error</property>
-            <property name="label" translatable="yes" />
+            <property name="css-classes">error</property>
           </object>
         </child>
 

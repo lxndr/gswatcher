@@ -252,6 +252,11 @@
                                     <lookup name="item">GtkListItem</lookup>
                                   </lookup>
                                 </binding>
+                                <binding name="css_classes">
+                                  <lookup name="ping_css_classes" type="GswUiServerListItem">
+                                    <lookup name="item">GtkListItem</lookup>
+                                  </lookup>
+                                </binding>
                               </object>
                             </property>
                           </template>

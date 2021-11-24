@@ -3,6 +3,7 @@ namespace Gsw.Ui {
   const string[] noslots_classes = { "no-slots" };
   const string[] notempty_classes = { "not-empty" };
   const string[] newentry_classes = { "new-entry" };
+  const string[] error_classes = { "error" };
 
   abstract class BaseServerListItem : Object {
     public string name { get; protected set; default = ""; }
@@ -16,6 +17,7 @@ namespace Gsw.Ui {
     public string players { get; protected set; default = ""; }
     public string[]? players_css_classes { get; protected set; }
     public string ping { get; protected set; default = ""; }
+    public string[]? ping_css_classes { get; protected set; }
   }
 
   class NewServerListItem : BaseServerListItem {
@@ -63,8 +65,12 @@ namespace Gsw.Ui {
       });
 
       querier.notify["error"].connect((error) => {
-        if (error != null) {
+        if (error == null) {
+          ping = querier.ping.to_string ();
+          ping_css_classes = null;
+        } else {
           ping = "Error";
+          ping_css_classes = error_classes;
         }
       });
     }

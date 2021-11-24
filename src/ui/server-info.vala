@@ -38,13 +38,10 @@ class ServerInfo : Widget {
 
   class construct {
     set_layout_manager_type (typeof (BinLayout));
+    set_css_name ("server-info");
   }
 
   construct {
-    var style_provider = new CssProvider ();
-    style_provider.load_from_resource ("/org/lxndr/gswatcher/ui/server-info.css");
-    get_style_context ().add_provider (style_provider, uint.MAX);
-
     update_sinfo ();
     update_error ();
   }

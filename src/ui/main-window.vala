@@ -15,6 +15,11 @@ namespace Gsw.Ui {
       typeof (Ui.BuddyList).ensure ();
       typeof (Ui.PlayerList).ensure ();
       typeof (Ui.Preferences).ensure ();
+
+      var display = Gdk.Display.get_default ();
+      var style_provider = new CssProvider ();
+      style_provider.load_from_resource ("/org/lxndr/gswatcher/ui/styles.css");
+      StyleContext.add_provider_for_display (display, style_provider, uint.MAX);
     }
 
     public MainWindow (Application application, QuerierManager querier_manager, Gsw.BuddyList buddy_list) {

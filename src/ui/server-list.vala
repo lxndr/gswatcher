@@ -36,6 +36,7 @@ class ServerList : Widget {
     typeof (NewServerListItem).ensure ();
 
     set_layout_manager_type (typeof (BinLayout));
+    set_css_name ("server-list");
 
     add_binding (
       Gdk.Key.Delete, 0,

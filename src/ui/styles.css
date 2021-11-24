@@ -1,0 +1,24 @@
+server-list #name_cell.new-entry {
+  color: lightgrey;
+  font-style: italic;
+}
+
+server-list #players_cell.no-slots {
+  color:  darkRed;
+}
+
+server-list #players_cell.not-empty {
+  color: darkGreen;
+}
+
+server-info {
+  margin: 8px;
+}
+
+server-info #error {
+  font-weight: bold;
+}
+
+preferences .group-title {
+  font-weight: bold;
+}
