@@ -210,6 +210,18 @@
           </object>
         </child>
 
+        <child>
+          <object class="GtkLabel" id="error_ctl">
+            <layout>
+              <property name="column">0</property>
+              <property name="row">9</property>
+              <property name="column-span">2</property>
+            </layout>
+            <property name="name">error</property>
+            <property name="label" translatable="yes" />
+          </object>
+        </child>
+
       </object>
     </child>
 

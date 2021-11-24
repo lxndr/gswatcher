@@ -1,9 +1,5 @@
 namespace Gsw {
 
-public errordomain ProtocolError {
-  UNKNOWN
-}
-
 public class ProtocolInfo {
   public string id;
   public string name;

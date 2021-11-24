@@ -33,6 +33,9 @@ class ServerInfo : Widget {
   [GtkChild]
   private unowned Label version_ctl;
 
+  [GtkChild]
+  private unowned Label error_ctl;
+
   class construct {
     set_layout_manager_type (typeof (BinLayout));
   }
@@ -41,6 +44,9 @@ class ServerInfo : Widget {
     var style_provider = new CssProvider ();
     style_provider.load_from_resource ("/org/lxndr/gswatcher/ui/server-info.css");
     get_style_context ().add_provider (style_provider, uint.MAX);
+
+    update_sinfo ();
+    update_error ();
   }
 
   public override void dispose () {
@@ -56,20 +62,23 @@ class ServerInfo : Widget {
     set {
       if (_querier != null) {
         _querier.notify["sinfo"].disconnect (update_sinfo);
-        update_sinfo ();
+        _querier.notify["error"].disconnect (update_error);
       }
 
       _querier = value;
 
       if (_querier != null) {
         _querier.notify["sinfo"].connect (update_sinfo);
-        update_sinfo ();
+        _querier.notify["error"].connect (update_error);
       }
+
+      update_sinfo ();
+      update_error ();
     }
   }
 
   private void update_sinfo () {
-    name_ctl.label = (_querier != null && _querier.sinfo != null && _querier.sinfo.has_key ("name"))
+    name_ctl.label = (_querier?.sinfo != null && _querier.sinfo.has_key ("name"))
       ? _querier.sinfo["name"]
       : _("N/A");
 
@@ -81,29 +90,34 @@ class ServerInfo : Widget {
       ? format_location ()
       : _("N/A");
 
-    game_ctl.label = (_querier != null && _querier.sinfo != null && _querier.sinfo.has_key ("game_name"))
+    game_ctl.label = (_querier?.sinfo != null && _querier.sinfo.has_key ("game_name"))
       ? _querier.sinfo["game_name"]
       : _("N/A");
 
-    game_mode_ctl.label = (_querier != null && _querier.sinfo != null && _querier.sinfo.has_key ("game_mode"))
+    game_mode_ctl.label = (_querier?.sinfo != null && _querier.sinfo.has_key ("game_mode"))
       ? _querier.sinfo["game_mode"]
       : _("N/A");
 
-    map_ctl.label = (_querier != null && _querier.sinfo != null && _querier.sinfo.has_key ("map"))
+    map_ctl.label = (_querier?.sinfo != null && _querier.sinfo.has_key ("map"))
       ? _querier.sinfo["map"]
       : _("N/A");
 
-    players_ctl.label = (_querier != null && _querier.sinfo != null && _querier.sinfo.has_key ("num_players") && _querier.sinfo.has_key ("max_players"))
+    players_ctl.label = (_querier?.sinfo != null && _querier.sinfo.has_key ("num_players") && _querier.sinfo.has_key ("max_players"))
       ? format_players (_querier.sinfo)
       : _("N/A");
 
-    has_password_ctl.label = (_querier != null && _querier.sinfo != null && _querier.sinfo.has_key ("has_password"))
+    has_password_ctl.label = (_querier?.sinfo != null && _querier.sinfo.has_key ("has_password"))
       ? format_boolean (_querier.sinfo["has_password"])
       : _("N/A");
 
-    version_ctl.label = (_querier != null && _querier.sinfo != null && _querier.sinfo.has_key ("version"))
+    version_ctl.label = (_querier?.sinfo != null && _querier.sinfo.has_key ("version"))
       ? _querier.sinfo["version"]
       : _("N/A");
+  }
+
+  private void update_error () {
+    error_ctl.visible = _querier?.error != null;
+    error_ctl.label = _querier?.error?.message;
   }
 
   private string format_location () {

@@ -1,3 +1,8 @@
 #server-info {
   margin: 8px;
 }
+
+#error {
+  font-weight: bold;
+  color: red;
+}

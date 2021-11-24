@@ -61,6 +61,12 @@ namespace Gsw.Ui {
       querier.notify["ping"].connect(() => {
         ping = querier.ping.to_string ();
       });
+
+      querier.notify["error"].connect((error) => {
+        if (error != null) {
+          ping = "Error";
+        }
+      });
     }
 
     public ServerListItem (Querier querier) {
