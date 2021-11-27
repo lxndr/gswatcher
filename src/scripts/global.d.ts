@@ -8,7 +8,8 @@ declare global {
   }
 
   interface ServerInfo {
-    name: string
+    gameId?: string
+    name?: string
     game_mode?: string
     map?: string
     version?: string

@@ -208,7 +208,13 @@ class JsProtocol : Protocol {
     vm.remove(-2);
 
     if (vm.pcall(1) != Duktape.Exec.SUCCESS) {
-      throw new JsProtocolError.FUNC_EXECUION ("failed to call 'module.processResponse': %s", vm.safe_to_stacktrace (-1));
+      var msg = vm.safe_to_stacktrace (-1);
+
+      if (msg.index_of ("InvalidResponseError") == 0) {
+        throw new ProtocolError.INVALID_RESPONSE (msg);
+      }
+
+      throw new JsProtocolError.FUNC_EXECUION ("failed to call 'module.processResponse': %s", msg);
     }
 
     vm.pop_2();

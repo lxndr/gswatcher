@@ -4,7 +4,8 @@
   "description": "",
   "main": "source.js",
   "scripts": {
-    "build": "webpack"
+    "build": "webpack",
+    "build:watch": "webpack --watch"
   },
   "author": "",
   "license": "GPL",

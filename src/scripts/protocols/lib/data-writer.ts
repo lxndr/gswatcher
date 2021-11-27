@@ -61,12 +61,12 @@ export class DataWriter {
   }
 
   zstring(val: string) {
-    this.lstring(val, val.length)
+    this.string(val, val.length)
     this.u8(0)
     return this
   }
 
-  lstring(val: string, length: number) {
+  string(val: string, length: number = val.length) {
     this._buf.write(val, this.pos, length)
     this.pos += length
     return this

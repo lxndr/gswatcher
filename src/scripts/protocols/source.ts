@@ -2,6 +2,7 @@ import 'core-js/features/array/find'
 import jsbi from 'jsbi'
 import { DataReader } from './lib/data-reader'
 import { DataWriter } from './lib/data-writer'
+import { InvalidResponseError } from './lib/response-error'
 
 interface PacketHeader {
   reqid: number
@@ -62,7 +63,7 @@ const sendPacket = (type: string, payload?: Buffer) => {
   const w = new DataWriter()
 
   w.i32le(-1)
-  w.lstring(type, 1)
+  w.string(type, 1)
 
   if (payload) {
     w.data(payload)
@@ -312,15 +313,15 @@ const readHeaderGold = (r: DataReader): PacketHeader => {
   number >>= 4
 
   if (!reqid) {
-    throw new Error('Incorrect reqid')
+    throw new InvalidResponseError(`request id cannot be ${reqid}`)
   }
 
   if (!total) {
-    throw new Error('Incorrect total')
+    throw new InvalidResponseError(`total packets cannot be ${total}`)
   }
 
   if (number >= total) {
-    throw new Error('Incorrect number')
+    throw new InvalidResponseError(`packet number ${number} cannot be greater or equal ${total}`)
   }
 
   const payload = r.data()
@@ -336,15 +337,15 @@ const readHeader = (r: DataReader): PacketHeader => {
   let dataSize, crc32
 
   if (!reqid) {
-    throw new Error('Incorrect reqid')
+    throw new InvalidResponseError(`request id cannot be ${reqid}`)
   }
 
   if (!total) {
-    throw new Error('Incorrect total')
+    throw new InvalidResponseError(`total packets cannot be ${total}`)
   }
 
   if (number >= total) {
-    throw new Error('Incorrect number')
+    throw new InvalidResponseError(`packet number ${number} cannot be greater or equal ${total}`)
   }
 
   if (number === 0 && compressed) {
@@ -380,15 +381,22 @@ const storePacket = (pak: PacketHeader) => {
   const req = requests[pak.reqid]
 
   if (req.total !== pak.total) {
-    throw new Error('Incorrect packet')
+    throw new InvalidResponseError('Incorrect packet')
   }
 
   req.packets[pak.number] = pak.payload
   return req
 }
 
-const gotAllPackets = (req: Request) =>
-  req.packets.every(pak => pak)
+const gotAllPackets = (req: Request) => {
+  for (let i = 0; i < req.total; i++) {
+    if (!req.packets[i]) {
+      return false
+    }
+  }
+
+  return true
+}
 
 export const processResponse = (data: Buffer) => {
   const r = new DataReader(data)
@@ -398,10 +406,6 @@ export const processResponse = (data: Buffer) => {
     readPayload(r)
   } else if (format == -2) {
     const pak = tryReadHeader(r)
-
-    if (!pak) {
-      throw new Error('Could not read packet header response')
-    }
 
     if (pak.compressed) {
       throw new Error('Compressed split packets are not supported')

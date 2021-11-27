@@ -118,7 +118,7 @@ class ServerInfo : Widget {
   }
 
   private string format_location () {
-    var addr = querier.transport.saddr.address.to_string ();
+    var addr = "0.0.0.0";// querier.transport.saddr.address.to_string ();
     var geoip_resolver = GeoIPResolver.get_instance ();
     var location = geoip_resolver.city_by_addr (addr);
     return location;

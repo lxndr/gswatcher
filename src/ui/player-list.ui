@@ -35,6 +35,7 @@
         <child>
           <object class="GtkColumnView" id="view">
             <property name="model">selection</property>
+            <property name="reorderable">false</property>
           </object>
         </child>
       </object>

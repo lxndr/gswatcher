@@ -29,7 +29,7 @@ public class GeoIPResolver : Object {
     switch (geoip.database_edition ()) {
       case GeoIP.Edition.CITY_REV1: {
         var rec = geoip.record_by_addr (addr);
-        return rec.country_code;
+        return rec == null ? "" : rec.country_code;
       }
       case GeoIP.Edition.COUNTRY: {
         var country_id = geoip.id_by_addr (addr);
@@ -47,6 +47,9 @@ public class GeoIPResolver : Object {
     switch (geoip.database_edition ()) {
       case GeoIP.Edition.CITY_REV1: {
         var record = geoip.record_by_addr (addr);
+
+        if (record == null)
+          return "";
 
         return record.city == null
           ? record.country_name

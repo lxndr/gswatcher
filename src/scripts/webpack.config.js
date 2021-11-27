@@ -2,8 +2,9 @@ const path = require('path')
 
 module.exports = {
   entry: {
-    source: './protocols/source.ts',
     gamespy: './protocols/gamespy.ts',
+    quake3: './protocols/quake3.ts',
+    source: './protocols/source.ts',
   },
   output: {
     filename: '[name].js',

@@ -2415,7 +2415,7 @@ var __webpack_exports__ = {};
 !function() {
 "use strict";
 /*!******************************************!*\
-  !*** ./protocols/source.ts + 16 modules ***!
+  !*** ./protocols/source.ts + 17 modules ***!
   \******************************************/
 // ESM COMPAT FLAG
 __webpack_require__.r(__webpack_exports__);
@@ -4604,13 +4604,15 @@ var DataWriter = /*#__PURE__*/function () {
   }, {
     key: "zstring",
     value: function zstring(val) {
-      this.lstring(val, val.length);
+      this.string(val, val.length);
       this.u8(0);
       return this;
     }
   }, {
-    key: "lstring",
-    value: function lstring(val, length) {
+    key: "string",
+    value: function string(val) {
+      var length = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : val.length;
+
       this._buf.write(val, this.pos, length);
 
       this.pos += length;
@@ -4627,7 +4629,18 @@ var DataWriter = /*#__PURE__*/function () {
 
   return DataWriter;
 }();
+;// CONCATENATED MODULE: ./protocols/lib/response-error.ts
+function InvalidResponseError(message) {
+  // @ts-expect-error
+  this.message = message; // @ts-expect-error
+
+  this.name = 'InvalidResponseError'; // @ts-expect-error
+
+  return this;
+}
+InvalidResponseError.prototype = Error.prototype;
 ;// CONCATENATED MODULE: ./protocols/source.ts
+
 
 
 
@@ -4645,7 +4658,7 @@ var gotPlayerList = null;
 var sendPacket = function sendPacket(type, payload) {
   var w = new DataWriter();
   w.i32le(-1);
-  w.lstring(type, 1);
+  w.string(type, 1);
 
   if (payload) {
     w.data(payload);
@@ -4907,15 +4920,15 @@ var readHeaderGold = function readHeaderGold(r) {
   number >>= 4;
 
   if (!reqid) {
-    throw new Error('Incorrect reqid');
+    throw new InvalidResponseError("request id cannot be ".concat(reqid));
   }
 
   if (!total) {
-    throw new Error('Incorrect total');
+    throw new InvalidResponseError("total packets cannot be ".concat(total));
   }
 
   if (number >= total) {
-    throw new Error('Incorrect number');
+    throw new InvalidResponseError("packet number ".concat(number, " cannot be greater or equal ").concat(total));
   }
 
   var payload = r.data();
@@ -4936,15 +4949,15 @@ var readHeader = function readHeader(r) {
   var dataSize, crc32;
 
   if (!reqid) {
-    throw new Error('Incorrect reqid');
+    throw new InvalidResponseError("request id cannot be ".concat(reqid));
   }
 
   if (!total) {
-    throw new Error('Incorrect total');
+    throw new InvalidResponseError("total packets cannot be ".concat(total));
   }
 
   if (number >= total) {
-    throw new Error('Incorrect number');
+    throw new InvalidResponseError("packet number ".concat(number, " cannot be greater or equal ").concat(total));
   }
 
   if (number === 0 && compressed) {
@@ -4988,7 +5001,7 @@ var storePacket = function storePacket(pak) {
   var req = requests[pak.reqid];
 
   if (req.total !== pak.total) {
-    throw new Error('Incorrect packet');
+    throw new InvalidResponseError('Incorrect packet');
   }
 
   req.packets[pak.number] = pak.payload;
@@ -4996,9 +5009,13 @@ var storePacket = function storePacket(pak) {
 };
 
 var gotAllPackets = function gotAllPackets(req) {
-  return req.packets.every(function (pak) {
-    return pak;
-  });
+  for (var i = 0; i < req.total; i++) {
+    if (!req.packets[i]) {
+      return false;
+    }
+  }
+
+  return true;
 };
 
 var processResponse = function processResponse(data) {
@@ -5009,10 +5026,6 @@ var processResponse = function processResponse(data) {
     readPayload(r);
   } else if (format == -2) {
     var pak = tryReadHeader(r);
-
-    if (!pak) {
-      throw new Error('Could not read packet header response');
-    }
 
     if (pak.compressed) {
       throw new Error('Compressed split packets are not supported');

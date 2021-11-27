@@ -20,6 +20,7 @@ dependencies = [
 core_sources = files(
   'core/buddy-list.vala',
   'core/buddy.vala',
+  'core/detector-querier.vala',
   'core/game-resolver.vala',
   'core/geoip-resolver.vala',
   'core/player-list.vala',
@@ -31,6 +32,7 @@ core_sources = files(
   'core/server.vala',
   'core/transport.vala',
   'core/utils.vala',
+  'core/worker-querier.vala',
   'protocols/js-protocol.vala',
   'transports/udp-transport-manager.vala',
   'transports/udp-transport.vala',

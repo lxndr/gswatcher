@@ -97,7 +97,6 @@ class UdpTransportManager : Object {
           addr.address.equal (transport.saddr.address)
         ) {
           transport.receive (data);
-          break;
         }
       }
     } catch (Error err) {

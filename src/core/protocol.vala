@@ -1,5 +1,9 @@
 namespace Gsw {
 
+public errordomain ProtocolError {
+  INVALID_RESPONSE
+}
+
 public class ProtocolInfo {
   public string id;
   public string name;

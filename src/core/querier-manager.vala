@@ -28,16 +28,8 @@ public class QuerierManager : Object {
     transports = new Gee.HashMap<string, TransportDesc> ();
 
     querier_list = new Gtk.MapListModel(server_list, (item) => {
-      var protocol_id = "source";
-
-      try {
-        var server = (Server) item;
-        var protocol = create_protocol (protocol_id);
-        var transport = create_transport (protocol.info.transport, server.host, server.qport);
-        return new Querier (server, protocol, transport);
-      } catch (Error err) {
-        log (Config.LOG_DOMAIN, LEVEL_ERROR, "failed to create protocol '%s': %s", protocol_id, err.message);
-      }
+      var server = (Server) item;
+      return new DetectorQuerier (this, server);
     });
 
     notify["update_interval"].connect (update_timer);
