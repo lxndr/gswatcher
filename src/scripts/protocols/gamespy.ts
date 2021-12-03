@@ -63,6 +63,31 @@ const normalizeServerInfo = (inf: Info): ServerInfo => ({
   [InfoField.GAME_VERSION]: String(inf.gamever),
 })
 
+const normalizePlayerList = (inf: Info) => {
+  const all_keys = Object.keys(inf)
+  const players: Player[] = []
+
+  for (let i = 1; ; i++) {
+    const ending = `_${i}`
+    const keys = all_keys.filter(key => key.endsWith(ending))
+
+    if (!keys.length) {
+      break;
+    }
+
+    const player: Player = {}
+
+    keys.forEach(key => {
+      const fleid = key.slice(0, -ending.length)
+      player[fleid] = inf[key]
+    })
+
+    players.push(player)
+  }
+
+  return players
+}
+
 export const processResponse = (data: Buffer) => {
   const { queryid, final, ...info } = parseQuakeInfo(data.toString())
 
@@ -84,9 +109,12 @@ export const processResponse = (data: Buffer) => {
   if (res.gotAllPackets()) {
     const all_info = res.combine()
     responses.remove(reqid)
+    gsw.details(all_info)
 
     const inf = normalizeServerInfo(all_info)
-    gsw.details(all_info)
     gsw.sinfo(inf)
+
+    const players = normalizePlayerList(all_info)
+    gsw.plist(players)
   }
 }

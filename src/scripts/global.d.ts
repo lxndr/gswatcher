@@ -8,11 +8,11 @@ declare global {
   }
 
   interface Info {
-    [key: string]: Info | string | number | boolean | null | undefined
+    [key: string]: unknown
   }
 
   interface Player {
-    [key: string]: string | number | undefined
+    [key: string]: unknown
   }
 
   const enum InfoField {

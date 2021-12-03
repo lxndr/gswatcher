@@ -149,14 +149,6 @@ public class GlobalRoutine {
       var msg = duk.safe_to_stacktrace (-1);
       throw new JsError.RUNTIME_ERROR ("failed to call '%s': %s", routine, msg);
     }
-/*
-      if (msg.index_of ("InvalidResponseError") == 0) {
-        throw new ProtocolError.INVALID_RESPONSE (msg);
-      }
-
-      throw new JsProtocolError.FUNC_EXECUION ("failed to call '%s': %s", routine, msg);
-    }
-*/
   }
 
   public unowned GlobalRoutine push_buffer (uint8[] data) {

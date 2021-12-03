@@ -2138,6 +2138,29 @@ var normalizeServerInfo = function (inf) {
         _a["game-version" /* GAME_VERSION */] = String(inf.gamever),
         _a);
 };
+var normalizePlayerList = function (inf) {
+    var all_keys = Object.keys(inf);
+    var players = [];
+    var _loop_1 = function (i) {
+        var ending = "_".concat(i);
+        var keys = all_keys.filter(function (key) { return key.endsWith(ending); });
+        if (!keys.length) {
+            return "break";
+        }
+        var player = {};
+        keys.forEach(function (key) {
+            var fleid = key.slice(0, -ending.length);
+            player[fleid] = inf[key];
+        });
+        players.push(player);
+    };
+    for (var i = 1;; i++) {
+        var state_1 = _loop_1(i);
+        if (state_1 === "break")
+            break;
+    }
+    return players;
+};
 var processResponse = function (data) {
     var _a = parseQuakeInfo(data.toString()), queryid = _a.queryid, final = _a.final, info = __rest(_a, ["queryid", "final"]);
     if (!queryid) {
@@ -2155,9 +2178,11 @@ var processResponse = function (data) {
     if (res.gotAllPackets()) {
         var all_info = res.combine();
         responses.remove(reqid);
-        var inf = normalizeServerInfo(all_info);
         gsw.details(all_info);
+        var inf = normalizeServerInfo(all_info);
         gsw.sinfo(inf);
+        var players = normalizePlayerList(all_info);
+        gsw.plist(players);
     }
 };
 

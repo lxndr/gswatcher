@@ -116,9 +116,11 @@ class JsProtocol : ScriptProtocol {
         .exec ();
     } catch (JsError err) {
       // NOTE: very naive to simply check if it contains InvalidResponseError
-      if (err.code == JsError.RUNTIME_ERROR && err.message == "InvalidResponseError") {
+      if (err.code == JsError.RUNTIME_ERROR && err.message.index_of ("InvalidResponseError") >= 0) {
         throw new ProtocolError.INVALID_RESPONSE (err.message);
       }
+
+      throw err;
     }
   }
 }

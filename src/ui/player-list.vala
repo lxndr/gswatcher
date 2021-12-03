@@ -39,13 +39,16 @@ class PlayerList : Widget {
   }
 
   private void plist_fields_change (uint position, uint removed, uint added) {
-    for (var i = 0; i < removed; i++)
-      view.remove_column ((ColumnViewColumn) view.columns.get_item (position));
+    for (var i = 0; i < removed; i++) {
+      if (view.columns.get_n_items () > position)
+        view.remove_column ((ColumnViewColumn) view.columns.get_item (position));
+    }
 
-    for (var i = position; i < (position + added); i++) {
-      var field = (PlayerField) querier.plist_fields.get_item (i);
+    for (var i = 0; i < added; i++) {
+      var index = position + i;
+      var field = (PlayerField) querier.plist_fields.get_item (index);
       var column = create_column (field);
-      view.insert_column (i, column);
+      view.insert_column (index, column);
     }
   }
 
