@@ -1,5 +1,3 @@
-import 'core-js/features/reflect/construct'
-
 export class DataWriter {
   private _buf: Buffer
   public pos = 0

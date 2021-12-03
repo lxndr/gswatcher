@@ -36,47 +36,61 @@ namespace Gsw.Ui {
     construct {
       name = querier.server.address;
 
+      update_sinfo ();
+      querier.sinfo.notify.connect (update_sinfo);
       querier.notify["sinfo"].connect (() => {
-        var sinfo = querier.sinfo;
-        var server = querier.server;
-
-        name = (sinfo.name != null && sinfo.name.length > 0)
-          ? sinfo.name : server.address;
-        game = sinfo.game_name;
-
-        if (sinfo.game_mode != null) {
-          game += " (%s)".printf (sinfo.game_mode);
-        }
-
-        game_icon = find_file_in_data_dirs ("./icons/games/" + sinfo.game_id + ".png");
-        map = sinfo.map;
-        num_players = sinfo.num_players;
-        players = format_players (sinfo.num_players, sinfo.max_players);
-        players_css_classes = format_players_css_classes (sinfo.num_players, sinfo.max_players);
-
-        var addr = "0.0.0.0";// querier.transport.saddr.address.to_string ();
-        var geoip_resolver = GeoIPResolver.get_instance ();
-        var country_code = geoip_resolver.code_by_addr (addr);
-        country_icon = find_file_in_data_dirs ("./icons/flags/" + country_code + ".png");
+        update_sinfo ();
+        querier.sinfo.notify.connect (update_sinfo);
       });
 
-      querier.notify["ping"].connect(() => {
-        ping = querier.ping.to_string ();
-      });
+      querier.notify["ping"].connect(update_ping);
+      update_ping ();
 
-      querier.notify["error"].connect((error) => {
-        if (error == null) {
-          ping = querier.ping.to_string ();
-          ping_css_classes = null;
-        } else {
-          ping = "Error";
-          ping_css_classes = error_classes;
-        }
-      });
+      querier.notify["error"].connect(update_error);
+      update_error ();
     }
 
     public ServerListItem (Querier querier) {
       Object (querier : querier);
+    }
+
+    private void update_sinfo () {
+      var sinfo = querier.sinfo;
+      var server = querier.server;
+
+      name = sinfo.server_name != null ? sinfo.server_name : server.address;
+      game = sinfo.game_name;
+
+      if (sinfo.game_mode != null) {
+        game += " (%s)".printf (sinfo.game_mode);
+      }
+
+      game_icon = find_file_in_data_dirs ("./icons/games/" + sinfo.game_id + ".png");
+      map = sinfo.map;
+      num_players = sinfo.num_players;
+      players = format_players (sinfo.num_players, sinfo.max_players);
+      players_css_classes = format_players_css_classes (sinfo.num_players, sinfo.max_players);
+
+      var addr = "0.0.0.0";// querier.transport.saddr.address.to_string ();
+      var geoip_resolver = GeoIPResolver.get_instance ();
+      var country_code = geoip_resolver.code_by_addr (addr);
+      country_icon = find_file_in_data_dirs ("./icons/flags/" + country_code + ".png");
+    }
+
+    private void update_ping () {
+      ping = querier.ping >= 0
+        ? querier.ping.to_string ()
+        : "";
+    }
+
+    private void update_error () {
+      if (querier.error == null) {
+        ping = querier.ping.to_string ();
+        ping_css_classes = null;
+      } else {
+        ping = "Error";
+        ping_css_classes = error_classes;
+      }
     }
 
     private string format_players (int num, int max) {

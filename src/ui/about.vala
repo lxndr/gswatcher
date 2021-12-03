@@ -13,8 +13,14 @@ namespace Gsw.Ui {
     sysinfo += "\tRun time: %s\n".printf (get_runtime_gtk_version ());
 
     sysinfo += "\nDuktape version:\n";
-    sysinfo += "\tBuild time: %s\n".printf (get_buildtime_duktape_version ());
-    sysinfo += "\tRun time: %s\n".printf (get_runtime_duktape_version ());
+    sysinfo += "\tBuild time: %s\n".printf (DuktapeEx.get_buildtime_version ());
+
+    try {
+      var duk = new DuktapeEx ();
+      sysinfo += "\tRun time: %s\n".printf (duk.get_runtime_version ());
+    } catch (Error err) {
+      sysinfo += "\tRun time: error getting version: %s\n".printf (err.message);
+    }
 
     sysinfo += "\nRegistered transports:\n";
 

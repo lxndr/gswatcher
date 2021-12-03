@@ -1,10 +1,3 @@
-export function InvalidResponseError(message: string) {
-  // @ts-expect-error
-  this.message = message
-  // @ts-expect-error
-  this.name = 'InvalidResponseError'
-  // @ts-expect-error
-  return this
+export class InvalidResponseError extends Error {
+  name = this.constructor.name
 }
-
-InvalidResponseError.prototype = Error.prototype

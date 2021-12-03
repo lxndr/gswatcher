@@ -176,7 +176,7 @@
           </object>
         </child>
         <child>
-          <object class="GtkLabel" id="has_password_ctl">
+          <object class="GtkLabel" id="private_ctl">
             <layout>
               <property name="column">1</property>
               <property name="row">7</property>
@@ -194,11 +194,11 @@
               <property name="row">8</property>
             </layout>
             <property name="xalign">0</property>
-            <property name="label" translatable="yes">Version:</property>
+            <property name="label" translatable="yes">Secure:</property>
           </object>
         </child>
         <child>
-          <object class="GtkLabel" id="version_ctl">
+          <object class="GtkLabel" id="secure_ctl">
             <layout>
               <property name="column">1</property>
               <property name="row">8</property>
@@ -210,10 +210,32 @@
         </child>
 
         <child>
-          <object class="GtkLabel" id="error_ctl">
+          <object class="GtkLabel">
             <layout>
               <property name="column">0</property>
               <property name="row">9</property>
+            </layout>
+            <property name="xalign">0</property>
+            <property name="label" translatable="yes">Version:</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="version_ctl">
+            <layout>
+              <property name="column">1</property>
+              <property name="row">9</property>
+            </layout>
+            <property name="hexpand">true</property>
+            <property name="xalign">0</property>
+            <property name="selectable">true</property>
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkLabel" id="error_ctl">
+            <layout>
+              <property name="column">0</property>
+              <property name="row">10</property>
               <property name="column-span">2</property>
             </layout>
             <property name="name">error</property>

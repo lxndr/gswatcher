@@ -116,13 +116,13 @@ public class GameResolver : Object {
     }
   }
 
-  public bool resolve (string protocol_id, ServerInfo inf) {
+  public bool resolve (string protocol_id, ServerInfo inf, Gee.Map<string, string> details) {
     var game = games.values.first_match ((game) => {
       if (game.phony || game.protocol != protocol_id)
         return false;
 
       foreach (var entry in game.inf.entries)
-        if (inf.get (entry.key) != entry.value)
+        if (details.get (entry.key) != entry.value)
           return false;
 
       return true;
@@ -131,8 +131,8 @@ public class GameResolver : Object {
     if (game == null)
       return false;
 
-    inf.set ("game_id", game.id);
-    inf.set ("game_name", game.name);
+    inf.set ("game-id", game.id);
+    inf.set ("game-name", game.name);
     return true;
   }
 

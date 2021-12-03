@@ -1,37 +1,97 @@
+// https://developer.valvesoftware.com/wiki/Server_Queries
+
 import 'core-js/features/array/find'
-import jsbi from 'jsbi'
+// import jsbi from 'jsbi'
 import { DataReader } from './lib/data-reader'
 import { DataWriter } from './lib/data-writer'
+import { CompoundResponse, Packet, ResponseStore } from './lib/response-store'
 import { InvalidResponseError } from './lib/response-error'
 
-interface PacketHeader {
-  reqid: number
-  number: number
+export const info: ProtocolInfo = {
+  id: 'source',
+  name: 'Source Engine',
+  transport: 'udp',
+}
+
+interface SourcePlayer extends Player {
+  index: number
+  name: string
+  score: number
+  duration: number
+  deaths?: number
+  money?: number
+}
+
+interface SourcePacket extends Packet<Buffer> {
   total: number
   size?: number
   compressed?: boolean
   dataSize?: number
   crc32?: number
-  payload: Buffer
 }
 
-interface ServerInfoExended extends ServerInfo {
+class SourceResponse extends CompoundResponse<Buffer, SourcePacket> {
+  combine() {
+    return Buffer.concat(this.packets.map(packet => packet.data))
+  }
+}
+
+class SourceResponseStore extends ResponseStore<Buffer, SourcePacket, SourceResponse> {
+  constructor() {
+    super(SourceResponse)
+  }
+
+  addPacket(packet: SourcePacket) {
+    const { reqid, total, compressed } = packet
+
+    if (compressed) {
+      throw new Error('Compressed split packets are not supported')
+    }
+
+    const res = this.ensureResponse(reqid)
+
+    if (res.total) {
+      if (res.total !== total) {
+        throw new InvalidResponseError('incorrect packet')
+      }
+    }
+
+    res.total = total
+    return super.addPacket(packet)
+  }
+}
+
+interface SourceServerDetails extends Info {
+  protocolVersion: number
+  name: string
+  map: string
+  folder: string
+  game: string
   appid?: number
-  protocol_version: number
-  dir: string
-  desc: string
-  num_bots: number
-  address?: string
-  keywords: string[]
-  server_port?: number
-  steamid?: string
-  sourcetv_port?: number
-  sourcetv_name?: string
+  numPlayers: number
+  maxPlayers: number
+  numBots: number
+  serverType: string
+  environment: string
+  visibility: number
+  vac: number
   theShip?: {
     mode: number
     witnesses: number
     duration: number
   }
+  version?: string
+  port?: number
+  steamid?: string
+  sourcetv?: {
+    port: number
+    name: string
+  }
+  keywords?: string
+  gameid?: string
+
+  // GoldSource
+  address?: string
   mod?: {
     link: string
     download: string
@@ -41,22 +101,10 @@ interface ServerInfoExended extends ServerInfo {
   }
 }
 
-interface Request {
-  packets: Buffer[]
-  firstPacketTime: number
-  total: number
-}
-
-export const info: ProtocolInfo = {
-  id: 'source',
-  name: 'Source Engine',
-  transport: 'udp',
-}
-
-const requests: Record<number, Request> = {}
+const responses = new SourceResponseStore()
 
 let gotChallenge = -1
-let gotServerInfo: ServerInfoExended | null = null
+let gotServerInfo: SourceServerDetails | null = null
 let gotPlayerList: (Player[] | null) = null
 
 const sendPacket = (type: string, payload?: Buffer) => {
@@ -111,10 +159,10 @@ export const query = () => {
   nextQuery ()
 }
 
-const getGameMode = (inf: ServerInfoExended): (string | null) => {
+const getGameMode = (inf: SourceServerDetails): (string | null) => {
   switch (inf.appid) {
     case 500: { // Left 4 Dead
-      const m = inf.desc.match(/^L4D - ([a-z-]+)/i)
+      const m = inf.game.match(/^L4D - ([a-z-]+)/i)
       return m?.[1] || null
     }
     case 550: { // Left 4 Dead 2
@@ -126,7 +174,7 @@ const getGameMode = (inf: ServerInfoExended): (string | null) => {
         scavenge: 'Scavenge',
       }
 
-      const mode = inf.keywords.find(keyword => keyword in modes)
+      const mode = inf.keywords?.split(',').find(keyword => keyword in modes)
       return mode ? modes[mode] : null
     }
     case 730: { // CS: GO
@@ -134,7 +182,7 @@ const getGameMode = (inf: ServerInfoExended): (string | null) => {
         competitive: 'Competitive',
       }
 
-      const mode = inf.keywords.find(keyword => keyword in modes)
+      const mode = inf.keywords?.split(',').find(keyword => keyword in modes)
       return mode ? modes[mode] : null
     }
     case 2400: { // The Ship
@@ -155,20 +203,20 @@ const getGameMode = (inf: ServerInfoExended): (string | null) => {
 }
 
 const readServerInfoGold = (r: DataReader) => {
-  const inf: ServerInfoExended = {
+  const inf: SourceServerDetails = {
     address: r.zstring(),
     name: r.zstring(),
     map: r.zstring(),
-    dir: r.zstring(),
-    desc: r.zstring(),
-    num_players: r.u8(),
-    max_players: r.u8(),
-    num_bots: 0,
-    protocol_version: r.u8(),
-    server_type: r.lstring(1),
-    os: r.lstring(1),
-    has_password: Boolean(r.u8()),
-    keywords: [],
+    folder: r.zstring(),
+    game: r.zstring(),
+    numPlayers: r.u8(),
+    maxPlayers: r.u8(),
+    numBots: 0,
+    protocolVersion: r.u8(),
+    serverType: r.lstring(1),
+    environment: r.lstring(1),
+    visibility: r.u8(),
+    vac: 0,
   }
 
   const mod = r.u8()
@@ -183,28 +231,27 @@ const readServerInfoGold = (r: DataReader) => {
     }
   }
 
-  inf.secure = Boolean(r.u8())
-  inf.num_bots = r.u8()
+  inf.vac = r.u8()
+  inf.numBots = r.u8()
 
   return inf
 }
 
 const readServerInfo = (r: DataReader) => {
-  const inf: ServerInfoExended = {
-    protocol_version: r.u8(),
+  const inf: SourceServerDetails = {
+    protocolVersion: r.u8(),
     name: r.zstring(),
     map: r.zstring(),
-    dir: r.zstring(),
-    desc: r.zstring(),
+    folder: r.zstring(),
+    game: r.zstring(),
     appid: r.u16le(),
-    num_players: r.u8(),
-    max_players: r.u8(),
-    num_bots: r.u8(),
-    server_type: r.lstring(1),
-    os: r.lstring(1),
-    has_password: Boolean(r.u8()),
-    secure: Boolean(r.u8()),
-    keywords: [],
+    numPlayers: r.u8(),
+    maxPlayers: r.u8(),
+    numBots: r.u8(),
+    serverType: r.lstring(1),
+    environment: r.lstring(1),
+    visibility: r.u8(),
+    vac: r.u8(),
   }
 
   if (inf.appid === 2400) { // The Ship
@@ -219,48 +266,56 @@ const readServerInfo = (r: DataReader) => {
   const edf = r.is_end() ? 0 : r.u8()
 
   if (edf & 0x80) {
-    inf.server_port = r.u16le()
+    inf.port = r.u16le()
   }
 
   if (edf & 0x10) {
-    // unneeded field, skip it for performance's sake
-    // inf.steamid = String(r.u64le())
-    r.skip(8)
+    inf.steamid = String(r.u64le())
   }
 
   if (edf & 0x40) {
-    inf.sourcetv_port = r.u16le()
-    inf.sourcetv_name = r.zstring()
+    inf.sourcetv = {
+      port: r.u16le(),
+      name: r.zstring(),
+    }
   }
 
   if (edf & 0x20) {
-    inf.keywords = r.zstring().split(',').filter(Boolean);
+    inf.keywords = r.zstring();
   }
 
   if (edf & 0x01) {
-    const gameId = r.u64le()
-    const appid = jsbi.bitwiseAnd(gameId, jsbi.BigInt(0xffffff))
-    inf.appid = jsbi.toNumber(appid)
-  }
-
-  const mode = getGameMode (inf)
-
-  if (mode) {
-    inf.game_mode = mode
+    inf.gameid = String(r.u64le())
+    // const gameId = r.u64le()
+    // const appid = jsbi.bitwiseAnd(gameId, jsbi.BigInt(0xffffff))
+    // inf.appid = jsbi.toNumber(appid)
   }
 
   return inf
 }
 
-const readPlayerList = (r: DataReader, inf: ServerInfoExended | null) => {
-  const players: Player[] = []
+const normalizeServerInfo = (inf: SourceServerDetails): ServerInfo => ({
+  [InfoField.GAME_MODE]: getGameMode(inf) || undefined,
+  [InfoField.GAME_VERSION]: inf.version,
+  [InfoField.SERVER_NAME]: inf.name,
+  [InfoField.SERVER_TYPE]: inf.serverType,
+  [InfoField.SERVER_OS]: inf.environment,
+  [InfoField.MAP]: inf.map,
+  [InfoField.NUM_PLAYERS]: inf.numPlayers,
+  [InfoField.MAX_PLAYERS]: inf.maxPlayers,
+  [InfoField.PRIVATE]: Boolean(inf.visibility),
+  [InfoField.SECURE]: Boolean(inf.vac),
+})
+
+const readPlayerList = (r: DataReader, inf: SourceServerDetails | null) => {
+  const players: SourcePlayer[] = []
   const count = r.u8()
 
   for (let i = 0; i < count; i++) {
-    const player: Player = {
+    const player: SourcePlayer = {
       index: r.u8(),
       name: r.zstring(),
-      score: r.u32le(),
+      score: r.i32le(),
       duration: r.f32le(),
     }
 
@@ -282,18 +337,24 @@ const readPayload = (r: DataReader) => {
   const type = r.lstring(1)
 
   switch (type) {
-    case 'I':
+    case 'I': {
+      gotChallenge = -1
       gotServerInfo = readServerInfo(r)
-      gotChallenge = -1
-      gsw.sinfo(gotServerInfo)
+      gsw.details(gotServerInfo)
+      const normalizedServerInfo = normalizeServerInfo(gotServerInfo)
+      gsw.sinfo(normalizedServerInfo)
       nextQuery ()
       break
-    case 'm':
+    }
+    case 'm': {
+      gotChallenge = -1
       gotServerInfo = readServerInfoGold(r)
-      gotChallenge = -1
-      gsw.sinfo(gotServerInfo)
+      gsw.details(gotServerInfo)
+      const normalizedServerInfo = normalizeServerInfo(gotServerInfo)
+      gsw.sinfo(normalizedServerInfo)
       nextQuery ()
       break
+    }
     case 'D':
       gotPlayerList = readPlayerList(r, gotServerInfo)
       gotChallenge = -1
@@ -306,7 +367,7 @@ const readPayload = (r: DataReader) => {
   }
 }
 
-const readHeaderGold = (r: DataReader): PacketHeader => {
+const readHeaderGold = (r: DataReader): SourcePacket => {
   const reqid = r.u32le()
   let number = r.u8()
   const total = number & 0x0f
@@ -324,11 +385,11 @@ const readHeaderGold = (r: DataReader): PacketHeader => {
     throw new InvalidResponseError(`packet number ${number} cannot be greater or equal ${total}`)
   }
 
-  const payload = r.data()
-  return { reqid, total, number, payload }
+  const data = r.data()
+  return { reqid, total, number, data }
 }
 
-const readHeader = (r: DataReader): PacketHeader => {
+const readHeader = (r: DataReader): SourcePacket => {
   const reqid = r.u32le()
   const total = r.u8()
   const number = r.u8()
@@ -353,8 +414,8 @@ const readHeader = (r: DataReader): PacketHeader => {
     crc32 = r.u32le()
   }
 
-  const payload = r.data()
-  return { reqid, total, number, compressed, dataSize, crc32, payload }
+  const data = r.data()
+  return { reqid, total, number, compressed, dataSize, crc32, data }
 }
 
 const tryReadHeader = (r: DataReader) => {
@@ -369,35 +430,6 @@ const tryReadHeader = (r: DataReader) => {
   return pak
 }
 
-const storePacket = (pak: PacketHeader) => {
-  if (!requests[pak.reqid]) {
-    requests[pak.reqid] = {
-      packets: [],
-      firstPacketTime: Date.now(),
-      total: pak.total,
-    }
-  }
-
-  const req = requests[pak.reqid]
-
-  if (req.total !== pak.total) {
-    throw new InvalidResponseError('Incorrect packet')
-  }
-
-  req.packets[pak.number] = pak.payload
-  return req
-}
-
-const gotAllPackets = (req: Request) => {
-  for (let i = 0; i < req.total; i++) {
-    if (!req.packets[i]) {
-      return false
-    }
-  }
-
-  return true
-}
-
 export const processResponse = (data: Buffer) => {
   const r = new DataReader(data)
   const format = r.i32le()
@@ -407,17 +439,14 @@ export const processResponse = (data: Buffer) => {
   } else if (format == -2) {
     const pak = tryReadHeader(r)
 
-    if (pak.compressed) {
-      throw new Error('Compressed split packets are not supported')
-    }
+    const res = responses.addPacket(pak)
 
-    const req = storePacket(pak)
+    if (res.gotAllPackets()) {
+      const data = res.combine()
+      responses.remove(pak.reqid)
 
-    if (gotAllPackets(req)) {
-      const data = Buffer.concat(req.packets)
       const r = new DataReader(data)
       readPayload(r)
-      delete requests[pak.reqid]
     }
   }
 }

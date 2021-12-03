@@ -12,6 +12,7 @@ namespace Gsw.Ui {
     class construct {
       typeof (Ui.ServerList).ensure ();
       typeof (Ui.ServerInfo).ensure ();
+      typeof (Ui.ServerDetails).ensure ();
       typeof (Ui.BuddyList).ensure ();
       typeof (Ui.PlayerList).ensure ();
       typeof (Ui.Preferences).ensure ();

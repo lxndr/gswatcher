@@ -15,6 +15,7 @@ public abstract class Protocol : Object {
   public ProtocolInfo info { get; protected set; }
 
   public signal void data_send (uint8[] data);
+  public signal void details_update (Gee.Map<string, string> details);
   public signal void sinfo_update (ServerInfo sinfo);
   public signal void plist_update (Gee.ArrayList<Player> plist);
 

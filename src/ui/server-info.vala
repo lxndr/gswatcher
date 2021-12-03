@@ -28,7 +28,10 @@ class ServerInfo : Widget {
   private unowned Label players_ctl;
 
   [GtkChild]
-  private unowned Label has_password_ctl;
+  private unowned Label private_ctl;
+
+  [GtkChild]
+  private unowned Label secure_ctl;
 
   [GtkChild]
   private unowned Label version_ctl;
@@ -58,6 +61,7 @@ class ServerInfo : Widget {
 
     set {
       if (_querier != null) {
+        _querier.sinfo.notify.disconnect (update_sinfo);
         _querier.notify["sinfo"].disconnect (update_sinfo);
         _querier.notify["error"].disconnect (update_error);
       }
@@ -65,7 +69,12 @@ class ServerInfo : Widget {
       _querier = value;
 
       if (_querier != null) {
-        _querier.notify["sinfo"].connect (update_sinfo);
+        _querier.notify["sinfo"].connect (() => {
+          update_sinfo ();
+          _querier.sinfo.notify.connect (update_sinfo);
+        });
+  
+        _querier.sinfo.notify.connect (update_sinfo);
         _querier.notify["error"].connect (update_error);
       }
 
@@ -75,8 +84,8 @@ class ServerInfo : Widget {
   }
 
   private void update_sinfo () {
-    name_ctl.label = (_querier?.sinfo != null && _querier.sinfo.has_key ("name"))
-      ? _querier.sinfo["name"]
+    name_ctl.label = (_querier?.sinfo?.server_name != null)
+      ? _querier.sinfo.server_name
       : _("N/A");
 
     address_ctl.label = _querier != null
@@ -87,28 +96,32 @@ class ServerInfo : Widget {
       ? format_location ()
       : _("N/A");
 
-    game_ctl.label = (_querier?.sinfo != null && _querier.sinfo.has_key ("game_name"))
-      ? _querier.sinfo["game_name"]
+    game_ctl.label = (_querier?.sinfo?.game_name != null)
+      ? _querier.sinfo.game_name
       : _("N/A");
 
-    game_mode_ctl.label = (_querier?.sinfo != null && _querier.sinfo.has_key ("game_mode"))
-      ? _querier.sinfo["game_mode"]
+    game_mode_ctl.label = (_querier?.sinfo?.game_mode != null)
+      ? _querier.sinfo.game_mode
       : _("N/A");
 
-    map_ctl.label = (_querier?.sinfo != null && _querier.sinfo.has_key ("map"))
-      ? _querier.sinfo["map"]
+    map_ctl.label = (_querier?.sinfo?.map != null)
+      ? _querier.sinfo.map
       : _("N/A");
 
-    players_ctl.label = (_querier?.sinfo != null && _querier.sinfo.has_key ("num_players") && _querier.sinfo.has_key ("max_players"))
+    players_ctl.label = (_querier?.sinfo != null)
       ? format_players (_querier.sinfo)
       : _("N/A");
 
-    has_password_ctl.label = (_querier?.sinfo != null && _querier.sinfo.has_key ("has_password"))
-      ? format_boolean (_querier.sinfo["has_password"])
+    private_ctl.label = (_querier?.sinfo?.private != null)
+      ? format_boolean (_querier.sinfo.private)
       : _("N/A");
 
-    version_ctl.label = (_querier?.sinfo != null && _querier.sinfo.has_key ("version"))
-      ? _querier.sinfo["version"]
+    secure_ctl.label = (_querier?.sinfo?.secure != null)
+      ? format_boolean (_querier.sinfo.secure)
+      : _("N/A");
+
+    version_ctl.label = (_querier?.sinfo?.game_version != null)
+      ? _querier.sinfo.game_version
       : _("N/A");
   }
 
@@ -125,11 +138,15 @@ class ServerInfo : Widget {
   }
 
   private string format_players (Gsw.ServerInfo sinfo) {
-    return "%s / %s".printf (sinfo["num_players"], sinfo["max_players"]);
+    var num = sinfo.num_players;
+    var max = sinfo.max_players;
+    var num_s = num < 0 ? "-" : num.to_string ();
+    var max_s = max < 0 ? "-" : max.to_string ();
+    return @"$(num_s) / $(max_s)";
   }
 
-  private string format_boolean (string val) {
-    return string_to_bool (val, false) ? _("Yes") : _("No");
+  private string format_boolean (bool val) {
+    return val ? _("Yes") : _("No");
   }
 }
 

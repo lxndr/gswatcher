@@ -1,6 +1,6 @@
-import { DataReader } from './lib/data-reader'
 import { DataWriter } from './lib/data-writer'
 import { InvalidResponseError } from './lib/response-error'
+import { parseQuakeInfo } from './quake'
 
 export const info: ProtocolInfo = {
   id: 'quake3',
@@ -19,40 +19,24 @@ const createPacket = (parts: string[]) => {
 export const query = () =>
   gsw.send(createPacket(['getstatus']))
 
-const parseInfo = (str: string): ServerInfo => {
-  const parts = str.substr(1).split('\\')
-
-  const obj: Record<string, string> = {}
-
-  for (let i = 0; i < parts.length; i++) {
-    const key = parts[i * 2]
-    const val = parts[i * 2 + 1]
-    obj[key] = val
+const extractServerInfo = (dict: Info): ServerInfo => {
+  return {
+    [InfoField.SERVER_NAME]: String(dict.sv_hostname),
+    [InfoField.GAME_NAME]: String(dict.gamename),
+    [InfoField.GAME_VERSION]: String(dict.version),
+    [InfoField.MAP]: String(dict.mapname),
+    [InfoField.MAX_PLAYERS]: Number(dict.sv_maxclients),
+    [InfoField.PRIVATE]: Boolean(dict.g_needpass),
   }
-
-  const inf: ServerInfo = {}
-
-  if ('sv_hostname' in obj) {
-    inf.name = obj.sv_hostname
-  }
-
-  if ('sv_maxclients' in obj) {
-    inf.max_players = parseInt(obj.sv_maxclients, 10)
-  }
-
-  if ('version' in obj) {
-    inf.version = obj.version
-  }
-
-  if ('mapname' in obj) {
-    inf.map = obj.mapname
-  }
-
-  return inf
 }
 
-const parsePlayer = (str: string): Player[] => {
-  return []
+const parsePlayer = (str: string): Player => {
+  const parts = str
+    .split('\"')
+    .flatMap((part, index) => index % 2 ? part : part.split(' '))
+    .filter(Boolean)
+
+  return Object.assign<Player, string[]>({}, parts)
 }
 
 export const processResponse = (data: Buffer) => {
@@ -69,12 +53,12 @@ export const processResponse = (data: Buffer) => {
     throw new InvalidResponseError('invalid packet')
   }
 
-  if (!parts[1].startsWith('\\')) {
-    throw new InvalidResponseError('invalid packet')
-  }
+  const all_info = parseQuakeInfo(parts[1])
+  gsw.details(all_info)
 
-  const inf = parseInfo(parts[1])
-  const players = parts.slice(2).map(parsePlayer)
-
+  const inf = extractServerInfo(all_info)
   gsw.sinfo(inf)
+
+  const players = parts.slice(2).map(parsePlayer)
+  gsw.plist(players)
 }

@@ -5,6 +5,7 @@
 		<file compressed="true" preprocess="xml-stripblanks">ui/main-window.ui</file>
 		<file compressed="true" preprocess="xml-stripblanks">ui/player-list.ui</file>
 		<file compressed="true" preprocess="xml-stripblanks">ui/preferences.ui</file>
+		<file compressed="true" preprocess="xml-stripblanks">ui/server-details.ui</file>
 		<file compressed="true" preprocess="xml-stripblanks">ui/server-info.ui</file>
 		<file compressed="true" preprocess="xml-stripblanks">ui/server-list.ui</file>
 		<file compressed="true" preprocess="xml-stripblanks">ui/buddy-list.ui</file>

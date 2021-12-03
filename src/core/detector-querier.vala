@@ -19,9 +19,9 @@ public class DetectorQuerier : Querier {
         var protocol = querier_manager.create_protocol (protocol_desc.id);
         var querier = new WorkerQuerier (querier_manager, server, protocol);
 
-        querier.notify["sinfo"].connect(() => {
-          on_protocol_detected (querier);
-          sinfo = querier.sinfo;
+        querier.sinfo.notify.connect(() => {
+          if (detected_querier == null)
+            on_protocol_detected (querier);
         });
 
         queriers.add (querier);
@@ -41,21 +41,20 @@ public class DetectorQuerier : Querier {
   }
 
   private void on_protocol_detected (WorkerQuerier querier) {
-    var worker = new WorkerQuerier (querier_manager, querier.server, querier.protocol);
+    detected_querier = querier;
 
-    sinfo = worker.sinfo;
-    plist = worker.plist;
-    plist_fields = worker.plist_fields;
-    ping = worker.ping;
+    details = querier.details;
+    sinfo = querier.sinfo;
+    plist = querier.plist;
+    plist_fields = querier.plist_fields;
+    ping = querier.ping;
 
-    querier.notify["sinfo"].connect(() => sinfo = worker.sinfo);
-    querier.notify["ping"].connect(() => ping = worker.ping);
-    querier.notify["error"].connect(() => error = worker.error);
-
-    detected_querier = worker;
+    querier.notify["ping"].connect(() => ping = querier.ping);
+    querier.notify["error"].connect(() => error = querier.error);
 
     foreach (var it in queriers)
-      it.dispose();
+      if (it != querier)
+        it.dispose();
     queriers.clear ();
   }
 }

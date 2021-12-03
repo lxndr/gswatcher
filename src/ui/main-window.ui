@@ -81,10 +81,38 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkBox">
-                    <property name="orientation">GTK_ORIENTATION_HORIZONTAL</property>
+                  <object class="GtkNotebook">
+                    <property name="tab-pos">GTK_POS_BOTTOM</property>
                     <child>
-                      <object class="GswUiServerInfo">
+                      <object class="GtkBox">
+                        <property name="orientation">GTK_ORIENTATION_HORIZONTAL</property>
+                        <child>
+                          <object class="GswUiServerInfo">
+                            <binding name="querier">
+                              <lookup type="GswUiMainWindow" name="selected-querier">
+                                GswUiMainWindow
+                              </lookup>
+                            </binding>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GswUiPlayerList" id="player_list">
+                            <binding name="querier">
+                              <lookup type="GswUiMainWindow" name="selected-querier">
+                                GswUiMainWindow
+                              </lookup>
+                            </binding>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="tab">
+                      <object class="GtkLabel">
+                        <property name="label">Info</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GswUiServerDetails" id="server_details">
                         <binding name="querier">
                           <lookup type="GswUiMainWindow" name="selected-querier">
                             GswUiMainWindow
@@ -92,13 +120,9 @@
                         </binding>
                       </object>
                     </child>
-                    <child>
-                      <object class="GswUiPlayerList" id="player_list">
-                        <binding name="querier">
-                          <lookup type="GswUiMainWindow" name="selected-querier">
-                            GswUiMainWindow
-                          </lookup>
-                        </binding>
+                    <child type="tab">
+                      <object class="GtkLabel">
+                        <property name="label">Details</property>
                       </object>
                     </child>
                   </object>

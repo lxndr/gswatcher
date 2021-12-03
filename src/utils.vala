@@ -1,40 +1,5 @@
 namespace Gsw {
 
-  public void print_duktape_stack (Duktape.Duktape vm) {
-    var len = vm.get_top ();
-    print ("Duktape stack:\n");
-
-    for (int idx = len - 1; idx >= 0; idx--) {
-      vm.dup (idx);
-      print ("| %d: %s = %s\n", idx, vm.get_type (-1).to_string (), vm.safe_to_string (-1));
-      vm.pop ();
-    }
-  }
-
-  public string get_runtime_duktape_version () {
-    var vm = new Duktape.Duktape.default ();
-
-    vm.get_global_string ("Duktape");
-    vm.get_prop_string (-1, "version");
-    var version = vm.to_uint32 (-1);
-
-    return format_duktape_version (version);
-  }
-
-  public string get_buildtime_duktape_version () {
-    return format_duktape_version (Duktape.VERSION);
-  }
-
-  private string format_duktape_version (uint32 version) {
-    var major = version / 10000;
-    version -= major * 10000;
-    var minor = version / 100;
-    version -= minor * 100;
-    var patch = version;
-
-    return "%u.%02u.%02u".printf (major, minor, patch);
-  }
-
   public string get_runtime_gtk_version () {
     return "%u.%02u.%02u".printf (Gtk.get_major_version (), Gtk.get_minor_version (), Gtk.get_minor_version ());
   }
