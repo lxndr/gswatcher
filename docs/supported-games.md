@@ -1,3 +1,5 @@
+# Supported games
+
 | Game                              | ID        | Protocol | Game port | Query port |
 |-----------------------------------|-----------|----------|-----------|------------|
 | Alien Arena                       | arena     | quake2   | 27910     |            |
@@ -20,6 +22,8 @@
 | Unreal Tournament                 | ut        | gamespy  | 7777      | port + 1   |
 | Tactical Ops: Assault on Terror   | to-aot    | gamespy  | 7777      | port + 1   |
 | Battlefield 1942                  | bf1942    | gamespy  | 14567     | 23000      |
+
+### Nice to have in the future
 
 | Game                              | ID        | Protocol | Game port | Query port |
 |-----------------------------------|-----------|----------|-----------|------------|
