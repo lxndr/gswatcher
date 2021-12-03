@@ -93,6 +93,7 @@ class UdpTransportManager : Object {
 
       foreach (var transport in transport_list) {
         if (
+          transport.saddr != null &&
           addr.port == transport.saddr.port &&
           addr.address.equal (transport.saddr.address)
         ) {

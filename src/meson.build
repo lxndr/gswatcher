@@ -23,6 +23,7 @@ core_sources = files(
   'core/detector-querier.vala',
   'core/game-resolver.vala',
   'core/geoip-resolver.vala',
+  'core/net-transport.vala',
   'core/player-list.vala',
   'core/protocol.vala',
   'core/querier-manager.vala',

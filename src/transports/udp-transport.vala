@@ -1,6 +1,6 @@
 namespace Gsw {
 
-class UdpTransport : Transport {
+class UdpTransport : NetTransport {
   private UdpTransportManager manager;
 
   construct {

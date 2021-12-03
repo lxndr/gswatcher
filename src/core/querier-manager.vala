@@ -29,7 +29,9 @@ public class QuerierManager : Object {
 
     querier_list = new Gtk.MapListModel(server_list, (item) => {
       var server = (Server) item;
-      return new DetectorQuerier (this, server);
+      var querier = new DetectorQuerier (this, server);
+      querier.query ();
+      return querier;
     });
 
     notify["update_interval"].connect (update_timer);
@@ -117,14 +119,14 @@ public class QuerierManager : Object {
     transports.set (id, desc);
   }
 
-  public Transport? create_transport (string id, string host, uint16 port) {
+  public NetTransport? create_transport (string id, string host, uint16 port) {
     if (!transports.has_key (id)) {
       log (Config.LOG_DOMAIN, LEVEL_ERROR, "unknown transport '%s'", id);
       return null;
     }
 
     var desc = transports[id];
-    return (Transport) Object.new (desc.class_type, "host", host, "port", port);
+    return (NetTransport) Object.new (desc.class_type, "host", host, "port", port);
   }
 }
 

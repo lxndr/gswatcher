@@ -22,16 +22,24 @@
 | Unreal Tournament                 | ut        | gamespy  | 7777      | port + 1   |
 | Tactical Ops: Assault on Terror   | to-aot    | gamespy  | 7777      | port + 1   |
 | Battlefield 1942                  | bf1942    | gamespy  | 14567     | 23000      |
+| America's Army                    | aa        | gamespy2 | 1716      | port + 1   |
+| Armed Assault                     | aa        | gamespy2 | 2302      | port       |
+| Battlefield Vietnam               | bfv       | gamespy2 | 23000     | port       |
+| Battlefield 2                     | bf2       | gamespy3 | 16567     | 29900      |
+| Battlefield 2142                  | bf2142    | gamespy3 | 17567     | 29900      |
+| Unreal Tournament 3               | ut3       | gamespy3 | 7777      | 6500       |
+| Crysis                            | crysis    | gamespy3 | 64000     |            |
+| Crysis 2                          | crysis2   | gamespy3 | 64100     |            |
+| Minecraft                         | mc        | gamespy3 | 25565     | port       |
+| Arma 2                            | arma2     | gamespy3 | 2302      | port       |
 
-### Nice to have in the future
+## Nice to have in the future
 
 | Game                              | ID        | Protocol | Game port | Query port |
 |-----------------------------------|-----------|----------|-----------|------------|
 | Age of Empires II                 | aoe2      | ase      |           |            |
 | Age of Empires II: The Conquerors | aoe2-c    | ase      |           |            |
 | Aliens versus Predator 2          | avp2      | gamespy  |           |            |
-| America's Army                    | aa        | gamespy2 |           |            |
-| BattleField Vietnam               | bfv       | gamespy2 |           |            |
 | Breed                             | breed     | gamespy2 |           |            |
 | Chaser                            | chaser    | ase      |           |            |
 | Chrome                            | chrome    | ase      |           |            |
@@ -56,3 +64,35 @@
 | Halo: Combat Evolved              | halo-ce   | gamespy2 |           |            |
 | Heretic 2                         | heretic2  | gamespy  |           |            |
 | Homeworld 2                       | hw2       | gamespy  |           |            |
+| IGI-2: Covert Strike              | igi2      | gamespy  |           |            |
+| IL-2 Sturmovik                    | il2       | gamespy  |           |            |
+| IL-2 Sturmovik: Forgotten Battles | il2fb     | gamespy  |           |            |
+| Iron Storm                        | is        | gamespy  |           |            |
+| James Bond: Nightfire             | jbn       | gamespy  |           |            |
+| Kingpin                           | kingpin   | gamespy  |           |            |
+| Medal of Honor: Allied Assault    | moh-aa    | gamespy  |           |            |
+| Medal of Honor: Breakthrough      | moh-bt    | gamespy  |           |            |
+| Medal of Honor: Pacific Assault   | mph-pa    | ase      |           |            |
+| Medal of Honor: Spearhead         | moh-sh    | gamespy  |           |            |
+| Multi Theft Auto                  | mta       | ase      |           |            |
+| Multi Theft Auto: Vicy City       | mta-vc    | ase      |           |            |
+| Need for Speed: Hot Pursuit 2     | nfs-hp2   | gamespy  |           |            |
+| Nerf Arena Blast                  | nab       | gamespy  |           |            |
+| Neverwinter Nights                | nwn       | gamespy2 |           |            |
+| Nitro Family                      | nf        | gamespy  |           |            |
+| No One Lives Forever              | nolf      | gamespy  |           |            |
+| No One Lives Forever 2            | nolf2     | gamespy  |           |            |
+| Operation Flashpoint              | ofp       | gamespy2 |           |            |
+| Operation Flashpoint: Resistance  | ofpr      | gamespy  |           |            |
+| Painkiller                        | pk        | gamespy2 |           |            |
+| Postal 2                          | postal2   | gamespy  |           |            |
+| Purge Jihad                       | pj        | ase      |           |            |
+| QuakeWorld                        | qw        | quakew   |           |            |
+| Rainbow Six                       | rs        | gamespy  |           |            |
+| Rainbow Six: Rogue Spear          | rs-rs     | gamespy  |           |            |
+| RalliSport Challenge              | rc        | gamespy  |           |            |
+| Rally Masters                     | rm        | gamespy  |           |            |
+| Redline                           | rl        | gamespy  |           |            |
+| Return to Castle Wolfenstein      | r2cw      | quake3   |           |            |
+| Rise of Nations                   | ron       | gamespy  |           |            |
+| Rune                              | rune      | gamespy  |           |            |
