@@ -34,6 +34,8 @@ public class QuerierManager : Object {
       return querier;
     });
 
+    querier_list.items_changed.connect (update_timer);
+
     notify["update_interval"].connect (update_timer);
     notify["paused"].connect (update_timer);
     update_timer ();

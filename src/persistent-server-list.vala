@@ -9,7 +9,6 @@ namespace Gsw {
     construct {
       config_file = Path.build_filename (Environment.get_user_config_dir (), "gswatcher", "servers.ini");
       settings_backend = SettingsBackend.keyfile_settings_backend_new (config_file, root_path, null);
-      reload ();
     }
 
     public override Server add (string name) {
@@ -32,7 +31,7 @@ namespace Gsw {
       }
     }
 
-    private void reload () {
+    public void reload () {
       try {
         var names = get_names ();
 

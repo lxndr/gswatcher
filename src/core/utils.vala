@@ -54,56 +54,44 @@ public bool string_to_bool (string value, bool def) {
   return def;
 }
 
-public Gee.List<File> get_data_dirs () {
-  var list = new Gee.ArrayList<string> ();
-  list.add (Environment.get_user_data_dir ());
-  list.add_all_array (Environment.get_system_data_dirs ());
-
-  var iter = list
-    .map<File> ((dir) => File.new_build_filename (dir, Environment.get_prgname ()))
-    .filter ((dir) => dir.query_exists () && dir.query_file_type (NONE) == DIRECTORY);
-
+public Gee.List<File> get_data_dirs (string subdir, string? data_dir_env = null) {
   var dirs = new Gee.ArrayList<File> ();
-  dirs.add_all_iterator (iter);
-  return dirs;
-}
-
-public Gee.Iterator<File> get_data_dirs_2 (string? data_dir_env = null) {
-  var dirs = new Gee.ArrayList<string> ();
+  var prgname = Environment.get_prgname ();
 
   if (data_dir_env != null) {
-    var env_data_dir = Environ.get_variable (null, data_dir_env);
+    var env_data_dir = Environment.get_variable (data_dir_env);
 
     if (env_data_dir != null) {
-      dirs.add (env_data_dir);
+      dirs.add (File.new_for_path (env_data_dir));
     }
   }
 
-  dirs.add (Environment.get_user_data_dir ());
-  dirs.add_all_array (Environment.get_system_data_dirs ());
+  var user_data_dir = Environment.get_user_data_dir ();
+  dirs.add (File.new_build_filename (user_data_dir, prgname, subdir));
 
-  return dirs.map<File> ((dir) => File.new_build_filename (dir, Environment.get_prgname ()));
+  var system_data_dirs = Environment.get_system_data_dirs ();
+  foreach (var dir in system_data_dirs)
+    dirs.add (File.new_build_filename (dir, prgname, subdir));
+
+  return dirs;
 }
 
 public async Gee.List<File> get_data_files (string subdir, string? data_dir_env = null, Cancellable? cancellable = null) {
   var files = new Gee.ArrayList<File> ();
-  var data_dirs = get_data_dirs_2 ();
+  var data_dirs = get_data_dirs (subdir, data_dir_env);
 
-  while (data_dirs.next ()) {
-    var data_dir = data_dirs.get ();
-    var dir_file = data_dir.get_child (subdir);
-
+  foreach (var data_dir in data_dirs) {
     try {
-      var enumerator = yield dir_file.enumerate_children_async ("standard::*", FileQueryInfoFlags.NOFOLLOW_SYMLINKS, Priority.DEFAULT, null);
+      var enumerator = yield data_dir.enumerate_children_async ("standard::*", FileQueryInfoFlags.NOFOLLOW_SYMLINKS);
 
       FileInfo info;
       while ((info = enumerator.next_file (null)) != null) {
-        var file = dir_file.get_child(info.get_name ());
+        var file = data_dir.get_child(info.get_name ());
         files.add (file);
       }
     } catch (Error err) {
       if (err.code != IOError.NOT_FOUND)
-        log (Config.LOG_DOMAIN, LEVEL_WARNING, "error reading directory %s: %s", dir_file.get_path (), err.message);
+        log (Config.LOG_DOMAIN, LEVEL_WARNING, "error reading directory %s: %s", data_dir.get_path (), err.message);
     }
   }
 

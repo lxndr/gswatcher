@@ -1,7 +1,7 @@
 namespace Gsw {
 
   class Application : Gtk.Application {
-    private ServerList server_list;
+    private PersistentServerList server_list;
     private BuddyList buddy_list;
     private QuerierManager querier_manager;
     private Gtk.Window main_window;
@@ -73,7 +73,10 @@ namespace Gsw {
         class_type = typeof (UdpTransport)
       });
 
-      register_protocols ();
+      register_protocols.begin ((obj, res) => {
+        register_protocols.end (res);
+        server_list.reload ();
+      });
 
       // buddies
       buddy_list = new PersistentBuddyList ();
@@ -114,41 +117,32 @@ namespace Gsw {
       send_notification (null, n);
     }
 
-    private void register_protocols () {
-      foreach (var data_dir in get_data_dirs ()) {
-        var dir = data_dir.get_child ("protocols");
+    private async void register_protocols () {
+      var files = yield get_data_files ("protocols", "GSW_PROTOCOLS_DIR");
 
-        if (!dir.query_exists ())
+      foreach (var file in files) {
+        var script = file.get_path ();
+
+        if (script.substring (-3) != ".js")
           continue;
 
         try {
-          FileInfo info;
-          var enumerator = dir.enumerate_children ("standard::*", NONE);
+          var desc = new ProtocolDesc ();
+          desc.class_type = typeof (JsProtocol);
+          desc.class_params = { "script-path" };
+          desc.class_values = { Value (typeof (string)) };
+          desc.class_values[0].set_string (script);
 
-          while ((info = enumerator.next_file ()) != null) {
-            var script = dir.get_child (info.get_name ()).get_path ();
+          var protocol = (Protocol) Object.new_with_properties (desc.class_type, desc.class_params, desc.class_values);
+          protocol.initialize ();
 
-            try {
-              var desc = new ProtocolDesc ();
-              desc.class_type = typeof (JsProtocol);
-              desc.class_params = { "script-path" };
-              desc.class_values = { Value (typeof (string)) };
-              desc.class_values[0].set_string (script);
+          desc.id = protocol.info.id;
+          desc.name = protocol.info.name;
+          desc.transport = protocol.info.transport;
 
-              var protocol = (Protocol) Object.new_with_properties (desc.class_type, desc.class_params, desc.class_values);
-              protocol.initialize ();
-
-              desc.id = protocol.info.id;
-              desc.name = protocol.info.name;
-              desc.transport = protocol.info.transport;
-
-              querier_manager.register_protocol (desc);
-            } catch (Error err) {
-              log (Config.LOG_DOMAIN, LEVEL_WARNING, "failed to load protocol script '%s': %s", script, err.message);
-            }
-          }
+          querier_manager.register_protocol (desc);
         } catch (Error err) {
-          log (Config.LOG_DOMAIN, LEVEL_WARNING, "failed to enumerate directory '%s'", dir.get_path ());
+          log (Config.LOG_DOMAIN, LEVEL_WARNING, "failed to load protocol script '%s': %s", script, err.message);
         }
       }
     }
