@@ -13,6 +13,7 @@ public class WorkerQuerier : Querier {
   public Protocol protocol { get; construct; }
   public NetTransport transport { get; construct; }
 
+  private GameResolver game_resolver = new GameResolver ();
   private bool query_pending;
   private int64 query_time;
   private uint timeout_source;
@@ -27,7 +28,9 @@ public class WorkerQuerier : Querier {
 
     transport = querier_manager.create_transport (protocol.info.transport, server.host, server.qport);
     transport.receive.connect (on_data_received);
-    transport.notify["ready"].connect (on_transport_ready);
+    transport.notify["ready"].connect (handle_pending_query);
+
+    game_resolver.notify["ready"].connect (handle_pending_query);
   }
 
   public WorkerQuerier (QuerierManager querier_manager, Server server, Protocol protocol) {
@@ -47,11 +50,13 @@ public class WorkerQuerier : Querier {
     protocol.sinfo_update.disconnect (on_sinfo_updated);
     protocol.plist_update.disconnect (on_plist_updated);
     transport.receive.disconnect (on_data_received);
+    transport.notify["ready"].disconnect (handle_pending_query);
+    game_resolver.notify["ready"].disconnect (handle_pending_query);
   }
 
   public override void query () {
     try {
-      if (!transport.ready) {
+      if (!(transport.ready && game_resolver.ready)) {
         query_pending = true;
         return;
       }
@@ -83,15 +88,14 @@ public class WorkerQuerier : Querier {
     }
   }
 
-  private void on_transport_ready () {
-    if (transport.ready && query_pending)
+  private void handle_pending_query () {
+    if (query_pending && transport.ready && game_resolver.ready)
       query ();
   }
 
   private void on_data_received (uint8[] data) {
     try {
       stop_ping_timer ();
-      log (Config.LOG_DOMAIN, LEVEL_DEBUG, "received data from %s:%u: length = %ld", server.host, server.qport, data.length);
       protocol.process_response (data);
       error = null;
     } catch (Error err) {

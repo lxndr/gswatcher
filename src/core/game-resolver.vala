@@ -1,109 +1,130 @@
 namespace Gsw {
 
+public errordomain GameDefinitionError {
+  NO_GAME_GROUP,
+  NO_GAME_ID,
+  NO_PROTOCOL,
+  INVALID_PORT,
+  INVALID_QPORT_DIFF,
+  NO_MATCH_GROUP,
+}
+
 class Game {
   public string id;
-  public string name;
   public string protocol;
-  public bool phony;
-  public Gee.Map<string, string> inf;
-  public Gee.List<PlayerField> pfields;
+  public uint16 port;
+  public int16 qport_diff;
+  public Gee.Map<string, string> inf_matches = new Gee.HashMap<string, string> ();
+  public Gee.Map<string, string> inf = new Gee.HashMap<string, string> ();
+  public Gee.List<PlayerField> pfields = new Gee.ArrayList<PlayerField> ();
 
-  public Game (string id) {
+  public Game (string id, string protocol) {
     this.id = id;
-    inf = new Gee.HashMap<string, string> ();
-    pfields = new Gee.ArrayList<PlayerField> ();
+    this.protocol = protocol;
   }
 
-  public void extend (Game game) {
-    if (name == null)
-      name = game.name;
+  public bool matches (string protocol_id, Gee.Map<string, string> details) {
+    if (protocol != protocol_id)
+      return false;
 
-    if (protocol == null)
-      protocol = game.protocol;
+    foreach (var entry in inf_matches.entries)
+      if (details.get (entry.key) != entry.value)
+        return false;
 
-    inf.set_all (game.inf);
-    pfields.add_all (game.pfields);
+    return true;
   }
 }
 
 [SingleInstance]
 public class GameResolver : Object {
-  private Gee.Map<string, Game> games;
+  public bool ready { get; private set; }
+
+  private Gee.Map<string, Game> games = new Gee.HashMap<string, Game> ();
+
+  construct {
+    load_games.begin ((obj, res) => {
+      try {
+        load_games.end (res);
+        ready = true;
+      } catch (Error err) {
+        log (Config.LOG_DOMAIN, LEVEL_ERROR, "Failed to load game definitions: %s", err.message);
+      }
+    });
+  }
 
   public static GameResolver get_instance () {
     return new GameResolver ();
   }
 
-  construct {
-    try {
-      games = new Gee.HashMap<string, Game> ();
+  private async void load_games () throws Error {
+    var ini_files = yield get_data_files_contents ("games", "GSW_GAMES_DIR", null);
 
-      var kf_file = File.new_for_uri ("resource:///org/lxndr/gswatcher/games.ini");
-      var kf = new KeyFile ();
-      kf.load_from_bytes (kf_file.load_bytes (), NONE);
-
-      foreach (var ini_group in kf.get_groups ()) {
-        var ini_group_parts = ini_group.split (".");
-        var id = ini_group_parts[0];
-        var game = ensure_game (id);
-
-        if (ini_group_parts.length == 1)
-          load_game (kf, ref game);
-        else if (ini_group_parts.length == 2 && ini_group_parts[1] == "player")
-          load_player_fields (kf, ref game, ini_group);
+    foreach (var ini_file in ini_files) {
+      try {
+        var kf = new KeyFile ();
+        kf.set_list_separator (',');
+        kf.load_from_bytes (new Bytes.static (ini_file.data), NONE);
+        var game = load_game (kf);
+        games[game.id] = game;
+      } catch (Error err) {
+        log (Config.LOG_DOMAIN, LEVEL_ERROR, "Failed to load game definition from '%s': %s", ini_file.file.get_path (), err.message);
       }
-    } catch (Error err) {
-      log (Config.LOG_DOMAIN, LEVEL_ERROR, "Failed to load game definitions: %s", err.message);
     }
   }
 
-  private Game ensure_game (string id) {
-    if (!games.has_key (id))
-      games.set (id, new Game (id));
-    return games.get (id);
-  }
+  private Game load_game (KeyFile kf) throws Error {
+    var game_id = kf.get_value ("Game", "id");
+    var protocol = kf.get_value ("Game", "protocol");
+    var game = new Game (game_id, protocol);
 
-  private void load_game (KeyFile kf, ref Game game) throws Error {
-    foreach (var key in kf.get_keys (game.id)) {
-      var value = kf.get_string (game.id, key);
+    if (kf.has_key ("Game", "port")) {
+      var port = kf.get_integer ("Game", "port");
+      if (!(port > 0 && port <= uint16.MAX))
+        throw new KeyFileError.INVALID_VALUE ("invalid port value");
+      game.port = (uint16) port;
+    }
+
+    if (kf.has_key ("Game", "qport-diff")) {
+      var qport_diff = kf.get_integer ("Game", "qport-diff");
+      if (!(qport_diff >= int16.MIN && qport_diff <= int16.MAX))
+        throw new KeyFileError.INVALID_VALUE ("invalid qport-diff value");
+      game.qport_diff = (int16) qport_diff;
+    }
+
+    foreach (var key in kf.get_keys ("Match")) {
+      var value = kf.get_string ("Match", key);
       var parts = key.split (".", 2);
       var key1 = parts[0];
       var key2 = parts[1];
 
       switch (key1) {
-        case "extends":
-          var base_game = games[value];
-
-          if (base_game == null)
-            log (Config.LOG_DOMAIN, LEVEL_WARNING, "Could not find '%s' to extend '%s'", value, game.id);
-          else
-            game.extend (base_game);
-
-          break;
-        case "name":
-          game.name = value;
-          break;
-        case "protocol":
-          game.protocol = value;
-          break;
-        case "phony":
-          game.phony = kf.get_boolean (game.id, key);
-          break;
         case "inf":
-          game.inf.set (key2, value);
+          game.inf_matches[key2] = value;
           break;
       }
     }
+
+    if (kf.has_group ("Info")) {
+      foreach (var key in kf.get_keys ("Info")) {
+        var val = kf.get_string ("Info", key);
+        game.inf[key] = val;
+      }
+    }
+
+    if (kf.has_group ("Player"))
+      load_player_fields (kf, ref game);
+
+    return game;
   }
 
-  private void load_player_fields (KeyFile kf, ref Game game, string ini_group) throws Error {
-    foreach (var key in kf.get_keys (ini_group)) {
-      // field = title;type;main
-      var options = kf.get_string_list (ini_group, key);
+  private void load_player_fields (KeyFile kf, ref Game game) throws Error {
+    foreach (var key in kf.get_keys ("Player")) {
+      // title = field;type;main
+      var options = kf.get_string_list ("Player", key);
 
       var field = new PlayerField () {
-        field = key,
-        title = options[0]
+        field = options[0],
+        title = key
       };
 
       if (options.length >= 2)
@@ -116,23 +137,20 @@ public class GameResolver : Object {
     }
   }
 
-  public bool resolve (string protocol_id, ServerInfo inf, Gee.Map<string, string> details) {
-    var game = games.values.first_match ((game) => {
-      if (game.phony || game.protocol != protocol_id)
-        return false;
-
-      foreach (var entry in game.inf.entries)
-        if (details.get (entry.key) != entry.value)
-          return false;
-
-      return true;
-    });
+  public bool resolve (string protocol_id, ServerInfo sinfo, Gee.Map<string, string> details) {
+    var game = games.values.first_match (game => game.matches (protocol_id, details));
 
     if (game == null)
       return false;
 
-    inf.set ("game-id", game.id);
-    inf.set ("game-name", game.name);
+    sinfo.set ("game-id", game.id);
+
+    foreach (var item in game.inf) {
+      var value = Value (typeof (string));
+      value.set_string (item.value);
+      sinfo.set_property (item.key, value);
+    }
+
     return true;
   }
 

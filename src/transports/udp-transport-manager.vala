@@ -5,17 +5,12 @@ class UdpTransportManager : Object {
   private uint16 _local_port = 27100;
   private Socket socket;
   private SocketSource socket_source;
-  private Gee.List<UdpTransport> transport_list;
+  private Gee.List<UdpTransport> transport_list = new Gee.ArrayList<UdpTransport> ();
 
   public signal void error (Error error);
 
   construct {
-    transport_list = new Gee.ArrayList<UdpTransport> ();
     open_socket ();
-  }
-
-  UdpTransportManager () {
-    Object ();
   }
 
   ~UdpTransportManager () {
@@ -90,6 +85,7 @@ class UdpTransportManager : Object {
       socket.receive_from (out saddr, data);
 
       var addr = (InetSocketAddress) saddr;
+      log (Config.LOG_DOMAIN, LEVEL_DEBUG, "received data from %s: length = %ld", addr.to_string (), data.length);
 
       foreach (var transport in transport_list) {
         if (

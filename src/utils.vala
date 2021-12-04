@@ -22,20 +22,6 @@ namespace Gsw {
     return "%lld:%02lld".printf (minutes, seconds);
   }
 
-  public Gee.List<File> get_data_dirs () {
-    var list = new Gee.ArrayList<string> ();
-    list.add (Environment.get_user_data_dir ());
-    list.add_all_array (Environment.get_system_data_dirs ());
-
-    var iter = list
-      .map<File> ((dir) => File.new_build_filename (dir, Environment.get_prgname ()))
-      .filter ((dir) => dir.query_exists () && dir.query_file_type (NONE) == DIRECTORY);
-
-    var dirs = new Gee.ArrayList<File> ();
-    dirs.add_all_iterator (iter);
-    return dirs;
-  }
-
   public string? find_file_in_data_dirs (string path) {
     var dirs = new Gee.ArrayList<string> ();
     dirs.add (Environment.get_user_data_dir ());

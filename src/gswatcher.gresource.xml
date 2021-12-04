@@ -10,7 +10,5 @@
 		<file compressed="true" preprocess="xml-stripblanks">ui/server-list.ui</file>
 		<file compressed="true" preprocess="xml-stripblanks">ui/buddy-list.ui</file>
 		<file compressed="true">ui/styles.css</file>
-
-		<file compressed="true">games.ini</file>
 	</gresource>
 </gresources>
