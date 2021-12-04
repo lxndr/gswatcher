@@ -3273,9 +3273,13 @@ var DataReader = /** @class */ (function () {
         this.pos += length;
         return this;
     };
-    DataReader.prototype.is_end = function () {
-        return this.pos >= this.buf.length;
-    };
+    Object.defineProperty(DataReader.prototype, "is_end", {
+        get: function () {
+            return this.pos >= this.buf.length;
+        },
+        enumerable: false,
+        configurable: true
+    });
     DataReader.prototype.u8 = function () {
         var ret = this.buf.readUInt8(this.pos);
         this.pos += 1;
@@ -3321,17 +3325,23 @@ var DataReader = /** @class */ (function () {
         this.pos += 8;
         return ret;
     };
-    DataReader.prototype.zstring = function () {
-        var idx = Array.prototype.indexOf.call(this.buf, 0, this.pos);
-        if (idx == -1) {
-            return this.lstring(this.buf.length - this.pos);
-        }
-        return this.lstring(idx - this.pos + 1);
-    };
     DataReader.prototype.lstring = function (length) {
+        if (length == null) {
+            length = this.buf.length - this.pos;
+        }
         var ret = this.buf.toString('binary', this.pos, this.pos + length);
         this.pos += length;
         return ret;
+    };
+    DataReader.prototype.zstring = function (terminator) {
+        if (terminator === void 0) { terminator = 0; }
+        var idx = Array.prototype.indexOf.call(this.buf, terminator, this.pos);
+        if (idx == -1) {
+            return this.lstring();
+        }
+        var str = this.lstring(idx - this.pos);
+        this.pos++;
+        return str;
     };
     DataReader.prototype.data = function () {
         var ret = this.buf.slice(this.pos);
@@ -3667,7 +3677,7 @@ var readServerInfo = function (r) {
         };
     }
     inf.version = r.zstring();
-    var edf = r.is_end() ? 0 : r.u8();
+    var edf = r.is_end ? 0 : r.u8();
     if (edf & 0x80) {
         inf.port = r.u16le();
     }

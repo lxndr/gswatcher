@@ -140,11 +140,13 @@ public class WorkerQuerier : Querier {
   }
 
   private void on_error () {
-    log (Config.LOG_DOMAIN, LEVEL_WARNING, error.message);
-    stop_timeout_timer ();
-    stop_ping_timer ();
-    ping = -1;
-    query_pending = false;
+    if (error != null) {
+      log (Config.LOG_DOMAIN, LEVEL_WARNING, error.message);
+      stop_timeout_timer ();
+      stop_ping_timer ();
+      ping = -1;
+      query_pending = false;
+    }
   }
 
   private void start_ping_timer () {

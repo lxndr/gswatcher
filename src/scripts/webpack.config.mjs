@@ -5,7 +5,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default {
   entry: {
+    ase: './protocols/ase.ts',
     gamespy: './protocols/gamespy.ts',
+    gamespy2: './protocols/gamespy2.ts',
     quake3: './protocols/quake3.ts',
     source: './protocols/source.ts',
   },

@@ -59,8 +59,10 @@ const normalizeServerInfo = (inf: Info): ServerInfo => ({
   [InfoField.SERVER_NAME]: String(inf.hostname),
   [InfoField.NUM_PLAYERS]: Number(inf.numplayers),
   [InfoField.MAX_PLAYERS]: Number(inf.maxplayers),
-  [InfoField.MAP]: String(inf.maptitle),
+  [InfoField.MAP]: String(inf.maptitle || inf.mapname),
   [InfoField.GAME_VERSION]: String(inf.gamever),
+  [InfoField.GAME_MODE]: String(inf.gametype || inf.gamemode),
+  [InfoField.PRIVATE]: inf.password === '1',
 })
 
 const normalizePlayerList = (inf: Info) => {
@@ -88,7 +90,7 @@ const normalizePlayerList = (inf: Info) => {
   return players
 }
 
-export const processResponse = (data: Buffer) => {
+export const processResponse: ProcessResponseFn = data => {
   const { queryid, final, ...info } = parseQuakeInfo(data.toString())
 
   if (!queryid) {

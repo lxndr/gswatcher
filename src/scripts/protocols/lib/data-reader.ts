@@ -19,7 +19,7 @@ export class DataReader {
     return this
   }
 
-  is_end() {
+  get is_end() {
     return this.pos >= this.buf.length
   }
 
@@ -77,20 +77,26 @@ export class DataReader {
     return ret
   }
 
-  zstring() {
-    const idx = Array.prototype.indexOf.call(this.buf, 0, this.pos)
-
-    if (idx == -1) {
-      return this.lstring(this.buf.length - this.pos)
+  lstring(length?: number) {
+    if (length == null) {
+      length = this.buf.length - this.pos
     }
 
-    return this.lstring(idx - this.pos + 1)
-  }
-
-  lstring(length: number) {
     const ret = this.buf.toString('binary', this.pos, this.pos + length)
     this.pos += length
     return ret
+  }
+
+  zstring(terminator = 0) {
+    const idx = Array.prototype.indexOf.call(this.buf, terminator, this.pos)
+
+    if (idx == -1) {
+      return this.lstring()
+    }
+
+    const str = this.lstring(idx - this.pos)
+    this.pos++
+    return str
   }
 
   data() {

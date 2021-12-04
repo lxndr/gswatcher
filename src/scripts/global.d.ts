@@ -45,6 +45,9 @@ declare global {
     [InfoField.SECURE]?: boolean
   }
 
+  type QueryFn = () => void
+  type ProcessResponseFn = (data: Buffer) => void
+
   class Gsw {
     sinfo(inf: ServerInfo): void
     details(inf: Info): void

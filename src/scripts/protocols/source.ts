@@ -263,7 +263,7 @@ const readServerInfo = (r: DataReader) => {
   }
 
   inf.version = r.zstring()
-  const edf = r.is_end() ? 0 : r.u8()
+  const edf = r.is_end ? 0 : r.u8()
 
   if (edf & 0x80) {
     inf.port = r.u16le()
@@ -430,7 +430,7 @@ const tryReadHeader = (r: DataReader) => {
   return pak
 }
 
-export const processResponse = (data: Buffer) => {
+export const processResponse: ProcessResponseFn = data => {
   const r = new DataReader(data)
   const format = r.i32le()
 

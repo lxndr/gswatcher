@@ -2134,8 +2134,10 @@ var normalizeServerInfo = function (inf) {
         _a["server-name" /* SERVER_NAME */] = String(inf.hostname),
         _a["num-players" /* NUM_PLAYERS */] = Number(inf.numplayers),
         _a["max-players" /* MAX_PLAYERS */] = Number(inf.maxplayers),
-        _a["map" /* MAP */] = String(inf.maptitle),
+        _a["map" /* MAP */] = String(inf.maptitle || inf.mapname),
         _a["game-version" /* GAME_VERSION */] = String(inf.gamever),
+        _a["game-mode" /* GAME_MODE */] = String(inf.gametype || inf.gamemode),
+        _a["private" /* PRIVATE */] = inf.password === '1',
         _a);
 };
 var normalizePlayerList = function (inf) {

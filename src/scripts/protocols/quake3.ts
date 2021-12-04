@@ -1,3 +1,4 @@
+import 'core-js/features/array/flat-map'
 import { DataWriter } from './lib/data-writer'
 import { InvalidResponseError } from './lib/response-error'
 import { parseQuakeInfo } from './quake'
@@ -39,7 +40,7 @@ const parsePlayer = (str: string): Player => {
   return Object.assign<Player, string[]>({}, parts)
 }
 
-export const processResponse = (data: Buffer) => {
+export const processResponse: ProcessResponseFn = data => {
   const hdr = data.readInt32LE()
 
   if (hdr !== -1) {

@@ -23,7 +23,7 @@
 | Tactical Ops: Assault on Terror   | to-aot    | gamespy  | 7777      | port + 1   |
 | Battlefield 1942                  | bf1942    | gamespy  | 14567     | 23000      |
 | America's Army                    | aa        | gamespy2 | 1716      | port + 1   |
-| Armed Assault                     | aa        | gamespy2 | 2302      | port       |
+| Armed Assault                     | arma      | gamespy2 | 2302      | port       |
 | Battlefield Vietnam               | bfv       | gamespy2 | 23000     | port       |
 | Battlefield 2                     | bf2       | gamespy3 | 16567     | 29900      |
 | Battlefield 2142                  | bf2142    | gamespy3 | 17567     | 29900      |
@@ -32,11 +32,13 @@
 | Crysis 2                          | crysis2   | gamespy3 | 64100     |            |
 | Minecraft                         | mc        | gamespy3 | 25565     | port       |
 | Arma 2                            | arma2     | gamespy3 | 2302      | port       |
+| Multi Theft Auto                  | mta       | ase      |           |            |
 
 ## Nice to have in the future
 
 | Game                              | ID        | Protocol | Game port | Query port |
 |-----------------------------------|-----------|----------|-----------|------------|
+| America's Army 3                  | aa3       | source   | 8777      | port + 18243 |
 | Age of Empires II                 | aoe2      | ase      |           |            |
 | Age of Empires II: The Conquerors | aoe2-c    | ase      |           |            |
 | Aliens versus Predator 2          | avp2      | gamespy  |           |            |
@@ -74,7 +76,6 @@
 | Medal of Honor: Breakthrough      | moh-bt    | gamespy  |           |            |
 | Medal of Honor: Pacific Assault   | mph-pa    | ase      |           |            |
 | Medal of Honor: Spearhead         | moh-sh    | gamespy  |           |            |
-| Multi Theft Auto                  | mta       | ase      |           |            |
 | Multi Theft Auto: Vicy City       | mta-vc    | ase      |           |            |
 | Need for Speed: Hot Pursuit 2     | nfs-hp2   | gamespy  |           |            |
 | Nerf Arena Blast                  | nab       | gamespy  |           |            |
