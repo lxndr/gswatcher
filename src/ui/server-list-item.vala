@@ -71,10 +71,13 @@ namespace Gsw.Ui {
       players = format_players (sinfo.num_players, sinfo.max_players);
       players_css_classes = format_players_css_classes (sinfo.num_players, sinfo.max_players);
 
-      var addr = "0.0.0.0";// querier.transport.saddr.address.to_string ();
-      var geoip_resolver = GeoIPResolver.get_instance ();
-      var country_code = geoip_resolver.code_by_addr (addr);
-      country_icon = find_file_in_data_dirs ("./icons/flags/" + country_code + ".png");
+      var addr = get_querier_ip_address (querier);
+
+      if (addr != null) {
+        var geoip_resolver = GeoIPResolver.get_instance ();
+        var country_code = geoip_resolver.code_by_addr (addr);
+        country_icon = find_file_in_data_dirs ("./icons/flags/" + country_code + ".png");
+      }
     }
 
     private void update_ping () {

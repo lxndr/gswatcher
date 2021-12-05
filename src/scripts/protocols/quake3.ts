@@ -20,14 +20,14 @@ const createPacket = (parts: string[]) => {
 export const query = () =>
   gsw.send(createPacket(['getstatus']))
 
-const extractServerInfo = (dict: Info): ServerInfo => {
+const extractServerInfo = (inf: Info): ServerInfo => {
   return {
-    [InfoField.SERVER_NAME]: String(dict.sv_hostname),
-    [InfoField.GAME_NAME]: String(dict.gamename),
-    [InfoField.GAME_VERSION]: String(dict.version),
-    [InfoField.MAP]: String(dict.mapname),
-    [InfoField.MAX_PLAYERS]: Number(dict.sv_maxclients),
-    [InfoField.PRIVATE]: Boolean(dict.g_needpass),
+    [InfoField.SERVER_NAME]: String(inf.sv_hostname),
+    [InfoField.GAME_NAME]: String(inf.gamename),
+    [InfoField.GAME_VERSION]: String(inf.version || inf.shortversion),
+    [InfoField.MAP]: String(inf.mapname),
+    [InfoField.MAX_PLAYERS]: Number(inf.sv_maxclients),
+    [InfoField.PRIVATE]: Boolean(inf.g_needpass),
   }
 }
 

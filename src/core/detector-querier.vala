@@ -2,7 +2,7 @@ namespace Gsw {
 
 public class DetectorQuerier : Querier {
   private Gee.List<Querier> queriers;
-  private Querier? detected_querier;
+  public Querier? detected_querier { get; private set; }
 
   public DetectorQuerier (QuerierManager querier_manager, Server server) {
     Object (

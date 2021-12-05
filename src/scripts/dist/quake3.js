@@ -2495,15 +2495,15 @@ var createPacket = function (parts) {
 var query = function () {
     return gsw.send(createPacket(['getstatus']));
 };
-var extractServerInfo = function (dict) {
+var extractServerInfo = function (inf) {
     var _a;
     return _a = {},
-        _a["server-name" /* SERVER_NAME */] = String(dict.sv_hostname),
-        _a["game-name" /* GAME_NAME */] = String(dict.gamename),
-        _a["game-version" /* GAME_VERSION */] = String(dict.version),
-        _a["map" /* MAP */] = String(dict.mapname),
-        _a["max-players" /* MAX_PLAYERS */] = Number(dict.sv_maxclients),
-        _a["private" /* PRIVATE */] = Boolean(dict.g_needpass),
+        _a["server-name" /* SERVER_NAME */] = String(inf.sv_hostname),
+        _a["game-name" /* GAME_NAME */] = String(inf.gamename),
+        _a["game-version" /* GAME_VERSION */] = String(inf.version || inf.shortversion),
+        _a["map" /* MAP */] = String(inf.mapname),
+        _a["max-players" /* MAX_PLAYERS */] = Number(inf.sv_maxclients),
+        _a["private" /* PRIVATE */] = Boolean(inf.g_needpass),
         _a;
 };
 var parsePlayer = function (str) {

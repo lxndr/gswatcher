@@ -2,7 +2,7 @@
 
 | Game                              | ID        | Protocol | Game port | Query port |
 |-----------------------------------|-----------|----------|-----------|------------|
-| Alien Arena                       | arena     | quake2   | 27910     |            |
+| Alien Arena                       | aarena    | quake2   | 27910     |            |
 | Quake 2                           | q2        | quake2   | 27910     |            |
 | Action Quake 2                    | aq2       | quake2   | 27910     |            |
 | Quake 3                           | q3        | quake3   | 27960     |            |

@@ -66,6 +66,7 @@ ui_sources = files(
   'ui/server-info.vala',
   'ui/server-list-item.vala',
   'ui/server-list.vala',
+  'ui/utils.vala',
 )
 
 sources = core_sources
