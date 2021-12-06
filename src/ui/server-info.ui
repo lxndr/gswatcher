@@ -22,7 +22,7 @@
           </object>
         </child>
         <child>
-          <object class="GtkLabel" id="name_ctl">
+          <object class="GtkLabel">
             <layout>
               <property name="column">1</property>
               <property name="row">0</property>
@@ -31,6 +31,17 @@
             <property name="xalign">0</property>
             <property name="selectable">true</property>
             <property name="wrap">true</property>
+            <binding name="label">
+              <closure type="gchararray" function="na_if_null">
+                <lookup type="GswServerInfo" name="server-name">
+                  <lookup type="GswQuerier" name="sinfo">
+                    <lookup type="GswUiServerInfo" name="querier">
+                      GswUiServerInfo
+                    </lookup>
+                  </lookup>
+                </lookup>
+              </closure>
+            </binding>
           </object>
         </child>
 
@@ -53,6 +64,17 @@
             <property name="hexpand">true</property>
             <property name="xalign">0</property>
             <property name="selectable">true</property>
+            <binding name="label">
+              <closure type="gchararray" function="na_if_null">
+                <lookup type="GswServer" name="address">
+                  <lookup type="GswQuerier" name="server">
+                    <lookup type="GswUiServerInfo" name="querier">
+                      GswUiServerInfo
+                    </lookup>
+                  </lookup>
+                </lookup>
+              </closure>
+            </binding>
           </object>
         </child>
 
@@ -75,6 +97,21 @@
             <property name="hexpand">true</property>
             <property name="xalign">0</property>
             <property name="selectable">true</property>
+            <binding name="label">
+              <!--closure type="gchararray" function="na_if_null"-->
+                <closure type="gchararray" function="format_location">
+                  <lookup type="GswNetTransport" name="saddr">
+                    <lookup type="GswWorkerQuerier" name="transport">
+                      <lookup type="GswDetectorQuerier" name="detected_querier">
+                        <lookup type="GswUiServerInfo" name="querier">
+                          GswUiServerInfo
+                        </lookup>
+                      </lookup>
+                    </lookup>
+                  </lookup>
+                </closure>
+              <!--/closure-->
+            </binding>
           </object>
         </child>
 
@@ -97,6 +134,17 @@
             <property name="hexpand">true</property>
             <property name="xalign">0</property>
             <property name="selectable">true</property>
+            <binding name="label">
+              <closure type="gchararray" function="na_if_null">
+                <lookup type="GswServerInfo" name="game-name">
+                  <lookup type="GswQuerier" name="sinfo">
+                    <lookup type="GswUiServerInfo" name="querier">
+                      GswUiServerInfo
+                    </lookup>
+                  </lookup>
+                </lookup>
+              </closure>
+            </binding>
           </object>
         </child>
 
@@ -119,6 +167,17 @@
             <property name="hexpand">true</property>
             <property name="xalign">0</property>
             <property name="selectable">true</property>
+            <binding name="label">
+              <closure type="gchararray" function="na_if_null">
+                <lookup type="GswServerInfo" name="game-mode">
+                  <lookup type="GswQuerier" name="sinfo">
+                    <lookup type="GswUiServerInfo" name="querier">
+                      GswUiServerInfo
+                    </lookup>
+                  </lookup>
+                </lookup>
+              </closure>
+            </binding>
           </object>
         </child>
 
@@ -141,6 +200,17 @@
             <property name="hexpand">true</property>
             <property name="xalign">0</property>
             <property name="selectable">true</property>
+            <binding name="label">
+              <closure type="gchararray" function="na_if_null">
+                <lookup type="GswServerInfo" name="map">
+                  <lookup type="GswQuerier" name="sinfo">
+                    <lookup type="GswUiServerInfo" name="querier">
+                      GswUiServerInfo
+                    </lookup>
+                  </lookup>
+                </lookup>
+              </closure>
+            </binding>
           </object>
         </child>
 
@@ -163,6 +233,26 @@
             <property name="hexpand">true</property>
             <property name="xalign">0</property>
             <property name="selectable">true</property>
+            <binding name="label">
+              <!-- closure type="gchararray" function="na_if_null" -->
+                <closure type="gchararray" function="format_players">
+                  <lookup type="GswServerInfo" name="num-players">
+                    <lookup type="GswQuerier" name="sinfo">
+                      <lookup type="GswUiServerInfo" name="querier">
+                        GswUiServerInfo
+                      </lookup>
+                    </lookup>
+                  </lookup>
+                  <lookup type="GswServerInfo" name="max-players">
+                    <lookup type="GswQuerier" name="sinfo">
+                      <lookup type="GswUiServerInfo" name="querier">
+                        GswUiServerInfo
+                      </lookup>
+                    </lookup>
+                  </lookup>
+                </closure>
+              <!-- /closure -->
+            </binding>
           </object>
         </child>
 
@@ -185,6 +275,17 @@
             <property name="hexpand">true</property>
             <property name="xalign">0</property>
             <property name="selectable">true</property>
+            <binding name="label">
+              <closure type="gchararray" function="format_boolean">
+                <lookup type="GswServerInfo" name="private">
+                  <lookup type="GswQuerier" name="sinfo">
+                    <lookup type="GswUiServerInfo" name="querier">
+                      GswUiServerInfo
+                    </lookup>
+                  </lookup>
+                </lookup>
+              </closure>
+            </binding>
           </object>
         </child>
 
@@ -207,6 +308,17 @@
             <property name="hexpand">true</property>
             <property name="xalign">0</property>
             <property name="selectable">true</property>
+            <binding name="label">
+              <closure type="gchararray" function="format_boolean">
+                <lookup type="GswServerInfo" name="secure">
+                  <lookup type="GswQuerier" name="sinfo">
+                    <lookup type="GswUiServerInfo" name="querier">
+                      GswUiServerInfo
+                    </lookup>
+                  </lookup>
+                </lookup>
+              </closure>
+            </binding>
           </object>
         </child>
 
@@ -229,6 +341,17 @@
             <property name="hexpand">true</property>
             <property name="xalign">0</property>
             <property name="selectable">true</property>
+            <binding name="label">
+              <closure type="gchararray" function="na_if_null">
+                <lookup type="GswServerInfo" name="game-version">
+                  <lookup type="GswQuerier" name="sinfo">
+                    <lookup type="GswUiServerInfo" name="querier">
+                      GswUiServerInfo
+                    </lookup>
+                  </lookup>
+                </lookup>
+              </closure>
+            </binding>
           </object>
         </child>
 
@@ -241,6 +364,15 @@
             </layout>
             <property name="name">error</property>
             <property name="css-classes">error</property>
+            <binding name="label">
+              <closure type="gchararray" function="format_error">
+                <lookup type="GswQuerier" name="error">
+                  <lookup type="GswUiServerInfo" name="querier">
+                    GswUiServerInfo
+                  </lookup>
+                </lookup>
+              </closure>
+            </binding>
           </object>
         </child>
 
