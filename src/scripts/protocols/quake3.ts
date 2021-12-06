@@ -20,16 +20,15 @@ const createPacket = (parts: string[]) => {
 export const query = () =>
   gsw.send(createPacket(['getstatus']))
 
-const extractServerInfo = (inf: Info): ServerInfo => {
-  return {
-    [InfoField.SERVER_NAME]: String(inf.sv_hostname),
-    [InfoField.GAME_NAME]: String(inf.gamename),
-    [InfoField.GAME_VERSION]: String(inf.version || inf.shortversion),
-    [InfoField.MAP]: String(inf.mapname),
-    [InfoField.MAX_PLAYERS]: Number(inf.sv_maxclients),
-    [InfoField.PRIVATE]: Boolean(inf.g_needpass),
-  }
-}
+const extractServerInfo = (inf: Info, plist: Player[]): ServerInfo => ({
+  [InfoField.SERVER_NAME]: String(inf.sv_hostname),
+  [InfoField.GAME_NAME]: String(inf.gamename),
+  [InfoField.GAME_VERSION]: String(inf.version || inf.shortversion),
+  [InfoField.MAP]: String(inf.mapname),
+  [InfoField.NUM_PLAYERS]: plist.length,
+  [InfoField.MAX_PLAYERS]: Number(inf.sv_maxclients),
+  [InfoField.PRIVATE]: Boolean(inf.g_needpass),
+})
 
 const parsePlayer = (str: string): Player => {
   const parts = str
@@ -55,11 +54,10 @@ export const processResponse: ProcessResponseFn = data => {
   }
 
   const all_info = parseQuakeInfo(parts[1])
-  gsw.details(all_info)
-
-  const inf = extractServerInfo(all_info)
-  gsw.sinfo(inf)
-
   const players = parts.slice(2).map(parsePlayer)
+  const inf = extractServerInfo(all_info, players)
+
+  gsw.details(all_info)
+  gsw.sinfo(inf)
   gsw.plist(players)
 }

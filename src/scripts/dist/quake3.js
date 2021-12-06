@@ -2495,16 +2495,17 @@ var createPacket = function (parts) {
 var query = function () {
     return gsw.send(createPacket(['getstatus']));
 };
-var extractServerInfo = function (inf) {
+var extractServerInfo = function (inf, plist) {
     var _a;
-    return _a = {},
+    return (_a = {},
         _a["server-name" /* SERVER_NAME */] = String(inf.sv_hostname),
         _a["game-name" /* GAME_NAME */] = String(inf.gamename),
         _a["game-version" /* GAME_VERSION */] = String(inf.version || inf.shortversion),
         _a["map" /* MAP */] = String(inf.mapname),
+        _a["num-players" /* NUM_PLAYERS */] = plist.length,
         _a["max-players" /* MAX_PLAYERS */] = Number(inf.sv_maxclients),
         _a["private" /* PRIVATE */] = Boolean(inf.g_needpass),
-        _a;
+        _a);
 };
 var parsePlayer = function (str) {
     var parts = str
@@ -2524,10 +2525,10 @@ var processResponse = function (data) {
         throw new InvalidResponseError('invalid packet');
     }
     var all_info = parseQuakeInfo(parts[1]);
-    gsw.details(all_info);
-    var inf = extractServerInfo(all_info);
-    gsw.sinfo(inf);
     var players = parts.slice(2).map(parsePlayer);
+    var inf = extractServerInfo(all_info, players);
+    gsw.details(all_info);
+    gsw.sinfo(inf);
     gsw.plist(players);
 };
 
