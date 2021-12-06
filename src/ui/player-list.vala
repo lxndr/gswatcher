@@ -86,8 +86,18 @@ class PlayerList : Widget {
     player.change.connect(() => {
       switch (field.kind) {
         case PlayerFieldType.DURATION:
-          var duration = double.parse (player.get (field.field));
-          label.label = format_time_duration ((int64) (duration * 1000000));
+          var str_val = player.get (field.field);
+          double val = 0;
+
+          if (str_val == null) {
+            label.label = "";
+          } else if (double.try_parse (str_val, out val, null)) {
+            label.label = format_time_duration ((int64) (val * 1000000));
+          } else {
+            log (Config.LOG_DOMAIN, LEVEL_WARNING, "could not parse double value '%s'", str_val);
+            label.label = "";
+          }
+
           break;
         default:
           label.label = player.get (field.field);
