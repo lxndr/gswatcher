@@ -11,7 +11,7 @@ add_project_arguments(
 )
 
 dependencies = [
-  dependency('gtk4', version : '>=4.0.3'),
+  dependency('gtk4', version : '>=4.5.0'),
   dependency('gee-0.8', version : '>=0.20.4'),
   dependency('duktape', version : '>=2.5.0'),
   dependency('geoip', version : '>=1.6.12'),
@@ -64,7 +64,6 @@ ui_sources = files(
   'ui/preferences.vala',
   'ui/server-details.vala',
   'ui/server-info.vala',
-  'ui/server-list-item.vala',
   'ui/server-list.vala',
   'ui/utils.vala',
 )
