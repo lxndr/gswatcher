@@ -13,7 +13,7 @@
       "cwd": "${workspaceFolder}/builddir",
       "env": {
         // "G_DEBUG": "fatal-warnings",
-        "G_MESSAGES_DEBUG": "Gsw",
+        // "G_MESSAGES_DEBUG": "Gsw",
         "GSETTINGS_SCHEMA_DIR": "${workspaceFolder}/tmp/schemas",
         "XDG_DATA_HOME": "${workspaceFolder}/..",
         "XDG_CONFIG_HOME": "${workspaceFolder}/tmp/config",

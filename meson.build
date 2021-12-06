@@ -1,4 +1,4 @@
-project('gswatcher', 'c', 'vala', version : '1.6.0-alpha.1')
+project('gswatcher', 'c', 'vala', version : '1.6.0-alpha.2')
 
 subdir('src')
 subdir('src/schemas')
