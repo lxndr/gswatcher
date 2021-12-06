@@ -1,4 +1,4 @@
-server-list #name_cell.new-entry {
+server-list cell .new-entry {
   color: lightgrey;
   font-style: italic;
 }
