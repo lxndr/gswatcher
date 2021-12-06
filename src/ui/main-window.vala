@@ -7,8 +7,6 @@ namespace Gsw.Ui {
     public QuerierManager querier_manager { get; construct; }
     public Gsw.BuddyList buddy_list { get; construct; }
 
-    protected Querier selected_querier { get; private set; }
-
     class construct {
       typeof (Ui.ServerList).ensure ();
       typeof (Ui.ServerInfo).ensure ();
@@ -29,6 +27,11 @@ namespace Gsw.Ui {
         querier_manager : querier_manager,
         buddy_list : buddy_list
       );
+    }
+
+    [GtkCallback]
+    private void add_server (string address) {
+      querier_manager.server_list.add (address);
     }
 
     [GtkCallback]
@@ -64,8 +67,8 @@ namespace Gsw.Ui {
     }
 
     [GtkCallback]
-    private void querier_selection_change (Querier querier) {
-      selected_querier = querier;
+    private bool can_show_sinfo (Querier? querier) {
+      return querier != null && !(querier is NewQuerier);
     }
   }
 
