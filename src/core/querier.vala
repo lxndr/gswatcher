@@ -11,6 +11,8 @@ public abstract class Querier : Object {
   public int64 ping { get; protected set; default = -1; }
   public Error? error { get; protected set; }
 
+  public signal void update ();
+
   public abstract void query ();
 }
 

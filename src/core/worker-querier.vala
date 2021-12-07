@@ -114,11 +114,10 @@ public class WorkerQuerier : Querier {
       resolve_game (new_details);
 
     details.apply (new_details);
+    update ();
   }
 
   private void on_sinfo_updated (ServerInfo new_sinfo) {
-    freeze_notify ();
-
     if (new_sinfo.game_id != null)
       sinfo.game_id = new_sinfo.game_id;
 
@@ -136,11 +135,12 @@ public class WorkerQuerier : Querier {
     sinfo.private = new_sinfo.private;
     sinfo.secure = new_sinfo.secure;
 
-    thaw_notify ();
+    update ();
   }
 
   private void on_plist_updated (Gee.ArrayList<Player> new_plist) {
     plist.apply (new_plist);
+    update ();
   }
 
   private void on_error () {
