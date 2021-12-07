@@ -16,8 +16,10 @@ namespace Gsw {
 
       var path = root_path + server.address + "/";
       var server_settings = new Settings.with_backend_and_path ("org.lxndr.gswatcher.Server", settings_backend, path);
-      server_settings.bind ("name", server, "name", SettingsBindFlags.DEFAULT);
       server_settings.bind ("favorite", server, "favorite", SettingsBindFlags.DEFAULT);
+      server_settings.bind ("protocol", server, "protocol", SettingsBindFlags.DEFAULT);
+      server_settings.bind ("game-id", server, "game-id", SettingsBindFlags.DEFAULT);
+      server_settings.bind ("server-name", server, "server-name", SettingsBindFlags.DEFAULT);
 
       return server;
     }
@@ -57,7 +59,7 @@ namespace Gsw {
         throw err;
       }
     }
-  
+
     private void remove_name (string name) throws Error {
       // TODO: is there a better way to remove address besides directly editing ini file?
       var kf = new KeyFile ();

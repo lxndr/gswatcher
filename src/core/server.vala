@@ -4,8 +4,10 @@ public class Server : Object {
   public string host;
   public uint16 gport;
   public uint16 qport;
-  public string name { get; set; }
   public bool favorite { get; set; }
+  public string protocol { get; set; }
+  public string server_name { get; set; }
+  public string game_id { get; set; }
 
   public Server (string address) {
     parse_address (address, out host, out gport, out qport);
@@ -13,14 +15,12 @@ public class Server : Object {
 
   public string address {
     owned get {
-      var builder = new StringBuilder (host);
-      builder.append_printf (":%d", gport);
+      var res = @"$(host):$(gport)";
 
-      if (gport != qport) {
-        builder.append_printf (":%d", qport);
-      }
+      if (gport != qport)
+        res += @":$(qport)";
 
-      return builder.str;
+      return res;
     }
   }
 }

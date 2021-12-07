@@ -74,6 +74,9 @@ public class WorkerQuerier : Querier {
     var game_resolver = GameResolver.get_instance ();
     game_resolver.resolve (protocol.info.id, sinfo, new_details);
 
+    server.protocol = protocol.info.id;
+    server.game_id = sinfo.game_id;
+
     if (sinfo.game_id != null && plist_fields.get_n_items () == 0)
       foreach (var field in game_resolver.get_player_fields (sinfo.game_id))
         plist_fields.append (field);
@@ -118,6 +121,8 @@ public class WorkerQuerier : Querier {
   }
 
   private void on_sinfo_updated (ServerInfo new_sinfo) {
+    server.server_name = new_sinfo.server_name;
+
     if (new_sinfo.game_id != null)
       sinfo.game_id = new_sinfo.game_id;
 

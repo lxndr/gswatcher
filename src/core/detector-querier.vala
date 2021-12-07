@@ -44,6 +44,7 @@ public class DetectorQuerier : Querier {
   }
 
   ~DetectorQuerier () {
+    // INFO: check later. probably we do not need to unwatch
     details_watch.unwatch ();
     sinfo_watch.unwatch ();
     plist_watch.unwatch ();
