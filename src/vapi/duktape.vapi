@@ -119,93 +119,58 @@ public class Duktape {
   [CCode (cname = "duk_create_heap_default")]
   public Duktape.default ();
 
-  // compile
-  public Exec pcompile_string_filename (uint flags, string src);
-
-  // call
-  public Exec pcall (Index nargs);
-
-  // put object
-  public Bool put_global_string (string key);
-  public Index push_object ();
-
-  // get object
-  public Bool get_global_string (string key);
-  public void push_global_object ();
-  public void require_object (Index idx);
-  public Bool get_prop_string (Index idx, string key);
-  public Bool get_prop_index (Index obj, ArrayIndex idx);
-  public Bool is_object (Index idx);
+  public void config_buffer (Index idx, uint8[] data);
+  public void dup (Index idx);
   public void enum (Index obj, Enum flags);
-  public Bool next (Index enum_idx, Bool get_value);
-
-  // get array
-  public Bool is_array (Index idx);
-
-  // put error
-  [PrintfFormat]
-  public Index push_error_object (Error code, string fmt, ...);
-  [PrintfFormat]
-  public Index push_error_object_va (Error code, string fmt, va_list args);
-
-  // throw error
-  [PrintfFormat]
-  public Return type_error (string fmt, ...);
-
-  // put string
-  public void push_string (string str);
-
-  // get string
-  public unowned string get_string (Index idx);
-  public unowned string get_string_default (Index idx, string def);
-  public unowned string require_string (Index idx);
-  public unowned string to_string (Index idx);
-  public unowned string safe_to_string (Index idx);
-  public unowned string safe_to_stacktrace (Index idx);
-
-  // get number
-  public Double get_number (Index idx);
-  public Double get_number_default (Index idx, Double def);
-  public Int to_int (Index idx);
-  public UInt32 to_uint32 (Index idx);
-
-  // get boolean
   public Bool get_boolean (Index idx);
   public Bool get_boolean_default (Index idx, Bool def);
-  public Bool to_boolean (Index idx);
-
-  // put function
-  public Index push_c_function (CFunction func, Index nargs);
-  public void put_function_list (Index index, [CCode (array_length = false, array_null_terminated = true)] FunctionListEntry[] funcs);
-
-  // put buffer
-  public void* push_fixed_buffer (Size size);
-  public void push_external_buffer ();
-  public void config_buffer (Index idx, uint8[] data);
-  public void push_buffer_object (Index idx, Size offset, Size length, BufferObject flags);
-
-  // get buffer
-  public unowned uint8[] require_buffer_data (Index idx);
-
-  // put pointer
-  public void push_pointer (void* ptr);
-
-  // get pointer
-  public unowned void* require_pointer (Index idx);
-
-  // stack
-  public void pull (Index idx);
-  public void dup (Index idx);
+  public Bool get_global_string (string key);
+  public Double get_number (Index idx);
+  public Double get_number_default (Index idx, Double def);
+  public Size get_length (Index idx);
+  public Bool get_prop_index (Index obj, ArrayIndex idx);
+  public Bool get_prop_string (Index idx, string key);
+  public unowned string get_string (Index idx);
+  public unowned string get_string_default (Index idx, string def);
+  public Index get_top ();
+  public Type get_type (Index idx);
+  public Bool is_array (Index idx);
+  public Bool is_null_or_undefined (Index idx);
+  public Bool is_object (Index idx);
+  public Bool next (Index enum_idx, Bool get_value);
+  public Exec pcall (Index nargs);
+  public Exec pcompile_string_filename (uint flags, string src);
   public void pop ();
   public void pop_2 ();
   public void pop_3 ();
   public void pop_n (Index count);
+  public void pull (Index idx);
+  public void push_buffer_object (Index idx, Size offset, Size length, BufferObject flags);
+  public Index push_c_function (CFunction func, Index nargs);
+  [PrintfFormat]
+  public Index push_error_object (Error code, string fmt, ...);
+  [PrintfFormat]
+  public Index push_error_object_va (Error code, string fmt, va_list args);
+  public void push_external_buffer ();
+  public void* push_fixed_buffer (Size size);
+  public void push_global_object ();
+  public Index push_object ();
+  public void push_pointer (void* ptr);
+  public void push_string (string str);
+  public void put_function_list (Index index, [CCode (array_length = false, array_null_terminated = true)] FunctionListEntry[] funcs);
+  public Bool put_global_string (string key);
   public void remove (Index idx);
-  public Index get_top ();
-  public Type get_type (Index idx);
-
-  // misc
+  public unowned uint8[] require_buffer_data (Index idx);
+  public void require_object (Index idx);
+  public unowned void* require_pointer (Index idx);
+  public unowned string require_string (Index idx);
+  public unowned string safe_to_stacktrace (Index idx);
+  public unowned string safe_to_string (Index idx);
   public Return throw ();
-  public Size get_length (Index idx);
-  public Bool is_null_or_undefined (Index idx);
+  public Bool to_boolean (Index idx);
+  public Int to_int (Index idx);
+  public UInt32 to_uint32 (Index idx);
+  public unowned string to_string (Index idx);
+  [PrintfFormat]
+  public Return type_error (string fmt, ...);
 }
