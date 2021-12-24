@@ -1,14 +1,5 @@
 namespace Gsw {
 
-public errordomain GameDefinitionError {
-  NO_GAME_GROUP,
-  NO_GAME_ID,
-  NO_PROTOCOL,
-  INVALID_PORT,
-  INVALID_QPORT_DIFF,
-  NO_MATCH_GROUP,
-}
-
 class Game {
   public string id;
   public string protocol;

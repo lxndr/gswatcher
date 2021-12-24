@@ -37,9 +37,9 @@ public static int main (string[] args) {
 
       proto.sinfo_update.connect ((sinfo) => {
         signal_called = true;
-        assert (sinfo.name == "game2xs.com Counter-Strike Source #1");
+        assert (sinfo.server_name == "game2xs.com Counter-Strike Source #1");
         assert (sinfo.map == "de_dust");
-        assert (sinfo["version"] == "1.0.0.22");
+        assert (sinfo.game_version == "1.0.0.22");
       });
 
       uint8[] data = {
