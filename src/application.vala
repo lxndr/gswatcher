@@ -1,6 +1,9 @@
 namespace Gsw {
 
   class Application : Gtk.Application {
+    private ProtocolRegistry protocol_registry = ProtocolRegistry.get_instance ();
+    private TransportRegistry transport_registry = TransportRegistry.get_instance ();
+    private UdpTransportManager udp_transport_manager = UdpTransportManager.get_instance ();
     private PersistentServerList server_list;
     private BuddyList buddy_list;
     private QuerierManager querier_manager;
@@ -60,18 +63,23 @@ namespace Gsw {
       base.startup ();
 
       // udp transport manager
-      var udp_transport_manager = UdpTransportManager.get_default ();
       udp_transport_manager.error.connect((err) => {
         log (Config.LOG_DOMAIN, LEVEL_ERROR, err.message);
+      });
+
+      // transports
+      transport_registry.register (new TransportDesc () {
+        id = "udp",
+        class_type = typeof (UdpTransport)
+      });
+      transport_registry.register (new TransportDesc () {
+        id = "tcp",
+        class_type = typeof (TcpTransport)
       });
 
       // queriers
       server_list = new PersistentServerList ();
       querier_manager = new QuerierManager (server_list);
-      querier_manager.register_transport (new TransportDesc () {
-        id = "udp",
-        class_type = typeof (UdpTransport)
-      });
 
       register_protocols.begin ((obj, res) => {
         register_protocols.end (res);
@@ -99,7 +107,7 @@ namespace Gsw {
     }
 
     private void activate_about (SimpleAction action, Variant? parameter) {
-      Ui.show_about (main_window, querier_manager.get_transports (), querier_manager.get_protocols ());
+      Ui.show_about (main_window, transport_registry.list (), protocol_registry.list ());
     }
 
     private void activate_pause (SimpleAction action, Variant? parameter) {
@@ -127,20 +135,26 @@ namespace Gsw {
           continue;
 
         try {
-          var desc = new ProtocolDesc ();
-          desc.class_type = typeof (JsProtocol);
-          desc.class_params = { "script-path" };
-          desc.class_values = { Value (typeof (string)) };
-          desc.class_values[0].set_string (script);
-
-          var protocol = (Protocol) Object.new_with_properties (desc.class_type, desc.class_params, desc.class_values);
+          var protocol = new DummyJsProtocol (script);
           protocol.initialize ();
 
-          desc.id = protocol.info.id;
-          desc.name = protocol.info.name;
-          desc.transport = protocol.info.transport;
+          var script_value = Value (typeof (string));
+          script_value.set_string (script);
 
-          querier_manager.register_protocol (desc);
+          var class_type = typeof (QueryJsProtocol);
+
+          if (protocol.info.feature == CONSOLE)
+            class_type = typeof (ConsoleJsProtocol);
+
+          protocol_registry.register (new ProtocolDesc () {
+            id = protocol.info.id,
+            name = protocol.info.name,
+            feature = protocol.info.feature,
+            transport = protocol.info.transport,
+            class_type = class_type,
+            class_params = { "script-path" },
+            class_values = { script_value },
+          });
         } catch (Error err) {
           log (Config.LOG_DOMAIN, LEVEL_WARNING, "failed to load protocol script '%s': %s", script, err.message);
         }

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<interface>
+  <requires lib="gtk+" version="4.6"/>
+
+  <object class="GtkEntryCompletion" id="completion">
+    <property name="text-column">0</property>
+  </object>
+
+  <template class="GswUiServerConsole" parent="GtkWidget">
+    <property name="hexpand">true</property>
+    <property name="vexpand">true</property>
+
+    <child>
+      <object class="GtkBox">
+        <property name="hexpand">true</property>
+        <property name="vexpand">true</property>
+        <property name="orientation">GTK_ORIENTATION_VERTICAL</property>
+
+        <child>
+          <object class="GtkScrolledWindow">
+            <property name="hscrollbar_policy">never</property>
+            <property name="hexpand">true</property>
+            <property name="hexpand-set">true</property>
+            <property name="vexpand">true</property>
+
+            <child>
+              <object class="GtkTextView">
+                <property name="editable">false</property>
+                <property name="monospace">false</property>
+                <property name="buffer">
+                  <object class="GtkTextBuffer" id="log_buffer" />
+                </property>
+              </object>
+            </child>
+
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">GTK_ORIENTATION_HORIZONTAL</property>
+
+            <child>
+              <object class="GtkEntry" id="entry">
+                <property name="secondary-icon-name">media-playback-start</property>
+                <property name="completion">completion</property>
+                <signal name="activate" handler="entry_activated" />
+                <signal name="icon-release" handler="entry_icon_released" />
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkMenuButton">
+                <property name="label">Options</property>
+                <property name="popover">
+                  <object class="GtkPopover" id="options_popover">
+                  </object>
+                </property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

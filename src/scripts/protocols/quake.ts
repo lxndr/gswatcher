@@ -1,8 +1,9 @@
-import { InvalidResponseError } from "./lib/response-error"
+import { InvalidResponseError } from "../lib/response-error"
 
 export const info: ProtocolInfo = {
   id: 'quake',
   name: 'Quake',
+  feature: 'query',
   transport: 'udp',
 }
 

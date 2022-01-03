@@ -1,10 +1,17 @@
 export {}
 
 declare global {
+  interface ProtocolOption {
+    id: string
+    type: 'password'
+  }
+
   interface ProtocolInfo {
     id: string
     name: string
-    transport: string
+    feature: 'query' | 'console'
+    transport: 'udp' | 'tcp'
+    options?: ProtocolOption[]
   }
 
   interface Info {
@@ -47,6 +54,7 @@ declare global {
 
   type QueryFn = () => void
   type ProcessResponseFn = (data: Buffer) => void
+  type SendCommandFn = (cmd: string) => void
 
   class Gsw {
     sinfo(inf: ServerInfo): void
@@ -54,6 +62,8 @@ declare global {
     plist(pl: Player[]): void
     send(data: Buffer): void
     print(str: string): void
+
+    response(body: string): void
   }
 
   const gsw: Gsw

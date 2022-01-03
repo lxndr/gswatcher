@@ -1,11 +1,12 @@
 import 'core-js/features/array/flat-map'
-import { DataWriter } from './lib/data-writer'
-import { InvalidResponseError } from './lib/response-error'
+import { DataWriter } from '../lib/data-writer'
+import { InvalidResponseError } from '../lib/response-error'
 import { parseQuakeInfo } from './quake'
 
 export const info: ProtocolInfo = {
   id: 'quake3',
   name: 'Quake 3',
+  feature: 'query',
   transport: 'udp',
 }
 

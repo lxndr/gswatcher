@@ -2,14 +2,15 @@
 
 import 'core-js/features/array/find'
 // import jsbi from 'jsbi'
-import { DataReader } from './lib/data-reader'
-import { DataWriter } from './lib/data-writer'
-import { CompoundResponse, Packet, ResponseStore } from './lib/response-store'
-import { InvalidResponseError } from './lib/response-error'
+import { DataReader } from '../lib/data-reader'
+import { DataWriter } from '../lib/data-writer'
+import { CompoundResponse, Packet, ResponseStore } from '../lib/response-store'
+import { InvalidResponseError } from '../lib/response-error'
 
 export const info: ProtocolInfo = {
   id: 'source',
   name: 'Source Engine',
+  feature: 'query',
   transport: 'udp',
 }
 

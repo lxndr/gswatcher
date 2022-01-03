@@ -10,6 +10,7 @@ namespace Gsw.Ui {
     class construct {
       typeof (Ui.ServerList).ensure ();
       typeof (Ui.ServerInfo).ensure ();
+      typeof (Ui.ServerConsole).ensure ();
       typeof (Ui.ServerDetails).ensure ();
       typeof (Ui.BuddyList).ensure ();
       typeof (Ui.PlayerList).ensure ();
@@ -21,7 +22,7 @@ namespace Gsw.Ui {
       StyleContext.add_provider_for_display (display, style_provider, uint.MAX);
     }
 
-    public MainWindow (Application application, QuerierManager querier_manager, Gsw.BuddyList buddy_list) {
+    public MainWindow (Gtk.Application application, QuerierManager querier_manager, Gsw.BuddyList buddy_list) {
       Object (
         application : application,
         querier_manager : querier_manager,

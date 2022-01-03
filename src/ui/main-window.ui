@@ -133,6 +133,20 @@
                         <property name="label">Details</property>
                       </object>
                     </child>
+                    <child>
+                      <object class="GswUiServerConsole" id="server_console">
+                        <!-- binding name="querier">
+                          <lookup type="GswUiServerList" name="selected">
+                            server_list_ctl
+                          </lookup>
+                        </binding -->
+                      </object>
+                    </child>
+                    <child type="tab">
+                      <object class="GtkLabel">
+                        <property name="label">Console</property>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>

@@ -1,5 +1,5 @@
 {
-  "name": "protocols",
+  "name": "@lxndr/gswatcher-protocols",
   "version": "1.0.0",
   "description": "",
   "type": "module",

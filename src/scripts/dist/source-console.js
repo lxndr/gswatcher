@@ -2,6 +2,24 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 8213:
+/*!********************************!*\
+  !*** ./lib/polyfill/buffer.ts ***!
+  \********************************/
+/***/ (function() {
+
+
+Buffer.alloc = function alloc(size, fill, encoding) {
+    var buf = new Buffer(size);
+    if (fill != null) {
+        buf.fill(fill, 0, buf.length, encoding);
+    }
+    return buf;
+};
+
+
+/***/ }),
+
 /***/ 131:
 /*!********************************************!*\
   !*** ./node_modules/jsbi/dist/jsbi-cjs.js ***!
@@ -920,9 +938,9 @@ JSBI.__kMaxLength = 33554432, JSBI.__kMaxLengthBits = JSBI.__kMaxLength << 5, JS
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 !function() {
-/*!**************************************!*\
-  !*** ./protocols/ase.ts + 4 modules ***!
-  \**************************************/
+/*!*************************************************!*\
+  !*** ./protocols/source-console.ts + 6 modules ***!
+  \*************************************************/
 // ESM COMPAT FLAG
 __webpack_require__.r(__webpack_exports__);
 
@@ -930,8 +948,13 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.d(__webpack_exports__, {
   "info": function() { return /* binding */ info; },
   "processResponse": function() { return /* binding */ processResponse; },
-  "query": function() { return /* binding */ query; }
+  "sendCommand": function() { return /* binding */ sendCommand; }
 });
+
+// EXTERNAL MODULE: ./lib/polyfill/buffer.ts
+var buffer = __webpack_require__(8213);
+;// CONCATENATED MODULE: ./lib/polyfill/index.ts
+
 
 ;// CONCATENATED MODULE: ./node_modules/tslib/tslib.es6.js
 /*! *****************************************************************************
@@ -1252,6 +1275,19 @@ function __classPrivateFieldSet(receiver, state, value, kind, f) {
     return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
 }
 
+;// CONCATENATED MODULE: ./lib/auth-error.ts
+
+var AuthError = /** @class */ (function (_super) {
+    __extends(AuthError, _super);
+    function AuthError() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.name = _this.constructor.name;
+        return _this;
+    }
+    return AuthError;
+}(Error));
+
+
 // EXTERNAL MODULE: ./node_modules/jsbi/dist/jsbi-cjs.js
 var jsbi_cjs = __webpack_require__(131);
 var jsbi_cjs_default = /*#__PURE__*/__webpack_require__.n(jsbi_cjs);
@@ -1352,6 +1388,79 @@ var DataReader = /** @class */ (function () {
 }());
 
 
+;// CONCATENATED MODULE: ./lib/data-writer.ts
+var DataWriter = /** @class */ (function () {
+    function DataWriter() {
+        this.pos = 0;
+        this._buf = new Buffer(256);
+    }
+    Object.defineProperty(DataWriter.prototype, "buf", {
+        get: function () {
+            return this._buf.slice(0, this.pos);
+        },
+        enumerable: false,
+        configurable: true
+    });
+    DataWriter.prototype.u8 = function (val) {
+        this._buf.writeUInt8(val, this.pos);
+        this.pos += 1;
+        return this;
+    };
+    DataWriter.prototype.u16le = function (val) {
+        this._buf.writeUInt16LE(val, this.pos);
+        this.pos += 2;
+        return this;
+    };
+    DataWriter.prototype.u32le = function (val) {
+        this._buf.writeUInt32LE(val, this.pos);
+        this.pos += 4;
+        return this;
+    };
+    DataWriter.prototype.i8 = function (val) {
+        this._buf.writeInt8(val, this.pos);
+        this.pos += 1;
+        return this;
+    };
+    DataWriter.prototype.i16le = function (val) {
+        this._buf.writeInt16LE(val, this.pos);
+        this.pos += 2;
+        return this;
+    };
+    DataWriter.prototype.i32le = function (val) {
+        this._buf.writeInt32LE(val, this.pos);
+        this.pos += 4;
+        return this;
+    };
+    DataWriter.prototype.f32le = function (val) {
+        this._buf.writeFloatLE(val, this.pos);
+        this.pos += 4;
+        return this;
+    };
+    DataWriter.prototype.f64le = function (val) {
+        this._buf.writeDoubleLE(val, this.pos);
+        this.pos += 8;
+        return this;
+    };
+    DataWriter.prototype.zstring = function (val) {
+        this.string(val, val.length);
+        this.u8(0);
+        return this;
+    };
+    DataWriter.prototype.string = function (val, length) {
+        if (length === void 0) { length = val.length; }
+        this._buf.write(val, this.pos, length);
+        this.pos += length;
+        return this;
+    };
+    DataWriter.prototype.data = function (data) {
+        this._buf = Buffer.concat([this.buf, data]);
+        this.pos = this._buf.length;
+        return this;
+    };
+    return DataWriter;
+}());
+
+
 ;// CONCATENATED MODULE: ./lib/response-error.ts
 
 var InvalidResponseError = /** @class */ (function (_super) {
@@ -1365,114 +1474,90 @@ var InvalidResponseError = /** @class */ (function (_super) {
 }(Error));
 
 
-;// CONCATENATED MODULE: ./lib/str2bool.ts
-var true_strings = [
-    '1',
-    'true',
-    'on',
-    'yes',
-];
-var str2bool = function (str) {
-    return true_strings.indexOf(str.toLowerCase()) !== -1;
-};
+;// CONCATENATED MODULE: ./protocols/source-console.ts
 
-;// CONCATENATED MODULE: ./protocols/ase.ts
 
 
 
 
 var info = {
-    id: 'ase',
-    name: 'All-Seeing Eye',
-    feature: 'query',
-    transport: 'udp',
+    id: 'source-console',
+    name: 'Source Engine Remote Console',
+    feature: 'console',
+    transport: 'tcp',
+    options: [
+        { id: 'password', type: 'password' },
+    ],
 };
-var query = function () {
-    return gsw.send(new Buffer('s'));
+var pending_command = '';
+var authorized = false;
+var requestId = 0;
+var source_console_buffer = Buffer.alloc(0);
+var createPacket = function (id, type, body) {
+    if (body === void 0) { body = ''; }
+    var length = body.length + 10;
+    var w = new DataWriter()
+        .i32le(length)
+        .i32le(id)
+        .i32le(type)
+        .zstring(body)
+        .zstring('');
+    return w.buf;
 };
-var readString = function (r) {
-    var len = r.u8();
-    if (len == 0) {
-        throw new InvalidResponseError('string must exist');
+var sendCommand = function (cmd, options) {
+    if (!authorized) {
+        if (options === null || options === void 0 ? void 0 : options.password) {
+            gsw.send(createPacket(requestId, 3 /* AUTH */, options.password));
+        }
     }
-    return r.lstring(len - 1);
-};
-var readGeneralInfo = function (r) { return ({
-    gameName: readString(r),
-    port: readString(r),
-    serverName: readString(r),
-    gameType: readString(r),
-    map: readString(r),
-    version: readString(r),
-    private: readString(r),
-    numPlayers: readString(r),
-    maxPlayers: readString(r),
-}); };
-var readKeyValues = function (r) {
-    var inf = {};
-    while (!r.is_end) {
-        var key = readString(r);
-        if (!key) {
-            break;
-        }
-        var val = readString(r);
-        inf[key] = val;
+    else {
+        gsw.send(createPacket(requestId, 2 /* EXEC_COMMAND */, cmd));
     }
-    return inf;
 };
-var readPlayerList = function (r) {
-    var players = [];
-    while (!r.is_end) {
-        var player = {};
-        var flags = r.u8();
-        if (flags & 0x01) {
-            player.name = readString(r);
-        }
-        if (flags & 0x02) {
-            player.team = readString(r);
-        }
-        if (flags & 0x04) {
-            player.skin = readString(r);
-        }
-        if (flags & 0x08) {
-            player.score = readString(r);
-        }
-        if (flags & 0x10) {
-            player.ping = readString(r);
-        }
-        if (flags & 0x20) {
-            player.time = readString(r);
-        }
-        players.push(player);
-    }
-    return players;
-};
-var normalizeServerInfo = function (inf) {
-    var _a;
-    return (_a = {},
-        _a["server-name" /* SERVER_NAME */] = inf.serverName,
-        _a["game-version" /* GAME_VERSION */] = inf.version,
-        _a["game-mode" /* GAME_MODE */] = inf.gameType,
-        _a["map" /* MAP */] = inf.map,
-        _a["private" /* PRIVATE */] = str2bool(inf.private),
-        _a["num-players" /* NUM_PLAYERS */] = Number(inf.numPlayers),
-        _a["max-players" /* MAX_PLAYERS */] = Number(inf.maxPlayers),
-        _a);
+var parsePacket = function (buf) {
+    var r = new DataReader(buf);
+    return {
+        length: r.i32le(),
+        id: r.i32le(),
+        type: r.i32le(),
+        body: r.zstring(),
+        empty: r.zstring(),
+    };
 };
 var processResponse = function (data) {
-    var r = new DataReader(data);
-    var sig = r.lstring(4);
-    if (sig !== 'EYE1') {
-        throw new InvalidResponseError('not an All-Seeing Eye response');
+    source_console_buffer = Buffer.concat([source_console_buffer, data]);
+    var length = source_console_buffer.readInt32LE(0);
+    if (length >= (source_console_buffer.length - 4)) {
+        return;
     }
-    var generalInfo = readGeneralInfo(r);
-    var keyValues = readKeyValues(r);
-    var players = readPlayerList(r);
-    var all_info = __assign(__assign({}, generalInfo), keyValues);
-    var inf = normalizeServerInfo(all_info);
-    gsw.details(all_info);
-    gsw.sinfo(inf);
-    gsw.plist(players);
+    var pak = parsePacket(source_console_buffer.slice(0, length));
+    switch (pak.type) {
+        case 2 /* AUTH_RESPONSE */:
+            if (pak.id === requestId) {
+                authorized = true;
+                if (pending_command) {
+                    sendCommand(pending_command);
+                }
+            }
+            else if (pak.id === -1) {
+                throw new AuthError();
+            }
+            else {
+                throw new InvalidResponseError();
+            }
+            break;
+        case 0 /* RESPONSE_VALUE */:
+            if (pak.id === requestId) {
+                gsw.response(pak.body);
+            }
+            else {
+                throw new InvalidResponseError();
+            }
+            break;
+        default:
+            throw new InvalidResponseError();
+    }
+    source_console_buffer = source_console_buffer.slice(length + 4);
 };
 
 }();

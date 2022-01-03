@@ -6,6 +6,8 @@ public errordomain JsError {
   RUNTIME_ERROR,
 }
 
+public delegate void Callback ();
+
 public class DuktapeEx : Duktape {
   public DuktapeEx () {
     base.default ();
@@ -149,6 +151,12 @@ public class GlobalRoutine {
       var msg = duk.safe_to_stacktrace (-1);
       throw new JsError.RUNTIME_ERROR ("failed to call '%s': %s", routine, msg);
     }
+  }
+
+  public unowned GlobalRoutine push_string (string command) {
+    duk.push_string (command);
+    nargs++;
+    return this;
   }
 
   public unowned GlobalRoutine push_buffer (uint8[] data) {

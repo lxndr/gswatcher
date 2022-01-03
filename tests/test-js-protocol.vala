@@ -3,17 +3,17 @@ using Gsw;
 public static int main (string[] args) {
   Test.init (ref args);
 
-  Test.add_data_func ("/JsProtocol/correct-file", () => {
+  Test.add_data_func ("/QueryJsProtocol/correct-file", () => {
     try {
-      new JsProtocol ("../src/scripts/dist/source.js");
+      new QueryJsProtocol ("../src/scripts/dist/source.js");
     } catch (Error err) {
       assert_no_error (err);
     }
   });
 
-  Test.add_data_func ("/JsProtocol/info", () => {
+  Test.add_data_func ("/QueryJsProtocol/info", () => {
     try {
-      var proto = new JsProtocol ("../src/scripts/dist/source.js");
+      var proto = new QueryJsProtocol ("../src/scripts/dist/source.js");
       assert (proto.info.id == "source");
       assert (proto.info.name == "Source Engine");
     } catch (Error err) {
@@ -21,18 +21,18 @@ public static int main (string[] args) {
     }
   });
 
-  Test.add_data_func ("/JsProtocol/query", () => {
+  Test.add_data_func ("/QueryJsProtocol/query", () => {
     try {
-      var proto = new JsProtocol ("../src/scripts/dist/source.js");
+      var proto = new QueryJsProtocol ("../src/scripts/dist/source.js");
       proto.query ();
     } catch (Error err) {
       assert_no_error (err);
     }
   });
 
-  Test.add_data_func ("/LuaProtocol/process_response", () => {
+  Test.add_data_func ("/QueryJsProtocol/process_response", () => {
     try {
-      var proto = new JsProtocol ("../src/scripts/dist/source.js");
+      var proto = new QueryJsProtocol ("../src/scripts/dist/source.js");
       bool signal_called = false;
 
       proto.sinfo_update.connect ((sinfo) => {

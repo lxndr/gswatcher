@@ -10,6 +10,7 @@ export default {
     gamespy2: './protocols/gamespy2.ts',
     quake3: './protocols/quake3.ts',
     source: './protocols/source.ts',
+    'source-console': './protocols/source-console.ts',
   },
   output: {
     filename: '[name].js',

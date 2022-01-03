@@ -1,11 +1,12 @@
 import 'core-js/features/object/entries'
-import { CompoundResponse, Packet, ResponseStore } from './lib/response-store'
-import { InvalidResponseError } from './lib/response-error'
+import { CompoundResponse, Packet, ResponseStore } from '../lib/response-store'
+import { InvalidResponseError } from '../lib/response-error'
 import { parseQuakeInfo } from './quake'
 
 export const info: ProtocolInfo = {
   id: 'gamespy',
   name: 'GameSpy',
+  feature: 'query',
   transport: 'udp',
 }
 

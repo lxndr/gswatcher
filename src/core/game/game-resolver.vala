@@ -3,6 +3,7 @@ namespace Gsw {
 class Game {
   public string id;
   public string protocol;
+  public Gee.List<string> features = new Gee.ArrayList<string> ();
   public uint16 port;
   public int16 qport_diff;
   public Gee.Map<string, string> inf_matches = new Gee.HashMap<string, string> ();
@@ -67,6 +68,11 @@ public class GameResolver : Object {
     var game_id = kf.get_value ("Game", "id");
     var protocol = kf.get_value ("Game", "protocol");
     var game = new Game (game_id, protocol);
+
+    if (kf.has_key ("Game", "features")) {
+      var features = kf.get_string_list ("Game", "features");
+      game.features = new Gee.ArrayList<string>.wrap (features);
+    }
 
     if (kf.has_key ("Game", "port")) {
       var port = kf.get_integer ("Game", "port");
@@ -149,6 +155,13 @@ public class GameResolver : Object {
     return games.has_key (game_id)
       ? games[game_id].pfields
       : null;
+  }
+
+  public bool supports_feature (string game_id, string feature) {
+    if (!games.has_key (game_id))
+      return false;
+
+    return feature in games[game_id].features;
   }
 }
 

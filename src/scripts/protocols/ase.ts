@@ -1,6 +1,6 @@
-import { DataReader } from "./lib/data-reader"
-import { InvalidResponseError } from "./lib/response-error"
-import { str2bool } from "./lib/str2bool"
+import { DataReader } from "../lib/data-reader"
+import { InvalidResponseError } from "../lib/response-error"
+import { str2bool } from "../lib/str2bool"
 
 interface ASEInfo extends Info {
   gameName: string
@@ -17,6 +17,7 @@ interface ASEInfo extends Info {
 export const info: ProtocolInfo = {
   id: 'ase',
   name: 'All-Seeing Eye',
+  feature: 'query',
   transport: 'udp',
 }
 

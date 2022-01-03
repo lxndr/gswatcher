@@ -3,6 +3,7 @@ namespace Gsw {
 public class DetectorQuerier : Querier {
   private Gee.List<Querier> queriers = new Gee.ArrayList<Querier> ();
   public Querier? detected_querier { get; private set; }
+  public ConsoleClient? console_client { get; private set; }
 
   private Gtk.ExpressionWatch details_watch;
   private Gtk.ExpressionWatch sinfo_watch;
@@ -11,11 +12,8 @@ public class DetectorQuerier : Querier {
   private Gtk.ExpressionWatch ping_watch;
   private Gtk.ExpressionWatch error_watch;
 
-  public DetectorQuerier (QuerierManager querier_manager, Server server) {
-    Object (
-      querier_manager : querier_manager,
-      server : server
-    );
+  public DetectorQuerier (Server server) {
+    Object (server : server);
   }
 
   construct {
@@ -57,10 +55,10 @@ public class DetectorQuerier : Querier {
     detected_querier = null;
     queriers.clear ();
 
-    foreach (var protocol_desc in querier_manager.get_protocols ()) {
+    foreach (var protocol_desc in ProtocolRegistry.get_instance ().list_by_feature (QUERY)) {
       try {
-        var protocol = querier_manager.create_protocol (protocol_desc.id);
-        var querier = new WorkerQuerier (querier_manager, server, protocol);
+        var protocol = ProtocolRegistry.get_instance ().create (protocol_desc.id);
+        var querier = new WorkerQuerier (server, (QueryProtocol) protocol);
         querier.update.connect (on_protocol_detected);
         queriers.add (querier);
       } catch (Error err) {
@@ -80,6 +78,17 @@ public class DetectorQuerier : Querier {
 
   private void on_protocol_detected (Querier querier) {
     detected_querier = querier;
+
+    var supports_console = GameResolver.get_instance ().supports_feature (querier.sinfo.game_id, "console");
+
+    if (supports_console) {
+      try {
+        var proto = (ConsoleProtocol) ProtocolRegistry.get_instance ().create ("source-console");
+        console_client = new ConsoleClient (querier.server.host, querier.server.gport, proto);
+      } catch (Error err) {
+        log (Config.LOG_DOMAIN, LEVEL_ERROR, "failed to create protocol '%s': %s", "source-console", err.message);
+      }
+    }
 
     foreach (var it in queriers) {
       it.update.disconnect (on_protocol_detected);

@@ -10,10 +10,10 @@ public errordomain QuerierError {
 }
 
 public class WorkerQuerier : Querier {
-  public Protocol protocol { get; construct; }
+  public QueryProtocol protocol { get; construct; }
   public NetTransport transport { get; construct; }
 
-  private GameResolver game_resolver = new GameResolver ();
+  private GameResolver game_resolver = GameResolver.get_instance ();
   private bool query_pending;
   private int64 query_time;
   private uint timeout_source;
@@ -26,16 +26,15 @@ public class WorkerQuerier : Querier {
     protocol.sinfo_update.connect (on_sinfo_updated);
     protocol.plist_update.connect (on_plist_updated);
 
-    transport = querier_manager.create_transport (protocol.info.transport, server.host, server.qport);
+    transport = TransportRegistry.get_instance ().create_net_transport (protocol.info.transport, server.host, server.qport);
     transport.receive.connect (on_data_received);
     transport.notify["ready"].connect (handle_pending_query);
 
     game_resolver.notify["ready"].connect (handle_pending_query);
   }
 
-  public WorkerQuerier (QuerierManager querier_manager, Server server, Protocol protocol) {
+  public WorkerQuerier (Server server, QueryProtocol protocol) {
     Object (
-      querier_manager : querier_manager,
       server : server,
       protocol : protocol
     );

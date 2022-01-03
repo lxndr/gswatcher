@@ -22,7 +22,7 @@ class UdpTransportManager : Object {
     }
   }
 
-  public static UdpTransportManager get_default () {
+  public static UdpTransportManager get_instance () {
     return new UdpTransportManager ();
   }
 

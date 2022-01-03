@@ -1980,7 +1980,7 @@ function __classPrivateFieldSet(receiver, state, value, kind, f) {
 
 // EXTERNAL MODULE: ./node_modules/core-js/features/object/entries.js
 var entries = __webpack_require__(8631);
-;// CONCATENATED MODULE: ./protocols/lib/response-error.ts
+;// CONCATENATED MODULE: ./lib/response-error.ts
 
 var InvalidResponseError = /** @class */ (function (_super) {
     __extends(InvalidResponseError, _super);
@@ -1993,7 +1993,7 @@ var InvalidResponseError = /** @class */ (function (_super) {
 }(Error));
 
 
-;// CONCATENATED MODULE: ./protocols/lib/response-store.ts
+;// CONCATENATED MODULE: ./lib/response-store.ts
 
 var CompoundResponse = /** @class */ (function () {
     function CompoundResponse() {
@@ -2056,6 +2056,7 @@ var ResponseStore = /** @class */ (function () {
 var info = {
     id: 'quake',
     name: 'Quake',
+    feature: 'query',
     transport: 'udp',
 };
 var parseQuakeInfo = function (data) {
@@ -2082,6 +2083,7 @@ var parseQuakeInfo = function (data) {
 var gamespy_info = {
     id: 'gamespy',
     name: 'GameSpy',
+    feature: 'query',
     transport: 'udp',
 };
 var GamespyResponse = /** @class */ (function (_super) {

@@ -3255,7 +3255,7 @@ var find = __webpack_require__(5374);
 // EXTERNAL MODULE: ./node_modules/jsbi/dist/jsbi-cjs.js
 var jsbi_cjs = __webpack_require__(131);
 var jsbi_cjs_default = /*#__PURE__*/__webpack_require__.n(jsbi_cjs);
-;// CONCATENATED MODULE: ./protocols/lib/data-reader.ts
+;// CONCATENATED MODULE: ./lib/data-reader.ts
 
 var BigInt = (jsbi_cjs_default()).BigInt;
 var big32 = BigInt(32);
@@ -3352,7 +3352,7 @@ var DataReader = /** @class */ (function () {
 }());
 
 
-;// CONCATENATED MODULE: ./protocols/lib/data-writer.ts
+;// CONCATENATED MODULE: ./lib/data-writer.ts
 var DataWriter = /** @class */ (function () {
     function DataWriter() {
         this.pos = 0;
@@ -3425,7 +3425,7 @@ var DataWriter = /** @class */ (function () {
 }());
 
 
-;// CONCATENATED MODULE: ./protocols/lib/response-error.ts
+;// CONCATENATED MODULE: ./lib/response-error.ts
 
 var InvalidResponseError = /** @class */ (function (_super) {
     __extends(InvalidResponseError, _super);
@@ -3438,7 +3438,7 @@ var InvalidResponseError = /** @class */ (function (_super) {
 }(Error));
 
 
-;// CONCATENATED MODULE: ./protocols/lib/response-store.ts
+;// CONCATENATED MODULE: ./lib/response-store.ts
 
 var CompoundResponse = /** @class */ (function () {
     function CompoundResponse() {
@@ -3508,6 +3508,7 @@ var ResponseStore = /** @class */ (function () {
 var info = {
     id: 'source',
     name: 'Source Engine',
+    feature: 'query',
     transport: 'udp',
 };
 var SourceResponse = /** @class */ (function (_super) {

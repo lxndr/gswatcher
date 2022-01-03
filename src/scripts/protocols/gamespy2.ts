@@ -1,11 +1,12 @@
-import { InvalidResponseError } from './lib/response-error'
-import { DataReader } from './lib/data-reader'
-import { DataWriter } from './lib/data-writer'
-import { genRandomInteger } from './lib/gen-random-integer'
+import { InvalidResponseError } from '../lib/response-error'
+import { DataReader } from '../lib/data-reader'
+import { DataWriter } from '../lib/data-writer'
+import { genRandomInteger } from '../lib/gen-random-integer'
 
 export const info: ProtocolInfo = {
   id: 'gamespy2',
   name: 'GameSpy 2',
+  feature: 'query',
   transport: 'udp',
 }
 

@@ -2048,7 +2048,7 @@ __webpack_require__.d(__webpack_exports__, {
 
 // EXTERNAL MODULE: ./node_modules/core-js/features/array/flat-map.js
 var flat_map = __webpack_require__(1452);
-;// CONCATENATED MODULE: ./protocols/lib/data-writer.ts
+;// CONCATENATED MODULE: ./lib/data-writer.ts
 var DataWriter = /** @class */ (function () {
     function DataWriter() {
         this.pos = 0;
@@ -2440,7 +2440,7 @@ function __classPrivateFieldSet(receiver, state, value, kind, f) {
     return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
 }
 
-;// CONCATENATED MODULE: ./protocols/lib/response-error.ts
+;// CONCATENATED MODULE: ./lib/response-error.ts
 
 var InvalidResponseError = /** @class */ (function (_super) {
     __extends(InvalidResponseError, _super);
@@ -2458,6 +2458,7 @@ var InvalidResponseError = /** @class */ (function (_super) {
 var info = {
     id: 'quake',
     name: 'Quake',
+    feature: 'query',
     transport: 'udp',
 };
 var parseQuakeInfo = function (data) {
@@ -2483,6 +2484,7 @@ var parseQuakeInfo = function (data) {
 var quake3_info = {
     id: 'quake3',
     name: 'Quake 3',
+    feature: 'query',
     transport: 'udp',
 };
 var createPacket = function (parts) {

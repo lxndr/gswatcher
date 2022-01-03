@@ -4,7 +4,7 @@ class UdpTransport : NetTransport {
   private UdpTransportManager manager;
 
   construct {
-    manager = UdpTransportManager.get_default ();
+    manager = UdpTransportManager.get_instance ();
     manager.register (this);
   }
 
