@@ -2,6 +2,8 @@ using Gtk;
 
 namespace Gsw.Ui {
 
+// TODO: should use GtkListView
+
 class OptionList : Widget {
   private Gee.Map<string, string> _values = new Gee.HashMap<string, string> ();
 
@@ -33,6 +35,10 @@ class OptionList : Widget {
       var editor = create_editor_widget (option, value);
       place_widget (editor, 1, i);
     }
+  }
+
+  public OptionList (Gee.List<ProtocolOption> options) {
+    Object (options : options);
   }
 
   protected override void dispose () {

@@ -35,7 +35,7 @@ public class ProtocolInfo {
   public string id;
   public string name;
   public string transport;
-  public Gee.List<ProtocolOption> options;
+  public Gee.List<ProtocolOption> options = new Gee.ArrayList<ProtocolOption> ();
 }
 
 public interface Protocol : Object {

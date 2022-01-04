@@ -21,7 +21,6 @@
           <object class="GtkScrolledWindow">
             <property name="hscrollbar_policy">never</property>
             <property name="hexpand">true</property>
-            <property name="hexpand-set">true</property>
             <property name="vexpand">true</property>
 
             <child>
@@ -40,9 +39,15 @@
         <child>
           <object class="GtkBox">
             <property name="orientation">GTK_ORIENTATION_HORIZONTAL</property>
+            <property name="spacing">4</property>
+            <property name="margin-top">4</property>
+            <property name="margin-bottom">4</property>
+            <property name="margin-end">4</property>
+            <property name="margin-start">4</property>
 
             <child>
               <object class="GtkEntry" id="entry">
+                <property name="hexpand">true</property>
                 <property name="secondary-icon-name">media-playback-start</property>
                 <property name="completion">completion</property>
                 <signal name="activate" handler="entry_activated" />

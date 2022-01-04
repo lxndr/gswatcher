@@ -12,11 +12,8 @@ public class ConsoleClient : Object {
   public ConsoleProtocol protocol { get; construct; }
   public NetTransport transport { get; construct; }
 
-  private Gee.List<string> _pending_commands = new Gee.ArrayList<string> ();
   private uint timeout_source;
 
-  public signal void authorized ();
-  public signal void command_sent (string command);
   public signal void response_received (string response);
   public signal void error_occured (Error error);
 
@@ -47,23 +44,12 @@ public class ConsoleClient : Object {
   }
 
   public void exec_command (string command) {
-    _pending_commands.add (command);
-    flush ();
-  }
-
-  private void flush () {
     try {
-      if (!_pending_commands.is_empty) {
-        var command = _pending_commands.first ();
-        _pending_commands.remove_at (0);
-
-        var options = new Gee.HashMap<string, string> ();
-        protocol.send_command (command, options);
-        start_timeout_timer ();
-        command_sent (command);
-      }
+      var options = new Gee.HashMap<string, string> ();
+      protocol.send_command (command, options);
+      start_timeout_timer ();
     } catch (Error err) {
-      error_occured (new ConsoleError.SENDING ("failed to send command to %s:%u: %s", host, port, err.message));
+      on_error (new ConsoleError.PROCESSING ("failed to send command '%s': %s", command, err.message));
     }
   }
 
@@ -76,12 +62,12 @@ public class ConsoleClient : Object {
     try {
       protocol.process_response (data);
     } catch (Error err) {
-      error_occured (new ConsoleError.PROCESSING ("failed to process data from %s:%u: %s", host, port, err.message));
+      on_error (new ConsoleError.PROCESSING ("failed to process data from %s:%u: %s", host, port, err.message));
     }
   }
 
   private void on_transport_error (Error err) {
-    error_occured (err);
+    on_error (err);
   }
 
   private void on_response (string response) {
@@ -89,11 +75,15 @@ public class ConsoleClient : Object {
     response_received (response);
   }
 
+  private void on_error (Error err) {
+    error_occured (err);
+  }
+
   private void start_timeout_timer () {
     stop_timeout_timer ();
 
     timeout_source = Timeout.add (TIMEOUT_MS, () => {
-      error_occured (new ConsoleError.TIMEOUT ("failed to query %s:%d: %s", host, port, "failed to receive a response in reasonable amount of time"));
+      on_error (new ConsoleError.TIMEOUT ("failed to query %s:%d: %s", host, port, "failed to receive a response in reasonable amount of time"));
       timeout_source = 0;
       return Source.REMOVE;
     });

@@ -9,6 +9,9 @@ class ServerConsole : Widget {
   [GtkChild]
   private unowned TextBuffer log_buffer;
 
+  [GtkChild]
+  private unowned Popover options_popover;
+
   class construct {
     set_layout_manager_type (typeof (BinLayout));
   }
@@ -25,6 +28,11 @@ class ServerConsole : Widget {
 
     set {
       if (_client != null) {
+        if (options_popover.child != null) {
+          options_popover.child.destroy ();
+          options_popover.child = null;
+        }
+
         _client.response_received.disconnect (on_response_received);
         _client.error_occured.disconnect (on_error_occured);
       }
@@ -34,6 +42,11 @@ class ServerConsole : Widget {
       if (_client != null) {
         _client.response_received.connect (on_response_received);
         _client.error_occured.connect (on_error_occured);
+
+        if (_client.protocol.info.options.size > 0) {
+          var options_widget = new OptionList (_client.protocol.info.options);
+          options_popover.child = options_widget;
+        }
       }
     }
   }
