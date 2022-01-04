@@ -167,6 +167,18 @@ public class GlobalRoutine {
     nargs++;
     return this;
   }
+
+  public unowned GlobalRoutine push_object (Gee.Map<string, string> options) {
+    var obj_idx = duk.push_object ();
+
+    foreach (var entry in options) {
+      duk.push_string (entry.value);
+      duk.put_prop_string (obj_idx, entry.key);
+    }
+
+    nargs++;
+    return this;
+  }
 }
 
 [Compact (opaque = true)]

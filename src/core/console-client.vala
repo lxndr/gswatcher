@@ -13,7 +13,6 @@ public class ConsoleClient : Object {
   public NetTransport transport { get; construct; }
 
   private Gee.List<string> _pending_commands = new Gee.ArrayList<string> ();
-  private bool request_pending;
   private uint timeout_source;
 
   public signal void authorized ();
@@ -26,8 +25,8 @@ public class ConsoleClient : Object {
     protocol.response.connect (on_response);
 
     transport = TransportRegistry.get_instance ().create_net_transport (protocol.info.transport, host, port);
-    transport.receive.connect (on_data_received);
-    transport.notify["ready"].connect (handle_pending_query);
+    transport.data_received.connect (on_data_received);
+    transport.error.connect (on_transport_error);
   }
 
   public ConsoleClient (string host, uint16 port, ConsoleProtocol protocol) {
@@ -43,8 +42,8 @@ public class ConsoleClient : Object {
 
     protocol.data_send.disconnect (send_data);
     protocol.response.disconnect (on_response);
-    transport.receive.disconnect (on_data_received);
-    transport.notify["ready"].disconnect (handle_pending_query);
+    transport.data_received.disconnect (on_data_received);
+    transport.error.disconnect (on_transport_error);
   }
 
   public void exec_command (string command) {
@@ -57,7 +56,9 @@ public class ConsoleClient : Object {
       if (!_pending_commands.is_empty) {
         var command = _pending_commands.first ();
         _pending_commands.remove_at (0);
-        protocol.send_command (command);
+
+        var options = new Gee.HashMap<string, string> ();
+        protocol.send_command (command, options);
         start_timeout_timer ();
         command_sent (command);
       }
@@ -67,17 +68,8 @@ public class ConsoleClient : Object {
   }
 
   private void send_data (uint8[] data) {
-    try {
-      transport.send (data);
-      log (Config.LOG_DOMAIN, LEVEL_DEBUG, "sent data to %s:%u: length = %ld", host, port, data.length);
-    } catch (Error err) {
-      error_occured (new ConsoleError.SENDING ("failed to send data to %s:%u: %s", host, port, err.message));
-    }
-  }
-
-  private void handle_pending_query () {
-    if (request_pending && transport.ready)
-      flush ();
+    transport.send (data);
+    log (Config.LOG_DOMAIN, LEVEL_DEBUG, "sent data to %s:%u: length = %ld", host, port, data.length);
   }
 
   private void on_data_received (uint8[] data) {
@@ -86,6 +78,10 @@ public class ConsoleClient : Object {
     } catch (Error err) {
       error_occured (new ConsoleError.PROCESSING ("failed to process data from %s:%u: %s", host, port, err.message));
     }
+  }
+
+  private void on_transport_error (Error err) {
+    error_occured (err);
   }
 
   private void on_response (string response) {

@@ -135,11 +135,13 @@
                     </child>
                     <child>
                       <object class="GswUiServerConsole" id="server_console">
-                        <!-- binding name="querier">
-                          <lookup type="GswUiServerList" name="selected">
-                            server_list_ctl
+                        <binding name="client">
+                          <lookup type="GswDetectorQuerier" name="console-client">
+                            <lookup type="GswUiServerList" name="selected">
+                              server_list_ctl
+                            </lookup>
                           </lookup>
-                        </binding -->
+                        </binding>
                       </object>
                     </child>
                     <child type="tab">

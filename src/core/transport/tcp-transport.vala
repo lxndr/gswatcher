@@ -1,9 +1,9 @@
 namespace Gsw {
 
 class TcpTransport : NetTransport {
-  private Socket socket;
-  private SocketSource socket_source;
-  private Cancellable cancellable;
+  private Socket? socket;
+  private SocketSource? socket_source;
+  private ByteArray output_buffer = new ByteArray ();
 
   public TcpTransport (string host, uint16 port) {
     Object (host : host, port : port);
@@ -13,65 +13,117 @@ class TcpTransport : NetTransport {
     close_socket ();
   }
 
+  private void resolve_address () {
+    resolve.begin ((obj, res) => {
+      try {
+        resolve.end (res);
+        flush ();
+      } catch (Error err) {
+        on_error (err);
+      }
+    });
+  }
+
   private void open_socket () {
     try {
-      close_socket ();
+      socket = new Socket (IPV4, STREAM, DEFAULT);
+      socket.blocking = false;
+      setup_socket_source (OUT);
 
-      cancellable = new Cancellable ();
-
-      socket = new Socket (SocketFamily.IPV4, SocketType.STREAM, SocketProtocol.TCP);
-      socket_source = socket.create_source (IOCondition.IN, cancellable);
-      socket_source.set_callback (data_received);
-      socket_source.attach ();
-
-      socket.connect (saddr, cancellable);
+      try {
+        socket.connect (saddr, cancellable);
+      } catch (IOError err) {
+        if (err.code != IOError.PENDING)
+          throw err;
+      }
     } catch (Error err) {
-      error (err);
+      on_error (err);
     }
   }
 
   private void close_socket () {
     try {
-      if (socket_source != null) {
+      if (socket_source != null)
         socket_source.destroy ();
-      }
 
-      if (cancellable != null && !cancellable.is_cancelled ()) {
+      if (cancellable != null && !cancellable.is_cancelled ())
         cancellable.cancel ();
-      }
 
-      if (socket != null) {
+      if (socket != null)
         socket.close ();
-      }
     } catch (Error err) {
-      error (err);
-    } finally {
-      socket_source = null;
-      cancellable = null;
-      socket = null;
+      log (Config.LOG_DOMAIN, LEVEL_ERROR, err.message);
     }
   }
 
-  public override void send (uint8[] data) throws Error {
-    if (socket == null)
-      open_socket ();
+  private void setup_socket_source (IOCondition condition) {
+    if (socket_source != null)
+      socket_source.destroy ();
 
-    socket.send (data, cancellable);
+    socket_source = socket.create_source (condition, cancellable);
+    socket_source.set_callback (on_socket_event);
+    socket_source.attach ();
   }
 
-  private bool data_received (Socket socket, IOCondition condition) {
+  private void send_pending_data () {
     try {
-      if (condition == HUP)
-        throw new IOError.FAILED ("the connection has been broken");
+      socket.send (output_buffer.data, cancellable);
+      output_buffer.set_size (0);
+    } catch (Error err) {
+      on_error (err);
+    }
+  }
 
-      var data = new uint8[socket.get_available_bytes ()];
-      socket.receive (data, cancellable);
-      receive (data);
+  public override void send (uint8[] data) {
+    output_buffer.append (data);
+    flush ();
+  }
+
+  private void flush () {
+    if (output_buffer.len > 0) {
+      if (!is_resolved) {
+        resolve_address ();
+      } else if (socket == null) {
+        open_socket ();
+      } else {
+        send_pending_data ();
+      }
+    }
+  }
+
+  private bool on_socket_event (Socket socket, IOCondition cond) {
+    try {
+      if (HUP in cond)
+        throw new IOError.FAILED ("socket has hung up");
+
+      if (ERR in cond)
+        throw new IOError.FAILED ("socket error has occured");
+
+      if (OUT in cond) {
+        if (socket.check_connect_result ()) {
+          setup_socket_source (IN);
+          flush ();
+          return Source.REMOVE;
+        }
+      }
+
+      if (IN in cond) {
+        var size = socket.get_available_bytes ();
+        var data = new uint8[size];
+        socket.receive (data, cancellable);
+        data_received (data);
+      }
+
+      return Source.CONTINUE;
     } catch (Error err) {
       error (err);
+      return Source.REMOVE;
     }
+  }
 
-    return true;
+  private void on_error (Error err) {
+    error (err);
+    close_socket ();
   }
 }
 

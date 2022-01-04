@@ -93,7 +93,7 @@ class UdpTransportManager : Object {
           addr.port == transport.saddr.port &&
           addr.address.equal (transport.saddr.address)
         ) {
-          transport.receive (data);
+          transport.data_received (data);
         }
       }
     } catch (Error err) {

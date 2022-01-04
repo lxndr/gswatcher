@@ -159,6 +159,7 @@ public class Duktape {
   public void push_string (string str);
   public void put_function_list (Index index, [CCode (array_length = false, array_null_terminated = true)] FunctionListEntry[] funcs);
   public Bool put_global_string (string key);
+  public Bool put_prop_string (Index obj_idx, string key);
   public void remove (Index idx);
   public unowned uint8[] require_buffer_data (Index idx);
   public void require_object (Index idx);

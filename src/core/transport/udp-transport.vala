@@ -1,10 +1,10 @@
 namespace Gsw {
 
 class UdpTransport : NetTransport {
-  private UdpTransportManager manager;
+  private UdpTransportManager manager = UdpTransportManager.get_instance ();
+  private uint8[]? output_message;
 
   construct {
-    manager = UdpTransportManager.get_instance ();
     manager.register (this);
   }
 
@@ -16,8 +16,43 @@ class UdpTransport : NetTransport {
     manager.unregister (this);
   }
 
-  public override void send (uint8[] data) throws Error {
-    manager.send (saddr, data);
+  private void resolve_address () {
+    resolve.begin ((obj, res) => {
+      try {
+        resolve.end (res);
+        flush ();
+      } catch (Error err) {
+        on_error (err);
+      }
+    });
+  }
+
+  private void send_pending_data () {
+    try {
+      manager.send (saddr, output_message);
+      output_message = null;
+    } catch (Error err) {
+      on_error (err);
+    }
+  }
+
+  public override void send (uint8[] data) {
+    output_message = data;
+    flush ();
+  }
+
+  private void flush () {
+    if (output_message != null) {
+      if (!is_resolved) {
+        resolve_address ();
+      } else {
+        send_pending_data ();
+      }
+    }
+  }
+
+  private void on_error (Error err) {
+    error (err);
   }
 }
 

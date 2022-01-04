@@ -2,6 +2,7 @@ namespace Gsw {
 
 public errordomain ProtocolError {
   INVALID_RESPONSE,
+  AUTH_FAILED,
   NOT_IMPLEMENTED,
 }
 

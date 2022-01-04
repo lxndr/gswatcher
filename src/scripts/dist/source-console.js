@@ -1504,20 +1504,19 @@ var createPacket = function (id, type, body) {
         .zstring('');
     return w.buf;
 };
-var sendCommand = function (cmd, options) {
-    if (!authorized) {
-        if (options === null || options === void 0 ? void 0 : options.password) {
-            gsw.send(createPacket(requestId, 3 /* AUTH */, options.password));
-        }
+var sendCommand = function (cmd, _a) {
+    var _b = _a === void 0 ? {} : _a, _c = _b.password, password = _c === void 0 ? '' : _c;
+    if (authorized) {
+        gsw.send(createPacket(requestId, 2 /* EXEC_COMMAND */, cmd));
     }
     else {
-        gsw.send(createPacket(requestId, 2 /* EXEC_COMMAND */, cmd));
+        pending_command = cmd;
+        gsw.send(createPacket(requestId, 3 /* AUTH */, password));
     }
 };
 var parsePacket = function (buf) {
     var r = new DataReader(buf);
     return {
-        length: r.i32le(),
         id: r.i32le(),
         type: r.i32le(),
         body: r.zstring(),
@@ -1526,38 +1525,46 @@ var parsePacket = function (buf) {
 };
 var processResponse = function (data) {
     source_console_buffer = Buffer.concat([source_console_buffer, data]);
-    var length = source_console_buffer.readInt32LE(0);
-    if (length >= (source_console_buffer.length - 4)) {
-        return;
-    }
-    var pak = parsePacket(source_console_buffer.slice(0, length));
-    switch (pak.type) {
-        case 2 /* AUTH_RESPONSE */:
-            if (pak.id === requestId) {
-                authorized = true;
-                if (pending_command) {
-                    sendCommand(pending_command);
+    while (source_console_buffer.length >= 4) {
+        var length_1 = source_console_buffer.readInt32LE(0);
+        if (length_1 > 4096) {
+            throw new InvalidResponseError('maximum packet size exceeded');
+        }
+        if (length_1 > (source_console_buffer.length - 4)) {
+            break;
+        }
+        var pak = parsePacket(source_console_buffer.slice(4, length_1 + 4));
+        if (pak.empty) {
+            throw new InvalidResponseError('no empty trailing string');
+        }
+        switch (pak.type) {
+            case 2 /* AUTH_RESPONSE */:
+                if (pak.id === requestId) {
+                    authorized = true;
+                    if (pending_command) {
+                        sendCommand(pending_command);
+                    }
                 }
-            }
-            else if (pak.id === -1) {
-                throw new AuthError();
-            }
-            else {
+                else if (pak.id === -1) {
+                    throw new AuthError();
+                }
+                else {
+                    throw new InvalidResponseError();
+                }
+                break;
+            case 0 /* RESPONSE_VALUE */:
+                if (pak.id === requestId) {
+                    gsw.response(pak.body);
+                }
+                else {
+                    throw new InvalidResponseError();
+                }
+                break;
+            default:
                 throw new InvalidResponseError();
-            }
-            break;
-        case 0 /* RESPONSE_VALUE */:
-            if (pak.id === requestId) {
-                gsw.response(pak.body);
-            }
-            else {
-                throw new InvalidResponseError();
-            }
-            break;
-        default:
-            throw new InvalidResponseError();
+        }
+        source_console_buffer = source_console_buffer.slice(length_1 + 4);
     }
-    source_console_buffer = source_console_buffer.slice(length + 4);
 };
 
 }();

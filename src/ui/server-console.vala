@@ -4,7 +4,7 @@ namespace Gsw.Ui {
 
 [GtkTemplate (ui = "/org/lxndr/gswatcher/ui/server-console.ui")]
 class ServerConsole : Widget {
-  public ConsoleClient client { get; set; }
+  private ConsoleClient? _client;
 
   [GtkChild]
   private unowned TextBuffer log_buffer;
@@ -16,6 +16,26 @@ class ServerConsole : Widget {
   protected override void dispose () {
     get_first_child ().unparent ();
     base.dispose ();
+  }
+
+  public ConsoleClient client {
+    get {
+      return _client;
+    }
+
+    set {
+      if (_client != null) {
+        _client.response_received.disconnect (on_response_received);
+        _client.error_occured.disconnect (on_error_occured);
+      }
+
+      _client = value;
+
+      if (_client != null) {
+        _client.response_received.connect (on_response_received);
+        _client.error_occured.connect (on_error_occured);
+      }
+    }
   }
 
   [GtkCallback]
@@ -34,6 +54,8 @@ class ServerConsole : Widget {
 
   private void send_command (string cmd) {
     log (cmd);
+
+    client.exec_command (cmd);
   }
 
   private void log (string msg) {
@@ -42,6 +64,16 @@ class ServerConsole : Widget {
     log_buffer.insert (ref iter, msg, -1);
     log_buffer.insert (ref iter, "\n", -1);
   }
+
+  private void on_response_received (string response) {
+    log (response);
+  }
+
+  private void on_error_occured (Error err) {
+    print ("Error: %s\n", err.message);
+    log (err.message);
+  }
+
 }
 
 }

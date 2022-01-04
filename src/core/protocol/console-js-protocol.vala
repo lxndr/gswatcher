@@ -24,9 +24,10 @@ public class ConsoleJsProtocol : JsProtocol, ConsoleProtocol {
     register_gsw_functions (funcs);
   }
 
-  public void send_command (string command) throws Error {
+  public void send_command (string command, Gee.Map<string, string> options) throws Error {
     new GlobalRoutine (vm, "module.sendCommand")
       .push_string (command)
+      .push_object (options)
       .exec ();
   }
 
@@ -37,10 +38,10 @@ public class ConsoleJsProtocol : JsProtocol, ConsoleProtocol {
         .exec ();
     } catch (JsError err) {
       // NOTE: very naive to simply check if it contains InvalidResponseError
-      if (err.code == JsError.RUNTIME_ERROR && err.message.index_of ("InvalidResponseError") >= 0) {
+      if (err.code == JsError.RUNTIME_ERROR && err.message.index_of ("InvalidResponseError") >= 0)
         throw new ProtocolError.INVALID_RESPONSE (err.message);
-      }
-
+      if (err.code == JsError.RUNTIME_ERROR && err.message.index_of ("AuthError") >= 0)
+        throw new ProtocolError.AUTH_FAILED (err.message);
       throw err;
     }
   }

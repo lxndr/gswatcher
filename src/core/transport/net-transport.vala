@@ -3,34 +3,30 @@ namespace Gsw {
 public abstract class NetTransport : Transport {
   public string host { get; construct; }
   public uint16 port { get; construct; }
-  public InetSocketAddress saddr { get; private set; }
+  public InetSocketAddress? saddr { get; private set; }
 
-  private Cancellable cancellable;
+  protected Cancellable cancellable = new Cancellable ();
 
-  construct {
-    resolve ();
-  }
-
-  private void resolve () {
+  ~NetTransport () {
     if (cancellable != null && !cancellable.is_cancelled ())
       cancellable.cancel ();
-    cancellable = new Cancellable ();
+  }
 
+  public bool is_resolved {
+    get {
+      return saddr != null;
+    }
+  }
+
+  protected async void resolve () throws Error {
     var resolver = Resolver.get_default ();
-    resolver.lookup_by_name_with_flags_async.begin (host, IPV4_ONLY, cancellable, (obj, res) => {
-      try {
-        var addresses = resolver.lookup_by_name_with_flags_async.end (res);
+    var addresses = yield resolver.lookup_by_name_with_flags_async (host, IPV4_ONLY, cancellable);
   
-        if (addresses.length () > 0) {
-          var address = addresses.nth_data (0);
-          log (Config.LOG_DOMAIN, LEVEL_DEBUG, "host %s resolved to %s", host, address.to_string ());
-          saddr = new InetSocketAddress (address, port);
-          ready = true;
-        }
-      } catch (Error err) {
-        error (err);
-      }  
-    });
+    if (addresses.length () == 0)
+      throw new IOError.NOT_FOUND ("no address found"); // TODO: handle
+
+    var address = addresses.nth_data (0);
+    saddr = new InetSocketAddress (address, port);
   }
 }
 

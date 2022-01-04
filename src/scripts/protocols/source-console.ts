@@ -37,13 +37,12 @@ const createPacket = (id: number, type: PacketType, body = '') => {
   return w.buf
 }
 
-export const sendCommand = (cmd: string, options?: Record<string, string>) => {
-  if (!authorized) {
-    if (options?.password) {
-      gsw.send(createPacket(requestId, PacketType.AUTH, options.password))
-    }
-  } else {
+export const sendCommand = (cmd: string, { password = '' } = {}) => {
+  if (authorized) {
     gsw.send(createPacket(requestId, PacketType.EXEC_COMMAND, cmd))
+  } else {
+    pending_command = cmd
+    gsw.send(createPacket(requestId, PacketType.AUTH, password))
   }
 }
 
@@ -51,7 +50,6 @@ const parsePacket = (buf: Buffer) => {
   const r = new DataReader(buf)
 
   return {
-    length: r.i32le(),
     id: r.i32le(),
     type: r.i32le(),
     body: r.zstring(),
@@ -62,38 +60,48 @@ const parsePacket = (buf: Buffer) => {
 export const processResponse: ProcessResponseFn = data => {
   buffer = Buffer.concat([buffer, data])
 
-  const length = buffer.readInt32LE(0)
+  while (buffer.length >= 4) {
+    const length = buffer.readInt32LE(0)
 
-  if (length >= (buffer.length - 4)) {
-    return
-  }
+    if (length > 4096) {
+      throw new InvalidResponseError('maximum packet size exceeded')
+    }
 
-  const pak = parsePacket(buffer.slice(0, length))
+    if (length > (buffer.length - 4)) {
+      break;
+    }
 
-  switch (pak.type) {
-    case PacketType.AUTH_RESPONSE:
-      if (pak.id === requestId) {
-        authorized = true
+    const pak = parsePacket(buffer.slice(4, length + 4))
 
-        if (pending_command) {
-          sendCommand(pending_command)
+    if (pak.empty) {
+      throw new InvalidResponseError('no empty trailing string')
+    }
+
+    switch (pak.type) {
+      case PacketType.AUTH_RESPONSE:
+        if (pak.id === requestId) {
+          authorized = true
+
+          if (pending_command) {
+            sendCommand(pending_command)
+          }
+        } else if (pak.id === -1) {
+          throw new AuthError()
+        } else {
+          throw new InvalidResponseError()
         }
-      } else if (pak.id === -1) {
-        throw new AuthError()
-      } else {
+        break
+      case PacketType.RESPONSE_VALUE:
+        if (pak.id === requestId) {
+          gsw.response(pak.body)
+        } else {
+          throw new InvalidResponseError()
+        }
+        break
+      default:
         throw new InvalidResponseError()
-      }
-      break
-    case PacketType.RESPONSE_VALUE:
-      if (pak.id === requestId) {
-        gsw.response(pak.body)
-      } else {
-        throw new InvalidResponseError()
-      }
-      break
-    default:
-      throw new InvalidResponseError()
-  }
+    }
 
-  buffer = buffer.slice(length + 4)
+    buffer = buffer.slice(length + 4)
+  }
 }

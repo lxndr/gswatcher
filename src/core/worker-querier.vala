@@ -27,8 +27,7 @@ public class WorkerQuerier : Querier {
     protocol.plist_update.connect (on_plist_updated);
 
     transport = TransportRegistry.get_instance ().create_net_transport (protocol.info.transport, server.host, server.qport);
-    transport.receive.connect (on_data_received);
-    transport.notify["ready"].connect (handle_pending_query);
+    transport.data_received.connect (on_data_received);
 
     game_resolver.notify["ready"].connect (handle_pending_query);
   }
@@ -48,14 +47,13 @@ public class WorkerQuerier : Querier {
     protocol.details_update.disconnect (on_details_updated);
     protocol.sinfo_update.disconnect (on_sinfo_updated);
     protocol.plist_update.disconnect (on_plist_updated);
-    transport.receive.disconnect (on_data_received);
-    transport.notify["ready"].disconnect (handle_pending_query);
+    transport.data_received.disconnect (on_data_received);
     game_resolver.notify["ready"].disconnect (handle_pending_query);
   }
 
   public override void query () {
     try {
-      if (!(transport.ready && game_resolver.ready)) {
+      if (!game_resolver.ready) {
         query_pending = true;
         return;
       }
@@ -82,16 +80,12 @@ public class WorkerQuerier : Querier {
   }
 
   private void send_data (uint8[] data) {
-    try {
-      transport.send (data);
-      log (Config.LOG_DOMAIN, LEVEL_DEBUG, "sent data to %s:%u: length = %ld", server.host, server.qport, data.length);
-    } catch (Error err) {
-      error = new QuerierError.SENDING ("failed to send data to %s:%u: %s", server.host, server.qport, err.message);
-    }
+    transport.send (data);
+    log (Config.LOG_DOMAIN, LEVEL_DEBUG, "sent data to %s:%u: length = %ld", server.host, server.qport, data.length);
   }
 
   private void handle_pending_query () {
-    if (query_pending && transport.ready && game_resolver.ready)
+    if (query_pending && game_resolver.ready)
       query ();
   }
 
