@@ -1,4 +1,4 @@
-import 'core-js/features/array/flat-map'
+import '../lib/polyfill'
 import { DataWriter } from '../lib/data-writer'
 import { InvalidResponseError } from '../lib/response-error'
 import { parseQuakeInfo } from './quake'

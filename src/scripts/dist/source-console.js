@@ -2,7 +2,7 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 8213:
+/***/ 213:
 /*!********************************!*\
   !*** ./lib/polyfill/buffer.ts ***!
   \********************************/
@@ -939,7 +939,7 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 !function() {
 /*!*************************************************!*\
-  !*** ./protocols/source-console.ts + 6 modules ***!
+  !*** ./protocols/source-console.ts + 8 modules ***!
   \*************************************************/
 // ESM COMPAT FLAG
 __webpack_require__.r(__webpack_exports__);
@@ -951,9 +951,69 @@ __webpack_require__.d(__webpack_exports__, {
   "sendCommand": function() { return /* binding */ sendCommand; }
 });
 
+;// CONCATENATED MODULE: ./lib/polyfill/array.js
+
+// https://github.com/jonathantneal/array-flat-polyfill/blob/master/src/polyfill-flat.js
+Object.defineProperty(Array.prototype, 'flat', {
+    configurable: true,
+    value: function flat() {
+        var depth = isNaN(arguments[0]) ? 1 : Number(arguments[0]);
+        return depth ? Array.prototype.reduce.call(this, function (acc, cur) {
+            if (Array.isArray(cur)) {
+                acc.push.apply(acc, flat.call(cur, depth - 1));
+            }
+            else {
+                acc.push(cur);
+            }
+            return acc;
+        }, []) : Array.prototype.slice.call(this);
+    },
+    writable: true
+});
+// https://github.com/jonathantneal/array-flat-polyfill/blob/master/src/polyfill-flatMap.js
+Object.defineProperty(Array.prototype, 'flatMap', {
+    configurable: true,
+    value: function flatMap(callback) {
+        return Array.prototype.map.apply(this, arguments).flat();
+    },
+    writable: true
+});
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find
+Array.prototype.find = function (predicate) {
+    if (this === null) {
+        throw new TypeError('Array.prototype.find called on null or undefined');
+    }
+    if (typeof predicate !== 'function') {
+        throw new TypeError('predicate must be a function');
+    }
+    var list = Object(this);
+    var length = list.length >>> 0;
+    var thisArg = arguments[1];
+    var value;
+    for (var i = 0; i < length; i++) {
+        value = list[i];
+        if (predicate.call(thisArg, value, i, list)) {
+            return value;
+        }
+    }
+    return undefined;
+};
+
 // EXTERNAL MODULE: ./lib/polyfill/buffer.ts
-var buffer = __webpack_require__(8213);
+var buffer = __webpack_require__(213);
+;// CONCATENATED MODULE: ./lib/polyfill/object.js
+
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/entries
+Object.entries = function (obj) {
+    var ownProps = Object.keys(obj), i = ownProps.length, resArray = new Array(i); // preallocate the Array
+    while (i--)
+        resArray[i] = [ownProps[i], obj[ownProps[i]]];
+    return resArray;
+};
+
 ;// CONCATENATED MODULE: ./lib/polyfill/index.ts
+
+
 
 
 ;// CONCATENATED MODULE: ./node_modules/tslib/tslib.es6.js
@@ -1485,9 +1545,12 @@ var info = {
     name: 'Source Engine Remote Console',
     feature: 'console',
     transport: 'tcp',
-    options: [
-        { id: 'password', type: 'password' },
-    ],
+    options: {
+        password: {
+            type: 'password',
+            label: 'Password',
+        },
+    },
 };
 var pending_command = '';
 var authorized = false;

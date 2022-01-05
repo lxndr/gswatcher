@@ -1,6 +1,6 @@
 // https://developer.valvesoftware.com/wiki/Server_Queries
 
-import 'core-js/features/array/find'
+import '../lib/polyfill'
 // import jsbi from 'jsbi'
 import { DataReader } from '../lib/data-reader'
 import { DataWriter } from '../lib/data-writer'

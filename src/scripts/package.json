@@ -10,7 +10,6 @@
   "author": "",
   "license": "GPL",
   "dependencies": {
-    "core-js": "^3.19.0",
     "jsbi": "^4.0.0",
     "ts-loader": "^9.2.6",
     "tslib": "^2.3.1",

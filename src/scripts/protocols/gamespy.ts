@@ -1,4 +1,4 @@
-import 'core-js/features/object/entries'
+import '../lib/polyfill'
 import { CompoundResponse, Packet, ResponseStore } from '../lib/response-store'
 import { InvalidResponseError } from '../lib/response-error'
 import { parseQuakeInfo } from './quake'
