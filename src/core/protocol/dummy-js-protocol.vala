@@ -3,7 +3,7 @@ namespace Gsw {
 public class DummyJsProtocol : JsProtocol {
   public DummyJsProtocol (string script_path) throws Error {
     Object (script_path : script_path);
-    initialize ();
+    init ();
   }
 
   public override void process_response (uint8[] data) throws Error {

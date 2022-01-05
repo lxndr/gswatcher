@@ -1,7 +1,6 @@
 namespace Gsw {
 
-public abstract class JsProtocol : Object, Protocol {
-  public bool initialized { get; protected set; }
+public abstract class JsProtocol : Object, Initable, Protocol {
   public ProtocolInfo info { get; protected set; }
   public string script_path { get; construct; }
 
@@ -35,13 +34,11 @@ public abstract class JsProtocol : Object, Protocol {
     return 0;
   }
 
-  public void initialize () throws Error {
-    if (!initialized) {
-      register_globals ();
-      vm.load_script (script_path);
-      info = fetch_info ();
-      initialized = true;
-    }
+  public bool init (Cancellable? cancellable = null) throws Error {
+    register_globals ();
+    vm.load_script (script_path);
+    info = fetch_info ();
+    return true;
   }
 
   protected virtual void register_globals () {

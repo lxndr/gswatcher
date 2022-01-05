@@ -38,13 +38,11 @@ public class ProtocolInfo {
   public Gee.List<ProtocolOption> options = new Gee.ArrayList<ProtocolOption> ();
 }
 
-public interface Protocol : Object {
-  public abstract bool initialized { get; protected set; }
+public interface Protocol : Object, Initable {
   public abstract ProtocolInfo info { get; protected set; }
 
   public signal void data_send (uint8[] data);
 
-  public abstract void initialize () throws Error;
   public abstract void process_response (uint8[] data) throws Error;
 }
 

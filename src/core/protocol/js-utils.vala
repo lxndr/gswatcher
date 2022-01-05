@@ -19,13 +19,11 @@ public class DuktapeEx : Duktape {
 
     push_string (filepath);
 
-    if (pcompile_string_filename (0, script) != Duktape.Exec.SUCCESS) {
+    if (pcompile_string_filename (0, script) != Duktape.Exec.SUCCESS)
       throw new JsError.SCRIPT ("failed to load script '%s': %s", filepath, safe_to_stacktrace (-1));
-    }
 
-    if (pcall (0) != Duktape.Exec.SUCCESS) {
+    if (pcall (0) != Duktape.Exec.SUCCESS)
       throw new JsError.RUNTIME_ERROR ("failed to execute '%s': %s", filepath, safe_to_stacktrace (-1));
-    }
 
     pop ();
   }

@@ -42,7 +42,7 @@ class ProtocolRegistry : Object {
 
     var desc = protocols[id];
     var protocol = (Protocol) Object.new_with_properties (desc.class_type, desc.class_params, desc.class_values);
-    protocol.initialize ();
+    protocol.init ();
     return protocol;
   }
 }

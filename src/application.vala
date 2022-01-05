@@ -136,7 +136,6 @@ namespace Gsw {
 
         try {
           var protocol = new DummyJsProtocol (script);
-          protocol.initialize ();
 
           var script_value = Value (typeof (string));
           script_value.set_string (script);

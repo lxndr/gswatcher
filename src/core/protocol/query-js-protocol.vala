@@ -3,7 +3,7 @@ namespace Gsw {
 public class QueryJsProtocol : JsProtocol, QueryProtocol {
   public QueryJsProtocol (string script_path) throws Error {
     Object (script_path : script_path);
-    initialize ();
+    init ();
   }
 
   private static Duktape.Return js_details (DuktapeEx vm) {

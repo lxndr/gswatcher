@@ -3,7 +3,7 @@ namespace Gsw {
 public class ConsoleJsProtocol : JsProtocol, ConsoleProtocol {
   public ConsoleJsProtocol (string script_path) throws Error {
     Object (script_path : script_path);
-    initialize ();
+    init ();
   }
 
   private static Duktape.Return js_response (DuktapeEx vm) {
@@ -38,10 +38,13 @@ public class ConsoleJsProtocol : JsProtocol, ConsoleProtocol {
         .exec ();
     } catch (JsError err) {
       // NOTE: very naive to simply check if it contains InvalidResponseError
-      if (err.code == JsError.RUNTIME_ERROR && err.message.index_of ("InvalidResponseError") >= 0)
-        throw new ProtocolError.INVALID_RESPONSE (err.message);
-      if (err.code == JsError.RUNTIME_ERROR && err.message.index_of ("AuthError") >= 0)
-        throw new ProtocolError.AUTH_FAILED (err.message);
+      if (err.code == JsError.RUNTIME_ERROR) {
+        if (err.message.index_of ("InvalidResponseError") >= 0)
+          throw new ProtocolError.INVALID_RESPONSE (err.message);
+        if (err.message.index_of ("AuthError") >= 0)
+          throw new ProtocolError.AUTH_FAILED (err.message);
+      }
+
       throw err;
     }
   }
