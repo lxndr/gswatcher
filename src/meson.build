@@ -66,6 +66,7 @@ core_sources += configure_file(
 
 ui_sources = files(
   'ui/about.vala',
+  'ui/buddy-list-item.vala',
   'ui/buddy-list.vala',
   'ui/main-window.vala',
   'ui/option-list.vala',

@@ -21,8 +21,18 @@
     </binding>
   </object>
 
-  <object class="GtkSingleSelection" id="selection">
+  <object class="GtkMapListModel" id="mapped_list">
     <property name="model">sort_model</property>
+  </object>
+
+  <object class="GtkFlattenListModel" id="combined_list">
+    <property name="model">
+      <object class="GListStore" id="combined_list_store" />
+    </property>
+  </object>
+
+  <object class="GtkSingleSelection" id="selection">
+    <property name="model">combined_list</property>
     <property name="autoselect">1</property>
     <property name="can-unselect">0</property>
   </object>
@@ -55,13 +65,23 @@
                         <interface>
                           <template class="GtkListItem">
                             <property name="child">
-                              <object class="GtkLabel">
-                                <property name="xalign">0</property>
-                                <binding name="label">
-                                  <lookup name="name" type="GswBuddy">
-                                    <lookup name="item">GtkListItem</lookup>
-                                  </lookup>
-                                </binding>
+                              <object class="GtkBox">
+                                <child>
+                                  <object class="GtkEditableLabel">
+                                    <property name="hexpand">true</property>
+                                    <binding name="text">
+                                      <lookup type="GswUiBuddyListItem" name="name">
+                                        <lookup name="item">GtkListItem</lookup>
+                                      </lookup>
+                                    </binding>
+                                    <binding name="editable">
+                                      <lookup type="GswUiBuddyListItem" name="is_new">
+                                        <lookup name="item">GtkListItem</lookup>
+                                      </lookup>
+                                    </binding>
+                                    <signal name="notify::editing" handler="handle_editing_change" />
+                                  </object>
+                                </child>
                               </object>
                             </property>
                           </template>
@@ -87,11 +107,20 @@
                               <object class="GtkCheckButton">
                                 <property name="halign">GTK_ALIGN_CENTER</property>
                                 <binding name="active">
-                                  <lookup name="notifications" type="GswBuddy">
-                                    <lookup name="item">GtkListItem</lookup>
+                                  <lookup type="GswBuddy" name="notifications">
+                                    <lookup type="GswUiBuddyListItem" name="buddy">
+                                      <lookup name="item">GtkListItem</lookup>
+                                    </lookup>
                                   </lookup>
                                 </binding>
-                                <signal name="toggled" handler="notify_toggled" object="GtkListItem" />
+                                <binding name="visible">
+                                  <closure type="gboolean" function="invert_boolean">
+                                    <lookup type="GswUiBuddyListItem" name="is_new">
+                                      <lookup name="item">GtkListItem</lookup>
+                                    </lookup>
+                                  </closure>
+                                </binding>
+                                <signal name="notify::active" handler="handle_notifications_change" />
                               </object>
                             </property>
                           </template>

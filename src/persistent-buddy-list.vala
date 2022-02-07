@@ -35,9 +35,8 @@ class PersistentBuddyList : BuddyList {
     try {
       var names = get_names ();
 
-      foreach (var name in names) {
+      foreach (var name in names)
         add (name);
-      }
     } catch (Error err) {
       log (Config.LOG_DOMAIN, LEVEL_WARNING, "failed to load buddy list from '%s': %s", config_file, err.message);
     }

@@ -52,6 +52,19 @@ namespace Gsw.Ui {
     }
 
     [GtkCallback]
+    private void add_buddy (string name) {
+      if (buddy_list.exists (name)) {
+        var dialog = new MessageDialog (this, DialogFlags.DESTROY_WITH_PARENT | DialogFlags.MODAL, MessageType.ERROR, ButtonsType.OK,
+          _("\"%s\" is already on your buddy list."), name);
+        dialog.response.connect (() => dialog.destroy ());
+        dialog.show ();
+        return;
+      }
+
+      buddy_list.add (name);
+    }
+
+    [GtkCallback]
     private void remove_buddy (Buddy buddy) {
       var dialog = new MessageDialog (this, DialogFlags.DESTROY_WITH_PARENT | DialogFlags.MODAL, MessageType.QUESTION, ButtonsType.YES_NO,
         _("Are you sure you want to remove \"%s\" from the buddy list?"), buddy.name);

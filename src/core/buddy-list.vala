@@ -34,6 +34,14 @@ public class BuddyList : Object, ListModel {
       items_changed (idx, 1, 0);
     }
   }
+
+  public Buddy? find_by_name (string name) {
+    return list.first_match (item => item.name == name);
+  }
+
+  public bool exists (string name) {
+    return find_by_name (name) != null;
+  }
 }
 
 }

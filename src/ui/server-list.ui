@@ -137,8 +137,6 @@
                                     <style>
                                       <class name="new-entry" />
                                     </style>
-                                    <signal name="notify::editing" handler="handle_new_server_editing_change"/>
-                                    <property name="xalign">0</property>
                                     <property name="hexpand">true</property>
                                     <property name="text">Click here to add new server</property>
                                     <binding name="visible">
@@ -146,6 +144,7 @@
                                         <lookup name="item">GtkListItem</lookup>
                                       </closure>
                                     </binding>
+                                    <signal name="notify::editing" handler="handle_editing_change"/>
                                   </object>
                                 </child>
                                 <child>
