@@ -1,4 +1,5 @@
-server-list cell .new-entry {
+server-list cell .new-entry,
+buddy-list cell .new-entry {
   color: lightgrey;
   font-style: italic;
 }
