@@ -18,6 +18,8 @@ dependencies = [
 ]
 
 core_sources = files(
+  'core/game/expression-parser.vala',
+  'core/game/expression.vala',
   'core/game/game-resolver.vala',
   'core/game/game.vala',
   'core/protocol/console-js-protocol.vala',

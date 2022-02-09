@@ -106,9 +106,7 @@ public class WorkerQuerier : Querier {
   private void on_details_updated (Gee.Map<string, string> new_details) {
     stop_timeout_timer ();
 
-    if (sinfo.game_id == null)
-      resolve_game (new_details);
-
+    resolve_game (new_details);
     details.apply (new_details);
     update ();
   }
@@ -122,10 +120,12 @@ public class WorkerQuerier : Querier {
     if (new_sinfo.game_name != null)
       sinfo.game_name = new_sinfo.game_name;
 
+    if (new_sinfo.game_mode != null)
+      sinfo.game_mode = new_sinfo.game_mode;
+
     sinfo.server_name = new_sinfo.server_name;
     sinfo.server_type = new_sinfo.server_type;
     sinfo.server_os = new_sinfo.server_os;
-    sinfo.game_mode = new_sinfo.game_mode;
     sinfo.game_version = new_sinfo.game_version;
     sinfo.map = new_sinfo.map;
     sinfo.num_players = new_sinfo.num_players;

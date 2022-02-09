@@ -1,7 +1,7 @@
 namespace Gsw {
 
 [SingleInstance]
-public class GameResolver : Object {
+class GameResolver : Object {
   public bool ready { get; private set; }
 
   private Gee.Map<string, Game> games = new Gee.HashMap<string, Game> ();
@@ -77,7 +77,8 @@ public class GameResolver : Object {
     if (kf.has_group ("Info")) {
       foreach (var key in kf.get_keys ("Info")) {
         var val = kf.get_string ("Info", key);
-        game.inf[key] = val;
+        var parser = new ExpressionParser (game_id, val);
+        game.inf[key] = parser.parse ();
       }
     }
 
@@ -113,14 +114,16 @@ public class GameResolver : Object {
     if (game == null)
       return false;
 
-    sinfo.set ("game-id", game.id);
+    var ctx = new Gee.HashMap<string, Gee.Map<string, string>> ();
+    ctx.set ("inf", details);
 
     foreach (var item in game.inf) {
       var value = Value (typeof (string));
-      value.set_string (item.value);
+      value.set_string (item.value.eval (ctx));
       sinfo.set_property (item.key, value);
     }
 
+    sinfo.set ("game-id", game.id);
     return true;
   }
 

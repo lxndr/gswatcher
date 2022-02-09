@@ -42,7 +42,7 @@ public class ConsoleJsProtocol : JsProtocol, ConsoleProtocol {
         if (err.message.index_of ("InvalidResponseError") >= 0)
           throw new ProtocolError.INVALID_RESPONSE (err.message);
         if (err.message.index_of ("AuthError") >= 0)
-          throw new ProtocolError.AUTH_FAILED (err.message);
+          throw new ProtocolError.AUTH_FAILED ("authorization failed");
       }
 
       throw err;

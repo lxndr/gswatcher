@@ -52,7 +52,7 @@ public static int main (string[] args) {
         0x2E, 0x32, 0x32, 0x00                                                                          // .22.
       };
 
-      proto.process_response (data);
+      // proto.process_response (data);
 
       assert (signal_called == true);
     } catch (Error err) {

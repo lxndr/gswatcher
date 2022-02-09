@@ -162,10 +162,6 @@ export const query = () => {
 
 const getGameMode = (inf: SourceServerDetails): (string | null) => {
   switch (inf.appid) {
-    case 500: { // Left 4 Dead
-      const m = inf.game.match(/^L4D - ([a-z-]+)/i)
-      return m?.[1] || null
-    }
     case 550: { // Left 4 Dead 2
       const modes: Record<string, string> = {
         coop: 'Co-op',

@@ -1672,10 +1672,6 @@ var query = function () {
 var getGameMode = function (inf) {
     var _a, _b, _c;
     switch (inf.appid) {
-        case 500: { // Left 4 Dead
-            var m = inf.game.match(/^L4D - ([a-z-]+)/i);
-            return (m === null || m === void 0 ? void 0 : m[1]) || null;
-        }
         case 550: { // Left 4 Dead 2
             var modes_1 = {
                 coop: 'Co-op',
