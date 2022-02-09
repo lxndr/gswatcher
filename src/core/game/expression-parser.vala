@@ -8,7 +8,6 @@ class ExpressionParser {
   private Scanner scanner = new Scanner (null);
 
   public ExpressionParser (string name, string input) {
-    scanner = new Scanner (null);
     scanner.config.scan_identifier_1char = true;
     scanner.input_name = name;
     scanner.input_text (input, input.length);

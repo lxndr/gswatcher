@@ -1,6 +1,6 @@
 namespace Gsw {
 
-  class Application : Gtk.Application {
+  class Application : Adw.Application {
     private ProtocolRegistry protocol_registry = ProtocolRegistry.get_instance ();
     private TransportRegistry transport_registry = TransportRegistry.get_instance ();
     private UdpTransportManager udp_transport_manager = UdpTransportManager.get_instance ();
@@ -18,26 +18,6 @@ namespace Gsw {
 
     public Application () {
       Object (application_id: Config.APPID);
-    }
-
-    private string? pixbuf_dir {
-      owned get {
-        var data_dirs = Environment.get_system_data_dirs ();
-
-        return data_dirs.length > 0
-          ? Path.build_filename (data_dirs[0], "share", "pixmaps")
-          : null;
-      }
-    }
-
-    private string? icon_dir {
-      owned get {
-        var data_dirs = Environment.get_system_data_dirs ();
-
-        return data_dirs.length > 0
-          ? Path.build_filename (data_dirs[0], "share", "gswatcher", "icons")
-          : null;
-      }
     }
 
     public override int handle_local_options (VariantDict options) {

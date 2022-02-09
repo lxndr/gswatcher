@@ -7,130 +7,69 @@
     <property name="name">preferences</property>
     <property name="hexpand">true</property>
     <property name="vexpand">false</property>
-    <property name="margin-top">8</property>
-    <property name="margin-bottom">8</property>
-    <property name="margin-start">8</property>
-    <property name="margin-end">8</property>
 
     <child>
-      <object class="GtkGrid">
-        <property name="column-spacing">8</property>
-        <property name="row-spacing">2</property>
-
+      <object class="AdwPreferencesPage">
         <child>
-          <object class="GtkBox">
-            <layout>
-              <property name="column">0</property>
-              <property name="row">0</property>
-            </layout>
+          <object class="AdwPreferencesGroup">
+            <property name="title" translatable="yes">General</property>
+
             <child>
-              <object class="GtkLabel">
-                <property name="halign">GTK_ALIGN_START</property>
-                <property name="label">General</property>
-                <style>
-                  <class name="group-title"/>
-                </style>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Query _interval</property>
+                <property name="use-underline">true</property>
+                <child>
+                  <object class="GtkSpinButton" id="query_interval">
+                    <property name="valign">center</property>
+                    <property name="numeric">true</property>
+                    <property name="digits">1</property>
+                    <property name="climb-rate">0.5</property>
+                    <property name="adjustment">
+                      <object class="GtkAdjustment" id="query_interval_adjustment">
+                        <property name="step-increment">0.5</property>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+              </object>
+            </child>
+
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Local UDP _port</property>
+                <property name="use-underline">true</property>
+                <child>
+                  <object class="GtkSpinButton" id="local_udp_port">
+                    <property name="valign">center</property>
+                    <property name="numeric">true</property>
+                    <property name="adjustment">
+                      <object class="GtkAdjustment" id="local_udp_port_adjustment">
+                        <property name="step-increment">1</property>
+                      </object>
+                    </property>
+                  </object>
+                </child>
               </object>
             </child>
           </object>
         </child>
 
         <child>
-          <object class="GtkLabel">
-            <property name="label">Query interval:</property>
-            <property name="halign">GTK_ALIGN_START</property>
-            <property name="margin-start">8</property>
-            <layout>
-              <property name="column">0</property>
-              <property name="row">1</property>
-            </layout>
-          </object>
-        </child>
-        <child>
-          <object class="GtkSpinButton" id="query_interval">
-            <property name="hexpand">true</property>
-            <property name="digits">1</property>
-            <property name="climb-rate">0.5</property>
-            <property name="adjustment">
-              <object class="GtkAdjustment" id="query_interval_adjustment">
-                <property name="step-increment">0.5</property>
-              </object>
-            </property>
-            <layout>
-              <property name="column">1</property>
-              <property name="row">1</property>
-            </layout>
-          </object>
-        </child>
-
-        <child>
-          <object class="GtkLabel">
-            <property name="label">Local UDP port:</property>
-            <property name="halign">GTK_ALIGN_START</property>
-            <property name="margin-start">8</property>
-            <layout>
-              <property name="column">0</property>
-              <property name="row">2</property>
-            </layout>
-          </object>
-        </child>
-        <child>
-          <object class="GtkSpinButton" id="local_udp_port">
-            <property name="hexpand">true</property>
-            <property name="numeric">true</property>
-            <property name="adjustment">
-              <object class="GtkAdjustment" id="local_udp_port_adjustment">
-                <property name="step-increment">1</property>
-              </object>
-            </property>
-            <layout>
-              <property name="column">1</property>
-              <property name="row">2</property>
-            </layout>
-          </object>
-        </child>
-
-        <child>
-          <object class="GtkBox">
-            <layout>
-              <property name="column">0</property>
-              <property name="row">3</property>
-            </layout>
+          <object class="AdwPreferencesGroup">
+            <property name="title" translatable="yes">Notifications</property>
             <child>
-              <object class="GtkLabel">
-                <property name="halign">GTK_ALIGN_START</property>
-                <property name="label">Notifications</property>
-                <style>
-                  <class name="group-title"/>
-                </style>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Enable _notifications</property>
+                <property name="use-underline">true</property>
+                <child>
+                  <object class="GtkSwitch" id="enable_notifications">
+                    <property name="valign">center</property>
+                  </object>
+                </child>
               </object>
             </child>
           </object>
         </child>
-
-        <child>
-          <object class="GtkLabel">
-            <property name="label">Enable _notifications:</property>
-            <property name="halign">GTK_ALIGN_START</property>
-            <property name="margin-start">8</property>
-            <property name="use-underline">true</property>
-            <property name="mnemonic-widget">enable_notifications</property>
-            <layout>
-              <property name="column">0</property>
-              <property name="row">4</property>
-            </layout>
-          </object>
-        </child>
-        <child>
-          <object class="GtkSwitch" id="enable_notifications">
-            <layout>
-              <property name="column">1</property>
-              <property name="row">4</property>
-            </layout>
-            <property name="halign">GTK_ALIGN_START</property>
-          </object>
-        </child>
-
       </object>
     </child>
   </template>
