@@ -75,6 +75,8 @@ class ExpressionParser {
     switch (name) {
       case "regex":
         return new RegexExpression (args);
+      case "mapKeyword":
+        return new MapKeywordExpression (args);
       default:
         throw new ExpressionParserError.INVALID_TOKEN ("invalid token at '%u'", scanner.position);
     }

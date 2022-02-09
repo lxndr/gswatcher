@@ -162,26 +162,6 @@ export const query = () => {
 
 const getGameMode = (inf: SourceServerDetails): (string | null) => {
   switch (inf.appid) {
-    case 550: { // Left 4 Dead 2
-      const modes: Record<string, string> = {
-        coop: 'Co-op',
-        realism: 'Realism',
-        survival: 'Survival',
-        versus: 'Versus',
-        scavenge: 'Scavenge',
-      }
-
-      const mode = inf.keywords?.split(',').find(keyword => keyword in modes)
-      return mode ? modes[mode] : null
-    }
-    case 730: { // CS: GO
-      const modes: Record<string, string> = {
-        competitive: 'Competitive',
-      }
-
-      const mode = inf.keywords?.split(',').find(keyword => keyword in modes)
-      return mode ? modes[mode] : null
-    }
     case 2400: { // The Ship
       const modes = [
         'Hunt',
@@ -292,6 +272,7 @@ const readServerInfo = (r: DataReader) => {
 }
 
 const normalizeServerInfo = (inf: SourceServerDetails): ServerInfo => ({
+  [InfoField.GAME_NAME]: inf.game,
   [InfoField.GAME_MODE]: getGameMode(inf) || undefined,
   [InfoField.GAME_VERSION]: inf.version,
   [InfoField.SERVER_NAME]: inf.name,

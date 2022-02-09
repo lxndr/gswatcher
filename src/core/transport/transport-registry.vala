@@ -4,7 +4,7 @@ public class TransportDesc {
   public string id;
   public Type class_type;
 }
-  
+
 [SingleInstance]
 class TransportRegistry : Object {
   private Gee.Map<string, TransportDesc> transports = new Gee.HashMap<string, TransportDesc> ();

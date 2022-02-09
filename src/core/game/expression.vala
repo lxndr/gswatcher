@@ -62,4 +62,35 @@ class RegexExpression : FunctionExpression {
   }
 }
 
+class MapKeywordExpression : FunctionExpression {
+  public MapKeywordExpression (Gee.List<Expression> args) {
+    this.args = args;
+  }
+
+  public override string eval (Map<string, Map<string, string>> ctx) {
+    var keywords_str = args[0].eval (ctx);
+    var delimiter = args[1].eval (ctx);
+    var map_name = args[2].eval (ctx);
+    var def = args[3].eval (ctx);
+
+    if (keywords_str.length == 0)
+      return def;
+
+    if (map_name.length == 0)
+      return def;
+
+    if (!ctx.has_key (map_name))
+      return def;
+
+    var keywords = keywords_str.split (delimiter);
+    var map = ctx[map_name];
+
+    foreach (var keyword in keywords)
+      if (map.has_key (keyword))
+        return map[keyword];
+
+    return def;
+  }
+}
+
 }

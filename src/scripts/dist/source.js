@@ -1670,26 +1670,8 @@ var query = function () {
     nextQuery();
 };
 var getGameMode = function (inf) {
-    var _a, _b, _c;
+    var _a;
     switch (inf.appid) {
-        case 550: { // Left 4 Dead 2
-            var modes_1 = {
-                coop: 'Co-op',
-                realism: 'Realism',
-                survival: 'Survival',
-                versus: 'Versus',
-                scavenge: 'Scavenge',
-            };
-            var mode = (_a = inf.keywords) === null || _a === void 0 ? void 0 : _a.split(',').find(function (keyword) { return keyword in modes_1; });
-            return mode ? modes_1[mode] : null;
-        }
-        case 730: { // CS: GO
-            var modes_2 = {
-                competitive: 'Competitive',
-            };
-            var mode = (_b = inf.keywords) === null || _b === void 0 ? void 0 : _b.split(',').find(function (keyword) { return keyword in modes_2; });
-            return mode ? modes_2[mode] : null;
-        }
         case 2400: { // The Ship
             var modes = [
                 'Hunt',
@@ -1699,7 +1681,7 @@ var getGameMode = function (inf) {
                 'VIP Team',
                 'Team Elimination',
             ];
-            return modes[(_c = inf.theShip) === null || _c === void 0 ? void 0 : _c.mode] || null;
+            return modes[(_a = inf.theShip) === null || _a === void 0 ? void 0 : _a.mode] || null;
         }
     }
     return null;
@@ -1785,6 +1767,7 @@ var readServerInfo = function (r) {
 var normalizeServerInfo = function (inf) {
     var _a;
     return (_a = {},
+        _a["game-name" /* GAME_NAME */] = inf.game,
         _a["game-mode" /* GAME_MODE */] = getGameMode(inf) || undefined,
         _a["game-version" /* GAME_VERSION */] = inf.version,
         _a["server-name" /* SERVER_NAME */] = inf.name,

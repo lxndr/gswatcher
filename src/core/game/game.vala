@@ -9,6 +9,7 @@ class Game {
   public Gee.Map<string, string> inf_matches = new Gee.HashMap<string, string> ();
   public Gee.Map<string, Expression> inf = new Gee.HashMap<string, Expression> ();
   public Gee.List<PlayerField> pfields = new Gee.ArrayList<PlayerField> ();
+  public Gee.Map<string, Gee.Map<string, string>> maps = new Gee.HashMap<string, Gee.Map<string, string>> ();
 
   public Game (string id, string protocol) {
     this.id = id;
