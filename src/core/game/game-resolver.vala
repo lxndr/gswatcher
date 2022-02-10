@@ -72,9 +72,11 @@ class GameResolver : Object {
           var key1 = parts[0];
           var key2 = parts[1];
 
+          var parser = new ExpressionParser (value);
+
           switch (key1) {
             case "inf":
-              game.inf_matches[key2] = value;
+              game.inf_matches[key2] = parser.parse ();
               break;
           }
         }
@@ -84,7 +86,7 @@ class GameResolver : Object {
         if (kf.has_group ("Info")) {
           foreach (var key in kf.get_keys ("Info")) {
             var val = kf.get_string ("Info", key);
-            var parser = new ExpressionParser (game_id, val);
+            var parser = new ExpressionParser (val);
             game.inf[key] = parser.parse ();
           }
         }

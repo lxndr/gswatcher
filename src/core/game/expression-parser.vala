@@ -7,9 +7,8 @@ errordomain ExpressionParserError {
 class ExpressionParser {
   private Scanner scanner = new Scanner (null);
 
-  public ExpressionParser (string name, string input) {
+  public ExpressionParser (string input) {
     scanner.config.scan_identifier_1char = true;
-    scanner.input_name = name;
     scanner.input_text (input, input.length);
   }
 

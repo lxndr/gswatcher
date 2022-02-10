@@ -6,7 +6,7 @@ class Game {
   public Gee.List<string> features = new Gee.ArrayList<string> ();
   public uint16 port;
   public int16 qport_diff;
-  public Gee.Map<string, string> inf_matches = new Gee.HashMap<string, string> ();
+  public Gee.Map<string, Expression> inf_matches = new Gee.HashMap<string, Expression> ();
   public Gee.Map<string, Expression> inf = new Gee.HashMap<string, Expression> ();
   public Gee.List<PlayerField> pfields = new Gee.ArrayList<PlayerField> ();
   public Gee.Map<string, Gee.Map<string, string>> maps = new Gee.HashMap<string, Gee.Map<string, string>> ();
@@ -20,8 +20,11 @@ class Game {
     if (protocol != protocol_id)
       return false;
 
+    var ctx = new Gee.HashMap<string, Gee.Map<string, string>> ();
+    ctx.set ("inf", details);
+
     foreach (var entry in inf_matches.entries)
-      if (details.get (entry.key) != entry.value)
+      if (details.get (entry.key) != entry.value.eval (ctx))
         return false;
 
     return true;

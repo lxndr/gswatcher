@@ -102,6 +102,7 @@ const readPlayerList = (r: DataReader) => {
 
 const normalizeServerInfo = (inf: ASEInfo): ServerInfo => ({
   [InfoField.SERVER_NAME]: inf.serverName,
+  [InfoField.GAME_NAME]: inf.gameName,
   [InfoField.GAME_VERSION]: inf.version,
   [InfoField.GAME_MODE]: inf.gameType,
   [InfoField.MAP]: inf.map,
