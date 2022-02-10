@@ -8,9 +8,11 @@
     <property name="expression">
       <closure type="gchararray" function="format_server_name">
         <lookup type="GswServerInfo" name="server-name">
-          <lookup type="GswQuerier" name="sinfo" />
+          <lookup type="GswQuerier" name="sinfo">
+            <lookup type="GswClient" name="querier" />
+          </lookup>
         </lookup>
-        <lookup type="GswQuerier" name="server" />
+        <lookup type="GswClient" name="server" />
       </closure>
     </property>
   </object>
@@ -20,10 +22,14 @@
     <property name="expression">
       <closure type="gchararray" function="format_game_name">
         <lookup type="GswServerInfo" name="game-name">
-          <lookup type="GswQuerier" name="sinfo" />
+          <lookup type="GswQuerier" name="sinfo">
+            <lookup type="GswClient" name="querier" />
+          </lookup>
         </lookup>
         <lookup type="GswServerInfo" name="game-mode">
-          <lookup type="GswQuerier" name="sinfo" />
+          <lookup type="GswQuerier" name="sinfo">
+            <lookup type="GswClient" name="querier" />
+          </lookup>
         </lookup>
       </closure>
     </property>
@@ -33,7 +39,9 @@
     <property name="ignore_case">1</property>
     <property name="expression">
       <lookup type="GswServerInfo" name="map">
-        <lookup type="GswQuerier" name="sinfo" />
+        <lookup type="GswQuerier" name="sinfo">
+          <lookup type="GswClient" name="querier" />
+        </lookup>
       </lookup>
     </property>
   </object>
@@ -41,17 +49,17 @@
   <object class="GtkNumericSorter" id="players_column_sorter">
     <property name="expression">
       <lookup type="GswServerInfo" name="num-players">
-        <lookup type="GswQuerier" name="sinfo" />
+        <lookup type="GswQuerier" name="sinfo">
+          <lookup type="GswClient" name="querier" />
+        </lookup>
       </lookup>
     </property>
   </object>
 
   <object class="GtkSortListModel" id="sort_model">
     <binding name="model">
-      <lookup type="GswQuerierManager" name="querier-list">
-        <lookup type="GswUiServerList" name="querier-manager">
-          GswUiServerList
-        </lookup>
+      <lookup type="GswUiServerList" name="client_list">
+        GswUiServerList
       </lookup>
     </binding>
     <binding name="sorter">
@@ -118,13 +126,15 @@
                                     </binding>
                                     <binding name="label">
                                       <closure type="gchararray" function="format_server_name">
-                                        <lookup type="GswServerInfo" name="server-name">
+                                        <lookup type="GswServerInfo" name="server_name">
                                           <lookup type="GswQuerier" name="sinfo">
-                                            <lookup name="item">GtkListItem</lookup>
+                                            <lookup type="GswClient" name="querier">
+                                              <lookup name="item">GtkListItem</lookup>
+                                            </lookup>
                                           </lookup>
                                         </lookup>
                                         <lookup type="GswServer" name="address">
-                                          <lookup type="GswQuerier" name="server">
+                                          <lookup type="GswClient" name="server">
                                             <lookup name="item">GtkListItem</lookup>
                                           </lookup>
                                         </lookup>
@@ -154,8 +164,8 @@
                                     <binding name="file">
                                       <closure type="gchararray" function="format_country_icon">
                                         <lookup type="GswNetTransport" name="saddr">
-                                          <lookup type="GswWorkerQuerier" name="transport">
-                                            <lookup type="GswDetectorQuerier" name="detected_querier">
+                                          <lookup type="GswQuerier" name="transport">
+                                            <lookup type="GswClient" name="querier">
                                               <lookup name="item">GtkListItem</lookup>
                                             </lookup>
                                           </lookup>
@@ -196,7 +206,9 @@
                                       <closure type="gchararray" function="format_game_icon">
                                         <lookup type="GswServerInfo" name="game-id">
                                           <lookup type="GswQuerier" name="sinfo">
-                                            <lookup name="item">GtkListItem</lookup>
+                                            <lookup type="GswClient" name="querier">
+                                              <lookup name="item">GtkListItem</lookup>
+                                            </lookup>
                                           </lookup>
                                         </lookup>
                                       </closure>
@@ -210,12 +222,16 @@
                                       <closure type="gchararray" function="format_game_name">
                                         <lookup type="GswServerInfo" name="game-name">
                                           <lookup type="GswQuerier" name="sinfo">
-                                            <lookup name="item">GtkListItem</lookup>
+                                            <lookup type="GswClient" name="querier">
+                                              <lookup name="item">GtkListItem</lookup>
+                                            </lookup>
                                           </lookup>
                                         </lookup>
                                         <lookup type="GswServerInfo" name="game-mode">
                                           <lookup type="GswQuerier" name="sinfo">
-                                            <lookup name="item">GtkListItem</lookup>
+                                            <lookup type="GswClient" name="querier">
+                                              <lookup name="item">GtkListItem</lookup>
+                                            </lookup>
                                           </lookup>
                                         </lookup>
                                       </closure>
@@ -250,7 +266,9 @@
                                 <binding name="label">
                                   <lookup type="GswServerInfo" name="map">
                                     <lookup type="GswQuerier" name="sinfo">
-                                      <lookup name="item">GtkListItem</lookup>
+                                      <lookup type="GswClient" name="querier">
+                                        <lookup name="item">GtkListItem</lookup>
+                                      </lookup>
                                     </lookup>
                                   </lookup>
                                 </binding>
@@ -284,12 +302,16 @@
                                   <closure type="gchararray" function="format_players">
                                     <lookup type="GswServerInfo" name="num-players">
                                       <lookup type="GswQuerier" name="sinfo">
-                                        <lookup name="item">GtkListItem</lookup>
+                                        <lookup type="GswClient" name="querier">
+                                          <lookup name="item">GtkListItem</lookup>
+                                        </lookup>
                                       </lookup>
                                     </lookup>
                                     <lookup type="GswServerInfo" name="max-players">
                                       <lookup type="GswQuerier" name="sinfo">
-                                        <lookup name="item">GtkListItem</lookup>
+                                        <lookup type="GswClient" name="querier">
+                                          <lookup name="item">GtkListItem</lookup>
+                                        </lookup>
                                       </lookup>
                                     </lookup>
                                   </closure>
@@ -298,12 +320,16 @@
                                   <closure type="GStrv" function="format_players_css_classes">
                                     <lookup type="GswServerInfo" name="num-players">
                                       <lookup type="GswQuerier" name="sinfo">
-                                        <lookup name="item">GtkListItem</lookup>
+                                        <lookup type="GswClient" name="querier">
+                                          <lookup name="item">GtkListItem</lookup>
+                                        </lookup>
                                       </lookup>
                                     </lookup>
                                     <lookup type="GswServerInfo" name="max-players">
                                       <lookup type="GswQuerier" name="sinfo">
-                                        <lookup name="item">GtkListItem</lookup>
+                                        <lookup type="GswClient" name="querier">
+                                          <lookup name="item">GtkListItem</lookup>
+                                        </lookup>
                                       </lookup>
                                     </lookup>
                                   </closure>
@@ -335,17 +361,23 @@
                                 <binding name="label">
                                   <closure type="gchararray" function="format_ping">
                                     <lookup type="GswQuerier" name="ping">
-                                      <lookup name="item">GtkListItem</lookup>
+                                      <lookup type="GswClient" name="querier">
+                                        <lookup name="item">GtkListItem</lookup>
+                                      </lookup>
                                     </lookup>
                                     <lookup type="GswQuerier" name="error">
-                                      <lookup name="item">GtkListItem</lookup>
+                                      <lookup type="GswClient" name="querier">
+                                        <lookup name="item">GtkListItem</lookup>
+                                      </lookup>
                                     </lookup>
                                   </closure>
                                 </binding>
                                 <binding name="css_classes">
                                   <closure type="GStrv" function="format_ping_css_classes">
                                     <lookup type="GswQuerier" name="error">
-                                      <lookup name="item">GtkListItem</lookup>
+                                      <lookup type="GswClient" name="querier">
+                                        <lookup name="item">GtkListItem</lookup>
+                                      </lookup>
                                     </lookup>
                                   </closure>
                                 </binding>

@@ -18,6 +18,13 @@ declare global {
     [key: string]: unknown
   }
 
+  interface PlayerField {
+    title: string
+    field: string
+    kind: 'string' | 'number' | 'duration'
+    main: boolean
+  }
+
   interface Player {
     [key: string]: unknown
   }
@@ -57,9 +64,8 @@ declare global {
   type SendCommandFn = (cmd: string) => void
 
   class Gsw {
-    sinfo(inf: ServerInfo): void
-    details(inf: Info): void
-    plist(pl: Player[]): void
+    sinfo(details: Info, inf: ServerInfo): void
+    plist(pfields: PlayerField[], pl: Player[]): void
     send(data: Buffer): void
     print(str: string): void
 

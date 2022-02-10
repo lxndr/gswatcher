@@ -641,6 +641,12 @@ var normalizeServerInfo = function (inf) {
 var normalizePlayerList = function (inf) {
     var all_keys = Object.keys(inf);
     var players = [];
+    var pfields = [{
+            title: 'Name',
+            kind: 'string',
+            field: 'name',
+            main: true,
+        }];
     var _loop_1 = function (i) {
         var ending = "_".concat(i);
         var keys = all_keys.filter(function (key) { return key.endsWith(ending); });
@@ -659,7 +665,15 @@ var normalizePlayerList = function (inf) {
         if (state_1 === "break")
             break;
     }
-    return players;
+    if (players.length) {
+        pfields = Object.keys(players[0]).map(function (key) { return ({
+            title: key.slice(0, 1).toLocaleUpperCase() + key.slice(1),
+            kind: 'string',
+            field: key,
+            main: key === 'name',
+        }); });
+    }
+    return { pfields: pfields, players: players };
 };
 var processResponse = function (data) {
     var _a = parseQuakeInfo(data.toString()), queryid = _a.queryid, final = _a.final, info = __rest(_a, ["queryid", "final"]);
@@ -676,13 +690,12 @@ var processResponse = function (data) {
         data: info,
     });
     if (res.gotAllPackets()) {
-        var all_info = res.combine();
+        var details = res.combine();
         responses.remove(reqid);
-        gsw.details(all_info);
-        var inf = normalizeServerInfo(all_info);
-        gsw.sinfo(inf);
-        var players = normalizePlayerList(all_info);
-        gsw.plist(players);
+        var inf = normalizeServerInfo(details);
+        gsw.sinfo(details, inf);
+        var _c = normalizePlayerList(details), pfields = _c.pfields, players = _c.players;
+        gsw.plist(pfields, players);
     }
 };
 

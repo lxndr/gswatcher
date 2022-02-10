@@ -285,6 +285,47 @@ const normalizeServerInfo = (inf: SourceServerDetails): ServerInfo => ({
   [InfoField.SECURE]: Boolean(inf.vac),
 })
 
+const createPlayerFields = (inf: SourceServerDetails) => {
+  const fields: PlayerField[] = [
+    {
+      title: 'Name',
+      kind: 'string',
+      field: 'name',
+      main: true,
+    },
+    {
+      title: 'Score',
+      kind: 'number',
+      field: 'score',
+      main: false,
+    },
+    {
+      title: 'Time',
+      kind: 'duration',
+      field: 'duration',
+      main: false,
+    },
+  ]
+
+  if (inf.appid === 2400) { // The Ship
+    fields.push({
+      title: 'Deaths',
+      kind: 'number',
+      field: 'deaths',
+      main: false,
+    })
+
+    fields.push({
+      title: 'Money',
+      kind: 'number',
+      field: 'money',
+      main: false,
+    })
+  }
+
+  return fields
+}
+
 const readPlayerList = (r: DataReader, inf: SourceServerDetails | null) => {
   const players: SourcePlayer[] = []
   const count = r.u8()
@@ -318,25 +359,24 @@ const readPayload = (r: DataReader) => {
     case 'I': {
       gotChallenge = -1
       gotServerInfo = readServerInfo(r)
-      gsw.details(gotServerInfo)
       const normalizedServerInfo = normalizeServerInfo(gotServerInfo)
-      gsw.sinfo(normalizedServerInfo)
+      gsw.sinfo(gotServerInfo, normalizedServerInfo)
       nextQuery ()
       break
     }
     case 'm': {
       gotChallenge = -1
       gotServerInfo = readServerInfoGold(r)
-      gsw.details(gotServerInfo)
       const normalizedServerInfo = normalizeServerInfo(gotServerInfo)
-      gsw.sinfo(normalizedServerInfo)
+      gsw.sinfo(gotServerInfo, normalizedServerInfo)
       nextQuery ()
       break
     }
     case 'D':
       gotPlayerList = readPlayerList(r, gotServerInfo)
       gotChallenge = -1
-      gsw.plist(gotPlayerList)
+      const pfields = createPlayerFields(gotServerInfo!)
+      gsw.plist(pfields, gotPlayerList)
       nextQuery ()
       break
     case 'A':

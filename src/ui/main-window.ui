@@ -68,8 +68,8 @@
                     <property name="position">400</property>
                     <child>
                       <object class="GswUiServerList" id="server_list_ctl">
-                        <binding name="querier-manager">
-                          <lookup type="GswUiMainWindow" name="querier-manager">
+                        <binding name="client-list">
+                          <lookup type="GswUiMainWindow" name="client_list">
                             GswUiMainWindow
                           </lookup>
                         </binding>
@@ -80,13 +80,6 @@
                     <child>
                       <object class="GtkNotebook">
                         <property name="tab-pos">GTK_POS_BOTTOM</property>
-                        <binding name="visible">
-                          <closure type="gboolean" function="can_show_sinfo">
-                            <lookup type="GswUiServerList" name="selected">
-                              server_list_ctl
-                            </lookup>
-                          </closure>
-                        </binding>
                         <child>
                           <object class="GtkBox">
                             <property name="orientation">GTK_ORIENTATION_HORIZONTAL</property>
@@ -94,8 +87,10 @@
                             <child>
                               <object class="GswUiServerInfo">
                                 <binding name="querier">
-                                  <lookup type="GswUiServerList" name="selected">
-                                    server_list_ctl
+                                  <lookup type="GswClient" name="querier">
+                                    <lookup type="GswUiServerList" name="selected">
+                                      server_list_ctl
+                                    </lookup>
                                   </lookup>
                                 </binding>
                               </object>
@@ -103,8 +98,10 @@
                             <child>
                               <object class="GswUiPlayerList" id="player_list">
                                 <binding name="querier">
-                                  <lookup type="GswUiServerList" name="selected">
-                                    server_list_ctl
+                                  <lookup type="GswClient" name="querier">
+                                    <lookup type="GswUiServerList" name="selected">
+                                      server_list_ctl
+                                    </lookup>
                                   </lookup>
                                 </binding>
                               </object>
@@ -119,8 +116,10 @@
                         <child>
                           <object class="GswUiServerDetails" id="server_details">
                             <binding name="querier">
-                              <lookup type="GswUiServerList" name="selected">
-                                server_list_ctl
+                              <lookup type="GswClient" name="querier">
+                                <lookup type="GswUiServerList" name="selected">
+                                  server_list_ctl
+                                </lookup>
                               </lookup>
                             </binding>
                           </object>
@@ -133,7 +132,7 @@
                         <child>
                           <object class="GswUiServerConsole" id="server_console">
                             <binding name="client">
-                              <lookup type="GswDetectorQuerier" name="console-client">
+                              <lookup type="GswClient" name="console_client">
                                 <lookup type="GswUiServerList" name="selected">
                                   server_list_ctl
                                 </lookup>

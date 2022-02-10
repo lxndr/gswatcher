@@ -45,11 +45,6 @@ class GameResolver : Object {
     foreach (var group in kf.get_groups ()) {
       switch (group) {
         case "Games":
-          if (kf.has_key ("Game", "features")) {
-            var features = kf.get_string_list ("Game", "features");
-            game.features = new Gee.ArrayList<string>.wrap (features);
-          }
-
           if (kf.has_key ("Game", "port")) {
             var port = kf.get_integer ("Game", "port");
             if (!(port > 0 && port <= uint16.MAX))
@@ -64,6 +59,10 @@ class GameResolver : Object {
             game.qport_diff = (int16) qport_diff;
           }
 
+        break;
+      case "Features":
+        if (kf.has_key ("Features", "console"))
+          game.features.set (CONSOLE, kf.get_string ("Features", "console"));
         break;
       case "Match":
         foreach (var key in kf.get_keys ("Match")) {
@@ -136,31 +135,23 @@ class GameResolver : Object {
     if (game == null)
       return false;
 
-    var ctx = new Gee.HashMap<string, Gee.Map<string, string>> ();
-    ctx.set ("inf", details);
-    ctx.set_all (game.maps);
-
-    foreach (var item in game.inf) {
-      var value = Value (typeof (string));
-      value.set_string (item.value.eval (ctx));
-      sinfo.set_property (item.key, value);
-    }
-
-    sinfo.set ("game-id", game.id);
+    game.enhance_sinfo (sinfo, details);
     return true;
   }
 
-  public Gee.List<PlayerField>? get_player_fields (string game_id) {
-    return games.has_key (game_id)
-      ? games[game_id].pfields
-      : null;
+  public Gee.List<PlayerField>? get_plist_fields (string? game_id) {
+    if (!(game_id != null && games.has_key (game_id)))
+      return null;
+
+    return games[game_id].pfields;
   }
 
-  public bool supports_feature (string game_id, string feature) {
-    if (!games.has_key (game_id))
-      return false;
+  public string? get_feature_protocol (string? game_id, ProtocolFeature feature) {
+    if (!(game_id != null && games.has_key (game_id)))
+      return null;
 
-    return feature in games[game_id].features;
+    var game = games[game_id];
+    return game.features[feature];
   }
 }
 

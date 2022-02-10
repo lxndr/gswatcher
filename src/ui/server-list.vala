@@ -2,16 +2,18 @@ using Gtk;
 
 namespace Gsw.Ui {
 
-class NewQuerier : Querier {
-  public signal void add (string address);
+class NewClient : Client {
+  public NewClient () {
+    Object (server : null);
+  }
 
-  public override void query () {}
+  public signal void add (string address);
 }
 
 [GtkTemplate (ui = "/org/lxndr/gswatcher/ui/server-list.ui")]
 class ServerList : Widget {
-  public QuerierManager? querier_manager { get; set; }
-  public Querier? selected { get; protected set; }
+  public ListModel client_list { get; set; }
+  public Client? selected { get; protected set; }
 
   [GtkChild]
   private unowned GLib.ListStore combined_list_store;
@@ -33,8 +35,6 @@ class ServerList : Widget {
 
   class construct {
     typeof (Gsw.ServerInfo).ensure ();
-    typeof (Gsw.WorkerQuerier).ensure ();
-    typeof (Gsw.DetectorQuerier).ensure ();
 
     set_layout_manager_type (typeof (BinLayout));
     set_css_name ("server-list");
@@ -43,8 +43,8 @@ class ServerList : Widget {
       Gdk.Key.Delete, 0,
       (widget, args) => {
         var server_list = (ServerList) widget;
-        var querier = (Querier) server_list.selection.selected_item;
-        var server = querier?.server;
+        var client = (Client) server_list.selection.selected_item;
+        var server = client?.server;
 
         if (server != null)
           server_list.remove (server);
@@ -56,11 +56,11 @@ class ServerList : Widget {
   }
 
   construct {
-    var new_querier = new NewQuerier ();
-    new_querier.add.connect (address => add (address));
+    var new_client = new NewClient ();
+    new_client.add.connect (address => add (address));
 
-    var new_item_list = new GLib.ListStore (typeof (Querier));
-    new_item_list.append (new_querier);
+    var new_item_list = new GLib.ListStore (typeof (Client));
+    new_item_list.append (new_client);
 
     combined_list_store.append (sort_model);
     combined_list_store.append (new_item_list);
@@ -74,11 +74,11 @@ class ServerList : Widget {
   }
 
   [GtkCallback]
-  private bool is_editor_row (Querier? querier) {
-    if (querier == null)
+  private bool is_editor_row (Client? client) {
+    if (client == null)
       return false;
 
-    return querier is NewQuerier;
+    return client is NewClient;
   }
 
   [GtkCallback]
@@ -163,7 +163,7 @@ class ServerList : Widget {
   private void handle_editing_change (Object obj, ParamSpec pspec) {
     // NOTE: `this` is GtkListItem
     var list_item = (ListItem) this;
-    var querier = (NewQuerier) list_item.item;
+    var client = (NewClient) list_item.item;
     var label = (Gtk.EditableLabel) obj;
 
     if (label.editing) {
@@ -173,7 +173,7 @@ class ServerList : Widget {
       var text = label.text;
 
       if (text != "" && text != default_text)
-        querier.add (text);
+        client.add (text);
 
       label.text = default_text;
     }

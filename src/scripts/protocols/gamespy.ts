@@ -70,6 +70,13 @@ const normalizePlayerList = (inf: Info) => {
   const all_keys = Object.keys(inf)
   const players: Player[] = []
 
+  let pfields: PlayerField[] = [{
+    title: 'Name',
+    kind: 'string',
+    field: 'name',
+    main: true,
+  }]
+
   for (let i = 1; ; i++) {
     const ending = `_${i}`
     const keys = all_keys.filter(key => key.endsWith(ending))
@@ -88,7 +95,16 @@ const normalizePlayerList = (inf: Info) => {
     players.push(player)
   }
 
-  return players
+  if (players.length) {
+    pfields = Object.keys(players[0]).map(key => ({
+      title: key.slice(0, 1).toLocaleUpperCase() + key.slice(1),
+      kind: 'string',
+      field: key,
+      main: key === 'name',
+    }))
+  }
+
+  return { pfields, players }
 }
 
 export const processResponse: ProcessResponseFn = data => {
@@ -110,14 +126,13 @@ export const processResponse: ProcessResponseFn = data => {
   })
 
   if (res.gotAllPackets()) {
-    const all_info = res.combine()
+    const details = res.combine()
     responses.remove(reqid)
-    gsw.details(all_info)
 
-    const inf = normalizeServerInfo(all_info)
-    gsw.sinfo(inf)
+    const inf = normalizeServerInfo(details)
+    gsw.sinfo(details, inf)
 
-    const players = normalizePlayerList(all_info)
-    gsw.plist(players)
+    const { pfields, players } = normalizePlayerList(details)
+    gsw.plist(pfields, players)
   }
 }

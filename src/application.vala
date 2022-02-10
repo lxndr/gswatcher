@@ -1,144 +1,143 @@
 namespace Gsw {
 
-  class Application : Adw.Application {
-    private ProtocolRegistry protocol_registry = ProtocolRegistry.get_instance ();
-    private TransportRegistry transport_registry = TransportRegistry.get_instance ();
-    private UdpTransportManager udp_transport_manager = UdpTransportManager.get_instance ();
-    private PersistentServerList server_list;
-    private BuddyList buddy_list;
-    private QuerierManager querier_manager;
-    private Gtk.Window main_window;
+class Application : Adw.Application {
+  private ProtocolRegistry protocol_registry = ProtocolRegistry.get_instance ();
+  private TransportRegistry transport_registry = TransportRegistry.get_instance ();
+  private UdpTransportManager udp_transport_manager = UdpTransportManager.get_instance ();
+  private QuerierManager querier_manager = QuerierManager.get_instance ();
+  private PersistentServerList server_list;
+  private BuddyList buddy_list;
+  private Gtk.Window main_window;
 
-    construct {
-      add_main_option_entries ({
-        { "version", 'v', OptionFlags.NONE, OptionArg.NONE, null, "Display version number", null },
-        { null }
-      });
+  construct {
+    add_main_option_entries ({
+      { "version", 'v', OptionFlags.NONE, OptionArg.NONE, null, "Display version number", null },
+      { null }
+    });
+  }
+
+  public Application () {
+    Object (application_id: Config.APPID);
+  }
+
+  public override int handle_local_options (VariantDict options) {
+    var version = options.lookup_value ("version", VariantType.BOOLEAN);
+
+    if (version != null && version.get_boolean ()) {
+      print ("%s\n", Config.VERSION);
+      return 0;
     }
 
-    public Application () {
-      Object (application_id: Config.APPID);
+    return -1;
+  }
+
+  public override void activate () {
+    if (main_window == null) {
+      main_window = new Ui.MainWindow (this, server_list, buddy_list);
+      main_window.show ();
+      add_window (main_window);
     }
+  }
 
-    public override int handle_local_options (VariantDict options) {
-      var version = options.lookup_value ("version", VariantType.BOOLEAN);
+  public override void startup () {
+    base.startup ();
 
-      if (version != null && version.get_boolean ()) {
-        print ("%s\n", Config.VERSION);
-        return 0;
-      }
+    // udp transport manager
+    udp_transport_manager.error.connect((err) => {
+      log (Config.LOG_DOMAIN, LEVEL_ERROR, err.message);
+    });
 
-      return -1;
-    }
+    // transports
+    transport_registry.register (new TransportDesc () {
+      id = "udp",
+      class_type = typeof (UdpTransport)
+    });
+    transport_registry.register (new TransportDesc () {
+      id = "tcp",
+      class_type = typeof (TcpTransport)
+    });
 
-    public override void activate () {
-      if (main_window == null) {
-        main_window = new Ui.MainWindow (this, querier_manager, buddy_list);
-        main_window.show ();
-        add_window (main_window);
-      }
-    }
+    // queriers
+    server_list = new PersistentServerList ();
 
-    public override void startup () {
-      base.startup ();
+    register_protocols.begin ((obj, res) => {
+      register_protocols.end (res);
+      server_list.reload ();
+    });
 
-      // udp transport manager
-      udp_transport_manager.error.connect((err) => {
-        log (Config.LOG_DOMAIN, LEVEL_ERROR, err.message);
-      });
+    // buddies
+    buddy_list = new PersistentBuddyList ();
 
-      // transports
-      transport_registry.register (new TransportDesc () {
-        id = "udp",
-        class_type = typeof (UdpTransport)
-      });
-      transport_registry.register (new TransportDesc () {
-        id = "tcp",
-        class_type = typeof (TcpTransport)
-      });
+    // settings
+    var settings_file = Path.build_filename (Environment.get_user_config_dir (), "gswatcher", "preferences.ini");
+    var settings_backend = SettingsBackend.keyfile_settings_backend_new (settings_file, "/org/lxndr/gswatcher/", null);
+    var preferences = new Settings.with_backend ("org.lxndr.gswatcher.Preferences", settings_backend);
+    preferences.bind ("local-udp-port", udp_transport_manager, "local-port", SettingsBindFlags.DEFAULT);
+    preferences.bind ("query-interval", querier_manager, "update-interval", SettingsBindFlags.DEFAULT);
 
-      // queriers
-      server_list = new PersistentServerList ();
-      querier_manager = new QuerierManager (server_list);
+    // app actions
+    ActionEntry[] action_entries = {
+      { "about", activate_about },
+      { "pause", activate_pause, null, "false" },
+      { "show-notification", show_notification }
+    };
 
-      register_protocols.begin ((obj, res) => {
-        register_protocols.end (res);
-        server_list.reload ();
-      });
+    add_action_entries (action_entries, this);
+  }
 
-      // buddies
-      buddy_list = new PersistentBuddyList ();
+  private void activate_about (SimpleAction action, Variant? parameter) {
+    Ui.show_about (main_window, transport_registry.list (), protocol_registry.list ());
+  }
 
-      // settings
-      var settings_file = Path.build_filename (Environment.get_user_config_dir (), "gswatcher", "preferences.ini");
-      var settings_backend = SettingsBackend.keyfile_settings_backend_new (settings_file, "/org/lxndr/gswatcher/", null);
-      var preferences = new Settings.with_backend ("org.lxndr.gswatcher.Preferences", settings_backend);
-      preferences.bind ("local-udp-port", udp_transport_manager, "local-port", SettingsBindFlags.DEFAULT);
-      preferences.bind ("query-interval", querier_manager, "update-interval", SettingsBindFlags.DEFAULT);
+  private void activate_pause (SimpleAction action, Variant? parameter) {
+    var paused = !action.get_state ().get_boolean ();
+    action.set_state (new Variant.boolean (paused));
+    querier_manager.paused = paused;
+  }
 
-      // app actions
-      ActionEntry[] action_entries = {
-        { "about", activate_about },
-        { "pause", activate_pause, null, "false" },
-        { "show-notification", show_notification }
-      };
+  private void show_notification (SimpleAction action, Variant? parameter) {
+    string title, body;
+    parameter.get_child (0, "s", out title);
+    parameter.get_child (1, "s", out body);
+    var n = new Notification (title);
+    n.set_body (body);
+    send_notification (null, n);
+  }
 
-      add_action_entries (action_entries, this);
-    }
+  private async void register_protocols () {
+    var files = yield get_data_files ("protocols", "GSW_PROTOCOLS_DIR");
 
-    private void activate_about (SimpleAction action, Variant? parameter) {
-      Ui.show_about (main_window, transport_registry.list (), protocol_registry.list ());
-    }
+    foreach (var file in files) {
+      var script = file.get_path ();
 
-    private void activate_pause (SimpleAction action, Variant? parameter) {
-      var paused = !action.get_state ().get_boolean ();
-      action.set_state (new Variant.boolean (paused));
-      querier_manager.paused = paused;
-    }
+      if (script.substring (-3) != ".js")
+        continue;
 
-    private void show_notification (SimpleAction action, Variant? parameter) {
-      string title, body;
-      parameter.get_child (0, "s", out title);
-      parameter.get_child (1, "s", out body);
-      var n = new Notification (title);
-      n.set_body (body);
-      send_notification (null, n);
-    }
+      try {
+        var protocol = new DummyJsProtocol (script);
 
-    private async void register_protocols () {
-      var files = yield get_data_files ("protocols", "GSW_PROTOCOLS_DIR");
+        var script_value = Value (typeof (string));
+        script_value.set_string (script);
 
-      foreach (var file in files) {
-        var script = file.get_path ();
+        var class_type = typeof (QueryJsProtocol);
 
-        if (script.substring (-3) != ".js")
-          continue;
+        if (protocol.info.feature == CONSOLE)
+          class_type = typeof (ConsoleJsProtocol);
 
-        try {
-          var protocol = new DummyJsProtocol (script);
-
-          var script_value = Value (typeof (string));
-          script_value.set_string (script);
-
-          var class_type = typeof (QueryJsProtocol);
-
-          if (protocol.info.feature == CONSOLE)
-            class_type = typeof (ConsoleJsProtocol);
-
-          protocol_registry.register (new ProtocolDesc () {
-            id = protocol.info.id,
-            name = protocol.info.name,
-            feature = protocol.info.feature,
-            transport = protocol.info.transport,
-            class_type = class_type,
-            class_params = { "script-path" },
-            class_values = { script_value },
-          });
-        } catch (Error err) {
-          log (Config.LOG_DOMAIN, LEVEL_WARNING, "failed to load protocol script '%s': %s", script, err.message);
-        }
+        protocol_registry.register (new ProtocolDesc () {
+          id = protocol.info.id,
+          name = protocol.info.name,
+          feature = protocol.info.feature,
+          transport = protocol.info.transport,
+          class_type = class_type,
+          class_params = { "script-path" },
+          class_values = { script_value },
+        });
+      } catch (Error err) {
+        log (Config.LOG_DOMAIN, LEVEL_WARNING, "failed to load protocol script '%s': %s", script, err.message);
       }
     }
   }
+}
 
 }

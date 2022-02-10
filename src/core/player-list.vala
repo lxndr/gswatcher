@@ -1,31 +1,5 @@
 namespace Gsw {
 
-public enum PlayerFieldType {
-  STRING,
-  NUMBER,
-  DURATION;
-
-  public static PlayerFieldType parse_nick (string nick) {
-    var enumc = (EnumClass) typeof (PlayerFieldType).class_ref ();
-    var eval = enumc.get_value_by_nick (nick);
-
-    return eval == null
-      ? PlayerFieldType.STRING
-      : (PlayerFieldType) eval.value;
-  }
-}
-
-public class PlayerField : Object {
-  public string title;
-  public string field;
-  public PlayerFieldType kind;
-  public bool main;
-
-  public PlayerField () {
-    kind = STRING;
-  }
-}
-
 public class Player : Gee.HashMap<string, string> {
   public signal void change ();
 

@@ -53,8 +53,8 @@ const parseServerInfo = (r: DataReader, delimiter: number): Info => {
   return inf
 }
 
-const readPlayerFields = (r: DataReader, delimiter: number): string[] => {
-  const fields: string[] = []
+const readPlayerFields = (r: DataReader, delimiter: number) => {
+  const fields: PlayerField[] = []
 
   while (!r.is_end) {
     const field = r.zstring(delimiter)
@@ -63,30 +63,35 @@ const readPlayerFields = (r: DataReader, delimiter: number): string[] => {
       break;
     }
 
-    fields.push(field)
+    fields.push({
+      title: field.slice(0, 1).toLocaleUpperCase() + field.slice(1),
+      kind: 'string',
+      field: field,
+      main: field === 'name',
+    })
   }
 
   return fields
 }
 
-const parsePlayerList = (r: DataReader, delimiter: number): Player[] => {
+const parsePlayerList = (r: DataReader, delimiter: number) => {
   const players: Player[] = []
   const player_count = r.u8()
-  const fields = readPlayerFields(r, delimiter)
-  const field_count = fields.length
+  const pfields = readPlayerFields(r, delimiter)
+  const field_count = pfields.length
 
   for (let iplayer = 0; iplayer < player_count && !r.is_end; iplayer++) {
     const player: Player = {}
 
     for (let ifield = 0; ifield < field_count && !r.is_end; ifield++) {
       const val = r.zstring(delimiter)
-      player[fields[ifield]] = val
+      player[pfields[ifield].field] = val
     }
 
     players.push(player)
   }
 
-  return players
+  return { pfields, players }
 }
 
 export const processResponse: ProcessResponseFn = data => {
@@ -99,11 +104,10 @@ export const processResponse: ProcessResponseFn = data => {
     throw new InvalidResponseError('invalid request id')
   }
 
-  const all_info = parseServerInfo(r, delimiter)
-  const players = parsePlayerList(r, delimiter)
-  const inf = normalizeServerInfo(all_info)
+  const details = parseServerInfo(r, delimiter)
+  const { pfields, players } = parsePlayerList(r, delimiter)
+  const inf = normalizeServerInfo(details)
 
-  gsw.details(all_info)
-  gsw.sinfo(inf)
-  gsw.plist(players)
+  gsw.sinfo(details, inf)
+  gsw.plist(pfields, players)
 }

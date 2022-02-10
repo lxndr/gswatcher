@@ -40,8 +40,8 @@ core_sources = files(
   'core/transport/udp-transport.vala',
   'core/buddy-list.vala',
   'core/buddy.vala',
+  'core/client.vala',
   'core/console-client.vala',
-  'core/detector-querier.vala',
   'core/geoip-resolver.vala',
   'core/player-list.vala',
   'core/querier-manager.vala',
@@ -51,7 +51,6 @@ core_sources = files(
   'core/server-list.vala',
   'core/server.vala',
   'core/utils.vala',
-  'core/worker-querier.vala',
 )
 
 conf_data = configuration_data()

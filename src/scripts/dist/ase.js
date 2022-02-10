@@ -1421,6 +1421,12 @@ var readKeyValues = function (r) {
     return inf;
 };
 var readPlayerList = function (r) {
+    var pfields = [{
+            title: 'Name',
+            kind: 'string',
+            field: 'name',
+            main: true,
+        }];
     var players = [];
     while (!r.is_end) {
         var player = {};
@@ -1445,12 +1451,21 @@ var readPlayerList = function (r) {
         }
         players.push(player);
     }
-    return players;
+    if (players.length) {
+        pfields = Object.keys(players[0]).map(function (key) { return ({
+            title: key.slice(0, 1).toLocaleUpperCase() + key.slice(1),
+            kind: 'string',
+            field: key,
+            main: key === 'name',
+        }); });
+    }
+    return { pfields: pfields, players: players };
 };
 var normalizeServerInfo = function (inf) {
     var _a;
     return (_a = {},
         _a["server-name" /* SERVER_NAME */] = inf.serverName,
+        _a["game-name" /* GAME_NAME */] = inf.gameName,
         _a["game-version" /* GAME_VERSION */] = inf.version,
         _a["game-mode" /* GAME_MODE */] = inf.gameType,
         _a["map" /* MAP */] = inf.map,
@@ -1467,12 +1482,11 @@ var processResponse = function (data) {
     }
     var generalInfo = readGeneralInfo(r);
     var keyValues = readKeyValues(r);
-    var players = readPlayerList(r);
-    var all_info = __assign(__assign({}, generalInfo), keyValues);
-    var inf = normalizeServerInfo(all_info);
-    gsw.details(all_info);
-    gsw.sinfo(inf);
-    gsw.plist(players);
+    var _a = readPlayerList(r), pfields = _a.pfields, players = _a.players;
+    var details = __assign(__assign({}, generalInfo), keyValues);
+    var inf = normalizeServerInfo(details);
+    gsw.sinfo(details, inf);
+    gsw.plist(pfields, players);
 };
 
 }();

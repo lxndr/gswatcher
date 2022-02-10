@@ -75,6 +75,7 @@ public class DuktapeEx : Duktape {
   }
 
   public void extract_object_to_map (Index idx, Gee.Map<string, string> map) {
+    require_object (idx);
     enum (idx, OWN_PROPERTIES_ONLY);
   
     while (next (-1, true)) {
@@ -91,15 +92,27 @@ public class DuktapeEx : Duktape {
   }
 
   public void extract_object_to_gobject (Index idx, Object object) {
+    unowned ObjectClass object_class = object.get_class ();
+
+    require_object (idx);
     enum (idx, OWN_PROPERTIES_ONLY);
 
     while (next (-1, true)) {
       var type = get_type (-1);
       var key = get_string (-2);
 
-      if (type == Type.STRING)
-        object.set (key, to_string (-1));
-      else if (type == Type.NUMBER)
+      if (type == Type.STRING) {
+        var str = to_string (-1);
+        var pspec = object_class.find_property (key);
+
+        if (pspec.value_type.is_enum ()) {
+          var enumc = (EnumClass) pspec.value_type.class_ref ();
+          var val = enumc.get_value_by_nick (str);
+          object.set (key, val.value);
+        } else {
+          object.set (key, str);
+        }
+      } else if (type == Type.NUMBER)
         object.set (key, to_int (-1));
       else if (type == Type.BOOLEAN)
         object.set (key, to_boolean (-1));

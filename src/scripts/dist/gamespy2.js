@@ -1499,24 +1499,29 @@ var readPlayerFields = function (r, delimiter) {
         if (!field) {
             break;
         }
-        fields.push(field);
+        fields.push({
+            title: field.slice(0, 1).toLocaleUpperCase() + field.slice(1),
+            kind: 'string',
+            field: field,
+            main: field === 'name',
+        });
     }
     return fields;
 };
 var parsePlayerList = function (r, delimiter) {
     var players = [];
     var player_count = r.u8();
-    var fields = readPlayerFields(r, delimiter);
-    var field_count = fields.length;
+    var pfields = readPlayerFields(r, delimiter);
+    var field_count = pfields.length;
     for (var iplayer = 0; iplayer < player_count && !r.is_end; iplayer++) {
         var player = {};
         for (var ifield = 0; ifield < field_count && !r.is_end; ifield++) {
             var val = r.zstring(delimiter);
-            player[fields[ifield]] = val;
+            player[pfields[ifield].field] = val;
         }
         players.push(player);
     }
-    return players;
+    return { pfields: pfields, players: players };
 };
 var processResponse = function (data) {
     var r = new DataReader(data);
@@ -1525,12 +1530,11 @@ var processResponse = function (data) {
     if (reqid !== requestID) {
         throw new InvalidResponseError('invalid request id');
     }
-    var all_info = parseServerInfo(r, delimiter);
-    var players = parsePlayerList(r, delimiter);
-    var inf = normalizeServerInfo(all_info);
-    gsw.details(all_info);
-    gsw.sinfo(inf);
-    gsw.plist(players);
+    var details = parseServerInfo(r, delimiter);
+    var _a = parsePlayerList(r, delimiter), pfields = _a.pfields, players = _a.players;
+    var inf = normalizeServerInfo(details);
+    gsw.sinfo(details, inf);
+    gsw.plist(pfields, players);
 };
 
 }();

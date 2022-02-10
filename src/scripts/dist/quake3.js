@@ -635,12 +635,11 @@ var processResponse = function (data) {
     if (parts[0] !== 'statusResponse') {
         throw new InvalidResponseError('invalid packet');
     }
-    var all_info = parseQuakeInfo(parts[1]);
+    var details = parseQuakeInfo(parts[1]);
     var players = parts.slice(2).map(parsePlayer);
-    var inf = extractServerInfo(all_info, players);
-    gsw.details(all_info);
-    gsw.sinfo(inf);
-    gsw.plist(players);
+    var inf = extractServerInfo(details, players);
+    gsw.sinfo(details, inf);
+    gsw.plist([], players);
 };
 
 }();

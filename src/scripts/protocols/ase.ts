@@ -64,6 +64,13 @@ const readKeyValues = (r: DataReader) => {
 }
 
 const readPlayerList = (r: DataReader) => {
+  let pfields: PlayerField[] = [{
+    title: 'Name',
+    kind: 'string',
+    field: 'name',
+    main: true,
+  }]
+
   const players: Player[] = []
 
   while (!r.is_end) {
@@ -97,7 +104,16 @@ const readPlayerList = (r: DataReader) => {
     players.push(player)
   }
 
-  return players
+  if (players.length) {
+    pfields = Object.keys(players[0]).map(key => ({
+      title: key.slice(0, 1).toLocaleUpperCase() + key.slice(1),
+      kind: 'string',
+      field: key,
+      main: key === 'name',
+    }))
+  }
+
+  return { pfields, players }
 }
 
 const normalizeServerInfo = (inf: ASEInfo): ServerInfo => ({
@@ -122,12 +138,11 @@ export const processResponse: ProcessResponseFn = data => {
 
   const generalInfo = readGeneralInfo(r)
   const keyValues = readKeyValues(r)
-  const players = readPlayerList(r)
+  const { pfields, players } = readPlayerList(r)
 
-  const all_info = { ...generalInfo, ...keyValues }
-  const inf = normalizeServerInfo(all_info)
+  const details = { ...generalInfo, ...keyValues }
+  const inf = normalizeServerInfo(details)
 
-  gsw.details(all_info)
-  gsw.sinfo(inf)
-  gsw.plist(players)
+  gsw.sinfo(details, inf)
+  gsw.plist(pfields, players)
 }

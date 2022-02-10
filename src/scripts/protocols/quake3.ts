@@ -54,11 +54,10 @@ export const processResponse: ProcessResponseFn = data => {
     throw new InvalidResponseError('invalid packet')
   }
 
-  const all_info = parseQuakeInfo(parts[1])
+  const details = parseQuakeInfo(parts[1])
   const players = parts.slice(2).map(parsePlayer)
-  const inf = extractServerInfo(all_info, players)
+  const inf = extractServerInfo(details, players)
 
-  gsw.details(all_info)
-  gsw.sinfo(inf)
-  gsw.plist(players)
+  gsw.sinfo(details, inf)
+  gsw.plist([], players)
 }

@@ -101,11 +101,9 @@
               <closure type="gchararray" function="na_if_null">
                 <closure type="gchararray" function="format_location">
                   <lookup type="GswNetTransport" name="saddr">
-                    <lookup type="GswWorkerQuerier" name="transport">
-                      <lookup type="GswDetectorQuerier" name="detected_querier">
-                        <lookup type="GswUiServerInfo" name="querier">
-                          GswUiServerInfo
-                        </lookup>
+                    <lookup type="GswQuerier" name="transport">
+                      <lookup type="GswUiServerInfo" name="querier">
+                        GswUiServerInfo
                       </lookup>
                     </lookup>
                   </lookup>
