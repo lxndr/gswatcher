@@ -133,9 +133,9 @@ public class Querier : Object {
   }
 
   private void on_plist_updated (Gee.List<PlayerField> default_pfields, Gee.ArrayList<Player> plist) {
-    if (sinfo.game_id != null && this.plist_fields.get_n_items () == 0) {
+    if (this.plist_fields.get_n_items () == 0) {
       var game_pfields = game_resolver.get_plist_fields (sinfo.game_id);
-      var new_pfields = game_pfields == null ? default_pfields : game_pfields;
+      var new_pfields = (game_pfields != null && game_pfields.size > 0) ? game_pfields : default_pfields;
 
       foreach (var field in new_pfields)
         this.plist_fields.append (field);

@@ -10,13 +10,20 @@ public class Client : Object {
     Object (server : server);
   }
 
+  ~Client () {
+    remove_queriers ();
+    querier.dispose ();
+  }
+
   construct {
     reset ();
   }
 
   private void reset () {
+    querier.dispose ();
     querier = null;
-    tmp_queriers.clear ();
+
+    remove_queriers ();
 
     foreach (var protocol_desc in ProtocolRegistry.get_instance ().list_by_feature (QUERY)) {
       try {
@@ -40,10 +47,14 @@ public class Client : Object {
         var proto = (ConsoleProtocol) ProtocolRegistry.get_instance ().create (console_protocol);
         console_client = new ConsoleClient (querier.server.host, querier.server.gport, proto);
       } catch (Error err) {
-        log (Config.LOG_DOMAIN, LEVEL_ERROR, "failed to create protocol '%s': %s", "source-console", err.message);
+        log (Config.LOG_DOMAIN, LEVEL_ERROR, "failed to create protocol '%s': %s", console_protocol, err.message);
       }
     }
 
+    remove_queriers ();
+  }
+
+  private void remove_queriers () {
     foreach (var it in tmp_queriers) {
       it.update.disconnect (on_protocol_detected);
 

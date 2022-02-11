@@ -1,11 +1,7 @@
 namespace Gsw {
 
 public class BuddyList : Object, ListModel {
-  private Gee.List<Buddy> list;
-
-  construct {
-    list = new Gee.ArrayList<Buddy> ();
-  }
+  private Gee.List<Buddy> list = new Gee.ArrayList<Buddy> ();
 
   public Object? get_item (uint position) {
     return list[(int) position];
