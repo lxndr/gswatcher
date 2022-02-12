@@ -16,7 +16,6 @@ class PersistentServerList : ServerList {
 
     var path = root_path + client.server.address + "/";
     var server_settings = new Settings.with_backend_and_path ("org.lxndr.gswatcher.Server", settings_backend, path);
-    server_settings.bind ("favorite", client.server, "favorite", SettingsBindFlags.DEFAULT);
     server_settings.bind ("protocol", client.server, "protocol", SettingsBindFlags.DEFAULT);
     server_settings.bind ("game-id", client.server, "game-id", SettingsBindFlags.DEFAULT);
     server_settings.bind ("server-name", client.server, "server-name", SettingsBindFlags.DEFAULT);

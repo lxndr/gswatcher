@@ -4,7 +4,6 @@ public class Server : Object {
   public string host;
   public uint16 gport;
   public uint16 qport;
-  public bool favorite { get; set; }
   public string protocol { get; set; }
   public string server_name { get; set; }
   public string game_id { get; set; }
