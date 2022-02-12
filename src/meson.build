@@ -11,10 +11,10 @@ add_project_arguments(
 )
 
 dependencies = [
-  dependency('gtk4', version : '>=4.5.0'),
+  dependency('gtk4', version : '>=4.4.1'),
   dependency('libadwaita-1', version : '>=1.0.0'),
   dependency('gee-0.8', version : '>=0.20.4'),
-  dependency('duktape', version : '>=2.5.0'),
+  dependency('duktape', version : '>=2.6.0'),
   dependency('geoip', version : '>=1.6.12'),
 ]
 
