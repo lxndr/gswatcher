@@ -11,7 +11,7 @@ add_project_arguments(
 )
 
 dependencies = [
-  dependency('gtk4', version : '>=4.4.1'),
+  dependency('gtk4', version : '>=4.6.0'),
   dependency('libadwaita-1', version : '>=1.0.0'),
   dependency('gee-0.8', version : '>=0.20.4'),
   dependency('duktape', version : '>=2.6.0'),
@@ -64,7 +64,7 @@ conf_data.set_quoted('GETTEXT_PACKAGE', meson.project_name())
 core_sources += configure_file(
   input: 'config.vala.in',
   output: 'config.vala',
-  configuration: conf_data
+  configuration: conf_data,
 )
 
 ui_sources = files(
