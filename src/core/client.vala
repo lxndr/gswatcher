@@ -1,6 +1,7 @@
 namespace Gsw {
 
 public class Client : Object {
+  private QuerierManager querier_manager = QuerierManager.get_instance ();
   private Gee.List<Querier> tmp_queriers = new Gee.ArrayList<Querier> ();
   public Server server { get; construct; }
   public Querier? querier { get; private set; }
@@ -12,7 +13,6 @@ public class Client : Object {
 
   ~Client () {
     remove_queriers ();
-    querier.dispose ();
   }
 
   construct {
@@ -20,15 +20,12 @@ public class Client : Object {
   }
 
   private void reset () {
-    querier.dispose ();
     querier = null;
-
     remove_queriers ();
 
     foreach (var protocol_desc in ProtocolRegistry.get_instance ().list_by_feature (QUERY)) {
       try {
-        var protocol = ProtocolRegistry.get_instance ().create (protocol_desc.id);
-        var querier = new Querier (server, (QueryProtocol) protocol);
+        var querier = querier_manager.create_querier (server, protocol_desc.id);
         querier.update.connect (on_protocol_detected);
         tmp_queriers.add (querier);
       } catch (Error err) {
@@ -55,13 +52,8 @@ public class Client : Object {
   }
 
   private void remove_queriers () {
-    foreach (var it in tmp_queriers) {
+    foreach (var it in tmp_queriers)
       it.update.disconnect (on_protocol_detected);
-
-      if (it != querier)
-        it.dispose();
-    }
-
     tmp_queriers.clear ();
   }
 }

@@ -1,35 +1,41 @@
+using Gee;
+
 namespace Gsw {
 
 [SingleInstance]
 public class QuerierManager : Object {
-  public Gee.List<Querier> queriers = new Gee.ArrayList<Querier> ();
   public uint update_interval { get; set; default = 5000; }
   public bool paused { get; set; }
 
   private uint timer_source;
-  private int querier_iter = -1;
+  private Collection<unowned Querier> queriers;
+  private Iterator<unowned Querier> querier_iter;
 
   public static QuerierManager get_instance () {
     return new QuerierManager ();
   }
 
   construct {
+    queriers = new ConcurrentList<unowned Querier> ();
+    querier_iter = queriers.iterator ();
+
     notify["update_interval"].connect (update_timer);
     notify["paused"].connect (update_timer);
     update_timer ();
   }
 
-  ~QuerierManager () {
-    notify["update_interval"].disconnect (update_timer);
-    notify["paused"].disconnect (update_timer);
-  }
+  public Querier create_querier (Server server, string protocol_id) throws Error {
+    var protocol = ProtocolRegistry.get_instance ().create (protocol_id);
 
-  public void register (Querier querier) {
+    var querier = new Querier (server, (QueryProtocol) protocol);
+    querier.weak_ref ((WeakNotify) remove_querier);
     queriers.add (querier);
+
     update_timer ();
+    return querier;
   }
 
-  public void unregister (Querier querier) {
+  private void remove_querier (Querier querier) {
     queriers.remove (querier);
     update_timer ();
   }
@@ -55,7 +61,7 @@ public class QuerierManager : Object {
 
   private void update_tick () {
     advance_querier_iter ();
-    var querier = (Querier) queriers[querier_iter];
+    var querier = querier_iter.get ();
 
     log (Config.LOG_DOMAIN, LEVEL_DEBUG, "querying %s:%d", querier.server.host, querier.server.qport);
 
@@ -63,12 +69,9 @@ public class QuerierManager : Object {
   }
 
   private void advance_querier_iter () {
-    var last_iter = queriers.size - 1;
-
-    if (querier_iter >= last_iter)
-      querier_iter = -1;
-
-    querier_iter++;
+    if (!querier_iter.has_next ())
+      querier_iter = queriers.iterator ();
+    querier_iter.next ();
   }
 }
 
