@@ -40,8 +40,6 @@ public class Querier : Object {
 
     game_resolver.notify["ready"].connect (handle_pending_query);
 
-    var querier_manager = QuerierManager.get_instance ();
-    querier_manager.register (this);
     query ();
   }
 
@@ -53,9 +51,6 @@ public class Querier : Object {
   }
 
   ~Querier () {
-    var querier_manager = QuerierManager.get_instance ();
-    querier_manager.unregister (this);
-
     stop_timeout_timer ();
 
     notify["error"].disconnect(on_error);

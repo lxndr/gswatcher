@@ -13,6 +13,12 @@ class PersistentBuddyList : BuddyList {
   }
 
   public override Buddy add (string name) {
+    try {
+      add_name (name);
+    } catch (Error err) {
+      log (Config.LOG_DOMAIN, LEVEL_ERROR, "failed to save buddy list to '%s': %s", config_file, err.message);
+    }
+
     var buddy = base.add (name);
 
     var path = root_path + buddy.name + "/";
@@ -27,7 +33,7 @@ class PersistentBuddyList : BuddyList {
       remove_name (buddy.name);
       base.remove (buddy);
     } catch (Error err) {
-      log (Config.LOG_DOMAIN, LEVEL_WARNING, "failed to save buddy list to '%s': %s", config_file, err.message);
+      log (Config.LOG_DOMAIN, LEVEL_ERROR, "failed to save buddy list to '%s': %s", config_file, err.message);
     }
   }
 
@@ -57,11 +63,25 @@ class PersistentBuddyList : BuddyList {
     }
   }
 
+  private void add_name (string name) throws Error {
+    // TODO: is there a better way to remove name besides directly editing ini file?
+    var kf = new KeyFile ();
+    kf.load_from_file (config_file, KeyFileFlags.NONE);
+
+    if (!kf.has_group (name))
+      kf.set_boolean (name, "notifications", true);
+
+    kf.save_to_file (config_file);
+  }
+
   private void remove_name (string name) throws Error {
     // TODO: is there a better way to remove name besides directly editing ini file?
     var kf = new KeyFile ();
     kf.load_from_file (config_file, KeyFileFlags.NONE);
-    kf.remove_group (name);
+
+    if (kf.has_group (name))
+      kf.remove_group (name);
+
     kf.save_to_file (config_file);
   }
 }

@@ -73,10 +73,8 @@ class MainWindow : Adw.ApplicationWindow {
       _("Are you sure you want to remove \"%s\" from the buddy list?"), buddy.name);
 
     dialog.response.connect ((response_id) => {
-      if (response_id == ResponseType.YES) {
+      if (response_id == ResponseType.YES)
         buddy_list.remove (buddy);
-      }
-
       dialog.destroy ();
     });
 

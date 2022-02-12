@@ -16,7 +16,12 @@ public class BuddyList : Object, ListModel {
   }
 
   public virtual Buddy add (string name) {
-    var buddy = new Buddy (name);
+    var buddy = find_by_name (name);
+
+    if (buddy != null)
+      return buddy;
+
+    buddy = new Buddy (name);
     list.add (buddy);
     items_changed (list.size - 1, 0, 1);
     return buddy;

@@ -34,6 +34,7 @@ class ServerList : Widget {
   signal void remove (Server server);
 
   class construct {
+    typeof (Gsw.Querier).ensure ();
     typeof (Gsw.ServerInfo).ensure ();
 
     set_layout_manager_type (typeof (BinLayout));
