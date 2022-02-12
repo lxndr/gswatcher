@@ -11,23 +11,23 @@ class PersistentServerList : ServerList {
     settings_backend = SettingsBackend.keyfile_settings_backend_new (config_file, root_path, null);
   }
 
-  public override Server add (string name) {
-    var server = base.add (name);
+  public override Client add (string name) {
+    var client = base.add (name);
 
-    var path = root_path + server.address + "/";
+    var path = root_path + client.server.address + "/";
     var server_settings = new Settings.with_backend_and_path ("org.lxndr.gswatcher.Server", settings_backend, path);
-    server_settings.bind ("favorite", server, "favorite", SettingsBindFlags.DEFAULT);
-    server_settings.bind ("protocol", server, "protocol", SettingsBindFlags.DEFAULT);
-    server_settings.bind ("game-id", server, "game-id", SettingsBindFlags.DEFAULT);
-    server_settings.bind ("server-name", server, "server-name", SettingsBindFlags.DEFAULT);
+    server_settings.bind ("favorite", client.server, "favorite", SettingsBindFlags.DEFAULT);
+    server_settings.bind ("protocol", client.server, "protocol", SettingsBindFlags.DEFAULT);
+    server_settings.bind ("game-id", client.server, "game-id", SettingsBindFlags.DEFAULT);
+    server_settings.bind ("server-name", client.server, "server-name", SettingsBindFlags.DEFAULT);
 
-    return server;
+    return client;
   }
 
-  public override void remove (Server server) {
+  public override void remove (Client client) {
     try {
-      remove_name (server.address);
-      base.remove (server);
+      remove_name (client.server.address);
+      base.remove (client);
     } catch (Error err) {
       log (Config.LOG_DOMAIN, LEVEL_WARNING, "failed to save server list to '%s': %s", config_file, err.message);
     }
@@ -60,12 +60,12 @@ class PersistentServerList : ServerList {
     }
   }
 
-  private void remove_name (string name) throws Error {
+  private void remove_name (string address) throws Error {
     // TODO: is there a better way to remove address besides directly editing ini file?
     var kf = new KeyFile ();
     kf.load_from_file (config_file, KeyFileFlags.NONE);
-    if (kf.has_group (name))
-      kf.remove_group (name);
+    if (kf.has_group (address))
+      kf.remove_group (address);
     kf.save_to_file (config_file);
   }
 }

@@ -35,7 +35,7 @@ public static int main (string[] args) {
       var proto = new QueryJsProtocol ("../src/scripts/dist/source.js");
       bool signal_called = false;
 
-      proto.sinfo_update.connect ((sinfo) => {
+      proto.sinfo_update.connect ((details, sinfo) => {
         signal_called = true;
         assert (sinfo.server_name == "game2xs.com Counter-Strike Source #1");
         assert (sinfo.map == "de_dust");

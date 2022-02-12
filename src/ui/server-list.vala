@@ -31,7 +31,7 @@ class ServerList : Widget {
   private unowned ColumnViewColumn name_column;
 
   signal void add (string address);
-  signal void remove (Server server);
+  signal void remove (Client client);
 
   class construct {
     typeof (Gsw.Querier).ensure ();
@@ -48,7 +48,7 @@ class ServerList : Widget {
         var server = client?.server;
 
         if (server != null)
-          server_list.remove (server);
+          server_list.remove (client);
 
         return true;
       },

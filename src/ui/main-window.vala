@@ -4,9 +4,8 @@ namespace Gsw.Ui {
 
 [GtkTemplate (ui = "/org/lxndr/gswatcher/ui/main-window.ui")]
 class MainWindow : Adw.ApplicationWindow {
-  public Gsw.ServerList server_list { get; construct; }
   public Gsw.BuddyList buddy_list { get; construct; }
-  public MapListModel client_list { get; private set; }
+  public Gsw.ServerList client_list { get; construct; }
 
   class construct {
     typeof (Ui.ServerList).ensure ();
@@ -18,36 +17,27 @@ class MainWindow : Adw.ApplicationWindow {
     typeof (Ui.Preferences).ensure ();
   }
 
-  construct {
-    client_list = new MapListModel (
-      server_list,
-      (obj) => new Client ((Gsw.Server) obj)
-    );
-  }
-
-  public MainWindow (Gtk.Application application, Gsw.ServerList server_list, Gsw.BuddyList buddy_list) {
+  public MainWindow (Gtk.Application application, Gsw.ServerList client_list, Gsw.BuddyList buddy_list) {
     Object (
       application : application,
-      server_list : server_list,
+      client_list : client_list,
       buddy_list : buddy_list
     );
   }
 
   [GtkCallback]
   private void add_server (string address) {
-    server_list.add (address);
+    client_list.add (address);
   }
 
   [GtkCallback]
-  private void remove_server (Server server) {
+  private void remove_server (Client client) {
     var dialog = new MessageDialog (this, DialogFlags.DESTROY_WITH_PARENT | DialogFlags.MODAL, MessageType.QUESTION, ButtonsType.YES_NO,
-      _("Are you sure you want to remove \"%s\" from the server list?"), server.address);
+      _("Are you sure you want to remove \"%s\" from the server list?"), client.server.address);
 
     dialog.response.connect ((response_id) => {
-      if (response_id == ResponseType.YES) {
-        server_list.remove (server);
-      }
-
+      if (response_id == ResponseType.YES)
+        client_list.remove (client);
       dialog.destroy ();
     });
 

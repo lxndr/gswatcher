@@ -1,10 +1,10 @@
 namespace Gsw {
 
 public class ServerList : Object, ListModel {
-  private Gee.List<Server> list;
+  private Gee.List<Client> list;
 
   construct {
-    list = new Gee.ArrayList<Server> ();
+    list = new Gee.ArrayList<Client> ();
   }
 
   public Object? get_item (uint position) {
@@ -19,15 +19,15 @@ public class ServerList : Object, ListModel {
     return list.size;
   }
 
-  public virtual Server add (string address) {
-    var server = new Server (address);
-    list.add (server);
+  public virtual Client add (string address) {
+    var client = new Client (new Server (address));
+    list.add (client);
     items_changed (list.size - 1, 0, 1);
-    return server;
+    return client;
   }
 
-  public virtual void remove (Server server) {
-    var idx = list.index_of (server);
+  public virtual void remove (Client client) {
+    var idx = list.index_of (client);
 
     if (idx > -1) {
       list.remove_at (idx);
