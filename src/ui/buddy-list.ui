@@ -21,10 +21,6 @@
     </binding>
   </object>
 
-  <object class="GtkMapListModel" id="mapped_list">
-    <property name="model">sort_model</property>
-  </object>
-
   <object class="GtkFlattenListModel" id="combined_list">
     <property name="model">
       <object class="GListStore" id="combined_list_store" />
@@ -67,17 +63,34 @@
                             <property name="child">
                               <object class="GtkBox">
                                 <child>
-                                  <object class="GtkEditableLabel">
+                                  <object class="GtkLabel">
+                                    <property name="xalign">0</property>
                                     <property name="hexpand">true</property>
-                                    <binding name="text">
-                                      <lookup type="GswUiBuddyListItem" name="name">
+                                    <binding name="visible">
+                                      <closure type="gboolean" function="invert_boolean">
+                                        <closure type="gboolean" function="is_editor_row">
+                                          <lookup name="item">GtkListItem</lookup>
+                                        </closure>
+                                      </closure>
+                                    </binding>
+                                    <binding name="label">
+                                      <lookup type="GswBuddy" name="name">
                                         <lookup name="item">GtkListItem</lookup>
                                       </lookup>
                                     </binding>
-                                    <binding name="editable">
-                                      <lookup type="GswUiBuddyListItem" name="is_new">
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkEditableLabel">
+                                    <style>
+                                      <class name="new-entry" />
+                                    </style>
+                                    <property name="hexpand">true</property>
+                                    <property name="text">Click here to add new buddy</property>
+                                    <binding name="visible">
+                                      <closure type="gboolean" function="is_editor_row">
                                         <lookup name="item">GtkListItem</lookup>
-                                      </lookup>
+                                      </closure>
                                     </binding>
                                     <signal name="notify::editing" handler="handle_editing_change" />
                                   </object>
@@ -108,16 +121,14 @@
                                 <property name="halign">GTK_ALIGN_CENTER</property>
                                 <binding name="active">
                                   <lookup type="GswBuddy" name="notifications">
-                                    <lookup type="GswUiBuddyListItem" name="buddy">
-                                      <lookup name="item">GtkListItem</lookup>
-                                    </lookup>
+                                    <lookup name="item">GtkListItem</lookup>
                                   </lookup>
                                 </binding>
                                 <binding name="visible">
                                   <closure type="gboolean" function="invert_boolean">
-                                    <lookup type="GswUiBuddyListItem" name="is_new">
+                                    <closure type="gboolean" function="is_editor_row">
                                       <lookup name="item">GtkListItem</lookup>
-                                    </lookup>
+                                    </closure>
                                   </closure>
                                 </binding>
                                 <signal name="notify::active" handler="handle_notifications_change" />

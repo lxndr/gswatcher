@@ -1,6 +1,6 @@
 server-list cell .new-entry,
 buddy-list cell .new-entry {
-  color: lightgrey;
+  color: grey;
   font-style: italic;
 }
 
