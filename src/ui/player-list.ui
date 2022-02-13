@@ -1,52 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.18.1 -->
+
 <interface>
-  <requires lib="gtk+" version="3.12"/>
-  <!-- interface-license-type gplv2 -->
-  <object class="GtkListStore" id="liststore">
-    <columns>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-      <!-- column-name gint1 -->
-      <column type="gint"/>
-      <!-- column-name gchararray1 -->
-      <column type="gchararray"/>
-    </columns>
+  <requires lib="gtk+" version="4.0"/>
+
+  <object class="GtkSortListModel" id="sort_model">
+    <binding name="model">
+      <lookup type="GswQuerier" name="plist">
+        <lookup type="GswUiPlayerList" name="querier">
+          GswUiPlayerList
+        </lookup>
+      </lookup>
+    </binding>
+    <binding name="sorter">
+      <lookup type="GtkColumnView" name="sorter">view</lookup>
+    </binding>
   </object>
-  <object class="GtkScrolledWindow" id="root">
-    <property name="visible">True</property>
-    <property name="can_focus">True</property>
-    <property name="hscrollbar_policy">never</property>
-    <property name="shadow_type">in</property>
+
+  <object class="GtkSingleSelection" id="selection">
+    <property name="model">sort_model</property>
+    <property name="autoselect">true</property>
+    <property name="can-unselect">false</property>
+  </object>
+
+  <template class="GswUiPlayerList" parent="GtkWidget">
+    <property name="name">player-list</property>
+    <property name="hexpand">true</property>
+
     <child>
-      <object class="GtkTreeView" id="listview">
-        <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="model">liststore</property>
-        <child internal-child="selection">
-          <object class="GtkTreeSelection" id="treeview-selection1">
-            <signal name="changed" handler="gui_plist_selection_changed" swapped="no"/>
-          </object>
-        </child>
+      <object class="GtkScrolledWindow">
+        <property name="hscrollbar_policy">never</property>
+        <property name="hexpand">true</property>
+        <property name="hexpand-set">true</property>
+
         <child>
-          <object class="GtkTreeViewColumn" id="treeviewcolumn1">
-            <property name="sizing">fixed</property>
-            <property name="min_width">80</property>
-            <property name="title" translatable="yes" context="Player">Name</property>
-            <property name="expand">True</property>
-            <property name="clickable">True</property>
-            <property name="sort_column_id">0</property>
-            <child>
-              <object class="GtkCellRendererText" id="cellrenderertext1">
-                <property name="ellipsize">end</property>
-              </object>
-              <attributes>
-                <attribute name="text">0</attribute>
-              </attributes>
-            </child>
+          <object class="GtkColumnView" id="view">
+            <property name="model">selection</property>
+            <property name="reorderable">false</property>
           </object>
         </child>
       </object>
     </child>
-  </object>
+
+  </template>
 </interface>

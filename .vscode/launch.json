@@ -1,0 +1,26 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug",
+      "program": "${workspaceFolder}/builddir/src/gswatcher",
+      "args": [],
+      "cwd": "${workspaceFolder}/builddir",
+      "env": {
+        // "G_DEBUG": "fatal-warnings",
+        // "G_MESSAGES_DEBUG": "Gsw",
+        "DEBUGINFOD_URLS": "https://debuginfod.archlinux.org",
+        "GSETTINGS_SCHEMA_DIR": "${workspaceFolder}/tmp/schemas",
+        "XDG_DATA_HOME": "${workspaceFolder}/..",
+        "XDG_CONFIG_HOME": "${workspaceFolder}/tmp/config",
+        "GSW_PROTOCOLS_DIR": "${workspaceFolder}/src/scripts/dist"
+      },
+      "preLaunchTask": "Meson: Build src/gswatcher"
+    }
+  ]
+}

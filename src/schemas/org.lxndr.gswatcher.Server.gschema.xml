@@ -1,0 +1,16 @@
+<schemalist>
+  <schema id="org.lxndr.gswatcher.Server">
+    <key name="server-name" type="s">
+      <default>""</default>
+      <summary>Server name</summary>
+    </key>
+    <key name="protocol" type="s">
+      <default>""</default>
+      <summary>Protocol</summary>
+    </key>
+    <key name="game-id" type="s">
+      <default>""</default>
+      <summary>Game ID</summary>
+    </key>
+  </schema>
+</schemalist>
