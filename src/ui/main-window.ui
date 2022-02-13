@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<interface>
+  <requires lib="gtk+" version="4.0"/>
+
+  <menu id="gear_menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Pause</attribute>
+        <attribute name="action">app.pause</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_About</attribute>
+        <attribute name="action">app.about</attribute>
+      </item>
+    </section>
+  </menu>
+
+  <template class="GswUiMainWindow" parent="AdwApplicationWindow">
+    <property name="default-width">1024</property>
+    <property name="default-height">768</property>
+    <property name="content">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+
+        <child>
+          <object class="GtkHeaderBar">
+            <property name="title-widget">
+              <object class="AdwWindowTitle">
+                <property name="title" translatable="yes">Game Server Watcher</property>
+              </object>
+            </property>
+
+            <child>
+              <object class="GtkStackSwitcher">
+                <property name="stack">stack</property>
+              </object>
+            </child>
+
+            <child type="end">
+              <object class="GtkMenuButton">
+                <property name="valign">center</property>
+                <property name="focus-on-click">0</property>
+                <property name="menu-model">gear_menu</property>
+                <property name="icon-name">open-menu-symbolic</property>
+                <accessibility>
+                  <property name="label" translatable="yes">Primary menu</property>
+                </accessibility>
+              </object>
+            </child>
+
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkStack" id="stack">
+            <property name="vexpand">true</property>
+
+            <child>
+              <object class="GtkStackPage">
+                <property name="name">server_list_page</property>
+                <property name="title">Server list</property>
+                <property name="icon-name">network-wired</property>
+                <property name="child">
+                  <object class="GtkPaned">
+                    <property name="orientation">GTK_ORIENTATION_VERTICAL</property>
+                    <property name="shrink-start-child">false</property>
+                    <property name="position">400</property>
+                    <child>
+                      <object class="GswUiServerList" id="server_list_ctl">
+                        <binding name="client-list">
+                          <lookup type="GswUiMainWindow" name="client_list">
+                            GswUiMainWindow
+                          </lookup>
+                        </binding>
+                        <signal name="add" handler="add_server" />
+                        <signal name="remove" handler="remove_server" />
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkNotebook">
+                        <property name="tab-pos">GTK_POS_BOTTOM</property>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="orientation">GTK_ORIENTATION_HORIZONTAL</property>
+                            <property name="homogeneous">true</property>
+                            <child>
+                              <object class="GswUiServerInfo">
+                                <binding name="querier">
+                                  <lookup type="GswClient" name="querier">
+                                    <lookup type="GswUiServerList" name="selected">
+                                      server_list_ctl
+                                    </lookup>
+                                  </lookup>
+                                </binding>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GswUiPlayerList" id="player_list">
+                                <binding name="querier">
+                                  <lookup type="GswClient" name="querier">
+                                    <lookup type="GswUiServerList" name="selected">
+                                      server_list_ctl
+                                    </lookup>
+                                  </lookup>
+                                </binding>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="tab">
+                          <object class="GtkLabel">
+                            <property name="label">Info</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GswUiServerDetails" id="server_details">
+                            <binding name="querier">
+                              <lookup type="GswClient" name="querier">
+                                <lookup type="GswUiServerList" name="selected">
+                                  server_list_ctl
+                                </lookup>
+                              </lookup>
+                            </binding>
+                          </object>
+                        </child>
+                        <child type="tab">
+                          <object class="GtkLabel">
+                            <property name="label">Details</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GswUiServerConsole" id="server_console">
+                            <binding name="client">
+                              <lookup type="GswClient" name="console_client">
+                                <lookup type="GswUiServerList" name="selected">
+                                  server_list_ctl
+                                </lookup>
+                              </lookup>
+                            </binding>
+                          </object>
+                        </child>
+                        <child type="tab">
+                          <object class="GtkLabel">
+                            <property name="label">Console</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkStackPage" id="buddy_list_page">
+                <property name="name">buddy_list</property>
+                <property name="title">Buddy list</property>
+                <property name="icon-name">contact-new</property>
+                <property name="child">
+                  <object class="GswUiBuddyList">
+                    <binding name="buddy-list">
+                      <lookup type="GswUiMainWindow" name="buddy-list">
+                        GswUiMainWindow
+                      </lookup>
+                    </binding>
+                    <signal name="add" handler="add_buddy" />
+                    <signal name="remove" handler="remove_buddy" />
+                  </object>
+                </property>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkStackPage">
+                <property name="name">preferences</property>
+                <property name="title">Preferences</property>
+                <property name="icon-name">preferences-system</property>
+                <property name="child">
+                  <object class="GswUiPreferences" />
+                </property>
+              </object>
+            </child>
+
+          </object>
+        </child>
+
+      </object>
+    </property>
+  </template>
+</interface>

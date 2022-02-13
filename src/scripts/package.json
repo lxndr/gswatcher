@@ -1,0 +1,20 @@
+{
+  "name": "@lxndr/gswatcher-protocols",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "build": "NODE_ENV=production webpack",
+    "build:watch": "webpack --watch"
+  },
+  "author": "",
+  "license": "GPL",
+  "dependencies": {
+    "jsbi": "^4.0.0",
+    "ts-loader": "^9.2.6",
+    "tslib": "^2.3.1",
+    "typescript": "^4.4.4",
+    "webpack": "^5.59.0",
+    "webpack-cli": "^4.9.1"
+  }
+}

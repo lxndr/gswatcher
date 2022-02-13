@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<interface>
+  <requires lib="gtk+" version="4.0"/>
+
+  <object class="GtkStringSorter" id="key_column_sorter">
+    <property name="ignore_case">true</property>
+    <property name="expression">
+      <lookup type="GswServerDetailsEntry" name="key" />
+    </property>
+  </object>
+
+  <object class="GtkSortListModel" id="sort_model">
+    <binding name="model">
+      <lookup type="GswQuerier" name="details">
+        <lookup type="GswUiServerDetails" name="querier">
+          GswUiServerDetails
+        </lookup>
+      </lookup>
+    </binding>
+    <binding name="sorter">
+      <lookup type="GtkColumnView" name="sorter">view</lookup>
+    </binding>
+  </object>
+
+  <object class="GtkSingleSelection" id="selection">
+    <property name="model">sort_model</property>
+    <property name="autoselect">1</property>
+    <property name="can-unselect">0</property>
+  </object>
+
+  <template class="GswUiServerDetails" parent="GtkWidget">
+    <property name="hexpand">true</property>
+    <property name="vexpand">true</property>
+
+    <child>
+      <object class="GtkScrolledWindow">
+        <property name="hscrollbar_policy">never</property>
+        <property name="hexpand">true</property>
+        <property name="hexpand-set">true</property>
+
+        <child>
+          <object class="GtkColumnView" id="view">
+            <property name="model">selection</property>
+            <property name="reorderable">false</property>
+
+            <child>
+              <object class="GtkColumnViewColumn" id="key_column">
+                <property name="title">Key</property>
+                <property name="sorter">key_column_sorter</property>
+                <property name="factory">
+                  <object class="GtkBuilderListItemFactory">
+                    <property name="bytes">
+                      <![CDATA[
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <interface>
+                          <template class="GtkListItem">
+                            <property name="child">
+                              <object class="GtkLabel">
+                                <property name="xalign">0</property>
+                                <binding name="label">
+                                  <lookup name="key" type="GswServerDetailsEntry">
+                                    <lookup name="item">GtkListItem</lookup>
+                                  </lookup>
+                                </binding>
+                              </object>
+                            </property>
+                          </template>
+                        </interface>
+                      ]]>
+                    </property>
+                  </object>
+                </property>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkColumnViewColumn" id="value_column">
+                <property name="title">Value</property>
+                <property name="expand">true</property>
+                <property name="factory">
+                  <object class="GtkBuilderListItemFactory">
+                    <property name="bytes">
+                      <![CDATA[
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <interface>
+                          <template class="GtkListItem">
+                            <property name="child">
+                              <object class="GtkLabel">
+                                <property name="xalign">0</property>
+                                <binding name="label">
+                                  <lookup name="value" type="GswServerDetailsEntry">
+                                    <lookup name="item">GtkListItem</lookup>
+                                  </lookup>
+                                </binding>
+                              </object>
+                            </property>
+                          </template>
+                        </interface>
+                      ]]>
+                    </property>
+                  </object>
+                </property>
+              </object>
+            </child>
+
+          </object>
+        </child>
+
+      </object>
+    </child>
+  </template>
+</interface>
