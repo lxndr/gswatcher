@@ -16,6 +16,7 @@ dependencies = [
   dependency('gee-0.8', version : '>=0.20.4'),
   dependency('duktape', version : '>=2.6.0'),
   dependency('geoip', version : '>=1.6.12'),
+  meson.get_compiler('c').find_library('m', required: false),
 ]
 
 core_sources = files(
