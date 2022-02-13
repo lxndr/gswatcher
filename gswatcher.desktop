@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Game Server Watcher
+Comment=A simple game server browser and an administrative tool
+Exec=gswatcher
+Icon=gswatcher
+Terminal=false
+Type=Application
+Categories=Network;
+StartupNotify=true
