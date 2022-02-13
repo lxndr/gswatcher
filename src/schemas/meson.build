@@ -4,7 +4,6 @@ settings_schemas = [
   'org.lxndr.gswatcher.Buddy.gschema.xml',
   'org.lxndr.gswatcher.Preferences.gschema.xml',
   'org.lxndr.gswatcher.Server.gschema.xml',
-  'org.lxndr.gswatcher.Window.gschema.xml',
 ]
 
 install_data(settings_schemas, install_dir: schemas_dir)

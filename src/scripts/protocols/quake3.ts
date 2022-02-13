@@ -28,7 +28,7 @@ const extractServerInfo = (inf: Info, plist: Player[]): ServerInfo => ({
   [InfoField.MAP]: String(inf.mapname),
   [InfoField.NUM_PLAYERS]: plist.length,
   [InfoField.MAX_PLAYERS]: Number(inf.sv_maxclients),
-  [InfoField.PRIVATE]: Boolean(inf.g_needpass),
+  [InfoField.PRIVATE]: Boolean(Number(inf.g_needpass)),
 })
 
 const parsePlayer = (str: string): Player => {

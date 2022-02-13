@@ -615,7 +615,7 @@ var extractServerInfo = function (inf, plist) {
         _a["map" /* MAP */] = String(inf.mapname),
         _a["num-players" /* NUM_PLAYERS */] = plist.length,
         _a["max-players" /* MAX_PLAYERS */] = Number(inf.sv_maxclients),
-        _a["private" /* PRIVATE */] = Boolean(inf.g_needpass),
+        _a["private" /* PRIVATE */] = Boolean(Number(inf.g_needpass)),
         _a);
 };
 var parsePlayer = function (str) {

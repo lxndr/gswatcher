@@ -1669,23 +1669,6 @@ var query = function () {
     gotPlayerList = null;
     nextQuery();
 };
-var getGameMode = function (inf) {
-    var _a;
-    switch (inf.appid) {
-        case 2400: { // The Ship
-            var modes = [
-                'Hunt',
-                'Elimination',
-                'Duel',
-                'Deathmatch',
-                'VIP Team',
-                'Team Elimination',
-            ];
-            return modes[(_a = inf.theShip) === null || _a === void 0 ? void 0 : _a.mode] || null;
-        }
-    }
-    return null;
-};
 var readServerInfoGold = function (r) {
     var inf = {
         address: r.zstring(),
@@ -1768,7 +1751,6 @@ var normalizeServerInfo = function (inf) {
     var _a;
     return (_a = {},
         _a["game-name" /* GAME_NAME */] = inf.game,
-        _a["game-mode" /* GAME_MODE */] = getGameMode(inf) || undefined,
         _a["game-version" /* GAME_VERSION */] = inf.version,
         _a["server-name" /* SERVER_NAME */] = inf.name,
         _a["server-type" /* SERVER_TYPE */] = inf.serverType,

@@ -160,25 +160,6 @@ export const query = () => {
   nextQuery ()
 }
 
-const getGameMode = (inf: SourceServerDetails): (string | null) => {
-  switch (inf.appid) {
-    case 2400: { // The Ship
-      const modes = [
-        'Hunt',
-        'Elimination',
-        'Duel',
-        'Deathmatch',
-        'VIP Team',
-        'Team Elimination',
-      ]
-
-      return modes[inf.theShip?.mode!] || null
-    }
-  }
-
-  return null
-}
-
 const readServerInfoGold = (r: DataReader) => {
   const inf: SourceServerDetails = {
     address: r.zstring(),
@@ -273,7 +254,6 @@ const readServerInfo = (r: DataReader) => {
 
 const normalizeServerInfo = (inf: SourceServerDetails): ServerInfo => ({
   [InfoField.GAME_NAME]: inf.game,
-  [InfoField.GAME_MODE]: getGameMode(inf) || undefined,
   [InfoField.GAME_VERSION]: inf.version,
   [InfoField.SERVER_NAME]: inf.name,
   [InfoField.SERVER_TYPE]: inf.serverType,
