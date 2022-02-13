@@ -1,0 +1,6 @@
+test:
+  image: archlinux:latest
+  script:
+    - pacman -Syu --noconfirm --noprogressbar base-devel meson ninja vala libgee gtk4 libadwaita duktape geoip
+    - meson setup --backend=ninja --buildtype=release builddir
+    - meson compile -C builddir
