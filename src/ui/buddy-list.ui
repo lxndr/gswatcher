@@ -1,140 +1,181 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.16.1 -->
+
 <interface>
-  <requires lib="gtk+" version="3.10"/>
-  <object class="GtkListStore" id="liststore">
-    <columns>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-      <!-- column-name last-seen -->
-      <column type="gchararray"/>
-      <!-- column-name place -->
-      <column type="gchararray"/>
-      <!-- column-name notify -->
-      <column type="gboolean"/>
-    </columns>
+  <requires lib="gtk+" version="4.0"/>
+
+  <object class="GtkStringSorter" id="name_column_sorter">
+    <property name="ignore_case">true</property>
+    <property name="expression">
+      <lookup type="GswBuddy" name="name" />
+    </property>
   </object>
-  <object class="GtkBox" id="root">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="orientation">vertical</property>
-    <property name="spacing">4</property>
+
+  <object class="GtkSortListModel" id="sort_model">
+    <binding name="model">
+      <lookup type="GswUiBuddyList" name="buddy_list">
+        GswUiBuddyList
+      </lookup>
+    </binding>
+    <binding name="sorter">
+      <lookup type="GtkColumnView" name="sorter">view</lookup>
+    </binding>
+  </object>
+
+  <object class="GtkFlattenListModel" id="combined_list">
+    <property name="model">
+      <object class="GListStore" id="combined_list_store" />
+    </property>
+  </object>
+
+  <object class="GtkSingleSelection" id="selection">
+    <property name="model">combined_list</property>
+    <property name="autoselect">1</property>
+    <property name="can-unselect">0</property>
+  </object>
+
+  <template class="GswUiBuddyList" parent="GtkWidget">
+    <property name="hexpand">true</property>
+    <property name="vexpand">true</property>
+
     <child>
-      <object class="GtkEntry" id="nickname">
-        <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="secondary_icon_name">list-add</property>
-        <property name="secondary_icon_sensitive">False</property>
-        <signal name="activate" handler="gui_blist_name_activated" swapped="no"/>
-        <signal name="changed" handler="gui_blist_name_changed" swapped="no"/>
-        <signal name="icon-release" handler="gui_blist_name_icon_clicked" swapped="no"/>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">0</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkScrolledWindow" id="scrolledwindow1">
-        <property name="visible">True</property>
-        <property name="can_focus">True</property>
+      <object class="GtkScrolledWindow">
         <property name="hscrollbar_policy">never</property>
-        <property name="shadow_type">in</property>
+        <property name="hexpand">true</property>
+        <property name="hexpand-set">true</property>
+
         <child>
-          <object class="GtkTreeView" id="listview">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="model">liststore</property>
-            <signal name="button-release-event" handler="gui_blist_clicked" swapped="no"/>
-            <child internal-child="selection">
-              <object class="GtkTreeSelection" id="treeview-selection1">
-                <property name="mode">multiple</property>
-                <signal name="changed" handler="gui_blist_selection_changed" swapped="no"/>
-              </object>
-            </child>
+          <object class="GtkColumnView" id="view">
+            <property name="model">selection</property>
+            <property name="show-column-separators">1</property>
+
             <child>
-              <object class="GtkTreeViewColumn" id="treeviewcolumn1">
-                <property name="title" translatable="yes" context="Player">Name</property>
-                <property name="expand">True</property>
-                <property name="clickable">True</property>
-                <property name="sort_column_id">0</property>
-                <child>
-                  <object class="GtkCellRendererText" id="cellrenderertext1">
-                    <property name="yalign">0</property>
+              <object class="GtkColumnViewColumn" id="name_column">
+                <property name="title">Name</property>
+                <property name="sorter">name_column_sorter</property>
+                <property name="expand">1</property>
+                <property name="factory">
+                  <object class="GtkBuilderListItemFactory">
+                    <property name="bytes">
+                      <![CDATA[
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <interface>
+                          <template class="GtkListItem">
+                            <property name="child">
+                              <object class="GtkBox">
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="xalign">0</property>
+                                    <property name="hexpand">true</property>
+                                    <binding name="visible">
+                                      <closure type="gboolean" function="invert_boolean">
+                                        <closure type="gboolean" function="is_editor_row">
+                                          <lookup name="item">GtkListItem</lookup>
+                                        </closure>
+                                      </closure>
+                                    </binding>
+                                    <binding name="label">
+                                      <lookup type="GswBuddy" name="name">
+                                        <lookup name="item">GtkListItem</lookup>
+                                      </lookup>
+                                    </binding>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkEditableLabel">
+                                    <style>
+                                      <class name="new-entry" />
+                                    </style>
+                                    <property name="hexpand">true</property>
+                                    <property name="text">Click here to add new buddy</property>
+                                    <binding name="visible">
+                                      <closure type="gboolean" function="is_editor_row">
+                                        <lookup name="item">GtkListItem</lookup>
+                                      </closure>
+                                    </binding>
+                                    <signal name="notify::editing" handler="handle_editing_change" />
+                                  </object>
+                                </child>
+                              </object>
+                            </property>
+                          </template>
+                        </interface>
+                      ]]>
+                    </property>
                   </object>
-                  <attributes>
-                    <attribute name="text">0</attribute>
-                  </attributes>
-                </child>
+                </property>
               </object>
             </child>
+
             <child>
-              <object class="GtkTreeViewColumn" id="treeviewcolumn2">
-                <property name="title" translatable="yes">Last seen</property>
-                <property name="expand">True</property>
-                <property name="clickable">True</property>
-                <property name="sort_column_id">1</property>
-                <child>
-                  <object class="GtkCellRendererText" id="cellrenderertext2">
-                    <property name="yalign">0</property>
+              <object class="GtkColumnViewColumn" id="notifications_column">
+                <property name="title">Notify</property>
+                <property name="factory">
+                  <object class="GtkBuilderListItemFactory">
+                    <property name="bytes">
+                      <![CDATA[
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <interface>
+                          <template class="GtkListItem">
+                            <property name="child">
+                              <object class="GtkCheckButton">
+                                <property name="halign">GTK_ALIGN_CENTER</property>
+                                <binding name="active">
+                                  <lookup type="GswBuddy" name="notifications">
+                                    <lookup name="item">GtkListItem</lookup>
+                                  </lookup>
+                                </binding>
+                                <binding name="visible">
+                                  <closure type="gboolean" function="invert_boolean">
+                                    <closure type="gboolean" function="is_editor_row">
+                                      <lookup name="item">GtkListItem</lookup>
+                                    </closure>
+                                  </closure>
+                                </binding>
+                                <signal name="notify::active" handler="handle_notifications_change" />
+                              </object>
+                            </property>
+                          </template>
+                        </interface>
+                      ]]>
+                    </property>
                   </object>
-                  <attributes>
-                    <attribute name="markup">1</attribute>
-                  </attributes>
-                </child>
+                </property>
               </object>
             </child>
+
             <child>
-              <object class="GtkTreeViewColumn" id="treeviewcolumn3">
-                <property name="title" translatable="yes">Place</property>
-                <property name="expand">True</property>
-                <property name="clickable">True</property>
-                <property name="sort_column_id">2</property>
-                <child>
-                  <object class="GtkCellRendererText" id="cellrenderertext3">
-                    <property name="yalign">0</property>
+              <object class="GtkColumnViewColumn" id="address_column">
+                <property name="title">Address</property>
+                <property name="factory">
+                  <object class="GtkBuilderListItemFactory">
+                    <property name="bytes">
+                      <![CDATA[
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <interface>
+                          <template class="GtkListItem">
+                            <property name="child">
+                              <object class="GtkLabel">
+                                <property name="xalign">0</property>
+                                <binding name="label">
+                                  <lookup name="lastaddr" type="GswBuddy">
+                                    <lookup name="item">GtkListItem</lookup>
+                                  </lookup>
+                                </binding>
+                              </object>
+                            </property>
+                          </template>
+                        </interface>
+                      ]]>
+                    </property>
                   </object>
-                  <attributes>
-                    <attribute name="markup">2</attribute>
-                  </attributes>
-                </child>
+                </property>
               </object>
             </child>
-            <child>
-              <object class="GtkTreeViewColumn" id="treeviewcolumn4">
-                <property name="title" translatable="yes">Notify</property>
-                <property name="clickable">True</property>
-                <property name="sort_column_id">3</property>
-                <child>
-                  <object class="GtkCellRendererToggle" id="cellrenderertoggle1">
-                    <property name="yalign">0</property>
-                    <signal name="toggled" handler="gui_blist_notify_toggled" swapped="no"/>
-                  </object>
-                  <attributes>
-                    <attribute name="active">3</attribute>
-                  </attributes>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkTreeViewColumn" id="treeviewcolumn5">
-                <child>
-                  <object class="GtkCellRendererPixbuf" id="cellrendererpixbuf1">
-                    <property name="yalign">0</property>
-                    <property name="icon_name">list-remove</property>
-                  </object>
-                </child>
-              </object>
-            </child>
+
           </object>
         </child>
+
       </object>
-      <packing>
-        <property name="expand">True</property>
-        <property name="fill">True</property>
-        <property name="position">1</property>
-      </packing>
     </child>
-  </object>
+  </template>
 </interface>

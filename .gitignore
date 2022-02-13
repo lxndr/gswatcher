@@ -1,1 +1,3 @@
-build
+/builddir
+/obsolete
+/tmp

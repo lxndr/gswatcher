@@ -1,0 +1,8 @@
+<schemalist>
+  <schema id="org.lxndr.gswatcher.Buddy">
+    <key name="notifications" type="b">
+      <default>true</default>
+      <summary>Notify if buddy is in game</summary>
+    </key>
+  </schema>
+</schemalist>

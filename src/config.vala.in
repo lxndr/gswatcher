@@ -1,0 +1,8 @@
+namespace Gsw.Config {
+  public const string APPID = @GSW_APPID@;
+  public const string APPNAME = @GSW_APPNAME@;
+  public const string VERSION = @GSW_VERSION@;
+  public const string HOMEPAGE = @GSW_HOMEPAGE@;
+  public const string LOG_DOMAIN = @GSW_LOG_DOMAIN@;
+  public const string GETTEXT_PACKAGE = @GETTEXT_PACKAGE@;
+}

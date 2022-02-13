@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<interface>
+  <requires lib="gtk+" version="4.0"/>
+
+  <object class="GtkStringSorter" id="name_column_sorter">
+    <property name="ignore_case">1</property>
+    <property name="expression">
+      <closure type="gchararray" function="format_server_name">
+        <lookup type="GswServerInfo" name="server-name">
+          <lookup type="GswQuerier" name="sinfo">
+            <lookup type="GswClient" name="querier" />
+          </lookup>
+        </lookup>
+        <lookup type="GswClient" name="server" />
+      </closure>
+    </property>
+  </object>
+
+  <object class="GtkStringSorter" id="game_column_sorter">
+    <property name="ignore_case">1</property>
+    <property name="expression">
+      <closure type="gchararray" function="format_game_name">
+        <lookup type="GswServerInfo" name="game-name">
+          <lookup type="GswQuerier" name="sinfo">
+            <lookup type="GswClient" name="querier" />
+          </lookup>
+        </lookup>
+        <lookup type="GswServerInfo" name="game-mode">
+          <lookup type="GswQuerier" name="sinfo">
+            <lookup type="GswClient" name="querier" />
+          </lookup>
+        </lookup>
+      </closure>
+    </property>
+  </object>
+
+  <object class="GtkStringSorter" id="map_column_sorter">
+    <property name="ignore_case">1</property>
+    <property name="expression">
+      <lookup type="GswServerInfo" name="map">
+        <lookup type="GswQuerier" name="sinfo">
+          <lookup type="GswClient" name="querier" />
+        </lookup>
+      </lookup>
+    </property>
+  </object>
+
+  <object class="GtkNumericSorter" id="players_column_sorter">
+    <property name="expression">
+      <lookup type="GswServerInfo" name="num-players">
+        <lookup type="GswQuerier" name="sinfo">
+          <lookup type="GswClient" name="querier" />
+        </lookup>
+      </lookup>
+    </property>
+  </object>
+
+  <object class="GtkSortListModel" id="sort_model">
+    <binding name="model">
+      <lookup type="GswUiServerList" name="client_list">
+        GswUiServerList
+      </lookup>
+    </binding>
+    <binding name="sorter">
+      <lookup type="GtkColumnView" name="sorter">view</lookup>
+    </binding>
+  </object>
+
+  <object class="GtkFlattenListModel" id="combined_list">
+    <property name="model">
+      <object class="GListStore" id="combined_list_store" />
+    </property>
+  </object>
+
+  <object class="GtkSingleSelection" id="selection">
+    <property name="model">combined_list</property>
+    <property name="autoselect">1</property>
+    <property name="can-unselect">0</property>
+  </object>
+
+  <template class="GswUiServerList" parent="GtkWidget">
+    <property name="hexpand">true</property>
+    <property name="vexpand">true</property>
+    <binding name="selected">
+      <lookup type="GtkSingleSelection" name="selected_item">
+        selection
+      </lookup>
+    </binding>
+
+    <child>
+      <object class="GtkScrolledWindow">
+        <property name="hscrollbar_policy">never</property>
+        <property name="hexpand">true</property>
+        <property name="hexpand-set">true</property>
+
+        <child>
+          <object class="GtkColumnView" id="view">
+            <property name="model">selection</property>
+            <property name="reorderable">false</property>
+
+            <child>
+              <object class="GtkColumnViewColumn" id="name_column">
+                <property name="title">Name</property>
+                <property name="sorter">name_column_sorter</property>
+                <property name="expand">true</property>
+                <property name="factory">
+                  <object class="GtkBuilderListItemFactory">
+                    <property name="bytes">
+                      <![CDATA[
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <interface>
+                          <template class="GtkListItem">
+                            <property name="child">
+                              <object class="GtkBox">
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="xalign">0</property>
+                                    <property name="hexpand">true</property>
+                                    <binding name="visible">
+                                      <closure type="gboolean" function="invert_boolean">
+                                        <closure type="gboolean" function="is_editor_row">
+                                          <lookup name="item">GtkListItem</lookup>
+                                        </closure>
+                                      </closure>
+                                    </binding>
+                                    <binding name="label">
+                                      <closure type="gchararray" function="format_server_name">
+                                        <lookup type="GswServerInfo" name="server_name">
+                                          <lookup type="GswQuerier" name="sinfo">
+                                            <lookup type="GswClient" name="querier">
+                                              <lookup name="item">GtkListItem</lookup>
+                                            </lookup>
+                                          </lookup>
+                                        </lookup>
+                                        <lookup type="GswServer" name="address">
+                                          <lookup type="GswClient" name="server">
+                                            <lookup name="item">GtkListItem</lookup>
+                                          </lookup>
+                                        </lookup>
+                                      </closure>
+                                    </binding>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkEditableLabel">
+                                    <style>
+                                      <class name="new-entry" />
+                                    </style>
+                                    <property name="hexpand">true</property>
+                                    <property name="text">Click here to add new server</property>
+                                    <binding name="visible">
+                                      <closure type="gboolean" function="is_editor_row">
+                                        <lookup name="item">GtkListItem</lookup>
+                                      </closure>
+                                    </binding>
+                                    <signal name="notify::editing" handler="handle_editing_change"/>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkImage">
+                                    <property name="margin-start">6</property>
+                                    <property name="icon-size">GTK_ICON_SIZE_NORMAL</property>
+                                    <binding name="file">
+                                      <closure type="gchararray" function="format_country_icon">
+                                        <lookup type="GswNetTransport" name="saddr">
+                                          <lookup type="GswQuerier" name="transport">
+                                            <lookup type="GswClient" name="querier">
+                                              <lookup name="item">GtkListItem</lookup>
+                                            </lookup>
+                                          </lookup>
+                                        </lookup>
+                                      </closure>
+                                    </binding>
+                                  </object>
+                                </child>
+                              </object>
+                            </property>
+                          </template>
+                        </interface>                      
+                      ]]>
+                    </property>
+                  </object>
+                </property>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkColumnViewColumn" id="game_column">
+                <property name="title">Game</property>
+                <property name="sorter">game_column_sorter</property>
+                <property name="factory">
+                  <object class="GtkBuilderListItemFactory">
+                    <property name="bytes">
+                      <![CDATA[
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <interface>
+                          <template class="GtkListItem">
+                            <property name="child">
+                              <object class="GtkBox">
+                                <child>
+                                  <object class="GtkImage">
+                                    <property name="icon-size">GTK_ICON_SIZE_NORMAL</property>
+                                    <property name="margin-end">6</property>
+                                    <binding name="file">
+                                      <closure type="gchararray" function="format_game_icon">
+                                        <lookup type="GswServerInfo" name="game-id">
+                                          <lookup type="GswQuerier" name="sinfo">
+                                            <lookup type="GswClient" name="querier">
+                                              <lookup name="item">GtkListItem</lookup>
+                                            </lookup>
+                                          </lookup>
+                                        </lookup>
+                                      </closure>
+                                    </binding>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="xalign">0</property>
+                                    <binding name="label">
+                                      <closure type="gchararray" function="format_game_name">
+                                        <lookup type="GswServerInfo" name="game-name">
+                                          <lookup type="GswQuerier" name="sinfo">
+                                            <lookup type="GswClient" name="querier">
+                                              <lookup name="item">GtkListItem</lookup>
+                                            </lookup>
+                                          </lookup>
+                                        </lookup>
+                                        <lookup type="GswServerInfo" name="game-mode">
+                                          <lookup type="GswQuerier" name="sinfo">
+                                            <lookup type="GswClient" name="querier">
+                                              <lookup name="item">GtkListItem</lookup>
+                                            </lookup>
+                                          </lookup>
+                                        </lookup>
+                                      </closure>
+                                    </binding>
+                                  </object>
+                                </child>
+                              </object>
+                            </property>
+                          </template>
+                        </interface>                      
+                      ]]>
+                    </property>
+                  </object>
+                </property>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkColumnViewColumn" id="map_column">
+                <property name="title">Map</property>
+                <property name="sorter">map_column_sorter</property>
+                <property name="factory">
+                  <object class="GtkBuilderListItemFactory">
+                    <property name="bytes">
+                      <![CDATA[
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <interface>
+                          <template class="GtkListItem">
+                            <property name="child">
+                              <object class="GtkLabel">
+                                <property name="xalign">0</property>
+                                <binding name="label">
+                                  <lookup type="GswServerInfo" name="map">
+                                    <lookup type="GswQuerier" name="sinfo">
+                                      <lookup type="GswClient" name="querier">
+                                        <lookup name="item">GtkListItem</lookup>
+                                      </lookup>
+                                    </lookup>
+                                  </lookup>
+                                </binding>
+                              </object>
+                            </property>
+                          </template>
+                        </interface>                      
+                      ]]>
+                    </property>
+                  </object>
+                </property>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkColumnViewColumn" id="players_column">
+                <property name="title">Players</property>
+                <property name="sorter">players_column_sorter</property>
+                <property name="factory">
+                  <object class="GtkBuilderListItemFactory">
+                    <property name="bytes">
+                      <![CDATA[
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <interface>
+                          <template class="GtkListItem">
+                            <property name="child">
+                              <object class="GtkLabel">
+                                <property name="name">players_cell</property>
+                                <property name="xalign">0</property>
+                                <binding name="label">
+                                  <closure type="gchararray" function="format_players">
+                                    <lookup type="GswServerInfo" name="num-players">
+                                      <lookup type="GswQuerier" name="sinfo">
+                                        <lookup type="GswClient" name="querier">
+                                          <lookup name="item">GtkListItem</lookup>
+                                        </lookup>
+                                      </lookup>
+                                    </lookup>
+                                    <lookup type="GswServerInfo" name="max-players">
+                                      <lookup type="GswQuerier" name="sinfo">
+                                        <lookup type="GswClient" name="querier">
+                                          <lookup name="item">GtkListItem</lookup>
+                                        </lookup>
+                                      </lookup>
+                                    </lookup>
+                                  </closure>
+                                </binding>
+                                <binding name="css-classes">
+                                  <closure type="GStrv" function="format_players_css_classes">
+                                    <lookup type="GswServerInfo" name="num-players">
+                                      <lookup type="GswQuerier" name="sinfo">
+                                        <lookup type="GswClient" name="querier">
+                                          <lookup name="item">GtkListItem</lookup>
+                                        </lookup>
+                                      </lookup>
+                                    </lookup>
+                                    <lookup type="GswServerInfo" name="max-players">
+                                      <lookup type="GswQuerier" name="sinfo">
+                                        <lookup type="GswClient" name="querier">
+                                          <lookup name="item">GtkListItem</lookup>
+                                        </lookup>
+                                      </lookup>
+                                    </lookup>
+                                  </closure>
+                                </binding>
+                              </object>
+                            </property>
+                          </template>
+                        </interface>
+                      ]]>
+                    </property>
+                  </object>
+                </property>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkColumnViewColumn">
+                <property name="title">Ping</property>
+                <property name="factory">
+                  <object class="GtkBuilderListItemFactory">
+                    <property name="bytes">
+                      <![CDATA[
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <interface>
+                          <template class="GtkListItem">
+                            <property name="child">
+                              <object class="GtkLabel">
+                                <property name="xalign">1</property>
+                                <binding name="label">
+                                  <closure type="gchararray" function="format_ping">
+                                    <lookup type="GswQuerier" name="ping">
+                                      <lookup type="GswClient" name="querier">
+                                        <lookup name="item">GtkListItem</lookup>
+                                      </lookup>
+                                    </lookup>
+                                    <lookup type="GswQuerier" name="error">
+                                      <lookup type="GswClient" name="querier">
+                                        <lookup name="item">GtkListItem</lookup>
+                                      </lookup>
+                                    </lookup>
+                                  </closure>
+                                </binding>
+                                <binding name="css_classes">
+                                  <closure type="GStrv" function="format_ping_css_classes">
+                                    <lookup type="GswQuerier" name="error">
+                                      <lookup type="GswClient" name="querier">
+                                        <lookup name="item">GtkListItem</lookup>
+                                      </lookup>
+                                    </lookup>
+                                  </closure>
+                                </binding>
+                              </object>
+                            </property>
+                          </template>
+                        </interface>
+                      ]]>
+                    </property>
+                  </object>
+                </property>
+              </object>
+            </child>
+
+          </object>
+        </child>
+
+      </object>
+    </child>
+
+  </template>
+</interface>
