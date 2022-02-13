@@ -66,7 +66,9 @@ class PersistentBuddyList : BuddyList {
   private void add_name (string name) throws Error {
     // TODO: is there a better way to remove name besides directly editing ini file?
     var kf = new KeyFile ();
-    kf.load_from_file (config_file, KeyFileFlags.NONE);
+
+    if (FileUtils.test (config_file, FileTest.EXISTS))
+      kf.load_from_file (config_file, KeyFileFlags.NONE);
 
     if (!kf.has_group (name))
       kf.set_boolean (name, "notifications", true);
