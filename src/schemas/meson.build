@@ -7,3 +7,4 @@ settings_schemas = [
 ]
 
 install_data(settings_schemas, install_dir: schemas_dir)
+gnome.compile_schemas()
