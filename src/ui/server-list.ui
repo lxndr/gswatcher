@@ -126,11 +126,9 @@
                                     </binding>
                                     <binding name="label">
                                       <closure type="gchararray" function="format_server_name">
-                                        <lookup type="GswServerInfo" name="server_name">
-                                          <lookup type="GswQuerier" name="sinfo">
-                                            <lookup type="GswClient" name="querier">
-                                              <lookup name="item">GtkListItem</lookup>
-                                            </lookup>
+                                        <lookup type="GswServer" name="server_name">
+                                          <lookup type="GswClient" name="server">
+                                            <lookup name="item">GtkListItem</lookup>
                                           </lookup>
                                         </lookup>
                                         <lookup type="GswServer" name="address">
