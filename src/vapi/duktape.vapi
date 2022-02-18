@@ -119,7 +119,7 @@ public class Duktape {
   [CCode (cname = "duk_create_heap_default")]
   public Duktape.default ();
 
-  public void config_buffer (Index idx, uint8[] data);
+  public void config_buffer (Index idx, [CCode (array_length_type = "duk_size_t")] uint8[] data);
   public void dup (Index idx);
   public void enum (Index obj, Enum flags);
   public Bool get_boolean (Index idx);
