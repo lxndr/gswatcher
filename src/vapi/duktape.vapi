@@ -161,6 +161,7 @@ public class Duktape {
   public Bool put_global_string (string key);
   public Bool put_prop_string (Index obj_idx, string key);
   public void remove (Index idx);
+  [CCode (array_length_type = "duk_size_t")]
   public unowned uint8[] require_buffer_data (Index idx);
   public void require_object (Index idx);
   public unowned void* require_pointer (Index idx);
