@@ -57,9 +57,10 @@ class Application : Adw.Application {
       class_type = typeof (TcpTransport)
     });
 
-    // queriers
+    // servers
     server_list = new PersistentServerList ();
 
+    // protocols
     register_protocols.begin ((obj, res) => {
       register_protocols.end (res);
       server_list.reload ();
