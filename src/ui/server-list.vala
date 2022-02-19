@@ -117,7 +117,7 @@ class ServerList : Widget {
     if (game_name != null)
       name += game_name;
 
-    if (game_mode != null)
+    if (game_mode != null && game_mode.length > 0)
       name += @" ($(game_mode))";
 
     return name;
