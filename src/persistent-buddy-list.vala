@@ -24,6 +24,26 @@ class PersistentBuddyList : BuddyList {
     var path = root_path + buddy.name + "/";
     var buddy_settings = new Settings.with_backend_and_path ("org.lxndr.gswatcher.Buddy", settings_backend, path);
     buddy_settings.bind ("notifications", buddy, "notifications", SettingsBindFlags.DEFAULT);
+    buddy_settings.bind ("lastaddr", buddy, "lastaddr", SettingsBindFlags.DEFAULT);
+
+    buddy_settings.bind_with_mapping (
+      "lastseen",
+      buddy,
+      "lastseen",
+      SettingsBindFlags.DEFAULT,
+      (value, variant, user_data) => {
+        var str = variant.get_string ();
+        var time = new DateTime.from_iso8601 (str, null);
+        value.set_boxed (time);
+        return true;
+      },
+      (value, expected_type, user_data) => {
+        var time = (DateTime) value.get_boxed ();
+        return new Variant.string (time.format_iso8601 ());
+      },
+      null,
+      null
+    );
 
     return buddy;
   }
