@@ -104,6 +104,11 @@ class BuddyList : Widget {
     var check = (Gtk.CheckButton) obj;
     buddy.notifications = check.active;
   }
+
+  [GtkCallback]
+  private string format_lastseen (DateTime? time) {
+    return time == null ? "" : time.format ("%x %X");
+  }
 }
 
 }

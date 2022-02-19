@@ -87,6 +87,7 @@ sources += ui_sources
 
 sources += files(
   'application.vala',
+  'buddy-watcher.vala',
   'persistent-buddy-list.vala',
   'persistent-server-list.vala',
   'utils.vala',

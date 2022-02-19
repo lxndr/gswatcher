@@ -11,11 +11,7 @@ public class Player : Gee.HashMap<string, string> {
 }
 
 public class PlayerList : Object, ListModel {
-  private Gee.List<Player> _list;
-
-  construct {
-    _list = new Gee.ArrayList<Player> ();
-  }
+  private Gee.List<Player> _list = new Gee.ArrayList<Player> ();
 
   public Object? get_item (uint position) {
     return _list.get ((int) position);
@@ -29,28 +25,37 @@ public class PlayerList : Object, ListModel {
     return _list.size;
   }
 
+  public uint size {
+    get {
+      return get_n_items ();
+    }
+  }
+
+  public new Player get (uint index) {
+    return (Player) get_item (index);
+  }
+
   public void apply (Gee.List<Player> players) {
     var old_size = _list.size;
     var new_size = players.size;
-    var min_size = int.min (old_size, new_size);
 
     if (old_size > new_size) {
-      while (_list.size > min_size)
-        _list.remove_at (min_size);
-      items_changed ((uint) (new_size - 1), (uint) (old_size - new_size), 0);
+      while (_list.size > new_size)
+        _list.remove_at (new_size);
+
+      items_changed (new_size, old_size - new_size, 0);
     }
 
-    for (var idx = 0; idx < min_size; idx++) {
+    for (var idx = 0; idx < _list.size; idx++) {
       _list[idx].set_all (players[idx]);
       _list[idx].change ();
     }
 
     if (new_size > old_size) {
-      for (var idx = min_size; idx < new_size; idx++) {
+      for (var idx = old_size; idx < new_size; idx++)
         _list.add (players[idx]);
-      }
 
-      items_changed (old_size - 1, 0, new_size - old_size);
+      items_changed (old_size, 0, new_size - old_size);
     }
   }
 }

@@ -15,6 +15,16 @@ public class BuddyList : Object, ListModel {
     return list.size;
   }
 
+  public uint size {
+    get {
+      return get_n_items ();
+    }
+  }
+
+  public new Buddy get (uint index) {
+    return (Buddy) get_item (index);
+  }
+
   public virtual Buddy add (string name) {
     var buddy = find_by_name (name);
 
