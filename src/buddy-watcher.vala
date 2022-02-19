@@ -1,0 +1,86 @@
+namespace Gsw {
+
+class BuddyWatcher : Object {
+  public ServerList client_list { get; construct; }
+  public BuddyList buddy_list { get; construct; }
+  public uint update_interval { get; construct; default = 5000; }
+  private uint update_timer;
+
+  public signal void online (Buddy buddy, Client client);
+
+  construct {
+    buddy_list.items_changed.connect ((pos, removed, added) => {
+      for (var idx = pos; idx < pos + added; idx++)
+        on_buddy_added (buddy_list[pos]);
+    });
+
+    update_timer = Timeout.add (update_interval, on_timer_tick);
+  }
+
+  public BuddyWatcher (ServerList client_list, BuddyList buddy_list) {
+    Object (client_list : client_list, buddy_list : buddy_list);
+  }
+
+  ~BuddyWatcher () {
+    Source.remove (update_timer);
+  }
+
+  private void on_buddy_added (Buddy buddy) {
+    foreach (var client in client_list) {
+      if (client?.querier == null)
+        continue;
+
+      foreach (var player in client.querier.plist) {
+        if (player.has_key ("name") && player["name"] == buddy.name) {
+          on_maybe_new_online (buddy, client);
+        }
+      }
+    }
+  }
+
+  private bool on_timer_tick () {
+    foreach (var client in client_list) {
+      if (client?.querier == null)
+        continue;
+
+      foreach (var player in client.querier.plist) {
+        var player_name = get_player_name (player);
+
+        if (player_name == null)
+          continue;
+
+        foreach (var buddy in buddy_list) {
+          if (buddy.name == player_name) {
+            on_maybe_new_online (buddy, client);
+          }
+        }
+      }
+    }
+
+    return Source.CONTINUE;
+  }
+
+  private void on_maybe_new_online (Buddy buddy, Client client) {
+    var expires_at = buddy.lastseen == null
+      ? new DateTime.now_local ()
+      : buddy.lastseen.add (TimeSpan.MILLISECOND * update_interval * 2);
+
+    buddy.lastaddr = client.server.address;
+    buddy.lastseen = new DateTime.now_local ();
+
+    if (buddy.lastseen.compare (expires_at) >= 0)
+      online (buddy, client);
+  }
+
+  private string? get_player_name (Player player) {
+    if (player.has_key ("name"))
+      return player["name"];
+
+    if (player.has_key ("player"))
+      return player["player"];
+
+    return null;
+  }
+}
+
+}

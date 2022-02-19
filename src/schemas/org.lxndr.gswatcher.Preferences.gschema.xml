@@ -1,3 +1,5 @@
+<?xml-model href="/usr/share/glib-2.0/schemas/gschema.dtd"?>
+
 <schemalist>
   <schema id="org.lxndr.gswatcher.Preferences" path="/org/lxndr/gswatcher/preferences/">
     <key name="query-interval" type="u">

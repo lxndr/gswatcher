@@ -7,6 +7,8 @@ class Application : Adw.Application {
   private QuerierManager querier_manager = QuerierManager.get_instance ();
   private PersistentServerList server_list;
   private BuddyList buddy_list;
+  private BuddyWatcher buddy_watcher;
+  private Settings preferences;
   private Gtk.Window main_window;
 
   construct {
@@ -68,19 +70,20 @@ class Application : Adw.Application {
 
     // buddies
     buddy_list = new PersistentBuddyList ();
+    buddy_watcher = new BuddyWatcher (server_list, buddy_list);
+    buddy_watcher.online.connect (on_buddy_online);
 
     // settings
     var settings_file = Path.build_filename (Environment.get_user_config_dir (), "gswatcher", "preferences.ini");
     var settings_backend = SettingsBackend.keyfile_settings_backend_new (settings_file, "/org/lxndr/gswatcher/", null);
-    var preferences = new Settings.with_backend ("org.lxndr.gswatcher.Preferences", settings_backend);
+    preferences = new Settings.with_backend ("org.lxndr.gswatcher.Preferences", settings_backend);
     preferences.bind ("local-udp-port", udp_transport_manager, "local-port", SettingsBindFlags.DEFAULT);
     preferences.bind ("query-interval", querier_manager, "update-interval", SettingsBindFlags.DEFAULT);
 
     // app actions
     ActionEntry[] action_entries = {
       { "about", activate_about },
-      { "pause", activate_pause, null, "false" },
-      { "show-notification", show_notification }
+      { "pause", activate_pause, null, "false" }
     };
 
     add_action_entries (action_entries, this);
@@ -96,12 +99,21 @@ class Application : Adw.Application {
     querier_manager.paused = paused;
   }
 
-  private void show_notification (SimpleAction action, Variant? parameter) {
-    string title, body;
-    parameter.get_child (0, "s", out title);
-    parameter.get_child (1, "s", out body);
+  private void on_buddy_online (Buddy buddy, Client client) {
+    if (!(preferences.get_boolean ("enable-notifications") && buddy.notifications))
+      return;
+
+    var title = _("Player %s has connected").printf (buddy.name);
+
+    var text = _("Address: %s\nServer: %s\nPlayers: %d / %d").printf (
+      client.server.address,
+      client.server.server_name,
+      client.querier.sinfo.num_players,
+      client.querier.sinfo.max_players
+    );
+
     var n = new Notification (title);
-    n.set_body (body);
+    n.set_body (text);
     send_notification (null, n);
   }
 
