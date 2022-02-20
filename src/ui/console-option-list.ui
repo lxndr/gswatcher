@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<interface>
+  <requires lib="gtk+" version="4.0"/>
+
+  <template class="GswUiConsoleOptionList" parent="GtkWidget">
+    <child>
+      <object class="GtkGrid">
+        <child>
+          <object class="GtkLabel">
+            <layout>
+              <property name="column">0</property>
+              <property name="row">0</property>
+            </layout>
+            <property name="xalign">0</property>
+            <property name="label" translatable="yes">Port:</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkSpinButton">
+            <layout>
+              <property name="column">1</property>
+              <property name="row">0</property>
+            </layout>
+            <property name="numeric">true</property>
+            <property name="adjustment">
+              <object class="GtkAdjustment" id="port_entry">
+                <property name="step-increment">1</property>
+                <property name="lower">1024</property>
+                <property name="upper">49151</property>
+              </object>
+            </property>
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkLabel">
+            <layout>
+              <property name="column">0</property>
+              <property name="row">1</property>
+            </layout>
+            <property name="xalign">0</property>
+            <property name="label" translatable="yes">Password:</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkEntry" id="password_entry">
+            <layout>
+              <property name="column">1</property>
+              <property name="row">1</property>
+            </layout>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

@@ -1,17 +1,11 @@
 export {}
 
 declare global {
-  interface ProtocolOption {
-    type: 'password'
-    label: string
-  }
-
   interface ProtocolInfo {
     id: string
     name: string
     feature: 'query' | 'console'
     transport: 'udp' | 'tcp'
-    options?: Record<string, ProtocolOption>
   }
 
   interface Info {

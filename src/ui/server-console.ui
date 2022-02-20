@@ -24,15 +24,11 @@
             <property name="vexpand">true</property>
 
             <child>
-              <object class="GtkTextView">
+              <object class="GtkTextView" id="text_view">
                 <property name="editable">false</property>
-                <property name="monospace">false</property>
-                <property name="buffer">
-                  <object class="GtkTextBuffer" id="log_buffer" />
-                </property>
+                <property name="monospace">true</property>
               </object>
             </child>
-
           </object>
         </child>
 
@@ -60,6 +56,17 @@
                 <property name="label">Options</property>
                 <property name="popover">
                   <object class="GtkPopover" id="options_popover">
+                    <property name="child">
+                      <object class="GswUiConsoleOptionList">
+                        <binding name="server">
+                          <lookup type="GswClient" name="server">
+                            <lookup type="GswUiServerConsole" name="client">
+                              GswUiServerConsole
+                            </lookup>
+                          </lookup>
+                        </binding>
+                      </object>
+                    </property>
                   </object>
                 </property>
               </object>

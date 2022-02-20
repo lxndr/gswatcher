@@ -3,7 +3,7 @@ export class DataWriter {
   public pos = 0
 
   constructor() {
-    this._buf = new Buffer(256)
+    this._buf = Buffer.alloc(256)
   }
 
   get buf() {

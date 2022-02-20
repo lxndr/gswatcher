@@ -71,8 +71,8 @@ core_sources += configure_file(
 ui_sources = files(
   'ui/about.vala',
   'ui/buddy-list.vala',
+  'ui/console-option-list.vala',
   'ui/main-window.vala',
-  'ui/option-list.vala',
   'ui/player-list.vala',
   'ui/preferences.vala',
   'ui/server-console.vala',

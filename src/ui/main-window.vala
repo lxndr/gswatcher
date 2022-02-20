@@ -70,11 +70,6 @@ class MainWindow : Adw.ApplicationWindow {
 
     dialog.show ();
   }
-
-  [GtkCallback]
-  private bool is_console_supported (Client? client) {
-    return client?.console_client != null;
-  }
 }
 
 }
