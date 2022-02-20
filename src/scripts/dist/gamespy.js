@@ -16,6 +16,10 @@ Buffer.alloc = function alloc(size, fill, encoding) {
     }
     return buf;
 };
+// @ts-expect-error
+Buffer.from = function from(str, encoding) {
+    return new Buffer(str, encoding);
+};
 
 
 /***/ })
@@ -617,7 +621,7 @@ var createPacket = function (values) {
         var key = _a[0], value = _a[1];
         return "\\".concat(key, "\\").concat(value);
     }).join('');
-    return new Buffer(str);
+    return Buffer.from(str);
 };
 var query = function () {
     return gsw.send(createPacket({

@@ -46,7 +46,7 @@ const responses = new GamespyResponseStore()
 
 const createPacket = (values: Record<string, string>) => {
   const str = Object.entries(values).map(([key, value]) => `\\${key}\\${value}`).join('')
-  return new Buffer(str)
+  return Buffer.from(str)
 }
 
 export const query = () =>

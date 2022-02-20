@@ -14,5 +14,14 @@
       <default>""</default>
       <summary>Game ID</summary>
     </key>
+    <key name="console-port" type="q">
+      <range min="1024" max="49151" />
+      <default>1024</default>
+      <summary>Remote console port</summary>
+    </key>
+    <key name="console-password" type="s">
+      <default>""</default>
+      <summary>Remote console password</summary>
+    </key>
   </schema>
 </schemalist>

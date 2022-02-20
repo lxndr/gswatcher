@@ -1369,7 +1369,7 @@ var DataReader = /** @class */ (function () {
 var DataWriter = /** @class */ (function () {
     function DataWriter() {
         this.pos = 0;
-        this._buf = new Buffer(256);
+        this._buf = Buffer.alloc(256);
     }
     Object.defineProperty(DataWriter.prototype, "buf", {
         get: function () {

@@ -101,6 +101,7 @@ class TcpTransport : NetTransport {
 
       if (OUT in cond) {
         if (socket.check_connect_result ()) {
+          connected ();
           setup_socket_source (IN);
           flush ();
           return Source.REMOVE;
@@ -109,9 +110,15 @@ class TcpTransport : NetTransport {
 
       if (IN in cond) {
         var size = socket.get_available_bytes ();
-        var data = new uint8[size];
-        socket.receive (data, cancellable);
-        data_received (data);
+
+        if (size > 0) {
+          var data = new uint8[size];
+          socket.receive (data, cancellable);
+          data_received (data);
+        } else {
+          close_socket ();
+          disconnected ();
+        }
       }
 
       return Source.CONTINUE;
