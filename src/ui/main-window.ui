@@ -132,17 +132,15 @@
                         <child>
                           <object class="GswUiServerConsole" id="server_console">
                             <binding name="visible">
-                              <closure type="gboolean" function="is_console_supported">
+                              <lookup type="GswClient" name="is_console_supported">
                                 <lookup type="GswUiServerList" name="selected">
                                   server_list_ctl
                                 </lookup>
-                              </closure>
+                              </lookup>
                             </binding>
                             <binding name="client">
-                              <lookup type="GswClient" name="console_client">
-                                <lookup type="GswUiServerList" name="selected">
-                                  server_list_ctl
-                                </lookup>
+                              <lookup type="GswUiServerList" name="selected">
+                                server_list_ctl
                               </lookup>
                             </binding>
                           </object>

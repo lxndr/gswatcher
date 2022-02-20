@@ -20,22 +20,11 @@ public enum ProtocolFeature {
   }
 }
 
-public enum ProtocolOptionType {
-  PASSWORD
-}
-
-public class ProtocolOption {
-  public string id;
-  public string label;
-  public ProtocolOptionType type;
-}
-
 public class ProtocolInfo {
   public ProtocolFeature feature;
   public string id;
   public string name;
   public string transport;
-  public Gee.List<ProtocolOption> options = new Gee.ArrayList<ProtocolOption> ();
 }
 
 public interface Protocol : Object, Initable {

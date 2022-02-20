@@ -33,10 +33,10 @@ public bool parse_address (string address, out string host, out uint16 gport, ou
   var p3 = match_info.fetch (3);
 
   host = p1;
-  gport = qport = (uint16) uint.parse (p2);
+  gport = qport = (uint16) uint.parse (p2, 10);
 
   if (p3 != null && p3.length > 0)
-    qport = (uint16) uint.parse (p3);
+    qport = (uint16) uint.parse (p3, 10);
 
   return true;
 }

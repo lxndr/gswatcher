@@ -7,3 +7,8 @@ Buffer.alloc = function alloc(size: number, fill?: string | Buffer | number, enc
 
   return buf
 }
+
+// @ts-expect-error
+Buffer.from = function from(str: string, encoding?: BufferEncoding): Buffer {
+  return new Buffer(str, encoding)
+}

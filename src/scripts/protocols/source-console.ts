@@ -9,12 +9,6 @@ export const info: ProtocolInfo = {
   name: 'Source Engine Remote Console',
   feature: 'console',
   transport: 'tcp',
-  options: {
-    password: {
-      type: 'password',
-      label: 'Password',
-    },
-  },
 }
 
 const enum PacketType {

@@ -72,15 +72,6 @@ public abstract class JsProtocol : Object, Initable, Protocol {
     info.transport = obj.require_string ("transport");
     info.feature = ProtocolFeature.parse_nick (obj.require_string ("feature"));
 
-    // TODO: read from protocol info
-    if (info.feature == CONSOLE) {
-      info.options.add (new ProtocolOption () {
-        id = "password",
-        label = "Password",
-        type = PASSWORD,
-      });
-    }
-
     return info;
   }
 

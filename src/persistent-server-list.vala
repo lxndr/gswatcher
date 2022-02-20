@@ -19,6 +19,8 @@ class PersistentServerList : ServerList {
     server_settings.bind ("protocol", client.server, "protocol", SettingsBindFlags.DEFAULT);
     server_settings.bind ("game-id", client.server, "game-id", SettingsBindFlags.DEFAULT);
     server_settings.bind ("server-name", client.server, "server-name", SettingsBindFlags.DEFAULT);
+    server_settings.bind ("console-port", client.server, "console-port", SettingsBindFlags.DEFAULT);
+    server_settings.bind ("console-password", client.server, "console-password", SettingsBindFlags.DEFAULT);
 
     return client;
   }
