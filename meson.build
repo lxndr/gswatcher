@@ -1,4 +1,4 @@
-project('gswatcher', 'c', 'vala', version : '1.6.0-alpha.4')
+project('gswatcher', 'c', 'vala', version : '1.6.0')
 
 data_dir = get_option('prefix') / get_option('datadir')
 gswatcher_dir = data_dir / meson.project_name()
