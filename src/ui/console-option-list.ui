@@ -6,6 +6,9 @@
   <template class="GswUiConsoleOptionList" parent="GtkWidget">
     <child>
       <object class="GtkGrid">
+        <property name="column-spacing">8</property>
+        <property name="row-spacing">4</property>
+
         <child>
           <object class="GtkLabel">
             <layout>
