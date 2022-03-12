@@ -14,7 +14,7 @@ dependencies = [
   dependency('gtk4', version : '>=4.6.0'),
   dependency('libadwaita-1', version : '>=1.0.0'),
   dependency('gee-0.8', version : '>=0.20.4'),
-  dependency('duktape', version : '>=2.2.0'),
+  dependency('lua', version : '>=5.4'),
   dependency('geoip', version : '>=1.6.12'),
   meson.get_compiler('c').find_library('m', required: false),
 ]

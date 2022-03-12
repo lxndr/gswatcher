@@ -122,9 +122,6 @@ class GameResolver : Object {
       if (options.length >= 2)
         field.kind = PlayerFieldType.parse_nick (options[1]);
 
-      if (options.length >= 3 && options[2] == "main")
-        field.main = true;
-
       game.pfields.add (field);
     }
   }
