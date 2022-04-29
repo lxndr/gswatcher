@@ -5,7 +5,7 @@ gswatcher_dir = data_dir / meson.project_name()
 
 subdir('src')
 subdir('src/schemas')
-subdir('src/scripts/dist')
+subdir('src/protocols')
 subdir('icons')
 
 install_data('gswatcher.desktop', install_dir: data_dir / 'applications')
