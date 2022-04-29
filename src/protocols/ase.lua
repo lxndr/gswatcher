@@ -1,5 +1,5 @@
 local DataReader = require "lib/DataReader"
-local DataWriter = require "lib/DataWriter"
+local concat_tables = require "lib/concat_tables"
 
 protocol = {
   id = "ase",
@@ -120,19 +120,6 @@ local function normalize_server_info(details)
   end
 
   return info
-end
-
-local function concat_tables(...)
-  local args = {...}
-  local res = {}
-
-  for _, t in pairs(args) do
-    for k, v in pairs(t) do
-      res[k] = v
-    end
-  end
-
-  return res
 end
 
 function process(data)
