@@ -123,7 +123,7 @@ class Application : Adw.Application {
     foreach (var file in files) {
       var script = file.get_path ();
 
-      if (script.substring (-3) != ".js")
+      if (script.substring (-4) != ".lua")
         continue;
 
       try {

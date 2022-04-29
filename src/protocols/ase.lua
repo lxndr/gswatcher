@@ -1,0 +1,155 @@
+local DataReader = require "lib/DataReader"
+local DataWriter = require "lib/DataWriter"
+
+protocol = {
+  id = "ase",
+  name = "All-Seeing Eye",
+  feature = "query",
+  transport = "udp",
+}
+
+local info_map = {
+  game_name    = "game",
+  game_version = "version",
+  game_mode    = "game_type",
+  server_name  = "name",
+  map          = "map",
+  num_players  = "num_players",
+  max_players  = "max_players",
+  private      = "private",
+}
+
+function query()
+  gsw.send("s")
+end
+
+local function read_general_info(r)
+  return {
+    game_name = r:lstring(),
+    port = r:lstring(),
+    server_name = r:lstring(),
+    game_type = r:lstring(),
+    map = r:lstring(),
+    version = r:lstring(),
+    private = r:lstring(),
+    num_players = r:lstring(),
+    max_players = r:lstring(),
+  }
+end
+
+local function read_key_values(r)
+  local info = {}
+
+  while not r:is_end() do
+    local key = r:lstring()
+
+    if key == "" then
+      break
+    end
+
+    info[key] = r:lstring()
+  end
+
+  return info
+end
+
+local function read_player_list(r)
+  local players = {}
+
+  while not r:is_end() do
+    local player = {}
+    local flags = r:u8()
+
+    if (flags & 0x01) > 0 then
+      player.name = r:lstring()
+    end
+
+    if (flags & 0x02) > 0 then
+      player.team = r:lstring()
+    end
+
+    if (flags & 0x04) > 0 then
+      player.skin = r:lstring()
+    end
+
+    if (flags & 0x08) > 0 then
+      player.score = r:lstring()
+    end
+
+    if (flags & 0x10) > 0 then
+      player.ping = r:lstring()
+    end
+
+    if (flags & 0x20) > 0 then
+      player["time"] = r:lstring()
+    end
+
+    players:insert(player)
+  end
+
+  return players
+end
+
+local function get_pfields(players)
+  local pfields = {
+    {
+      title = 'Name',
+      kind = 'string',
+      field = 'name',
+    },
+  }
+
+  if #players > 0 then
+    for k, v in pairs(players[0]) do
+      pfields:insert({
+        title = k:sub(1, 2):upper() .. k:sub(2),
+        kind = 'string',
+        field = k,
+      })
+    end
+  end
+
+  return pfields
+end
+
+local function normalize_server_info(details)
+  local info = {}
+
+  for k, v in pairs(info_map) do
+    info[k] = details[v]
+  end
+
+  return info
+end
+
+local function concat_tables(...)
+  local args = {...}
+  local res = {}
+
+  for _, t in pairs(args) do
+    for k, v in pairs(t) do
+      res[k] = v
+    end
+  end
+
+  return res
+end
+
+function process(data)
+  local r = DataReader(data)
+  local sig = r:lstring(4)
+
+  if sig ~= "EYE1" then
+    error("not an All-Seeing Eye response")
+  end
+
+  local general_info = read_general_info(r)
+  local values = read_key_values(r)
+  local details = concat_tables(general_info, values)
+  local inf = normalize_server_info(general_info)
+  local players = read_player_list(r)
+  local pfields = get_pfields(players)
+
+  gsw.sinfo(details, inf)
+  gsw.plist(pfields, players)
+end
