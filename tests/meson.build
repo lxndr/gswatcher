@@ -1,8 +1,6 @@
-js_protocol = executable(
-  'test-js-protocol',
+test('JsGames', executable(
+  'test-games',
   core_sources,
-  'test-js-protocol.vala',
+  'test-games.vala',
   dependencies : dependencies,
-)
-
-test('JsProtocol', js_protocol)
+))
