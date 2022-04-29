@@ -8,98 +8,86 @@ public errordomain JsError {
 
 public delegate void Callback ();
 
-public class DuktapeEx : Duktape {
-  public DuktapeEx () {
-    base.default ();
+public class LuaEx : Lua {
+  public LuaEx () {
+    base ();
   }
 
   public void load_script (string filepath) throws GLib.Error {
-    string script;
-    FileUtils.get_contents (filepath, out script);
-
-    push_string (filepath);
-
-    if (pcompile_string_filename (0, script) != Duktape.Exec.SUCCESS)
-      throw new JsError.SCRIPT ("failed to load script '%s': %s", filepath, safe_to_stacktrace (-1));
-
-    if (pcall (0) != Duktape.Exec.SUCCESS)
-      throw new JsError.RUNTIME_ERROR ("failed to execute '%s': %s", filepath, safe_to_stacktrace (-1));
-
-    pop ();
+    if (l_do_file (filepath) != Status.OK)
+      throw new JsError.SCRIPT ("failed to load script '%s': %s", filepath, to_string (-1));
   }
 
-  public void print_duktape_stack () {
+  public void print_stack () {
     var len = get_top ();
-    print ("Duktape stack:\n");
+    print ("Lua stack (size = %d):\n", len);
   
-    for (int idx = len - 1; idx >= 0; idx--) {
-      dup (idx);
-      print ("| %d: %s = %s\n", idx, get_type (-1).to_string (), safe_to_string (-1));
-      pop ();
+    for (int idx = len; idx > 0; idx--) {
+      print ("| %d: %s = %s\n", idx, l_type_name (idx), l_to_lstring (idx, null));
+      pop (1);
     }
+  }
+
+  public void print_globals () {
+    print ("Lua globals:\n");
+    push_globaltable ();
+    push_nil ();
+
+    while (next (-2) != 0) {
+      print ("  %s = %s\n", to_string (-2), l_to_lstring (-1, null));
+      pop (2);
+    }
+
+    pop (1);
   }
 
   public string get_runtime_version () throws GLib.Error {
-    var obj = new GlobalObject (this, "Duktape");
-    var version = obj.require_uint32 ("version");
-    return format_duktape_version (version);
+    return version ().to_string ();
   }
 
   public static string get_buildtime_version () {
-    return format_duktape_version (VERSION);
+    return VERSION;
   }
 
-  private static string format_duktape_version (Duktape.UInt32 version) {
-    var major = version / 10000;
-    version -= major * 10000;
-    var minor = version / 100;
-    version -= minor * 100;
-    var patch = version;
-  
-    return "%u.%02u.%02u".printf (major, minor, patch);
-  }  
+  public void extract_array (int idx, Callback cb) {
+    var table_idx = absindex (idx);
+    push_nil ();
 
-  public Return extract_array (Index idx, Callback cb) {
-    if (!is_array (idx))
-      return type_error ("argument %d must be an array", idx);
-  
-    var len = get_length (idx);
-  
-    for (var i = 0; i < len; i++) {
-      get_prop_index (idx, i);
+    while (next (table_idx) != 0) {
       cb ();
-      pop ();
+      pop (1);
     }
-  
-    return 0;
   }
 
-  public void extract_object_to_map (Index idx, Gee.Map<string, string> map) {
-    require_object (idx);
-    enum (idx, OWN_PROPERTIES_ONLY);
-  
-    while (next (-1, true)) {
-      if (!is_null_or_undefined (-1)) {
-        var key = get_string (-2);
-        var val = to_string (-1);
-        map.set (key, val);
+  public void extract_object_to_map (int idx, Gee.Map<string, string> map) {
+    var table_idx = absindex (idx);
+    push_nil ();
+
+    while (next (table_idx) != 0) {
+      if (!is_none_or_nil (-1)) {
+        var key = to_string (-2);
+
+        if (type (-1) == Type.TABLE) {
+          print ("TODO: handle table value\n");
+        } else {
+          var val = to_string (-1);
+          map.set (key, val);
+        }
       }
 
-      pop_2 ();
+      pop (1);
     }
-  
-    pop ();
   }
 
-  public void extract_object_to_gobject (Index idx, Object object) {
+  public void extract_object_to_gobject (int idx, Object object) {
     unowned ObjectClass object_class = object.get_class ();
+    var table_idx = absindex (idx);
 
-    require_object (idx);
-    enum (idx, OWN_PROPERTIES_ONLY);
+    push_nil ();
 
-    while (next (-1, true)) {
-      var type = get_type (-1);
-      var key = get_string (-2);
+    while (next (table_idx) != 0) {
+      var type = type (-1);
+      var key = to_string (-2);
 
       if (type == Type.STRING) {
         var str = to_string (-1);
@@ -112,34 +100,44 @@ public class DuktapeEx : Duktape {
         } else {
           object.set (key, str);
         }
-      } else if (type == Type.NUMBER)
-        object.set (key, to_int (-1));
-      else if (type == Type.BOOLEAN)
+      } else if (type == Type.NUMBER) {
+        object.set (key, (int) to_integer (-1));
+      } else if (type == Type.BOOLEAN) {
         object.set (key, to_boolean (-1));
+      }
 
-      pop_2 ();
+      pop (1);
     }
-  
-    pop ();
+  }
+
+  public void push_error_handler () {
+    push_cfunction (js_error);
+  }
+
+  private static int js_error (Lua vm) {
+    var msg = vm.to_string (1);
+    vm.l_traceback (vm, msg, 0);
+    return 1;
   }
 }
 
 [Compact (opaque = true)]
 public class GlobalRoutine {
-  unowned Duktape duk;
+  unowned LuaEx vm;
   string routine;
-  Duktape.Index initial_top;
-  Duktape.Index nargs;
+  int initial_top;
+  int nargs;
 
-  public GlobalRoutine (Duktape duk, string routine) throws Error {
-    this.duk = duk;
+  public GlobalRoutine (LuaEx vm, string routine) throws Error {
+    this.vm = vm;
     this.routine = routine;
-    this.initial_top = this.duk.get_top ();
+    initial_top = this.vm.get_top ();
+    vm.push_error_handler ();
     push_routine ();
   }
 
   ~GlobalRoutine () {
-    duk.pop_n (duk.get_top () - this.initial_top);
+    vm.set_top (this.initial_top);
   }
 
   public void exec () throws Error {
@@ -147,44 +145,35 @@ public class GlobalRoutine {
   }
 
   private void push_routine () throws Error {
-    var path = routine.split (".");
-    duk.push_global_object ();
+    var type = vm.get_global (routine);
 
-    foreach (var path_part in path) {
-      if (!duk.get_prop_string (-1, path_part)) {
-        throw new JsError.MISSING_GLOBAL ("routine '%s' does not exist", routine);
-      }
-    }
+    if (type != FUNCTION)
+      throw new JsError.MISSING_GLOBAL ("routine '%s' does not exist", routine);
   }
 
   private void call_routine () throws Error {
-    if (duk.pcall (nargs) != Duktape.Exec.SUCCESS) {
-      var msg = duk.safe_to_stacktrace (-1);
-      throw new JsError.RUNTIME_ERROR ("failed to call '%s': %s", routine, msg);
-    }
+    if (vm.pcall (nargs, 0, initial_top + 1) != OK)
+    throw new JsError.RUNTIME_ERROR ("failed to call function: %s", vm.to_string (-1));
   }
 
-  public unowned GlobalRoutine push_string (string command) {
-    duk.push_string (command);
+  public unowned GlobalRoutine push_string (string str) {
+    vm.push_string (str);
     nargs++;
     return this;
   }
 
   public unowned GlobalRoutine push_buffer (uint8[] data) {
-    duk.push_external_buffer ();
-    duk.config_buffer (-1, data);
-    duk.push_buffer_object (-1, 0, data.length, NODEJS_BUFFER);
-    duk.remove (-2);
+    vm.push_buffer (data);
     nargs++;
     return this;
   }
 
   public unowned GlobalRoutine push_object (Gee.Map<string, string> options) {
-    var obj_idx = duk.push_object ();
+    vm.new_table ();
 
     foreach (var entry in options) {
-      duk.push_string (entry.value);
-      duk.put_prop_string (obj_idx, entry.key);
+      vm.push_string (entry.value);
+      vm.set_field (-2, entry.key);
     }
 
     nargs++;
@@ -194,51 +183,49 @@ public class GlobalRoutine {
 
 [Compact (opaque = true)]
 public class GlobalObject {
-  unowned DuktapeEx duk;
+  unowned LuaEx vm;
   string path;
   string[] path_parts;
 
-  public GlobalObject(DuktapeEx duk, string path) throws Error {
-    this.duk = duk;
+  public GlobalObject(LuaEx vm, string path) throws Error {
+    this.vm = vm;
     this.path = path;
 
     path_parts = path.split (".");
-    duk.push_global_object ();
+    vm.push_globaltable ();
 
     foreach (var path_part in path_parts) {
-      if (!duk.get_prop_string (-1, path_part))
-        throw new JsError.MISSING_GLOBAL ("global '%s' does not exist", path);
+      var type = vm.get_field (-1, path_part);
 
-      if (!duk.is_object (-1))
+      if (type != Lua.Type.TABLE)
         throw new JsError.MISSING_GLOBAL ("global '%s' is not object", path);
     }
   }
 
   ~GlobalObject() {
-    duk.pop_n (path_parts.length + 1);
+    vm.pop (path_parts.length + 1);
   }
 
   private void require_prop (string name) throws Error {
-    if (!duk.get_prop_string (-1, name))
-      throw new JsError.MISSING_GLOBAL ("could not find global '%s.%s'", path, name);
+    var type = vm.get_field (-1, name);
 
-    if (duk.is_null_or_undefined (-1)) {
-      duk.pop ();
+    if (type == Lua.Type.NIL || type == Lua.Type.NONE) {
+      vm.pop (1);
       throw new JsError.MISSING_GLOBAL ("could not find global '%s.%s'", path, name);
     }
   }
 
   public string require_string (string name) throws Error {
     require_prop (name);
-    var str = duk.safe_to_string (-1);
-    duk.pop ();
+    var str = vm.l_check_string (-1);
+    vm.pop (1);
     return str;
   }
 
   public uint32 require_uint32 (string name) throws Error {
     require_prop (name);
-    var num = duk.to_uint32 (-1);
-    duk.pop ();
+    var num = (uint32) vm.l_check_integer (-1);
+    vm.pop (1);
     return num;
   }
 }

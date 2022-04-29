@@ -19,7 +19,6 @@ public class PlayerField : Object {
   public string title { get; set; }
   public string field { get; set; }
   public PlayerFieldType kind { get; set; default = STRING; }
-  public bool main { get; set; }
 }
 
 public abstract interface QueryProtocol : Protocol {

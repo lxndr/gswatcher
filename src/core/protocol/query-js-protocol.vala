@@ -6,42 +6,40 @@ public class QueryJsProtocol : JsProtocol, QueryProtocol {
     init ();
   }
 
-  private static Duktape.Return js_sinfo (DuktapeEx vm) {
+  private static int js_sinfo (LuaEx vm) {
     var proto = (QueryJsProtocol) JsProtocol.get_this_pointer (vm);
+    vm.check_type (1, Lua.Type.TABLE);
+    vm.check_type (2, Lua.Type.TABLE);
 
     var details = new Gee.HashMap<string, string> ();
-    vm.extract_object_to_map (0, details);
+    vm.extract_object_to_map (1, details);
 
     var sinfo = new ServerInfo ();
-    vm.extract_object_to_gobject (1, sinfo);
+    vm.extract_object_to_gobject (2, sinfo);
 
     proto.enqueue_callback (() => proto.sinfo_update (details, sinfo));
     return 0;
   }
 
-  private static Duktape.Return js_plist (DuktapeEx vm) {
+  private static int js_plist (LuaEx vm) {
+    var proto = (QueryJsProtocol) JsProtocol.get_this_pointer (vm);
+    vm.check_type (1, Lua.Type.TABLE);
+    vm.check_type (2, Lua.Type.TABLE);
+
     var pfields = new Gee.ArrayList<PlayerField> ();
     var players = new Gee.ArrayList<Player> ();
 
-    var proto = (QueryJsProtocol) JsProtocol.get_this_pointer (vm);
-
-    var ret = vm.extract_array (0, () => {
+    vm.extract_array (1, () => {
       var field = new PlayerField ();
       vm.extract_object_to_gobject (-1, field);
       pfields.add (field);
     });
 
-    if (ret < 0)
-      return ret;
-
-    ret = vm.extract_array (1, () => {
+    vm.extract_array (2, () => {
       var player = new Player ();
       vm.extract_object_to_map (-1, player);
       players.add (player);
     });
-
-    if (ret < 0)
-      return ret;
 
     proto.enqueue_callback (() => proto.plist_update (pfields, players));
     return 0;
@@ -50,9 +48,9 @@ public class QueryJsProtocol : JsProtocol, QueryProtocol {
   protected override void register_globals () {
     base.register_globals ();
 
-    Duktape.FunctionListEntry[] funcs = {
-      { "sinfo",   (Duktape.CFunction) js_sinfo,   2 },
-      { "plist",   (Duktape.CFunction) js_plist,   2 },
+    Lua.Reg[] funcs = {
+      { "sinfo", (Lua.CFunction) js_sinfo },
+      { "plist", (Lua.CFunction) js_plist },
       { null },
     };
 
@@ -60,13 +58,13 @@ public class QueryJsProtocol : JsProtocol, QueryProtocol {
   }
 
   public void query () throws Error {
-    new GlobalRoutine (vm, "module.query")
+    new GlobalRoutine (vm, "query")
       .exec ();
   }
 
   public override void process_response (uint8[] data) throws Error {
     try {
-      new GlobalRoutine (vm, "module.processResponse")
+      new GlobalRoutine (vm, "process")
         .push_buffer (data)
         .exec ();
     } catch (JsError err) {

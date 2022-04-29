@@ -47,19 +47,19 @@ class PlayerList : Widget {
     for (var i = 0; i < added; i++) {
       var index = position + i;
       var field = (PlayerField) querier.plist_fields.get_item (index);
-      var column = create_column (field);
+      var column = create_column (field, i == 0);
       view.insert_column (index, column);
     }
   }
 
-  private ColumnViewColumn create_column (PlayerField field) {
+  private ColumnViewColumn create_column (PlayerField field, bool expand) {
     var factory = new SignalListItemFactory ();
     factory.setup.connect ((factory, listitem) => player_setup (listitem, field));
     factory.bind.connect ((factory, listitem) => player_bind (listitem, field));
 
     var col = new ColumnViewColumn (field.title, factory);
     // TODO: add player list sorting
-    col.expand = field.main;
+    col.expand = expand;
     return col;
   }
 

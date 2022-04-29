@@ -18,7 +18,7 @@
         "GSETTINGS_SCHEMA_DIR": "${workspaceFolder}/tmp/schemas",
         "XDG_DATA_HOME": "${workspaceFolder}/..",
         "XDG_CONFIG_HOME": "${workspaceFolder}/tmp/config",
-        "GSW_PROTOCOLS_DIR": "${workspaceFolder}/src/scripts/dist"
+        "GSW_PROTOCOLS_DIR": "${workspaceFolder}/src/protocols"
       },
       "preLaunchTask": "Meson: Build src/gswatcher"
     }

@@ -1,0 +1,8 @@
+{
+  "Lua.diagnostics.globals": [
+    "query",
+    "protocol",
+    "gsw",
+    "process"
+  ]
+}
