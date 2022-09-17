@@ -1,13 +1,13 @@
 namespace Gsw {
 
-public class QueryJsProtocol : JsProtocol, QueryProtocol {
-  public QueryJsProtocol (string script_path) throws Error {
+public class QueryLuaProtocol : LuaProtocol, QueryProtocol {
+  public QueryLuaProtocol (string script_path) throws Error {
     Object (script_path : script_path);
     init ();
   }
 
-  private static int js_sinfo (LuaEx vm) {
-    var proto = (QueryJsProtocol) JsProtocol.get_this_pointer (vm);
+  private static int lua_sinfo (LuaEx vm) {
+    var proto = (QueryLuaProtocol) LuaProtocol.get_this_pointer (vm);
     vm.check_type (1, Lua.Type.TABLE);
     vm.check_type (2, Lua.Type.TABLE);
 
@@ -21,8 +21,8 @@ public class QueryJsProtocol : JsProtocol, QueryProtocol {
     return 0;
   }
 
-  private static int js_plist (LuaEx vm) {
-    var proto = (QueryJsProtocol) JsProtocol.get_this_pointer (vm);
+  private static int lua_plist (LuaEx vm) {
+    var proto = (QueryLuaProtocol) LuaProtocol.get_this_pointer (vm);
     vm.check_type (1, Lua.Type.TABLE);
     vm.check_type (2, Lua.Type.TABLE);
 
@@ -49,8 +49,8 @@ public class QueryJsProtocol : JsProtocol, QueryProtocol {
     base.register_globals ();
 
     Lua.Reg[] funcs = {
-      { "sinfo", (Lua.CFunction) js_sinfo },
-      { "plist", (Lua.CFunction) js_plist },
+      { "sinfo", (Lua.CFunction) lua_sinfo },
+      { "plist", (Lua.CFunction) lua_plist },
       { null },
     };
 
@@ -67,9 +67,9 @@ public class QueryJsProtocol : JsProtocol, QueryProtocol {
       new GlobalRoutine (vm, "process")
         .push_buffer (data)
         .exec ();
-    } catch (JsError err) {
+    } catch (LuaError err) {
       // NOTE: very naive to simply check if it contains InvalidResponseError
-      if (err.code == JsError.RUNTIME_ERROR && err.message.index_of ("InvalidResponseError") >= 0) {
+      if (err.code == LuaError.RUNTIME_ERROR && err.message.index_of ("InvalidResponseError") >= 0) {
         throw new ProtocolError.INVALID_RESPONSE (err.message);
       }
 
