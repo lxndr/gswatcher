@@ -143,7 +143,7 @@ public class Querier : Object {
   private void on_error () {
     if (error != null) {
       if (error.code != QuerierError.TIMEOUT)
-        log (Config.LOG_DOMAIN, LEVEL_WARNING, error.message);
+        log (Config.LOG_DOMAIN, LEVEL_DEBUG, error.message);
       stop_timeout_timer ();
       stop_ping_timer ();
       ping = -1;

@@ -124,7 +124,7 @@ end
 
 function process(data)
   local r = DataReader(data)
-  local sig = r:lstring(4)
+  local sig = r:string(4)
 
   if sig ~= "EYE1" then
     error("not an All-Seeing Eye response")
