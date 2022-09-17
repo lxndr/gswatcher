@@ -1,6 +1,10 @@
 namespace Gsw {
 
-public abstract class JsProtocol : Object, Initable, Protocol {
+errordomain LuaProtocolError {
+  INVALID_PROTOCOL_INFO,
+}
+
+public abstract class LuaProtocol : Object, Initable, Protocol {
   public ProtocolInfo info { get; protected set; }
   public string script_path { get; construct; }
 
@@ -11,19 +15,19 @@ public abstract class JsProtocol : Object, Initable, Protocol {
 
   protected abstract void process_response (uint8[] data) throws Error;
 
-  ~JsProtocol () {
+  ~LuaProtocol () {
     foreach (var source in callback_sources)
       source.destroy ();
   }
 
-  public static unowned JsProtocol get_this_pointer (LuaEx vm) {
+  public static unowned LuaProtocol get_this_pointer (LuaEx vm) {
     vm.get_field (Lua.PseudoIndex.REGISTRY, THIS_PROTOCOL_POINTER_KEY);
-    unowned JsProtocol self = (JsProtocol) vm.to_userdata (-1);
+    unowned LuaProtocol self = (LuaProtocol) vm.to_userdata (-1);
     vm.pop (1);
     return self;
   }
 
-  private static int js_send (LuaEx vm) {
+  private static int lua_send (LuaEx vm) {
     var proto = get_this_pointer (vm);
     var data = vm.l_check_buffer (1);
     proto.enqueue_callback (() => proto.data_send (data));
@@ -78,7 +82,7 @@ public abstract class JsProtocol : Object, Initable, Protocol {
     vm.set_field (Lua.PseudoIndex.REGISTRY, THIS_PROTOCOL_POINTER_KEY);
 
     Lua.Reg[] funcs = {
-      { "send",    (Lua.CFunction) js_send },
+      { "send",    (Lua.CFunction) lua_send },
       { null },
     };
 
@@ -92,15 +96,19 @@ public abstract class JsProtocol : Object, Initable, Protocol {
   }
 
   private ProtocolInfo fetch_info () throws Error {
-    var obj = new GlobalObject (vm, "protocol");
+    try {
+      var obj = new GlobalObject (vm, "protocol");
 
-    var info = new ProtocolInfo ();
-    info.id = obj.require_string ("id");
-    info.name = obj.require_string ("name");
-    info.transport = obj.require_string ("transport");
-    info.feature = ProtocolFeature.parse_nick (obj.require_string ("feature"));
+      var info = new ProtocolInfo ();
+      info.id = obj.require_string ("id");
+      info.name = obj.require_string ("name");
+      info.transport = obj.require_string ("transport");
+      info.feature = ProtocolFeature.parse_nick (obj.require_string ("feature"));
 
-    return info;
+      return info;
+    } catch (Error err) {
+      throw new LuaProtocolError.INVALID_PROTOCOL_INFO ("invalid protocol info: %s", err.message);
+    }
   }
 
   protected void enqueue_callback (owned Callback cb) {

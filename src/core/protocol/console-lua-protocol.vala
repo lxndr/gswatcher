@@ -1,13 +1,13 @@
 namespace Gsw {
 
-public class ConsoleJsProtocol : JsProtocol, ConsoleProtocol {
-  public ConsoleJsProtocol (string script_path) throws Error {
+public class ConsoleLuaProtocol : LuaProtocol, ConsoleProtocol {
+  public ConsoleLuaProtocol (string script_path) throws Error {
     Object (script_path : script_path);
     init ();
   }
 
-  private static int js_response (LuaEx vm) {
-    var proto = (ConsoleJsProtocol) JsProtocol.get_this_pointer (vm);
+  private static int lua_response (LuaEx vm) {
+    var proto = (ConsoleLuaProtocol) LuaProtocol.get_this_pointer (vm);
     var resp = vm.to_string (0);
     proto.enqueue_callback (() => proto.response (resp));
     return 0;
@@ -17,7 +17,7 @@ public class ConsoleJsProtocol : JsProtocol, ConsoleProtocol {
     base.register_globals ();
 
     Lua.Reg[] funcs = {
-      { "response", (Lua.CFunction) js_response },
+      { "response", (Lua.CFunction) lua_response },
       { null },
     };
 
@@ -36,9 +36,9 @@ public class ConsoleJsProtocol : JsProtocol, ConsoleProtocol {
       new GlobalRoutine (vm, "process")
         .push_buffer (data)
         .exec ();
-    } catch (JsError err) {
+    } catch (LuaError err) {
       // NOTE: very naive to simply check if it contains InvalidResponseError
-      if (err.code == JsError.RUNTIME_ERROR) {
+      if (err.code == LuaError.RUNTIME_ERROR) {
         if (err.message.index_of ("InvalidResponseError") >= 0)
           throw new ProtocolError.INVALID_RESPONSE (err.message);
         if (err.message.index_of ("AuthError") >= 0)

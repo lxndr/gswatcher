@@ -127,15 +127,15 @@ class Application : Adw.Application {
         continue;
 
       try {
-        var protocol = new DummyJsProtocol (script);
+        var protocol = new DummyLuaProtocol (script);
 
         var script_value = Value (typeof (string));
         script_value.set_string (script);
 
-        var class_type = typeof (QueryJsProtocol);
+        var class_type = typeof (QueryLuaProtocol);
 
         if (protocol.info.feature == CONSOLE)
-          class_type = typeof (ConsoleJsProtocol);
+          class_type = typeof (ConsoleLuaProtocol);
 
         protocol_registry.register (new ProtocolDesc () {
           id = protocol.info.id,
@@ -147,7 +147,8 @@ class Application : Adw.Application {
           class_values = { script_value },
         });
       } catch (Error err) {
-        log (Config.LOG_DOMAIN, LEVEL_WARNING, "failed to load protocol script '%s': %s", script, err.message);
+        if (!(err is LuaProtocolError && err.code == LuaProtocolError.INVALID_PROTOCOL_INFO))
+          log (Config.LOG_DOMAIN, LEVEL_WARNING, "failed to load protocol script '%s': %s", script, err.message);
       }
     }
   }

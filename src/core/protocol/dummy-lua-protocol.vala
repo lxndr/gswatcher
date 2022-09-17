@@ -1,7 +1,7 @@
 namespace Gsw {
 
-public class DummyJsProtocol : JsProtocol {
-  public DummyJsProtocol (string script_path) throws Error {
+public class DummyLuaProtocol : LuaProtocol {
+  public DummyLuaProtocol (string script_path) throws Error {
     Object (script_path : script_path);
     init ();
   }

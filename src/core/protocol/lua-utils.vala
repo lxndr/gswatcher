@@ -1,6 +1,6 @@
 namespace Gsw {
 
-public errordomain JsError {
+public errordomain LuaError {
   SCRIPT,
   MISSING_GLOBAL,
   RUNTIME_ERROR,
@@ -15,7 +15,7 @@ public class LuaEx : Lua {
 
   public void load_script (string filepath) throws GLib.Error {
     if (l_do_file (filepath) != Status.OK)
-      throw new JsError.SCRIPT ("failed to load script '%s': %s", filepath, to_string (-1));
+      throw new LuaError.SCRIPT ("failed to load script '%s': %s", filepath, to_string (-1));
   }
 
   public void print_stack () {
@@ -111,10 +111,10 @@ public class LuaEx : Lua {
   }
 
   public void push_error_handler () {
-    push_cfunction (js_error);
+    push_cfunction (lua_error);
   }
 
-  private static int js_error (Lua vm) {
+  private static int lua_error (Lua vm) {
     var msg = vm.to_string (1);
     vm.l_traceback (vm, msg, 0);
     return 1;
@@ -148,12 +148,12 @@ public class GlobalRoutine {
     var type = vm.get_global (routine);
 
     if (type != FUNCTION)
-      throw new JsError.MISSING_GLOBAL ("routine '%s' does not exist", routine);
+      throw new LuaError.MISSING_GLOBAL ("routine '%s' does not exist", routine);
   }
 
   private void call_routine () throws Error {
     if (vm.pcall (nargs, 0, initial_top + 1) != OK)
-    throw new JsError.RUNTIME_ERROR ("failed to call function: %s", vm.to_string (-1));
+    throw new LuaError.RUNTIME_ERROR ("failed to call function: %s", vm.to_string (-1));
   }
 
   public unowned GlobalRoutine push_string (string str) {
@@ -198,7 +198,7 @@ public class GlobalObject {
       var type = vm.get_field (-1, path_part);
 
       if (type != Lua.Type.TABLE)
-        throw new JsError.MISSING_GLOBAL ("global '%s' is not object", path);
+        throw new LuaError.MISSING_GLOBAL ("global '%s' is not object", path);
     }
   }
 
@@ -211,7 +211,7 @@ public class GlobalObject {
 
     if (type == Lua.Type.NIL || type == Lua.Type.NONE) {
       vm.pop (1);
-      throw new JsError.MISSING_GLOBAL ("could not find global '%s.%s'", path, name);
+      throw new LuaError.MISSING_GLOBAL ("could not find global '%s.%s'", path, name);
     }
   }
 

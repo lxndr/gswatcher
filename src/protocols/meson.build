@@ -5,10 +5,10 @@ install_subdir('lib', install_dir: protocols_dir)
 install_data(
   files(
     #'ase.lua',
-    #'gamespy.js',
-    #'gamespy2.js',
-    #'quake3.js',
-    #'source-console.js',
+    #'gamespy.lua',
+    #'gamespy2.lua',
+    #'quake3.lua',
+    #'source-console.lua',
     'source.lua',
   ),
   install_dir: protocols_dir,
