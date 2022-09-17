@@ -2,17 +2,12 @@ using Gtk;
 
 namespace Gsw.Ui {
 
-  void show_about (Window win, Gee.Collection<TransportDesc> transports, Gee.Collection<ProtocolDesc> protocols) {
-    string[] authors = {
-      "Alexander Burobin <lxndr87i@gmail.com>",
-      null
-    };
-
+  private string format_debug_info (Gee.Collection<TransportDesc> transports, Gee.Collection<ProtocolDesc> protocols) {
     var sysinfo = "GTK version:\n";
     sysinfo += "\tBuild time: %s\n".printf (get_buildtime_gtk_version ());
     sysinfo += "\tRun time: %s\n".printf (get_runtime_gtk_version ());
 
-    sysinfo += "\nDuktape version:\n";
+    sysinfo += "\nLua version:\n";
     sysinfo += "\tBuild time: %s\n".printf (LuaEx.get_buildtime_version ());
 
     try {
@@ -44,15 +39,26 @@ namespace Gsw.Ui {
       }
     }
 
-    show_about_dialog (
-      win,
-      "authors", authors,
-      "license-type", License.GPL_3_0,
-      "logo-icon-name", Environment.get_prgname (),
-      "version", Config.VERSION,
-      "website", Config.HOMEPAGE,
-      "system-information", sysinfo
-    );
+    return sysinfo;
+  }
+
+  void show_about (Window win, Gee.Collection<TransportDesc> transports, Gee.Collection<ProtocolDesc> protocols) {
+    string[] authors = {
+      "Alexander Burobin <lxndr87i@gmail.com>",
+      null,
+    };
+
+    var dlg = new Adw.AboutWindow ();
+    dlg.application_name = _("Game Server Watcher");
+    dlg.application_icon = Environment.get_prgname ();
+    dlg.version = Config.VERSION;
+    dlg.website = Config.HOMEPAGE;
+    dlg.developers = authors;
+    dlg.license_type = License.GPL_3_0;
+    dlg.issue_url = Config.ISSUES;
+    dlg.debug_info = format_debug_info (transports, protocols);
+    dlg.transient_for = win;
+    dlg.present ();
   }
 
 }
