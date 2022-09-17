@@ -24,7 +24,7 @@
         <property name="orientation">vertical</property>
 
         <child>
-          <object class="GtkHeaderBar">
+          <object class="AdwHeaderBar">
             <property name="title-widget">
               <object class="AdwWindowTitle">
                 <property name="title" translatable="yes">Game Server Watcher</property>

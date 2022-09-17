@@ -59,6 +59,7 @@ conf_data.set_quoted('GSW_APPID', 'org.lxndr.gswatcher')
 conf_data.set_quoted('GSW_APPNAME', 'Game Server Watcher')
 conf_data.set_quoted('GSW_VERSION', meson.project_version())
 conf_data.set_quoted('GSW_HOMEPAGE', 'https://gitlab.com/lxndr-ab/gswatcher')
+conf_data.set_quoted('GSW_ISSUES', 'https://gitlab.com/lxndr-ab/gswatcher/-/issues')
 conf_data.set_quoted('GSW_LOG_DOMAIN', 'Gsw')
 conf_data.set_quoted('GETTEXT_PACKAGE', meson.project_name())
 
