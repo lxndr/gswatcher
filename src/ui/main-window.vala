@@ -32,16 +32,23 @@ class MainWindow : Adw.ApplicationWindow {
 
   [GtkCallback]
   private void remove_server (Client client) {
-    var dialog = new MessageDialog (this, DialogFlags.DESTROY_WITH_PARENT | DialogFlags.MODAL, MessageType.QUESTION, ButtonsType.YES_NO,
-      _("Are you sure you want to remove \"%s\" from the server list?"), client.server.address);
+    var dialog = new Adw.MessageDialog (this, _("Remove server?"), null);
+    dialog.format_body (_("Are you sure you want to remove \"%s\" from the server list?"), client.server.address);
+    dialog.add_responses (
+      "cancel", _("Cancel"),
+      "remove", _("Remove")
+    );
+    dialog.set_response_appearance ("remove", DESTRUCTIVE);
+    dialog.default_response = "cancel";
+    dialog.close_response = "cancel";
 
     dialog.response.connect ((response_id) => {
-      if (response_id == ResponseType.YES)
+      if (response_id == "remove")
         client_list.remove (client);
       dialog.destroy ();
     });
 
-    dialog.show ();
+    dialog.present ();
   }
 
   [GtkCallback]

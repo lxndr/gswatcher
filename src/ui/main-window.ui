@@ -27,7 +27,7 @@
           <object class="AdwHeaderBar">
             <property name="title-widget">
               <object class="AdwWindowTitle">
-                <property name="title" translatable="yes">Game Server Watcher</property>
+                <property name="title">Game Server Watcher</property>
               </object>
             </property>
 

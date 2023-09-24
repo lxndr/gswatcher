@@ -3,5 +3,8 @@
 		{
 			"path": "."
 		}
-	]
+	],
+	"settings": {
+		"C_Cpp.default.compileCommands": "builddir/compile_commands.json"
+	}
 }
