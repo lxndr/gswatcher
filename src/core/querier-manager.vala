@@ -9,7 +9,6 @@ public class QuerierManager : Object {
 
   private uint timer_source;
   private Collection<unowned Querier> queriers;
-  private Iterator<unowned Querier> querier_iter;
 
   public static QuerierManager get_instance () {
     return new QuerierManager ();
@@ -17,7 +16,6 @@ public class QuerierManager : Object {
 
   construct {
     queriers = new ConcurrentList<unowned Querier> ();
-    querier_iter = queriers.iterator ();
 
     notify["update_interval"].connect (update_timer);
     notify["paused"].connect (update_timer);
@@ -48,30 +46,20 @@ public class QuerierManager : Object {
     }
 
     if (!paused && queriers.size > 0) {
-      var interval = update_interval / queriers.size;
-
-      timer_source = Timeout.add (interval, () => {
+      timer_source = Timeout.add (update_interval, () => {
         update_tick ();
         return Source.CONTINUE;
       });
 
-      log (Config.LOG_DOMAIN, LEVEL_DEBUG, "update timer started with interval %u ms", interval);
+      log (Config.LOG_DOMAIN, LEVEL_DEBUG, "update timer started with interval %u ms", update_interval);
     }
   }
 
   private void update_tick () {
-    advance_querier_iter ();
-    var querier = querier_iter.get ();
-
-    log (Config.LOG_DOMAIN, LEVEL_DEBUG, "querying %s:%d", querier.server.host, querier.server.qport);
-
-    querier.query ();
-  }
-
-  private void advance_querier_iter () {
-    if (!querier_iter.has_next ())
-      querier_iter = queriers.iterator ();
-    querier_iter.next ();
+    foreach (var querier in queriers) {
+      log (Config.LOG_DOMAIN, LEVEL_DEBUG, "querying %s:%d", querier.server.host, querier.server.qport);
+      querier.query ();
+    }
   }
 }
 

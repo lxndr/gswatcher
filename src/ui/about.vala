@@ -44,12 +44,12 @@ namespace Gsw.Ui {
 
   void show_about (Window win, Gee.Collection<TransportDesc> transports, Gee.Collection<ProtocolDesc> protocols) {
     string[] authors = {
-      "Alexander Burobin <lxndr87i@gmail.com>",
+      "Alexander Burobin <alexandrburobin@gmail.com>",
       null,
     };
 
     var dlg = new Adw.AboutWindow ();
-    dlg.application_name = _("Game Server Watcher");
+    dlg.application_name = Config.APPNAME;
     dlg.application_icon = Environment.get_prgname ();
     dlg.version = Config.VERSION;
     dlg.website = Config.HOMEPAGE;

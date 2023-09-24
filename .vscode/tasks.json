@@ -3,14 +3,13 @@
 	"tasks": [
 		{
 			"type": "meson",
-			"target": "src/gswatcher",
+			"target": "src/gswatcher:executable",
 			"mode": "build",
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
-			"problemMatcher": [],
-			"label": "Meson: Build src/gswatcher"
+			"problemMatcher": [
+				"$meson-gcc"
+			],
+			"group": "build",
+			"label": "Meson: Build src/gswatcher:executable"
 		}
 	]
 }

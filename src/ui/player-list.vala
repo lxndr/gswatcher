@@ -54,8 +54,8 @@ class PlayerList : Widget {
 
   private ColumnViewColumn create_column (PlayerField field, bool expand) {
     var factory = new SignalListItemFactory ();
-    factory.setup.connect ((factory, listitem) => player_setup (listitem, field));
-    factory.bind.connect ((factory, listitem) => player_bind (listitem, field));
+    factory.setup.connect ((factory, listitem) => player_setup (listitem as ListItem, field));
+    factory.bind.connect ((factory, listitem) => player_bind (listitem as ListItem, field));
 
     var col = new ColumnViewColumn (field.title, factory);
     // TODO: add player list sorting
