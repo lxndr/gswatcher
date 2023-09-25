@@ -1,7 +1,16 @@
-test:
+test-archlinux:
   image: archlinux:latest
   script:
-    - pacman -Syu --noconfirm --noprogressbar base-devel meson ninja vala libgee gtk4 libadwaita duktape geoip
+    - pacman -Syu --noconfirm --noprogressbar base-devel meson ninja vala libgee gtk4 libadwaita lua geoip
+    - meson setup --buildtype=release builddir
+    - meson compile -C builddir
+
+test-debian-bookworm:
+  image: debian:bookworm
+  script:
+    - apt-get update
+    - apt-get upgrade -y
+    - apt-get install -y meson ninja-build valac libgee-0.8-dev libgtk-4-dev libadwaita-1-dev liblua5.4-dev libgeoip-dev
     - meson setup --buildtype=release builddir
     - meson compile -C builddir
 
@@ -10,6 +19,6 @@ test-debian-sid:
   script:
     - apt-get update
     - apt-get upgrade -y
-    - apt-get install -y meson cmake valac libgee-0.8-dev libgtk-4-dev libadwaita-1-dev duktape-dev libgeoip-dev
+    - apt-get install -y meson ninja-build valac libgee-0.8-dev libgtk-4-dev libadwaita-1-dev liblua5.4-dev libgeoip-dev
     - meson setup --buildtype=release builddir
     - meson compile -C builddir
