@@ -1,4 +1,7 @@
-project('gswatcher', 'c', 'vala', version : '1.6.0')
+project('gswatcher', 'c', 'vala',
+        version: '1.6.0',
+  meson_version: '>= 0.60.0',
+)
 
 data_dir = get_option('prefix') / get_option('datadir')
 gswatcher_dir = data_dir / meson.project_name()
@@ -14,3 +17,9 @@ install_subdir('games', install_dir: gswatcher_dir)
 if get_option('tests')
   subdir('tests')
 endif
+
+gnome.post_install(
+  gtk_update_icon_cache: true,
+  glib_compile_schemas: true,
+  update_desktop_database: host_machine.system() not in ['darwin', 'windows'],
+)
