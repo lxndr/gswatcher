@@ -5,8 +5,7 @@ test-archlinux:
     - meson setup --buildtype=release builddir
     - meson compile -C builddir
 
-test-debian-bookworm:
-  image: debian:bookworm
+.test-debian:
   script:
     - apt-get update
     - apt-get upgrade -y
@@ -15,10 +14,13 @@ test-debian-bookworm:
     - meson compile -C builddir
 
 test-debian-sid:
+  extends: .test-debian
   image: debian:sid
-  script:
-    - apt-get update
-    - apt-get upgrade -y
-    - apt-get install -y meson ninja-build valac libgee-0.8-dev libgtk-4-dev libadwaita-1-dev liblua5.4-dev libgeoip-dev
-    - meson setup --buildtype=release builddir
-    - meson compile -C builddir
+
+test-debian-trixie:
+  extends: .test-debian
+  image: debian:trixie
+
+test-debian-bookworm:
+  extends: .test-debian
+  image: debian:bookworm

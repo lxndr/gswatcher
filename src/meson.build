@@ -11,8 +11,8 @@ add_project_arguments(
 )
 
 dependencies = [
-  dependency('gtk4', version : '>=4.6.0'),
-  dependency('libadwaita-1', version : '>=1.2.0'),
+  dependency('gtk4', version : '>=4.8.3'),
+  dependency('libadwaita-1', version : '>=1.3.0'),
   dependency('gee-0.8', version : '>=0.20.4'),
   dependency('lua', version : '>=5.4'),
   dependency('geoip', version : '>=1.6.12'),
