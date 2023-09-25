@@ -1,6 +1,6 @@
-test('LuaGames', executable(
-  'test-games',
+test('core/utils/parse_address', executable(
+  'test-parse_address',
   core_sources,
-  'test-games.vala',
+  'test-parse_address.vala',
   dependencies : dependencies,
 ))
