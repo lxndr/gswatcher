@@ -1,7 +1,7 @@
 settings_schemas = [
-  'org.lxndr.gswatcher.Buddy.gschema.xml',
-  'org.lxndr.gswatcher.Preferences.gschema.xml',
-  'org.lxndr.gswatcher.Server.gschema.xml',
+  get_option('app-id') + '.Buddy.gschema.xml',
+  get_option('app-id') + '.Preferences.gschema.xml',
+  get_option('app-id') + '.Server.gschema.xml',
 ]
 
 install_data(

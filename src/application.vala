@@ -75,8 +75,8 @@ class Application : Adw.Application {
 
     // settings
     var settings_file = Path.build_filename (Environment.get_user_config_dir (), "gswatcher", "preferences.ini");
-    var settings_backend = SettingsBackend.keyfile_settings_backend_new (settings_file, "/org/lxndr/gswatcher/", null);
-    preferences = new Settings.with_backend ("org.lxndr.gswatcher.Preferences", settings_backend);
+    var settings_backend = SettingsBackend.keyfile_settings_backend_new (settings_file, "/ru/lxndr/gswatcher/", null);
+    preferences = new Settings.with_backend (@"$(Config.APPID).Preferences", settings_backend);
     preferences.bind ("local-udp-port", udp_transport_manager, "local-port", SettingsBindFlags.DEFAULT);
     preferences.bind ("query-interval", querier_manager, "update-interval", SettingsBindFlags.DEFAULT);
 

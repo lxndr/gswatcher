@@ -2,7 +2,7 @@ namespace Gsw {
 
 class PersistentBuddyList : BuddyList {
   public string config_file { get; private construct set; }
-  public string root_path { get; private construct set; default = "/org/lxndr/gswatcher/buddies/"; }
+  public string root_path { get; private construct set; default = "/ru/lxndr/gswatcher/buddies/"; }
 
   private SettingsBackend settings_backend;
 
@@ -22,7 +22,7 @@ class PersistentBuddyList : BuddyList {
     var buddy = base.add (name);
 
     var path = root_path + buddy.name + "/";
-    var buddy_settings = new Settings.with_backend_and_path ("org.lxndr.gswatcher.Buddy", settings_backend, path);
+    var buddy_settings = new Settings.with_backend_and_path (@"$(Config.APPID).Buddy", settings_backend, path);
     buddy_settings.bind ("notifications", buddy, "notifications", SettingsBindFlags.DEFAULT);
     buddy_settings.bind ("lastaddr", buddy, "lastaddr", SettingsBindFlags.DEFAULT);
 

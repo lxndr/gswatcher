@@ -2,7 +2,7 @@ namespace Gsw {
 
 class PersistentServerList : ServerList {
   public string config_file { get; private construct set; }
-  public string root_path { get; private construct set; default = "/org/lxndr/gswatcher/servers/"; }
+  public string root_path { get; private construct set; default = "/ru/lxndr/gswatcher/servers/"; }
 
   private SettingsBackend settings_backend;
 
@@ -15,7 +15,7 @@ class PersistentServerList : ServerList {
     var client = base.add (name);
 
     var path = root_path + client.server.address + "/";
-    var server_settings = new Settings.with_backend_and_path ("org.lxndr.gswatcher.Server", settings_backend, path);
+    var server_settings = new Settings.with_backend_and_path (@"$(Config.APPID).Server", settings_backend, path);
     server_settings.bind ("protocol", client.server, "protocol", SettingsBindFlags.DEFAULT);
     server_settings.bind ("game-id", client.server, "game-id", SettingsBindFlags.DEFAULT);
     server_settings.bind ("server-name", client.server, "server-name", SettingsBindFlags.DEFAULT);

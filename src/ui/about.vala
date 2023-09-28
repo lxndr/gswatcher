@@ -50,7 +50,7 @@ namespace Gsw.Ui {
 
     var dlg = new Adw.AboutWindow ();
     dlg.application_name = Config.APPNAME;
-    dlg.application_icon = Environment.get_prgname ();
+    dlg.application_icon = Config.APPID;
     dlg.version = Config.VERSION;
     dlg.website = Config.HOMEPAGE;
     dlg.developers = authors;
