@@ -143,8 +143,13 @@ class ServerList : Widget {
 
   [GtkCallback]
   private string? format_ping (int ping, Error? error) {
-    if (error != null)
-      return "Error";
+    if (error != null) {
+      if (error is QuerierError.TIMEOUT) {
+        return _("Timed out");
+      } else {
+        return _("Error");
+      }
+    }
 
     if (ping < 0)
       return "";
