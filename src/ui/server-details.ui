@@ -12,8 +12,8 @@
 
   <object class="GtkSortListModel" id="sort_model">
     <binding name="model">
-      <lookup type="GswQuerier" name="details">
-        <lookup type="GswUiServerDetails" name="querier">
+      <lookup type="GswClient" name="details">
+        <lookup type="GswUiServerDetails" name="client">
           GswUiServerDetails
         </lookup>
       </lookup>
