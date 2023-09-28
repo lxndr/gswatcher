@@ -1,7 +1,7 @@
 <?xml-model href="/usr/share/glib-2.0/schemas/gschema.dtd"?>
 
 <schemalist>
-  <schema id="org.lxndr.gswatcher.Server">
+  <schema id="ru.lxndr.gswatcher.Server">
     <key name="server-name" type="s">
       <default>""</default>
       <summary>Server name</summary>

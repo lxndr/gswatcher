@@ -2,7 +2,7 @@ using Gtk;
 
 namespace Gsw.Ui {
 
-[GtkTemplate (ui = "/org/lxndr/gswatcher/ui/player-list.ui")]
+[GtkTemplate (ui = "/ru/lxndr/gswatcher/ui/player-list.ui")]
 class PlayerList : Widget {
   private Client? _client;
 

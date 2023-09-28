@@ -2,7 +2,7 @@ using Gtk;
 
 namespace Gsw.Ui {
 
-[GtkTemplate (ui = "/org/lxndr/gswatcher/ui/server-console.ui")]
+[GtkTemplate (ui = "/ru/lxndr/gswatcher/ui/server-console.ui")]
 class ServerConsole : Widget {
   public Client? _client;
 
