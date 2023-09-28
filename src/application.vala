@@ -108,8 +108,8 @@ class Application : Adw.Application {
     var text = _("Address: %s\nServer: %s\nPlayers: %d / %d").printf (
       client.server.address,
       client.server.server_name,
-      client.querier.sinfo.num_players,
-      client.querier.sinfo.max_players
+      client.sinfo.num_players,
+      client.sinfo.max_players
     );
 
     var n = new Notification (title);

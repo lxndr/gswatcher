@@ -13,11 +13,6 @@ public class Querier : Object {
   public Server server { get; construct; }
   public QueryProtocol protocol { get; construct; }
   public NetTransport transport { get; construct; }
-
-  public ServerDetailsList details { get; protected set; default = new ServerDetailsList (); }
-  public ServerInfo sinfo { get; protected set; default = new ServerInfo (); }
-  public PlayerList plist { get; protected set; default = new PlayerList (); }
-  public ListStore? plist_fields { get; protected set; default = new ListStore (typeof (PlayerField)); }
   public int64 ping { get; protected set; default = -1; }
   public Error? error { get; protected set; }
 
@@ -25,8 +20,12 @@ public class Querier : Object {
   private bool query_pending;
   private int64 query_time;
   private uint timeout_source;
+  private bool plist_fields_resolved;
 
-  public signal void update ();
+  public signal void details_update (Gee.Map<string, string> details);
+  public signal void sinfo_update (ServerInfo sinfo);
+  public signal void plist_fields_update (Gee.List<PlayerField> plist_fields);
+  public signal void plist_update (Gee.ArrayList<Player> plist);
 
   construct {
     notify["error"].connect(on_error);
@@ -103,41 +102,20 @@ public class Querier : Object {
 
   private void on_sinfo_updated (Gee.Map<string, string> details, ServerInfo sinfo) {
     stop_timeout_timer ();
-
     game_resolver.resolve (protocol.info.id, sinfo, details);
-
-    server.protocol = protocol.info.id;
-    server.game_id = sinfo.game_id;
-    server.server_name = sinfo.server_name;
-
-    this.sinfo.game_id = sinfo.game_id;
-    this.sinfo.game_name = sinfo.game_name;
-    this.sinfo.game_mode = sinfo.game_mode;
-    this.sinfo.server_name = sinfo.server_name;
-    this.sinfo.server_type = sinfo.server_type;
-    this.sinfo.server_os = sinfo.server_os;
-    this.sinfo.game_version = sinfo.game_version;
-    this.sinfo.map = sinfo.map;
-    this.sinfo.num_players = sinfo.num_players;
-    this.sinfo.max_players = sinfo.max_players;
-    this.sinfo.private = sinfo.private;
-    this.sinfo.secure = sinfo.secure;
-
-    this.details.apply (details);
-    update ();
+    details_update (details);
+    sinfo_update (sinfo);
   }
 
   private void on_plist_updated (Gee.List<PlayerField> default_pfields, Gee.ArrayList<Player> plist) {
-    if (this.plist_fields.get_n_items () == 0) {
-      var game_pfields = game_resolver.get_plist_fields (sinfo.game_id);
+    if (!plist_fields_resolved) {
+      var game_pfields = game_resolver.get_plist_fields (server.game_id);
       var new_pfields = (game_pfields != null && game_pfields.size > 0) ? game_pfields : default_pfields;
-
-      foreach (var field in new_pfields)
-        this.plist_fields.append (field);
+      plist_fields_update (new_pfields);
+      plist_fields_resolved = true;
     }
 
-    this.plist.apply (plist);
-    update ();
+    plist_update (plist);
   }
 
   private void on_error () {
