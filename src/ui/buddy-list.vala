@@ -10,7 +10,7 @@ class NewBuddy : Buddy {
   public signal void add (string name);
 }
 
-[GtkTemplate (ui = "/org/lxndr/gswatcher/ui/buddy-list.ui")]
+[GtkTemplate (ui = "/ru/lxndr/gswatcher/ui/buddy-list.ui")]
 class BuddyList : Widget {
   public Gsw.BuddyList buddy_list { get; set; }
 

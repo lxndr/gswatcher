@@ -1,7 +1,7 @@
 <?xml-model href="/usr/share/glib-2.0/schemas/gschema.dtd"?>
 
 <schemalist>
-  <schema id="org.lxndr.gswatcher.Buddy">
+  <schema id="ru.lxndr.gswatcher.Buddy">
     <key name="notifications" type="b">
       <default>true</default>
       <summary>Notify if buddy is in game</summary>

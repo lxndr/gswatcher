@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <gresources>
-	<gresource prefix="/org/lxndr/gswatcher">
+	<gresource prefix="/ru/lxndr/gswatcher">
 		<file compressed="true">ui/buddy-list.ui</file>
 		<file compressed="true">ui/console-option-list.ui</file>
 		<file compressed="true">ui/main-window.ui</file>
