@@ -43,8 +43,14 @@ class ServerInfo : Widget {
   }
 
   [GtkCallback]
-  private string format_error (Error? error) {
-    return error == null ? null : error.message;
+  private string? format_error (Error? error) {
+    if (error == null)
+      return null;
+
+    if (error is QuerierError.TIMEOUT)
+      return _("Timed out");
+
+    return  error.message;
   }
 }
 
