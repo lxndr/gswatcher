@@ -86,22 +86,18 @@
                             <property name="homogeneous">true</property>
                             <child>
                               <object class="GswUiServerInfo">
-                                <binding name="querier">
-                                  <lookup type="GswClient" name="querier">
-                                    <lookup type="GswUiServerList" name="selected">
-                                      server_list_ctl
-                                    </lookup>
+                                <binding name="client">
+                                  <lookup type="GswUiServerList" name="selected">
+                                    server_list_ctl
                                   </lookup>
                                 </binding>
                               </object>
                             </child>
                             <child>
                               <object class="GswUiPlayerList" id="player_list">
-                                <binding name="querier">
-                                  <lookup type="GswClient" name="querier">
-                                    <lookup type="GswUiServerList" name="selected">
-                                      server_list_ctl
-                                    </lookup>
+                                <binding name="client">
+                                  <lookup type="GswUiServerList" name="selected">
+                                    server_list_ctl
                                   </lookup>
                                 </binding>
                               </object>
@@ -115,11 +111,9 @@
                         </child>
                         <child>
                           <object class="GswUiServerDetails" id="server_details">
-                            <binding name="querier">
-                              <lookup type="GswClient" name="querier">
-                                <lookup type="GswUiServerList" name="selected">
-                                  server_list_ctl
-                                </lookup>
+                            <binding name="client">
+                              <lookup type="GswUiServerList" name="selected">
+                                server_list_ctl
                               </lookup>
                             </binding>
                           </object>

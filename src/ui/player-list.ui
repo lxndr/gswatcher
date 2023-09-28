@@ -5,8 +5,8 @@
 
   <object class="GtkSortListModel" id="sort_model">
     <binding name="model">
-      <lookup type="GswQuerier" name="plist">
-        <lookup type="GswUiPlayerList" name="querier">
+      <lookup type="GswClient" name="plist">
+        <lookup type="GswUiPlayerList" name="client">
           GswUiPlayerList
         </lookup>
       </lookup>

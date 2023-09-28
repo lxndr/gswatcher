@@ -27,10 +27,7 @@ class BuddyWatcher : Object {
 
   private void on_buddy_added (Buddy buddy) {
     foreach (var client in client_list) {
-      if (client?.querier == null)
-        continue;
-
-      foreach (var player in client.querier.plist) {
+      foreach (var player in client.plist) {
         if (player.has_key ("name") && player["name"] == buddy.name) {
           on_maybe_new_online (buddy, client);
         }
@@ -40,10 +37,7 @@ class BuddyWatcher : Object {
 
   private bool on_timer_tick () {
     foreach (var client in client_list) {
-      if (client?.querier == null)
-        continue;
-
-      foreach (var player in client.querier.plist) {
+      foreach (var player in client.plist) {
         var player_name = get_player_name (player);
 
         if (player_name == null)

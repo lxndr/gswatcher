@@ -4,7 +4,7 @@ namespace Gsw.Ui {
 
 [GtkTemplate (ui = "/org/lxndr/gswatcher/ui/player-list.ui")]
 class PlayerList : Widget {
-  private Querier? _querier;
+  private Client? _client;
 
   [GtkChild]
   private unowned ColumnView view;
@@ -18,22 +18,22 @@ class PlayerList : Widget {
     base.dispose ();
   }
 
-  public Querier? querier {
+  public Client? client {
     get {
-      return _querier;
+      return _client;
     }
 
     set {
-      if (_querier != null) {
-        _querier.plist_fields.items_changed.disconnect (plist_fields_change);
-        plist_fields_change (0, _querier.plist_fields.get_n_items (), 0);
+      if (_client != null) {
+        _client.plist_fields.items_changed.disconnect (plist_fields_change);
+        plist_fields_change (0, _client.plist_fields.get_n_items (), 0);
       }
 
-      _querier = value;
+      _client = value;
 
-      if (_querier != null) {
-        _querier.plist_fields.items_changed.connect (plist_fields_change);
-        plist_fields_change (0, 0, _querier.plist_fields.get_n_items ());
+      if (_client != null) {
+        _client.plist_fields.items_changed.connect (plist_fields_change);
+        plist_fields_change (0, 0, _client.plist_fields.get_n_items ());
       }
     }
   }
@@ -46,7 +46,7 @@ class PlayerList : Widget {
 
     for (var i = 0; i < added; i++) {
       var index = position + i;
-      var field = (PlayerField) querier.plist_fields.get_item (index);
+      var field = (PlayerField) client.plist_fields.get_item (index);
       var column = create_column (field, i == 0);
       view.insert_column (index, column);
     }

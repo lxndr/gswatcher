@@ -4,7 +4,7 @@ namespace Gsw.Ui {
 
 [GtkTemplate (ui = "/org/lxndr/gswatcher/ui/server-details.ui")]
 class ServerDetails : Widget {
-  public Querier? querier { get; set; }
+  public Client? client { get; set; }
 
   class construct {
     typeof (ServerDetailsEntry).ensure ();

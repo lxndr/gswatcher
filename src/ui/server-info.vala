@@ -4,7 +4,7 @@ namespace Gsw.Ui {
 
 [GtkTemplate (ui = "/org/lxndr/gswatcher/ui/server-info.ui")]
 class ServerInfo : Widget {
-  public Querier? querier { get; set; }
+  public Client? client { get; set; }
 
   class construct {
     typeof (Gsw.ServerInfo).ensure ();
@@ -28,12 +28,12 @@ class ServerInfo : Widget {
   }
 
   [GtkCallback]
-  private string? format_location (InetSocketAddress? saddr) {
-    if (saddr == null)
+  private string? format_location (string? ip_address) {
+    if (ip_address == null)
       return null;
 
     var geoip_resolver = GeoIPResolver.get_instance ();
-    var location = geoip_resolver.city_by_addr (saddr.address.to_string ());
+    var location = geoip_resolver.city_by_addr (ip_address);
     return location;
   }
 

@@ -4,7 +4,7 @@ namespace Gsw.Ui {
 
 class NewClient : Client {
   public NewClient () {
-    Object (server : null);
+    Object (server : new Server ("fake:0"));
   }
 
   public signal void add (string address);
@@ -88,17 +88,17 @@ class ServerList : Widget {
   }
 
   [GtkCallback]
-  private string? format_server_name (string? server_name, string address) {
+  private string format_server_name (string? server_name, string address) {
     return server_name == null ? address : server_name;
   }
 
   [GtkCallback]
-  private string? format_country_icon (InetSocketAddress? saddr) {
-    if (saddr == null)
+  private string? format_country_icon (string? ip_address) {
+    if (ip_address == null)
       return null;
 
     var geoip_resolver = GeoIPResolver.get_instance ();
-    var country_code = geoip_resolver.code_by_addr (saddr.address.to_string ());
+    var country_code = geoip_resolver.code_by_addr (ip_address);
     return find_file_in_data_dirs ("./icons/flags/" + country_code + ".png");
   }
 
