@@ -1,5 +1,16 @@
 gnome = import('gnome')
 
+libadwaita_dep = dependency('libadwaita-1', version : '>=1.2.2')
+
+dependencies = [
+  dependency('gtk4', version : '>=4.8.3'),
+  libadwaita_dep,
+  dependency('gee-0.8', version : '>=0.20.4'),
+  dependency('lua', version : '>=5.4'),
+  dependency('geoip', version : '>=1.6.12'),
+  meson.get_compiler('c').find_library('m', required: false),
+]
+
 add_project_arguments(
   ['--vapidir', join_paths(meson.current_source_dir(), 'vapi')],
   language: 'vala',
@@ -10,14 +21,12 @@ add_project_arguments(
     language: 'c',
 )
 
-dependencies = [
-  dependency('gtk4', version : '>=4.8.3'),
-  dependency('libadwaita-1', version : '>=1.3.0'),
-  dependency('gee-0.8', version : '>=0.20.4'),
-  dependency('lua', version : '>=5.4'),
-  dependency('geoip', version : '>=1.6.12'),
-  meson.get_compiler('c').find_library('m', required: false),
-]
+if libadwaita_dep.version().version_compare('>=1.3.0')
+  add_project_arguments(
+    '-D', 'GSW_ADWAITA_1_3_SUPPORTED',
+    language: 'vala',
+  )
+endif
 
 core_sources = files(
   'core/game/expression-parser.vala',

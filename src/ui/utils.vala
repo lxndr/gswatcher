@@ -21,7 +21,8 @@ async ShowRemoveDialogResponse show_remove_dialog (Gtk.Window parent, string hea
   dlg.set_response_appearance ("remove", DESTRUCTIVE);
   dlg.default_response = "cancel";
   dlg.close_response = "cancel";
-  var res = yield dlg.choose (null);
+
+  var res = yield show_message_dialog (dlg);
 
   return res == "remove"
     ? ShowRemoveDialogResponse.REMOVE
@@ -35,6 +36,26 @@ void show_error_dialog (Gtk.Window parent, string body) {
   dlg.default_response = "ok";
   dlg.close_response = "ok";
   dlg.present ();
+}
+
+async string show_message_dialog (Adw.MessageDialog dlg) {
+  #if GSW_ADWAITA_1_3_SUPPORTED
+    return yield dlg.choose (null);
+  #else
+    var promise = new Gee.Promise<string> ();
+
+    dlg.response.connect ((res) => {
+      promise.set_value (res);
+    });
+
+    dlg.present ();
+
+    try {
+      return yield promise.future.wait_async ();
+    } catch (Gee.FutureError err) {
+      return "cancel";
+    }
+  #endif
 }
 
 }
