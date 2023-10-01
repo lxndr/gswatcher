@@ -42,7 +42,7 @@ public class ConsoleLuaProtocol : LuaProtocol, ConsoleProtocol {
         if (err.message.index_of ("InvalidResponseError") >= 0)
           throw new ProtocolError.INVALID_RESPONSE (err.message);
         if (err.message.index_of ("AuthError") >= 0)
-          throw new ProtocolError.AUTH_FAILED ("authorization failed");
+          throw new ProtocolError.AUTH_FAILED ("authentication failed");
       }
 
       throw err;

@@ -1,6 +1,6 @@
 namespace Gsw {
 
-const uint TIMEOUT_MS = 2000;
+const uint TIMEOUT_MS = 5000;
 
 public errordomain QuerierError {
   PROCESSING,
