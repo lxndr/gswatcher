@@ -34,7 +34,7 @@ namespace Gsw.Ui {
 
     construct {
       var settings_file = Path.build_filename (Environment.get_user_config_dir (), "gswatcher", "preferences.ini");
-      var settings_backend = SettingsBackend.keyfile_settings_backend_new (settings_file, "/ru/org/gswatcher/", null);
+      var settings_backend = SettingsBackend.keyfile_settings_backend_new (settings_file, "/ru/lxndr/gswatcher/", null);
       var settings = new GLib.Settings.with_backend (@"$(Config.APPID).Preferences", settings_backend);
       var schema = settings.settings_schema;
 
