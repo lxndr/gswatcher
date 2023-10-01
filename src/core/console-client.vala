@@ -3,6 +3,7 @@ namespace Gsw {
 errordomain ConsoleError {
   SENDING,
   PROCESSING,
+  AUTH_FAILED,
   TIMEOUT,
 }
 
@@ -59,7 +60,10 @@ public class ConsoleClient : Object {
     try {
       protocol.process_response (data);
     } catch (Error err) {
-      on_error (new ConsoleError.PROCESSING ("failed to process data from %s:%u: %s", transport.host, transport.port, err.message));
+      if (err is ProtocolError.AUTH_FAILED)
+        on_error (new ConsoleError.AUTH_FAILED ("authentication failed"));
+      else
+        on_error (new ConsoleError.PROCESSING ("failed to process data from %s:%u: %s", transport.host, transport.port, err.message));
     }
   }
 
@@ -73,6 +77,7 @@ public class ConsoleClient : Object {
   }
 
   private void on_error (Error err) {
+    stop_timeout_timer ();
     error_occured (err);
   }
 

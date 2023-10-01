@@ -11,8 +11,8 @@ protocol = {
   transport = "tcp",
 }
 
----@enum AuthorizationState
-local AuthorizationState = {
+---@enum AuthenticationState
+local AuthenticationState = {
   NONE        = 0,
   AUTHORIZING = 1,
   AUTHORIZED  = 2,
@@ -34,8 +34,8 @@ local PacketType = {
 
 ---@type string[]
 local pending_commands = {}
----@type AuthorizationState
-local authorization_state = AuthorizationState.NONE
+---@type AuthenticationState
+local authentication_state = AuthenticationState.NONE
 ---@type integer
 local requestId = 0
 ---@type string
@@ -56,7 +56,7 @@ local function create_packet(id, type, body)
 end
 
 local function send_pending_command()
-  if authorization_state == AuthorizationState.AUTHORIZED and #pending_commands > 0 then
+  if authentication_state == AuthenticationState.AUTHORIZED and #pending_commands > 0 then
     requestId = requestId + 1
     local cmd = table.remove(pending_commands, 1)
     gsw.send(create_packet(requestId, PacketType.EXEC_COMMAND, cmd))
@@ -68,11 +68,11 @@ end
 function send_command(cmd, params)
   table.insert(pending_commands, cmd)
 
-  switch (authorization_state) {
-    [AuthorizationState.NONE] = function()
+  switch (authentication_state) {
+    [AuthenticationState.NONE] = function()
       gsw.send(create_packet(requestId, PacketType.AUTH, params.password))
     end,
-    [AuthorizationState.AUTHORIZED] = function()
+    [AuthenticationState.AUTHORIZED] = function()
       send_pending_command()
     end,
   }
@@ -94,19 +94,19 @@ end
 ---@param pak Packet
 local function process_auth_response(pak)
   if pak.id == requestId then
-    authorization_state = AuthorizationState.AUTHORIZED
+    authentication_state = AuthenticationState.AUTHORIZED
     send_pending_command()
   elseif pak.id == -1 then
-    error("AuthError: authorization failed")
+    error("AuthError: authentication failed")
   else
-    error("InvalidResponseError: invalid auth response")
+    error("InvalidResponseError: invalid authentication response")
   end
 end
 
 ---@param pak Packet
 local function process_response(pak)
   if pak.id == requestId then
-    if authorization_state == AuthorizationState.AUTHORIZED then
+    if authentication_state == AuthenticationState.AUTHORIZED then
       gsw.response(pak.body)
       send_pending_command()
     end

@@ -160,7 +160,11 @@ public class Client : Object {
   }
 
   private void on_console_error_occured (Error err) {
-    log_to_console (err.message, "err");
+    if (err is ConsoleError.AUTH_FAILED)
+      log_to_console ("Authentication failed.", "err");
+    else
+      log_to_console (err.message, "err");
+
     console_client = null;
   }
 
