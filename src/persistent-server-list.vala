@@ -8,6 +8,7 @@ class PersistentServerList : ServerList {
 
   construct {
     config_file = Path.build_filename (Environment.get_user_config_dir (), "gswatcher", "servers.ini");
+    print ("!!! config_file = %s", config_file);
     settings_backend = SettingsBackend.keyfile_settings_backend_new (config_file, root_path, null);
   }
 
