@@ -8,7 +8,7 @@ public class ConsoleLuaProtocol : LuaProtocol, ConsoleProtocol {
 
   private static int lua_response (LuaEx vm) {
     var proto = (ConsoleLuaProtocol) LuaProtocol.get_this_pointer (vm);
-    var resp = vm.to_string (0);
+    var resp = vm.l_check_string (1);
     proto.enqueue_callback (() => proto.response (resp));
     return 0;
   }

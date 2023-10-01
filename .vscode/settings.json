@@ -3,6 +3,7 @@
     "query",
     "protocol",
     "gsw",
-    "process"
+    "process",
+    "send_command",
   ]
 }
