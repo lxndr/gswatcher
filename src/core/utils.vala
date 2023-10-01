@@ -124,4 +124,28 @@ public async Gee.List<DataFileContents> get_data_files_contents (string dirname,
   return contents;
 }
 
+public void print_buffer (uint8[] buf) {
+  const int MAX_COLUMNS = 16;
+  var len = buf.length;
+
+  for (var idx = 0; idx < len;) {
+    var ncols = int.min (len - idx, MAX_COLUMNS);
+
+    for(var col = 0; col < ncols; col++) {
+      print (" %02X", buf[idx + col]);
+    }
+
+    for (var col = 0; col < (MAX_COLUMNS - ncols) * 3 + 2; col++) {
+      print (" ");
+    }
+
+    for (var col = 0; col < ncols; col++, idx++) {
+      var ch = (char) buf[idx];
+      print ("%c", ch.isprint () ? ch : '.');
+    }
+
+    print ("\n");
+  }
+}
+
 }

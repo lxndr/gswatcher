@@ -8,7 +8,7 @@ public class ServerList : Object, ListModel {
   }
 
   public Type get_item_type () {
-    return typeof (Server);
+    return typeof (Client);
   }
 
   public uint get_n_items () {

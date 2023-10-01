@@ -1,3 +1,5 @@
+-- https://developer.valvesoftware.com/wiki/Source_RCON_Protocol
+
 local switch = require("lib/switch")
 local DataWriter = require("lib/DataWriter")
 local DataReader = require("lib/DataReader")
@@ -9,6 +11,14 @@ protocol = {
   transport = "tcp",
 }
 
+---@enum AuthorizationState
+local AuthorizationState = {
+  NONE        = 0,
+  AUTHORIZING = 1,
+  AUTHORIZED  = 2,
+}
+
+---@enum PacketType
 local PacketType = {
   AUTH           = 3,
   AUTH_RESPONSE  = 2,
@@ -16,15 +26,25 @@ local PacketType = {
   RESPONSE_VALUE = 0,
 }
 
-local pending_command = nil
-local authorized = false
+---@class Packet
+---@field id integer
+---@field type PacketType
+---@field body string
+---@field empty ""
+
+---@type string[]
+local pending_commands = {}
+---@type AuthorizationState
+local authorization_state = AuthorizationState.NONE
+---@type integer
 local requestId = 0
+---@type string
 local buffer = ""
 
----@param id string
----@param type integer
+---@param id integer
+---@param type PacketType
 ---@param body string
-function create_packet(id, type, body)
+local function create_packet(id, type, body)
   local length = #body + 10
   local w = DataWriter ()
   w:i32le(length)
@@ -35,19 +55,32 @@ function create_packet(id, type, body)
   return w.buf
 end
 
----@param cmd string
----@param options table
-function send_command(cmd, options)
-  if options.authorized then
+local function send_pending_command()
+  if authorization_state == AuthorizationState.AUTHORIZED and #pending_commands > 0 then
+    requestId = requestId + 1
+    local cmd = table.remove(pending_commands, 1)
     gsw.send(create_packet(requestId, PacketType.EXEC_COMMAND, cmd))
-  else
-    pending_command = cmd
-    gsw.send(create_packet(requestId, PacketType.AUTH, options.password))
   end
 end
 
+---@param cmd string
+---@param params { password: string }
+function send_command(cmd, params)
+  table.insert(pending_commands, cmd)
+
+  switch (authorization_state) {
+    [AuthorizationState.NONE] = function()
+      gsw.send(create_packet(requestId, PacketType.AUTH, params.password))
+    end,
+    [AuthorizationState.AUTHORIZED] = function()
+      send_pending_command()
+    end,
+  }
+end
+
 ---@param buf string
-function parse_packet(buf)
+---@return Packet
+local function parse_packet(buf)
   local r = DataReader(buf)
 
   return {
@@ -58,25 +91,27 @@ function parse_packet(buf)
   }
 end
 
-function process_auth_response(pak)
+---@param pak Packet
+local function process_auth_response(pak)
   if pak.id == requestId then
-    authorized = true
-
-    if pending_command then
-      send_command(pending_command)
-    end
+    authorization_state = AuthorizationState.AUTHORIZED
+    send_pending_command()
   elseif pak.id == -1 then
-    error("unauthorized")
+    error("AuthError: authorization failed")
   else
-    error("invalid auth response")
+    error("InvalidResponseError: invalid auth response")
   end
 end
 
-function process_response(pak)
+---@param pak Packet
+local function process_response(pak)
   if pak.id == requestId then
-    gsw.response(pak.body)
+    if authorization_state == AuthorizationState.AUTHORIZED then
+      gsw.response(pak.body)
+      send_pending_command()
+    end
   else
-    error("invalid response id")
+    error("InvalidResponseError: invalid response id")
   end
 end
 
@@ -92,21 +127,21 @@ function process(data)
       break
     end
 
-    local pak = parse_packet(buffer:sub(5, length + 4))
+    local pak = parse_packet(buffer:sub(5, length + 5))
     assert(pak.empty == "", "no empty trailing string")
 
     switch (pak.type) {
-      [PacketType.AUTH_RESPONSE] = function ()
+      [PacketType.AUTH_RESPONSE] = function()
         process_auth_response(pak)
       end,
-      [PacketType.RESPONSE_VALUE] = function ()
+      [PacketType.RESPONSE_VALUE] = function()
         process_response(pak)
       end,
-      default = function ()
-        error("invalid response type")
+      default = function()
+        error("InvalidResponseError: invalid response type")
       end,
     }
 
-    buffer = buffer:sub(length + 4)
+    buffer = buffer:sub(length + 5)
   end
 end
