@@ -47,7 +47,7 @@ namespace Gsw.Ui {
         "query-interval",
         query_interval,
         "value",
-        SettingsBindFlags.DEFAULT,
+        DEFAULT,
         (value, variant, user_data) => {
           var secs = ms2s (variant.get_uint32 ());
           value.set_double (secs);
@@ -65,10 +65,10 @@ namespace Gsw.Ui {
       range_tuple = schema.get_key ("local-udp-port").get_range ().get_child_value (1).get_variant ();
       local_udp_port_adjustment.lower = (double) range_tuple.get_child_value (0).get_uint16 ();
       local_udp_port_adjustment.upper = (double) range_tuple.get_child_value (1).get_uint16 ();
-      settings.bind ("local-udp-port", local_udp_port, "value", SettingsBindFlags.DEFAULT);
+      settings.bind ("local-udp-port", local_udp_port, "value", DEFAULT);
 
       // enable notifications
-      settings.bind ("enable-notifications", enable_notifications, "active", SettingsBindFlags.DEFAULT);
+      settings.bind ("enable-notifications", enable_notifications, "active", DEFAULT);
     }
 
     protected override void dispose () {

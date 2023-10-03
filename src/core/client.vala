@@ -9,15 +9,20 @@ public class Client : Object {
 
   public Server server { get; construct set; }
   public string? ip_address { get; protected set; }
+
+  // query
   public Error? error { get; protected set; }
   public int64 ping { get; protected set; default = -1; }
   public ServerDetailsList details { get; construct set; }
   public ServerInfo sinfo { get; construct set; }
   public PlayerList plist { get; construct set; }
   public ListStore? plist_fields { get; construct set; }
+
+  // remote console
   public bool is_console_supported { get; private set; }
   public ConsoleClient? console_client { get; private set; }
   public Gtk.TextBuffer? console_log_buffer { get; private set; }
+  public Gee.ArrayList<string> console_command_history { get; set; }
 
   class construct {
     console_log_buffer_tag_table = new Gtk.TextTagTable ();
@@ -48,6 +53,7 @@ public class Client : Object {
     sinfo = new ServerInfo ();
     plist = new PlayerList ();
     plist_fields = new ListStore (typeof (PlayerField));
+    console_command_history = new Gee.ArrayList<string> ((a, b) => a == b);
 
     if (server.protocol == null) {
       reset ();
@@ -181,6 +187,14 @@ public class Client : Object {
 
     log_to_console (cmd, "cmd");
     console_client.exec_command (cmd);
+
+    console_command_history.remove (cmd);
+    console_command_history.add (cmd);
+
+    if (console_command_history.size > 50)
+      console_command_history.remove_at (0);
+
+    notify_property ("console-command-history");
   }
 }
 

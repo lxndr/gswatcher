@@ -16,11 +16,29 @@ class PersistentServerList : ServerList {
 
     var path = root_path + client.server.address + "/";
     var server_settings = new Settings.with_backend_and_path (@"$(Config.APPID).Server", settings_backend, path);
-    server_settings.bind ("protocol", client.server, "protocol", SettingsBindFlags.DEFAULT | SettingsBindFlags.GET_NO_CHANGES);
-    server_settings.bind ("game-id", client.server, "game-id", SettingsBindFlags.DEFAULT | SettingsBindFlags.GET_NO_CHANGES);
-    server_settings.bind ("server-name", client.sinfo, "server-name", SettingsBindFlags.DEFAULT | SettingsBindFlags.GET_NO_CHANGES);
-    server_settings.bind ("console-port", client.server, "console-port", SettingsBindFlags.DEFAULT);
-    server_settings.bind ("console-password", client.server, "console-password", SettingsBindFlags.DEFAULT);
+    server_settings.bind ("protocol", client.server, "protocol", DEFAULT | GET_NO_CHANGES);
+    server_settings.bind ("game-id", client.server, "game-id", DEFAULT | GET_NO_CHANGES);
+    server_settings.bind ("server-name", client.sinfo, "server-name", DEFAULT | GET_NO_CHANGES);
+    server_settings.bind ("console-port", client.server, "console-port", DEFAULT);
+    server_settings.bind ("console-password", client.server, "console-password", DEFAULT);
+
+    server_settings.bind_with_mapping (
+      "console-command-history",
+      client,
+      "console-command-history",
+      DEFAULT | GET_NO_CHANGES,
+      (value, variant, user_data) => {
+        var list = new Gee.ArrayList<string>.wrap (variant.get_strv (), (a, b) => a == b);
+        value.set_object (list);
+        return true;
+      },
+      (value, expected_type, user_data) => {
+        var list = (Gee.ArrayList<string>) value.get_object ();
+        return new Variant.strv (list.to_array ());
+      },
+      null,
+      null
+    );
 
     return client;
   }

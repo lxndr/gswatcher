@@ -48,6 +48,11 @@
                 <property name="completion">completion</property>
                 <signal name="activate" handler="entry_activated" />
                 <signal name="icon-release" handler="entry_icon_released" />
+                <child>
+                  <object class="GtkEventControllerKey">
+                    <signal name="key-pressed" handler="entry_key_pressed"/>
+                  </object>
+                </child>
               </object>
             </child>
 

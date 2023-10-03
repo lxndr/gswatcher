@@ -23,5 +23,9 @@
       <default>""</default>
       <summary>Remote console password</summary>
     </key>
+    <key name="console-command-history" type="as">
+      <default>[]</default>
+      <summary>Remote console command history</summary>
+    </key>
   </schema>
 </schemalist>

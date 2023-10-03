@@ -23,14 +23,14 @@ class PersistentBuddyList : BuddyList {
 
     var path = root_path + buddy.name + "/";
     var buddy_settings = new Settings.with_backend_and_path (@"$(Config.APPID).Buddy", settings_backend, path);
-    buddy_settings.bind ("notifications", buddy, "notifications", SettingsBindFlags.DEFAULT);
-    buddy_settings.bind ("lastaddr", buddy, "lastaddr", SettingsBindFlags.DEFAULT);
+    buddy_settings.bind ("notifications", buddy, "notifications", DEFAULT);
+    buddy_settings.bind ("lastaddr", buddy, "lastaddr", DEFAULT);
 
     buddy_settings.bind_with_mapping (
       "lastseen",
       buddy,
       "lastseen",
-      SettingsBindFlags.DEFAULT,
+      DEFAULT,
       (value, variant, user_data) => {
         var str = variant.get_string ();
         var time = new DateTime.from_iso8601 (str, null);
