@@ -2,7 +2,7 @@ using Gtk;
 
 namespace Gsw.Ui {
 
-[GtkTemplate (ui = "/ru/lxndr/gswatcher/ui/main-window.ui")]
+[GtkTemplate (ui = "/com/github/lxndr/gswatcher/ui/main-window.ui")]
 class MainWindow : Adw.ApplicationWindow {
   public Gsw.BuddyList buddy_list { get; construct; }
   public Gsw.ServerList client_list { get; construct; }

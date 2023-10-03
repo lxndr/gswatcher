@@ -64,7 +64,7 @@ core_sources = files(
 )
 
 conf_data = configuration_data()
-conf_data.set_quoted('GSW_APPID', 'ru.lxndr.gswatcher')
+conf_data.set_quoted('GSW_APPID', 'com.github.lxndr.gswatcher')
 conf_data.set_quoted('GSW_APPNAME', 'Game Server Watcher')
 conf_data.set_quoted('GSW_VERSION', meson.project_version())
 conf_data.set_quoted('GSW_HOMEPAGE', 'https://gitlab.com/lxndr-ab/gswatcher')

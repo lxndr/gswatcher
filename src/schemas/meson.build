@@ -1,7 +1,7 @@
 settings_schemas = [
-  'ru.lxndr.gswatcher.Buddy.gschema.xml',
-  'ru.lxndr.gswatcher.Preferences.gschema.xml',
-  'ru.lxndr.gswatcher.Server.gschema.xml',
+  'com.github.lxndr.gswatcher.Buddy.gschema.xml',
+  'com.github.lxndr.gswatcher.Preferences.gschema.xml',
+  'com.github.lxndr.gswatcher.Server.gschema.xml',
 ]
 
 install_data(

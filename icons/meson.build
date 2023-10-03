@@ -1,4 +1,4 @@
-install_data('gswatcher.png', install_dir: data_dir / 'icons/hicolor/128x128/apps', rename: 'ru.lxndr.gswatcher.png')
+install_data('gswatcher.png', install_dir: data_dir / 'icons/hicolor/128x128/apps', rename: 'com.github.lxndr.gswatcher.png')
 install_subdir('flags', install_dir: gswatcher_dir / 'icons')
 
 free_icons = [
