@@ -1,2 +1,2 @@
 option('tests', type: 'boolean', value: true, description: 'build tests')
-option('proprietary-icon', type: 'boolean', value: false, description: 'Enable proprietary icons')
+option('proprietary-icons', type: 'boolean', value: false, description: 'Enable proprietary icons')
