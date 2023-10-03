@@ -15,16 +15,16 @@ class ServerConsole : Widget {
     }
 
     set {
+      if (_client?.console_log_buffer != null) {
+        _client.console_log_buffer.changed.disconnect(scroll_to_bottom);
+      }
+
       _client = value;
 
       if (_client?.console_log_buffer != null) {
         text_view.buffer = _client.console_log_buffer;
-
-        TextIter iter;
-        text_view.buffer.get_end_iter (out iter);
-        var mark = text_view.buffer.create_mark (null, iter, true);
-        text_view.scroll_mark_onscreen (mark);
-        text_view.buffer.delete_mark (mark);
+        _client.console_log_buffer.changed.connect(scroll_to_bottom);
+        scroll_to_bottom ();
       }
     }
   }
@@ -52,6 +52,14 @@ class ServerConsole : Widget {
       client.send_console_command (entry.text);
       entry.text = "";
     }
+  }
+
+  private void scroll_to_bottom () {
+    TextIter iter;
+    text_view.buffer.get_end_iter (out iter);
+    var mark = text_view.buffer.create_mark (null, iter, true);
+    text_view.scroll_to_mark (mark, 0, true, 0, 0);
+    text_view.buffer.delete_mark (mark);
   }
 }
 
