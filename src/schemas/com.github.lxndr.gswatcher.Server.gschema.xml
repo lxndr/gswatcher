@@ -6,7 +6,7 @@
       <default>""</default>
       <summary>Server name</summary>
     </key>
-    <key name="protocol" type="s">
+    <key name="protocol-id" type="s">
       <default>""</default>
       <summary>Protocol</summary>
     </key>

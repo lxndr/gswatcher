@@ -20,6 +20,7 @@ public class Querier : Object {
   private bool query_pending;
   private int64 query_time;
   private uint timeout_source;
+  private string? game_id;
   private bool plist_fields_resolved;
 
   public signal void details_update (Gee.Map<string, string> details);
@@ -103,13 +104,17 @@ public class Querier : Object {
   private void on_sinfo_updated (Gee.Map<string, string> details, ServerInfo sinfo) {
     stop_timeout_timer ();
     game_resolver.resolve (protocol.info.id, sinfo, details);
+
+    if (game_id == null)
+      game_id = sinfo.game_id;
+
     details_update (details);
     sinfo_update (sinfo);
   }
 
   private void on_plist_updated (Gee.List<PlayerField> default_pfields, Gee.ArrayList<Player> plist) {
     if (!plist_fields_resolved) {
-      var game_pfields = game_resolver.get_plist_fields (server.game_id);
+      var game_pfields = game_resolver.get_plist_fields (game_id);
       var new_pfields = (game_pfields != null && game_pfields.size > 0) ? game_pfields : default_pfields;
       plist_fields_update (new_pfields);
       plist_fields_resolved = true;

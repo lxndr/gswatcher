@@ -16,8 +16,8 @@ class PersistentServerList : ServerList {
 
     var path = root_path + client.server.address + "/";
     var server_settings = new Settings.with_backend_and_path (@"$(Config.APPID).Server", settings_backend, path);
-    server_settings.bind ("protocol", client.server, "protocol", DEFAULT | GET_NO_CHANGES);
-    server_settings.bind ("game-id", client.server, "game-id", DEFAULT | GET_NO_CHANGES);
+    server_settings.bind ("protocol-id", client, "protocol-id", DEFAULT | GET_NO_CHANGES);
+    server_settings.bind ("game-id", client.sinfo, "game-id", DEFAULT | GET_NO_CHANGES);
     server_settings.bind ("server-name", client.sinfo, "server-name", DEFAULT | GET_NO_CHANGES);
     server_settings.bind ("console-port", client.server, "console-port", DEFAULT);
     server_settings.bind ("console-password", client.server, "console-password", DEFAULT);
