@@ -1,6 +1,6 @@
 project('gswatcher', 'c', 'vala',
-        version: '1.6.3',
-  meson_version: '>= 0.60.0',
+        version: '1.6.4',
+  meson_version: '>= 1.0.1',
 )
 
 data_dir = get_option('prefix') / get_option('datadir')
