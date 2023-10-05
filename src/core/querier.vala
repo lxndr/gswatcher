@@ -143,10 +143,9 @@ public class Querier : Object {
   private void start_timeout_timer () {
     stop_timeout_timer ();
 
-    timeout_source = Timeout.add (TIMEOUT_MS, () => {
+    timeout_source = Timeout.add_once (TIMEOUT_MS, () => {
       error = new QuerierError.TIMEOUT("failed to query %s:%d: %s", server.host, server.qport, "failed to receive a response in reasonable amount of time");
       timeout_source = 0;
-      return Source.REMOVE;
     });
   }
 

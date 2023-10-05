@@ -1,3 +1,5 @@
+---@meta
+
 local Object = require("lib/classic")
 
 ---@class Packet
@@ -6,6 +8,7 @@ local Object = require("lib/classic")
 ---@field data string
 ---@field total integer
 
+---@class CompoundResponse
 local CompoundResponse = Object:extend()
 
 function CompoundResponse:new()
@@ -60,6 +63,7 @@ function CompoundResponse:got_all_packets()
   return true
 end
 
+---@return table
 function CompoundResponse:combine()
   if type(self.packets[0]) == "string" then
     return self.packets:concat()

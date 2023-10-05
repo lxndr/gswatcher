@@ -1,3 +1,5 @@
+---@meta
+
 local function concat_tables(...)
   local args = {...}
   local res = {}

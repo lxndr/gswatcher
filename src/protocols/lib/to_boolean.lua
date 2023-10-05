@@ -1,3 +1,5 @@
+---@meta
+
 local truthy_values = {
   [true]   = true,
   [1]      = true,
