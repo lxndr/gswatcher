@@ -9,6 +9,7 @@ protocol = {
   transport = "udp",
 }
 
+---@type CompoundResponse
 local response = nil
 
 local function create_packet(values)

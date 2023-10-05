@@ -103,7 +103,7 @@ local function parse_player_list(r, delimiter)
       player[pfields[field_idx].field] = val
     end
 
-    table.insert(players, player)
+    players[player_idx] = player
   end
 
   return pfields, players

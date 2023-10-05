@@ -6,7 +6,7 @@ install_data(
   files(
     #'ase.lua',
     #'gamespy.lua',
-    #'gamespy2.lua',
+    'gamespy2.lua',
     #'quake3.lua',
     'source-console.lua',
     'source.lua',
