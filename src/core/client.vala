@@ -60,7 +60,7 @@ public class Client : Object {
   }
 
   private void activate () {
-    if (protocol_id == null) {
+    if (protocol_id == null || protocol_id.length == 0) {
       reset ();
     } else {
       try {
