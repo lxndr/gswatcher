@@ -48,18 +48,18 @@ local function get_players(inf)
   local players = {}
 
   for k, v in pairs(inf) do
-    local _, _, key, val = v:find("^(%a+)_(%d+)$")
+    local _, _, key, idx = k:find("^(%a+)_(%d+)$")
 
     if key then
-      local index = tonumber(val)
+      local index = tonumber(idx) + 1
       local player = players[index]
 
-      if not player then
+      if player == nil then
         player = {}
         players[index] = player
       end
 
-      player[key] = val
+      player[key] = v
     end
   end
 
@@ -67,18 +67,12 @@ local function get_players(inf)
 end
 
 local function get_pfields(players)
-  local pfields = {
-    {
-      title = 'Name',
-      kind = 'string',
-      field = 'name',
-    },
-  }
+  local pfields = {}
 
   if #players > 0 then
-    for k, v in pairs(players[0]) do
-      pfields:insert({
-        title = k:sub(1, 2):upper() .. k:sub(2),
+    for k, v in pairs(players[1]) do
+      table.insert(pfields, {
+        title = k:sub(1, 1):upper() .. k:sub(2),
         kind = 'string',
         field = k,
       })
