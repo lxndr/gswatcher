@@ -27,6 +27,7 @@ public abstract class NetTransport : Transport {
 
     var address = addresses.nth_data (0);
     saddr = new InetSocketAddress (address, port);
+    resolved (saddr.address.to_string ());
   }
 }
 

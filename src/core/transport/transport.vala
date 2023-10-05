@@ -1,6 +1,7 @@
 namespace Gsw {
 
 public abstract class Transport : Object {
+  public signal void resolved (string address);
   public signal void connected ();
   public signal void disconnected ();
   public signal void authenticated ();

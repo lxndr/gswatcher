@@ -64,11 +64,7 @@ public class Client : Object {
       reset ();
     } else {
       try {
-        querier = querier_manager.create_querier (server, protocol_id);
-        querier.details_update.connect (on_details_update);
-        querier.sinfo_update.connect (on_sinfo_update);
-        querier.plist_fields_update.connect (on_plist_fields_updated);
-        querier.plist_update.connect (on_plist_update);
+        querier = setup_querier (server, protocol_id);
         on_game_detected (querier);
       } catch (Error err) {
         log (Config.LOG_DOMAIN, LEVEL_ERROR, "failed to create querier for protocol '%s': %s", protocol_id, err.message);
@@ -82,16 +78,27 @@ public class Client : Object {
 
     foreach (var protocol_desc in ProtocolRegistry.get_instance ().list_by_feature (QUERY)) {
       try {
-        var querier = querier_manager.create_querier (server, protocol_desc.id);
-        querier.details_update.connect (on_details_update);
-        querier.sinfo_update.connect (on_sinfo_update);
-        querier.plist_fields_update.connect (on_plist_fields_updated);
-        querier.plist_update.connect (on_plist_update);
+        setup_querier (server, protocol_desc.id);
         tmp_queriers.add (querier);
       } catch (Error err) {
         log (Config.LOG_DOMAIN, LEVEL_ERROR, "failed to create querier for protocol '%s': %s", protocol_desc.id, err.message);
       }
     }
+  }
+
+  private Querier setup_querier (Server server, string protocol_id) throws Error {
+    var querier = querier_manager.create_querier (server, protocol_id);
+    querier.details_update.connect (on_details_update);
+    querier.sinfo_update.connect (on_sinfo_update);
+    querier.plist_fields_update.connect (on_plist_fields_updated);
+    querier.plist_update.connect (on_plist_update);
+    querier.transport.resolved.connect(on_address_resolve);
+    return querier;
+  }
+
+  private void on_address_resolve (string address) {
+    ip_address = address;
+    print (" > %s\n", ip_address);
   }
 
   private void on_details_update (Gee.Map<string, string> details) {
@@ -130,7 +137,6 @@ public class Client : Object {
   private void on_game_detected (Querier querier) {
     this.querier = querier;
     this.protocol_id = querier.protocol.info.id;
-    this.ip_address = querier.transport.saddr?.address?.to_string ();
     querier.bind_property ("ping", this, "ping", DEFAULT | SYNC_CREATE);
     querier.bind_property ("error", this, "error", DEFAULT | SYNC_CREATE);
     tmp_queriers.clear ();
