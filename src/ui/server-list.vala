@@ -89,7 +89,7 @@ class ServerList : Widget {
 
   [GtkCallback]
   private string format_server_name (string? server_name, string address) {
-    return server_name == null ? address : server_name;
+    return (server_name == null || server_name.length == 0) ? address : server_name;
   }
 
   [GtkCallback]
