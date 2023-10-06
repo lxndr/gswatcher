@@ -1,5 +1,3 @@
-gnome = import('gnome')
-
 libadwaita_dep = dependency('libadwaita-1', version : '>=1.2.2')
 
 dependencies = [
@@ -62,15 +60,6 @@ core_sources = files(
   'core/server.vala',
   'core/utils.vala',
 )
-
-conf_data = configuration_data()
-conf_data.set_quoted('GSW_APPID', 'com.github.lxndr.gswatcher')
-conf_data.set_quoted('GSW_APPNAME', 'Game Server Watcher')
-conf_data.set_quoted('GSW_VERSION', meson.project_version())
-conf_data.set_quoted('GSW_HOMEPAGE', 'https://github.com/lxndr/gswatcher')
-conf_data.set_quoted('GSW_ISSUES', 'https://github.com/lxndr/gswatcher/issues')
-conf_data.set_quoted('GSW_LOG_DOMAIN', 'Gsw')
-conf_data.set_quoted('GETTEXT_PACKAGE', meson.project_name())
 
 core_sources += configure_file(
   input: 'config.vala.in',

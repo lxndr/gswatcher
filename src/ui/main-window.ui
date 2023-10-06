@@ -17,8 +17,8 @@
   </menu>
 
   <template class="GswUiMainWindow" parent="AdwApplicationWindow">
-    <property name="default-width">1024</property>
-    <property name="default-height">768</property>
+    <property name="default-width">1280</property>
+    <property name="default-height">720</property>
     <property name="content">
       <object class="GtkBox">
         <property name="orientation">vertical</property>

@@ -1,4 +1,4 @@
-protocols_dir = gswatcher_dir / 'protocols'
+protocols_dir = join_paths(gsw_datadir, 'protocols')
 
 install_subdir('lib', install_dir: protocols_dir)
 

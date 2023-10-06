@@ -12,13 +12,13 @@
       "args": [],
       "cwd": "${workspaceFolder}/builddir",
       "env": {
-        "G_DEBUG": "fatal-warnings",
+        // "G_DEBUG": "fatal-warnings",
         // "G_MESSAGES_DEBUG": "Gsw",
         "DEBUGINFOD_URLS": "https://debuginfod.archlinux.org",
         "GSETTINGS_SCHEMA_DIR": "${workspaceFolder}/tmp/schemas",
-        "XDG_DATA_HOME": "${workspaceFolder}/..",
         "XDG_CONFIG_HOME": "${workspaceFolder}/tmp/config",
-        "GSW_PROTOCOLS_DIR": "${workspaceFolder}/src/protocols"
+        "GSW_PROTOCOLS_DIR": "${workspaceFolder}/data/protocols",
+        "GSW_GAMES_DIR": "${workspaceFolder}/data/games"
       },
       "preLaunchTask": "Meson: Build src/gswatcher:executable"
     }

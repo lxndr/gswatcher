@@ -98,7 +98,6 @@ public class Client : Object {
 
   private void on_address_resolve (string address) {
     ip_address = address;
-    print (" > %s\n", ip_address);
   }
 
   private void on_details_update (Gee.Map<string, string> details) {

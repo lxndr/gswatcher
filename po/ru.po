@@ -1,0 +1,163 @@
+#
+# Alexander Burobin <alexandrburobin@gmail.com>, 2023.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: unnamed project\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-06 21:25+0300\n"
+"PO-Revision-Date: 2023-10-06 21:19+0300\n"
+"Last-Translator: Alexander Burobin <alexandrburobin@gmail.com>\n"
+"Language-Team: Russian <>\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
+"X-Generator: Gtranslator 45.2\n"
+
+#: src/ui/buddy-list.vala:7 src/ui/buddy-list.vala:89
+msgid "Click here to add new buddy"
+msgstr "Нажмите сюда, чтобы добавить нового друга"
+
+#: src/ui/console-option-list.ui:19
+msgid "Port:"
+msgstr "Порт:"
+
+#: src/ui/console-option-list.ui:46
+msgid "Password:"
+msgstr "Пароль:"
+
+#: src/ui/main-window.ui:9
+msgid "_Pause"
+msgstr "_Пауза"
+
+#: src/ui/main-window.ui:13
+msgid "_About"
+msgstr "_О приложении"
+
+#: src/ui/main-window.ui:47
+msgid "Primary menu"
+msgstr "Главное меню"
+
+#: src/ui/main-window.vala:35
+msgid "Remove server?"
+msgstr "Удалить сервер?"
+
+#: src/ui/main-window.vala:36
+#, c-format
+msgid "Are you sure you want to remove \"%s\" from the server list?"
+msgstr "Вы уверены, что хотите удалить \"%s\" из списка серверов?"
+
+#: src/ui/main-window.vala:48
+#, c-format
+msgid "\"%s\" is already on your buddy list."
+msgstr "\"%s\" уже в списке друзей."
+
+#: src/ui/main-window.vala:58
+msgid "Remove buddy?"
+msgstr "Удалить друга?"
+
+#: src/ui/main-window.vala:59
+#, c-format
+msgid "Are you sure you want to remove \"%s\" from the buddy list?"
+msgstr "Вы уверены, что хотите удалить \"%s\" из списка друзей?"
+
+#: src/ui/preferences.ui:15
+msgid "General"
+msgstr ""
+
+#: src/ui/preferences.ui:19
+msgid "Query _interval"
+msgstr ""
+
+#: src/ui/preferences.ui:39
+msgid "Local UDP _port"
+msgstr ""
+
+#: src/ui/preferences.ui:59
+msgid "Notifications"
+msgstr ""
+
+#: src/ui/preferences.ui:62
+msgid "Enable _notifications"
+msgstr ""
+
+#: src/ui/server-info.ui:21
+msgid "Name:"
+msgstr ""
+
+#: src/ui/server-info.ui:55
+msgid "Address:"
+msgstr ""
+
+#: src/ui/server-info.ui:88
+msgid "Location:"
+msgstr ""
+
+#: src/ui/server-info.ui:121
+msgid "Game:"
+msgstr ""
+
+#: src/ui/server-info.ui:154
+msgid "Mode:"
+msgstr ""
+
+#: src/ui/server-info.ui:187
+msgid "Map:"
+msgstr ""
+
+#: src/ui/server-info.ui:220
+msgid "Players:"
+msgstr ""
+
+#: src/ui/server-info.ui:262
+msgid "Private:"
+msgstr ""
+
+#: src/ui/server-info.ui:295
+msgid "Secure:"
+msgstr ""
+
+#: src/ui/server-info.ui:328
+msgid "Version:"
+msgstr ""
+
+#: src/ui/server-info.vala:22
+msgid "n/a"
+msgstr ""
+
+#: src/ui/server-info.vala:27
+msgid "yes"
+msgstr ""
+
+#: src/ui/server-info.vala:27
+msgid "no"
+msgstr ""
+
+#: src/ui/server-info.vala:51 src/ui/server-list.vala:148
+msgid "Timed out"
+msgstr ""
+
+#: src/ui/server-list.vala:150
+msgid "Error"
+msgstr ""
+
+#: src/ui/server-list.vala:178
+#, fuzzy
+msgid "Click here to add new server"
+msgstr "Нажмите сюда, чтобы добавить нового друга"
+
+#: src/ui/utils.vala:19
+msgid "Cancel"
+msgstr ""
+
+#: src/ui/utils.vala:20
+#, fuzzy
+msgid "Remove"
+msgstr "Удалить друга?"
+
+#: src/ui/utils.vala:34
+msgid "OK"
+msgstr ""

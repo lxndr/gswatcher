@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+  <id>@app_id@.desktop</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-2.0</project_license>
+  <developer_name>Alexander Burobin</developer_name>
+  <launchable type="desktop-id">@app_id@.desktop</launchable>
+  <name>@app_name@</name>
+  <summary>@app_summary@</summary>
+  <description>
+    <p>Game Server Watcher (GSWatcher) is a simple application that helps you to watch
+       the state of your favorite game servers and control remotely the servers of
+       your own. It also has a buddy list and can notify you if a buddy joins any of
+       servers.</p>
+    <h3>Features</h3>
+    <ul>
+      <li>Server list</li>
+      <li>Buddy list</li>
+      <li>Notifications when your buddy is on a server</li>
+      <li>Multiple query protocols</li>
+      <li>Remote console (Source only)</li>
+    </ul>
+  </description>
+
+  <url type="homepage">@app_homepage@</url>
+  <url type="bugtracker">@app_bugtracker@</url>
+
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/lxndr/gswatcher/main/docs/screenshots/01.png</image>
+    </screenshot>
+  </screenshots>
+
+  <translation type="gettext">@app_id@</translation>
+
+  <releases>
+    <release version="1.6.4" date="2023-10-05"/>
+  </releases>
+
+  <content_rating type="oars-1.1"/>
+</component>

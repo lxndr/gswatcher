@@ -1,9 +1,9 @@
 namespace Gsw.Config {
-  public const string APPID = @GSW_APPID@;
-  public const string APPNAME = @GSW_APPNAME@;
-  public const string VERSION = @GSW_VERSION@;
-  public const string HOMEPAGE = @GSW_HOMEPAGE@;
-  public const string ISSUES = @GSW_ISSUES@;
-  public const string LOG_DOMAIN = @GSW_LOG_DOMAIN@;
-  public const string GETTEXT_PACKAGE = @GETTEXT_PACKAGE@;
+  public const string APPID = "@app_id@";
+  public const string APPNAME = "@app_name@";
+  public const string VERSION = "@app_version@";
+  public const string HOMEPAGE = "@app_homepage@";
+  public const string ISSUES = "@app_bugtracker@";
+  public const string LOG_DOMAIN = "@app_log_domain@";
+  public const string GETTEXT_PACKAGE = "@app_gettext_package@";
 }
