@@ -5,5 +5,5 @@ namespace Gsw.Config {
   public const string HOMEPAGE = "@app_homepage@";
   public const string ISSUES = "@app_bugtracker@";
   public const string LOG_DOMAIN = "@app_log_domain@";
-  public const string GETTEXT_PACKAGE = "@app_gettext_package@";
+  public const string GETTEXT_PACKAGE = "@app_exec@";
 }
