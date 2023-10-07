@@ -43,7 +43,7 @@ local function normalize_server_info(details)
 end
 
 --- @param r DataReader
---- @param delimiter integer
+--- @param delimiter string
 local function parse_server_info(r, delimiter)
   local details = {}
 
@@ -62,7 +62,7 @@ local function parse_server_info(r, delimiter)
 end
 
 --- @param r DataReader
---- @param delimiter integer
+--- @param delimiter string
 local function read_player_fields(r, delimiter)
   ---@type Field[]
   local fields = {}
@@ -85,7 +85,7 @@ local function read_player_fields(r, delimiter)
 end
 
 --- @param r DataReader
---- @param delimiter integer
+--- @param delimiter string
 local function parse_player_list(r, delimiter)
   local players = {}
   local player_count = r:u8()
@@ -112,7 +112,7 @@ end
 ---@param data string
 function process(data)
   local r = DataReader(data)
-  local delimiter = r:u8()
+  local delimiter = string.char(r:u8())
   local reqid = r:u32le()
 
   if reqid ~= requestId then

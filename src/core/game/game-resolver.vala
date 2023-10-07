@@ -12,7 +12,7 @@ class GameResolver : Object {
         load_games.end (res);
         ready = true;
       } catch (Error err) {
-        log (Config.LOG_DOMAIN, LEVEL_ERROR, "Failed to load game definitions: %s", err.message);
+        log (Config.LOG_DOMAIN, LEVEL_ERROR, "failed to load game definitions: %s", err.message);
       }
     });
   }
@@ -32,7 +32,7 @@ class GameResolver : Object {
         var game = load_game (kf);
         games[game.id] = game;
       } catch (Error err) {
-        log (Config.LOG_DOMAIN, LEVEL_ERROR, "Failed to load game definition from '%s': %s", ini_file.file.get_path (), err.message);
+        log (Config.LOG_DOMAIN, LEVEL_ERROR, "failed to load game definition from '%s': %s", ini_file.file.get_path (), err.message);
       }
     }
   }
@@ -71,12 +71,16 @@ class GameResolver : Object {
           var key1 = parts[0];
           var key2 = parts[1];
 
-          var parser = new ExpressionParser (value);
+          try {
+            var parser = new ExpressionParser (value);
 
-          switch (key1) {
-            case "inf":
-              game.inf_matches[key2] = parser.parse ();
-              break;
+            switch (key1) {
+              case "inf":
+                game.inf_matches[key2] = parser.parse ();
+                break;
+            }
+          } catch (ExpressionParserError parser_err) {
+            throw new IOError.INVALID_DATA ("failed to parse expression at '%s' (group 'Match'): %s", key, parser_err.message);
           }
         }
 
@@ -85,8 +89,13 @@ class GameResolver : Object {
         if (kf.has_group ("Info")) {
           foreach (var key in kf.get_keys ("Info")) {
             var val = kf.get_string ("Info", key);
-            var parser = new ExpressionParser (val);
-            game.inf[key] = parser.parse ();
+
+            try {
+              var parser = new ExpressionParser (val);
+              game.inf[key] = parser.parse ();
+            } catch (ExpressionParserError parser_err) {
+              throw new IOError.INVALID_DATA ("failed to parse expression at '%s' (group 'Match'): %s", key, parser_err.message);
+            }
           }
         }
 

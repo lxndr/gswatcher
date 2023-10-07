@@ -76,7 +76,7 @@ class ExpressionParser {
       case "mapKeyword":
         return new MapKeywordExpression (args);
       default:
-        throw new ExpressionParserError.INVALID_TOKEN ("invalid token at '%u'", scanner.position);
+        throw new ExpressionParserError.INVALID_TOKEN ("unknown function '%s' at '%u'", name, scanner.position);
     }
   }
 }

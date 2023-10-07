@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: unnamed project\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-06 21:25+0300\n"
-"PO-Revision-Date: 2023-10-06 21:19+0300\n"
+"PO-Revision-Date: 2023-10-07 18:56+0300\n"
 "Last-Translator: Alexander Burobin <alexandrburobin@gmail.com>\n"
 "Language-Team: Russian <>\n"
 "Language: ru\n"
@@ -31,7 +31,7 @@ msgstr "Пароль:"
 
 #: src/ui/main-window.ui:9
 msgid "_Pause"
-msgstr "_Пауза"
+msgstr "_Преостановить"
 
 #: src/ui/main-window.ui:13
 msgid "_About"
@@ -66,79 +66,79 @@ msgstr "Вы уверены, что хотите удалить \"%s\" из сп
 
 #: src/ui/preferences.ui:15
 msgid "General"
-msgstr ""
+msgstr "Основные"
 
 #: src/ui/preferences.ui:19
 msgid "Query _interval"
-msgstr ""
+msgstr "_Частота обновления"
 
 #: src/ui/preferences.ui:39
 msgid "Local UDP _port"
-msgstr ""
+msgstr "UDP _порт"
 
 #: src/ui/preferences.ui:59
 msgid "Notifications"
-msgstr ""
+msgstr "Уведомления"
 
 #: src/ui/preferences.ui:62
 msgid "Enable _notifications"
-msgstr ""
+msgstr "Включить _уведомления"
 
 #: src/ui/server-info.ui:21
 msgid "Name:"
-msgstr ""
+msgstr "Название:"
 
 #: src/ui/server-info.ui:55
 msgid "Address:"
-msgstr ""
+msgstr "Адрес:"
 
 #: src/ui/server-info.ui:88
 msgid "Location:"
-msgstr ""
+msgstr "Расположение:"
 
 #: src/ui/server-info.ui:121
 msgid "Game:"
-msgstr ""
+msgstr "Игра:"
 
 #: src/ui/server-info.ui:154
 msgid "Mode:"
-msgstr ""
+msgstr "Режим:"
 
 #: src/ui/server-info.ui:187
 msgid "Map:"
-msgstr ""
+msgstr "Карта:"
 
 #: src/ui/server-info.ui:220
 msgid "Players:"
-msgstr ""
+msgstr "Игроки:"
 
 #: src/ui/server-info.ui:262
 msgid "Private:"
-msgstr ""
+msgstr "Закрытый:"
 
 #: src/ui/server-info.ui:295
 msgid "Secure:"
-msgstr ""
+msgstr "Безопастный:"
 
 #: src/ui/server-info.ui:328
 msgid "Version:"
-msgstr ""
+msgstr "Версия:"
 
 #: src/ui/server-info.vala:22
 msgid "n/a"
-msgstr ""
+msgstr "нет"
 
 #: src/ui/server-info.vala:27
 msgid "yes"
-msgstr ""
+msgstr "да"
 
 #: src/ui/server-info.vala:27
 msgid "no"
-msgstr ""
+msgstr "нет"
 
 #: src/ui/server-info.vala:51 src/ui/server-list.vala:148
 msgid "Timed out"
-msgstr ""
+msgstr "Таймаут"
 
 #: src/ui/server-list.vala:150
 msgid "Error"

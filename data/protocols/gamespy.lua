@@ -1,6 +1,6 @@
 local to_boolean = require("lib/to_boolean")
 local CompoundResponse = require("lib/CompoundResponse")
-local quake = require("quake")
+local quake2 = require("quake2")
 
 protocol = {
   id        = "gamespy",
@@ -83,7 +83,7 @@ local function get_pfields(players)
 end
 
 function process(data)
-  local info = quake.parse_info(data)
+  local info = quake2.parse_info(data)
   local queryid = info.queryid
 
   if not queryid then

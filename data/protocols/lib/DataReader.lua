@@ -105,18 +105,18 @@ function DataReader:lstring()
   return val
 end
 
----@param delimiter? integer
+---@param delimiter? string
 ---@return string
 function DataReader:zstring(delimiter)
-  delimiter = delimiter or 0
-  local pos = self.buf:find(string.char(delimiter), self.pos, true)
+  delimiter = delimiter or "\0"
+  local pos = self.buf:find(delimiter, self.pos, true)
 
   if pos == nil then
-    pos = #self.buf
+    pos = #self.buf + 1
   end
 
-  local val = self.buf:sub(self.pos, pos - 1)
-  self.pos = pos + 1
+  local val = self.buf:sub(self.pos, pos - #delimiter)
+  self.pos = pos + #delimiter
   return val
 end
 
