@@ -78,8 +78,8 @@ public class Client : Object {
 
     foreach (var protocol_desc in ProtocolRegistry.get_instance ().list_by_feature (QUERY)) {
       try {
-        setup_querier (server, protocol_desc.id);
-        tmp_queriers.add (querier);
+        var tmp_querier = setup_querier (server, protocol_desc.id);
+        tmp_queriers.add (tmp_querier);
       } catch (Error err) {
         log (Config.LOG_DOMAIN, LEVEL_ERROR, "failed to create querier for protocol '%s': %s", protocol_desc.id, err.message);
       }

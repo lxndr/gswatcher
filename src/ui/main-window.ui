@@ -65,7 +65,8 @@
                   <object class="GtkPaned">
                     <property name="orientation">GTK_ORIENTATION_VERTICAL</property>
                     <property name="shrink-start-child">false</property>
-                    <property name="position">400</property>
+                    <property name="shrink-end-child">false</property>
+                    <property name="position">350</property>
                     <child>
                       <object class="GswUiServerList" id="server_list_ctl">
                         <binding name="client-list">
