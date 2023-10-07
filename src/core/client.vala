@@ -23,7 +23,7 @@ public class Client : Object {
   public bool is_console_supported { get; private set; }
   public ConsoleClient? console_client { get; private set; }
   public Gtk.TextBuffer? console_log_buffer { get; private set; }
-  public Gee.ArrayList<string> console_command_history { get; set; }
+  public Gee.ArrayList<string>? console_command_history { get; set; }
 
   class construct {
     console_log_buffer_tag_table = new Gtk.TextTagTable ();
@@ -41,22 +41,25 @@ public class Client : Object {
     console_log_buffer_tag_table.add (err_tag);
   }
 
+  construct {
+    details = new ServerDetailsList ();
+    sinfo = new ServerInfo ();
+    sinfo.notify["game-id"].connect(setup_console_feature);
+    plist = new PlayerList ();
+    plist_fields = new ListStore (typeof (PlayerField));
+
+    var game_resolver = GameResolver.get_instance ();
+    game_resolver.notify["ready"].connect(on_game_resolver_ready_change);
+    on_game_resolver_ready_change ();
+  }
+
   public Client (Server server) {
     Object (server : server);
   }
 
   ~Client () {
     tmp_queriers.clear ();
-  }
-
-  construct {
-    details = new ServerDetailsList ();
-    sinfo = new ServerInfo ();
-    plist = new PlayerList ();
-    plist_fields = new ListStore (typeof (PlayerField));
-    console_command_history = new Gee.ArrayList<string> ((a, b) => a == b);
-
-    Idle.add_once (activate);
+    GameResolver.get_instance ().notify["ready"].disconnect (on_game_resolver_ready_change);
   }
 
   private void activate () {
@@ -65,7 +68,8 @@ public class Client : Object {
     } else {
       try {
         querier = setup_querier (server, protocol_id);
-        on_game_detected (querier);
+        on_protocol_detected (querier);
+        setup_console_feature ();
       } catch (Error err) {
         log (Config.LOG_DOMAIN, LEVEL_ERROR, "failed to create querier for protocol '%s': %s", protocol_id, err.message);
       }
@@ -83,6 +87,15 @@ public class Client : Object {
       } catch (Error err) {
         log (Config.LOG_DOMAIN, LEVEL_ERROR, "failed to create querier for protocol '%s': %s", protocol_desc.id, err.message);
       }
+    }
+  }
+
+  private void on_game_resolver_ready_change () {
+    var resolver = GameResolver.get_instance ();
+
+    if (resolver.ready) {
+      resolver.notify.disconnect (on_game_resolver_ready_change);
+      activate ();
     }
   }
 
@@ -119,7 +132,7 @@ public class Client : Object {
     this.sinfo.secure = sinfo.secure;
 
     if (this.querier == null)
-      on_game_detected (querier);
+      on_protocol_detected (querier);
   }
 
   private void on_plist_fields_updated (Gee.List<PlayerField> plist_fields) {
@@ -133,21 +146,33 @@ public class Client : Object {
     this.plist.apply (plist);
   }
 
-  private void on_game_detected (Querier querier) {
+  private void on_protocol_detected (Querier querier) {
     this.querier = querier;
     this.protocol_id = querier.protocol.info.id;
     querier.bind_property ("ping", this, "ping", DEFAULT | SYNC_CREATE);
     querier.bind_property ("error", this, "error", DEFAULT | SYNC_CREATE);
     tmp_queriers.clear ();
-
-    var console_protocol = GameResolver.get_instance ().get_feature_protocol (sinfo.game_id, CONSOLE);
-    is_console_supported = console_protocol != null;
-
-    if (is_console_supported)
-      console_log_buffer = new Gtk.TextBuffer (console_log_buffer_tag_table);
   }
 
-  private void setup_console () {
+  private void setup_console_feature () {
+    var game_resolver = GameResolver.get_instance ();
+    var game_id = sinfo.game_id;
+
+    var console_protocol = (game_resolver.ready && game_id != null && game_id.length > 0)
+      ? GameResolver.get_instance ().get_feature_protocol (game_id, CONSOLE)
+      : null;
+
+    if (console_protocol == null) {
+      is_console_supported = false;
+      console_log_buffer = null;
+    } else {
+      is_console_supported = true;
+      console_log_buffer = new Gtk.TextBuffer (console_log_buffer_tag_table);
+      console_command_history = new Gee.ArrayList<string> ((a, b) => a == b);
+    }
+  }
+
+  private void setup_console_client () {
     var console_protocol = GameResolver.get_instance ().get_feature_protocol (sinfo.game_id, CONSOLE);
 
     try {
@@ -198,7 +223,7 @@ public class Client : Object {
 
   public void send_console_command (string cmd) {
     if (console_client == null)
-      setup_console ();
+      setup_console_client ();
 
     log_to_console (cmd, "cmd");
     console_client.exec_command (cmd);
