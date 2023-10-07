@@ -10,7 +10,7 @@ namespace Gsw.Ui {
     return (uint32) (ms * 1000);
   }
 
-  [GtkTemplate (ui = "/com/github/lxndr/gswatcher/ui/preferences.ui")]
+  [GtkTemplate (ui = "/io/github/lxndr/gswatcher/ui/preferences.ui")]
   class Preferences : Widget {
     [GtkChild]
     private unowned SpinButton query_interval;
@@ -34,7 +34,7 @@ namespace Gsw.Ui {
 
     construct {
       var settings_file = Path.build_filename (Environment.get_user_config_dir (), "gswatcher", "preferences.ini");
-      var settings_backend = SettingsBackend.keyfile_settings_backend_new (settings_file, "/com/github/lxndr/gswatcher/", null);
+      var settings_backend = SettingsBackend.keyfile_settings_backend_new (settings_file, "/io/github/lxndr/gswatcher/", null);
       var settings = new GLib.Settings.with_backend (@"$(Config.APPID).Preferences", settings_backend);
       var schema = settings.settings_schema;
 

@@ -2,7 +2,7 @@ namespace Gsw {
 
 class PersistentServerList : ServerList {
   public string config_file { get; private construct set; }
-  public string root_path { get; private construct set; default = "/com/github/lxndr/gswatcher/servers/"; }
+  public string root_path { get; private construct set; default = "/io/github/lxndr/gswatcher/servers/"; }
 
   private SettingsBackend settings_backend;
 

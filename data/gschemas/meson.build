@@ -1,7 +1,7 @@
 settings_schemas = [
-  'com.github.lxndr.gswatcher.Buddy.gschema.xml',
-  'com.github.lxndr.gswatcher.Preferences.gschema.xml',
-  'com.github.lxndr.gswatcher.Server.gschema.xml',
+  'io.github.lxndr.gswatcher.Buddy.gschema.xml',
+  'io.github.lxndr.gswatcher.Preferences.gschema.xml',
+  'io.github.lxndr.gswatcher.Server.gschema.xml',
 ]
 
 gnome.compile_schemas(build_by_default: true)

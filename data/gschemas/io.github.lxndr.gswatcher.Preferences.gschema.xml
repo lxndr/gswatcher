@@ -1,7 +1,7 @@
 <?xml-model href="/usr/share/glib-2.0/schemas/gschema.dtd"?>
 
 <schemalist>
-  <schema id="com.github.lxndr.gswatcher.Preferences" path="/com/github/lxndr/gswatcher/preferences/">
+  <schema id="io.github.lxndr.gswatcher.Preferences" path="/io/github/lxndr/gswatcher/preferences/">
     <key name="query-interval" type="u">
       <range min="500" max="60000" />
       <default>2000</default>

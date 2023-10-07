@@ -10,7 +10,7 @@ class NewClient : Client {
   public signal void add (string address);
 }
 
-[GtkTemplate (ui = "/com/github/lxndr/gswatcher/ui/server-list.ui")]
+[GtkTemplate (ui = "/io/github/lxndr/gswatcher/ui/server-list.ui")]
 class ServerList : Widget {
   public ListModel client_list { get; set; }
   public Client? selected { get; protected set; }

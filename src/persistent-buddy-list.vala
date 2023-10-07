@@ -2,7 +2,7 @@ namespace Gsw {
 
 class PersistentBuddyList : BuddyList {
   public string config_file { get; private construct set; }
-  public string root_path { get; private construct set; default = "/com/github/lxndr/gswatcher/buddies/"; }
+  public string root_path { get; private construct set; default = "/io/github/lxndr/gswatcher/buddies/"; }
 
   private SettingsBackend settings_backend;
 

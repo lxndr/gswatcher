@@ -7,7 +7,7 @@ gnome = import('gnome')
 i18n = import('i18n')
 
 conf_data = configuration_data({
-  'app_id': 'com.github.lxndr.gswatcher',
+  'app_id': 'io.github.lxndr.gswatcher',
   'app_name': 'Game Server Watcher',
   'app_summary': 'A simple game server browser and an administrative tool',
   'app_exec': meson.project_name(),

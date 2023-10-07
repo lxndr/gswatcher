@@ -2,7 +2,7 @@ using Gtk;
 
 namespace Gsw.Ui {
 
-[GtkTemplate (ui = "/com/github/lxndr/gswatcher/ui/console-option-list.ui")]
+[GtkTemplate (ui = "/io/github/lxndr/gswatcher/ui/console-option-list.ui")]
 class ConsoleOptionList : Widget {
   private Server? _server;
 
