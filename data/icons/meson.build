@@ -4,8 +4,6 @@ install_data(
   rename: conf_data.get('app_id') + '.png',
 )
 
-install_subdir('flags', install_dir: join_paths(gsw_datadir, 'icons'))
-
 free_icons = [
   'nexuiz'
 ]
