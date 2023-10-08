@@ -30,12 +30,16 @@ namespace Gsw {
       dirs.add (dir);
 
     foreach (var data_dir in dirs) {
-      var filename = Path.build_filename (data_dir, Environment.get_prgname (), path);
+      var filename = Path.build_filename (data_dir, path);
 
       if (FileUtils.test (filename, FileTest.EXISTS))
         return filename;
     }
 
     return null;
+  }
+
+  public string? find_file_in_app_data_dirs (string path) {
+    return find_file_in_data_dirs (Path.build_filename(Environment.get_prgname (), path));
   }
 }

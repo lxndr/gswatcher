@@ -4,6 +4,10 @@ buddy-list cell .new-entry {
   font-style: italic;
 }
 
+server-list #country_flag {
+  -gtk-icon-transform: scale(1.5) translateY(1px);
+}
+
 server-list #players_cell.no-slots {
   color:  darkRed;
 }

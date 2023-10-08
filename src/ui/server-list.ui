@@ -149,6 +149,7 @@
                                 </child>
                                 <child>
                                   <object class="GtkImage">
+                                    <property name="name">country_flag</property>
                                     <property name="margin-start">6</property>
                                     <property name="icon-size">GTK_ICON_SIZE_NORMAL</property>
                                     <binding name="file">

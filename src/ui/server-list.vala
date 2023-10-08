@@ -98,8 +98,8 @@ class ServerList : Widget {
       return null;
 
     var geoip_resolver = GeoIPResolver.get_instance ();
-    var country_code = geoip_resolver.code_by_addr (ip_address);
-    return find_file_in_data_dirs ("./icons/flags/" + country_code + ".png");
+    var country_code = geoip_resolver.code_by_addr (ip_address).ascii_down ();
+    return find_file_in_data_dirs ("iso-flag-png/" + country_code + ".png");
   }
 
   [GtkCallback]
@@ -107,7 +107,7 @@ class ServerList : Widget {
     if (game_id == null)
       return null;
 
-    return find_file_in_data_dirs ("./icons/games/" + game_id + ".png");
+    return find_file_in_app_data_dirs ("icons/games/" + game_id + ".png");
   }
 
   [GtkCallback]
