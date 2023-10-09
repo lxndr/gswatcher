@@ -2,7 +2,7 @@ libadwaita_dep = dependency('libadwaita-1', version : '>=1.1.7')
 libadwaita_dep_version = libadwaita_dep.version()
 
 dependencies = [
-  dependency('gtk4', version : '>=4.8.3'),
+  dependency('gtk4', version : '>=4.6.9'),
   libadwaita_dep,
   dependency('gee-0.8', version : '>=0.20.4'),
   dependency('lua', version : '>=5.4'),
