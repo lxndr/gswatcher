@@ -19,5 +19,5 @@ free_icons = files([
 if get_option('proprietary-icons')
   install_subdir('games', install_dir: join_paths(gsw_datadir, 'icons'), exclude_directories: 'original')
 else
-  install_data(free_icons, install_dir: join_paths(gsw_datadir, 'icons'))
+  install_data(free_icons, install_dir: join_paths(gsw_datadir, 'icons/games'))
 endif
