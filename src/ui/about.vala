@@ -48,17 +48,29 @@ namespace Gsw.Ui {
       null,
     };
 
+#if GSW_ADWAITA_1_2_SUPPORTED
     var dlg = new Adw.AboutWindow ();
     dlg.application_name = Config.APPNAME;
     dlg.application_icon = Config.APPID;
     dlg.version = Config.VERSION;
     dlg.website = Config.HOMEPAGE;
     dlg.developers = authors;
-    dlg.license_type = License.GPL_3_0;
+    dlg.license_type = License.GPL_2_0;
     dlg.issue_url = Config.ISSUES;
     dlg.debug_info = format_debug_info (transports, protocols);
     dlg.transient_for = win;
     dlg.present ();
   }
-
+#else
+  var dlg = new AboutDialog ();
+  dlg.program_name = Config.APPNAME;
+  dlg.logo_icon_name = Config.APPID;
+  dlg.version = Config.VERSION;
+  dlg.website = Config.HOMEPAGE;
+  dlg.authors = authors;
+  dlg.license_type = License.GPL_2_0;
+  dlg.system_information = format_debug_info (transports, protocols);
+  dlg.transient_for = win;
+  dlg.present ();
+#endif
 }
