@@ -23,11 +23,27 @@ async ShowRemoveDialogResponse show_remove_dialog (Gtk.Window parent, string hea
   dlg.default_response = "cancel";
   dlg.close_response = "cancel";
 
-  var res = yield show_message_dialog (dlg);
+  #if GSW_ADWAITA_1_3_SUPPORTED
+    return (yield dlg.choose (null)) == "remove"
+      ? ShowRemoveDialogResponse.REMOVE
+      : ShowRemoveDialogResponse.CANCEL;
+  #else
+    var promise = new Gee.Promise<string> ();
 
-  return res == "remove"
-    ? ShowRemoveDialogResponse.REMOVE
-    : ShowRemoveDialogResponse.CANCEL;
+    dlg.response.connect ((res) => {
+      promise.set_value (res);
+    });
+
+    dlg.present ();
+
+    try {
+      return (yield promise.future.wait_async () == "remove")
+        ? ShowRemoveDialogResponse.REMOVE
+        : ShowRemoveDialogResponse.CANCEL;
+    } catch (Gee.FutureError err) {
+      return ShowRemoveDialogResponse.REMOVE;
+    }
+  #endif
 #else
   var promise = new Gee.Promise<ShowRemoveDialogResponse> ();
   var dlg = new MessageDialog (parent, MODAL, QUESTION, YES_NO, body);
@@ -47,32 +63,17 @@ async ShowRemoveDialogResponse show_remove_dialog (Gtk.Window parent, string hea
 }
 
 void show_error_dialog (Gtk.Window parent, string body) {
+#if GSW_ADWAITA_1_2_SUPPORTED
   var dlg = new Adw.MessageDialog (parent, null, body);
   dlg.add_response("ok", _("OK"));
   dlg.set_response_appearance ("ok", SUGGESTED);
   dlg.default_response = "ok";
   dlg.close_response = "ok";
   dlg.present ();
-}
-
-async string show_message_dialog (Adw.MessageDialog dlg) {
-  #if GSW_ADWAITA_1_3_SUPPORTED
-    return yield dlg.choose (null);
-  #else
-    var promise = new Gee.Promise<string> ();
-
-    dlg.response.connect ((res) => {
-      promise.set_value (res);
-    });
-
-    dlg.present ();
-
-    try {
-      return yield promise.future.wait_async ();
-    } catch (Gee.FutureError err) {
-      return "cancel";
-    }
-  #endif
+#else
+  var dlg = new MessageDialog (parent, MODAL, QUESTION, OK, body);
+  dlg.present ();
+#endif
 }
 
 }
