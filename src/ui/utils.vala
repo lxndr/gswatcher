@@ -46,7 +46,7 @@ async ShowRemoveDialogResponse show_remove_dialog (Gtk.Window parent, string hea
   #endif
 #else
   var promise = new Gee.Promise<ShowRemoveDialogResponse> ();
-  var dlg = new MessageDialog (parent, MODAL, QUESTION, YES_NO, body);
+  var dlg = new Gtk.MessageDialog (parent, MODAL, QUESTION, YES_NO, body);
 
   dlg.response.connect ((res) => {
     promise.set_value (res == ResponseType.YES ? ShowRemoveDialogResponse.REMOVE : ShowRemoveDialogResponse.CANCEL);
@@ -71,7 +71,7 @@ void show_error_dialog (Gtk.Window parent, string body) {
   dlg.close_response = "ok";
   dlg.present ();
 #else
-  var dlg = new MessageDialog (parent, MODAL, QUESTION, OK, body);
+  var dlg = new Gtk.MessageDialog (parent, MODAL, QUESTION, OK, body);
   dlg.present ();
 #endif
 }
