@@ -46,3 +46,9 @@ jobs:
             lua:p
             geoip:p
       - uses: actions/checkout@v4
+      - name: Setup meson project
+        run: meson setup builddir
+      - name: Compile
+        run: cd builddir && ninja
+      - name: Test
+        run: cd builddir && ninja test
