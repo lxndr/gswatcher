@@ -2,43 +2,12 @@
 
 | Game                              | ID        | Protocol | Game port | Query port |
 |-----------------------------------|-----------|----------|-----------|------------|
-| Alien Arena                       | aarena    | quake2   | 27910     |            |
-| Quake 2                           | q2        | quake2   | 27910     |            |
-| Action Quake 2                    | aq2       | quake2   | 27910     |            |
-| Quake 3                           | q3        | quake3   | 27960     |            |
-| Quake3: OSP                       | q3osp     | quake3   | 27960     |            |
-| Urban Terror                      | urt       | quake3   | 27960     |            |
-| Open Arena                        | oarena    | quake3   | 27960     |            |
-| ZEQ2                              | zeq2      | quake3   | 27960     |            |
-| Nexuiz                            | nexuiz    | quake3   | 26000     |            |
-| Warsow                            | warsow    | quake3   | 27960     |            |
-| Call of Duty                      | cod       | quake3   | 27960     |            |
-| Call of Duty: United Offensive    | cod2-uo   | quake3   | 27960     |            |
-| Call of Duty 2                    | cod2      | quake3   | 27960     |            |
-| Call of Duty 4                    | cod4      | quake3   | 27960     |            |
-| Call of Duty: World at War        | cod-ww    | quake3   | 27960     |            |
-| Red Orchestra                     | ro        | gamespy  | 7757      | port + 10  |
-| Killing Floor                     | kf        | gamespy  | 7707      | port + 10  |
-| Unreal Tournament                 | ut        | gamespy  | 7777      | port + 1   |
-| Tactical Ops: Assault on Terror   | to-aot    | gamespy  | 7777      | port + 1   |
-| Battlefield 1942                  | bf1942    | gamespy  | 14567     | 23000      |
-| America's Army                    | aa        | gamespy2 | 1716      | port + 1   |
-| Armed Assault                     | arma      | gamespy2 | 2302      | port       |
-| Battlefield Vietnam               | bfv       | gamespy2 | 23000     | port       |
-| Battlefield 2                     | bf2       | gamespy3 | 16567     | 29900      |
-| Battlefield 2142                  | bf2142    | gamespy3 | 17567     | 29900      |
-| Unreal Tournament 3               | ut3       | gamespy3 | 7777      | 6500       |
-| Crysis                            | crysis    | gamespy3 | 64000     |            |
-| Crysis 2                          | crysis2   | gamespy3 | 64100     |            |
-| Minecraft                         | mc        | gamespy3 | 25565     | port       |
-| Arma 2                            | arma2     | gamespy3 | 2302      | port       |
-| Multi Theft Auto                  | mta       | ase      |           |            |
+| go see data/games directory       |           |          |           |            |
 
 ## Nice to have in the future
 
 | Game                              | ID        | Protocol | Game port | Query port |
 |-----------------------------------|-----------|----------|-----------|------------|
-| America's Army 3                  | aa3       | source   | 8777      | port + 18243 |
 | Age of Empires II                 | aoe2      | ase      |           |            |
 | Age of Empires II: The Conquerors | aoe2-c    | ase      |           |            |
 | Aliens versus Predator 2          | avp2      | gamespy  |           |            |

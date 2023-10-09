@@ -11,6 +11,11 @@ servers.
 * Multiple query protocols
 * Remote console (Source only)
 
+### For users
+
+This project isn't actively developed. If you have interest to add or update support
+for specific game, please, right a ticket. Also, feel free to fork and create a MR.
+
 ### Development
 
 Compile gsettings schemas
