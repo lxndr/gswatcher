@@ -60,17 +60,17 @@ namespace Gsw.Ui {
     dlg.debug_info = format_debug_info (transports, protocols);
     dlg.transient_for = win;
     dlg.present ();
-  }
 #else
-  var dlg = new AboutDialog ();
-  dlg.program_name = Config.APPNAME;
-  dlg.logo_icon_name = Config.APPID;
-  dlg.version = Config.VERSION;
-  dlg.website = Config.HOMEPAGE;
-  dlg.authors = authors;
-  dlg.license_type = License.GPL_2_0;
-  dlg.system_information = format_debug_info (transports, protocols);
-  dlg.transient_for = win;
-  dlg.present ();
+    var dlg = new AboutDialog ();
+    dlg.program_name = Config.APPNAME;
+    dlg.logo_icon_name = Config.APPID;
+    dlg.version = Config.VERSION;
+    dlg.website = Config.HOMEPAGE;
+    dlg.authors = authors;
+    dlg.license_type = License.GPL_2_0;
+    dlg.system_information = format_debug_info (transports, protocols);
+    dlg.transient_for = win;
+    dlg.present ();
 #endif
+  }
 }
