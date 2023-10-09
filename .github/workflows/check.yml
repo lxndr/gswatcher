@@ -1,0 +1,25 @@
+name: Linux Build
+on:
+  - push
+jobs:
+  Ubuntu_22_04:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Install packages
+      run: sudo apt-get update && sudo apt-get install -y meson ninja-build cmake gettext desktop-file-utils appstream-util valac libgee-0.8-dev libgtk-4-dev libadwaita-1-dev liblua5.4-dev libgeoip-dev
+    - name: Setup meson project
+      run: meson setup builddir
+    - name: Compile
+      run:  cd builddir && ninja
+    - name: Test
+      run: cd builddir && ninja test
+
+  Windows_2022:
+    runs-on: windows-2022
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Install packages
+      run: C:\msys2\bin\pacman -Syu mingw-w64-x86_64-meson mingw-w64-ninja mingw-w64-gettext mingw-w64-appstream mingw-w64-vala mingw-w64-libgee mingw-w64-libadwaita mingw-w64-lua mingw-w64-geoip
