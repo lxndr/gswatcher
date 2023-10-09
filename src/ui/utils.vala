@@ -49,7 +49,7 @@ async ShowRemoveDialogResponse show_remove_dialog (Gtk.Window parent, string hea
   var dlg = new Gtk.MessageDialog (parent, MODAL, QUESTION, YES_NO, body);
 
   dlg.response.connect ((res) => {
-    promise.set_value (res == ResponseType.YES ? ShowRemoveDialogResponse.REMOVE : ShowRemoveDialogResponse.CANCEL);
+    promise.set_value (res == Gtk.ResponseType.YES ? ShowRemoveDialogResponse.REMOVE : ShowRemoveDialogResponse.CANCEL);
   });
 
   dlg.present ();
