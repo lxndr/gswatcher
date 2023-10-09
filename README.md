@@ -13,8 +13,8 @@ servers.
 
 ### For users
 
-This project isn't actively developed. If you have interest to add or update support
-for specific game, please, right a ticket. Also, feel free to fork and create a MR.
+This project isn't actively developed. If you have interest adding or updating support
+for specific game, please, write a ticket. Also, feel free to fork and create a MR.
 
 ### Development
 
