@@ -15,6 +15,7 @@ enum ShowRemoveDialogResponse {
 }
 
 async ShowRemoveDialogResponse show_remove_dialog (Gtk.Window parent, string heading, string body) {
+#if GSW_ADWAITA_1_2_SUPPORTED
   var dlg = new Adw.MessageDialog (parent, heading, body);
   dlg.add_response("cancel", _("Cancel"));
   dlg.add_response("remove", _("Remove"));
@@ -27,6 +28,22 @@ async ShowRemoveDialogResponse show_remove_dialog (Gtk.Window parent, string hea
   return res == "remove"
     ? ShowRemoveDialogResponse.REMOVE
     : ShowRemoveDialogResponse.CANCEL;
+#else
+  var promise = new Gee.Promise<ShowRemoveDialogResponse> ();
+  var dlg = new MessageDialog (parent, MODAL, QUESTION, YES_NO, body);
+
+  dlg.response.connect ((res) => {
+    promise.set_value (res == ResponseType.YES ? ShowRemoveDialogResponse.REMOVE : ShowRemoveDialogResponse.CANCEL);
+  });
+
+  dlg.present ();
+
+  try {
+    return yield promise.future.wait_async ();
+  } catch (Gee.FutureError err) {
+    return ShowRemoveDialogResponse.CANCEL;
+  }
+#endif
 }
 
 void show_error_dialog (Gtk.Window parent, string body) {
