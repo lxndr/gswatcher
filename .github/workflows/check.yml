@@ -22,7 +22,10 @@ jobs:
       matrix:
         include:
           - { sys: mingw64, env: x86_64 }
-          - { sys: mingw32, env: i686 }
+          #- { sys: mingw32, env: i686 }
+          #- { sys: ucrt64,  env: ucrt-x86_64 }
+          #- { sys: clang64, env: clang-x86_64 }
+          #- { sys: clangarm64, env: clang-aarch64 }
     defaults:
       run:
         shell: msys2 {0}
@@ -30,8 +33,15 @@ jobs:
       - uses: msys2/setup-msys2@v2
         with:
           msystem: ${{matrix.sys}}
-          install: mingw-w64-${{matrix.env}}-gettext mingw-w64-${{matrix.env}}-appstream  mingw-w64-${{matrix.env}}-vala mingw-w64-${{matrix.env}}-libgee mingw-w64-${{matrix.env}}-libadwaita mingw-w64-${{matrix.env}}-lua mingw-w64-${{matrix.env}}-geoip
           pacboy: >-
             meson:p
             ninja:p
+            gettext:p
+            appstream:p
+            vala:p
+            libgee:p
+            libadwaita:p
+            libadwaita:p
+            lua:p
+            geoip:p
       - uses: actions/checkout@v4
