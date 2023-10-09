@@ -1,0 +1,22 @@
+[Game]
+id = kf
+protocol = gamespy
+port = 7707
+qport-diff = 10
+
+[Match]
+inf.gamename = "redorchestra"
+inf.gametype.0 = "KFGameType"
+inf.gametype.1 = "SRGameType"
+
+[Info]
+game-name = "Killing Floor"
+
+[Player]
+Player = player,string,main
+Frags = frags,number
+Team = team,number
+Ping = ping,number
+
+[Extra]
+release-year = 2009

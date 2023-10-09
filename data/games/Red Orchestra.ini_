@@ -1,0 +1,14 @@
+[Game]
+id = ro
+protocol = gamespy
+port = 7757
+qport-diff = 10
+
+[Match]
+inf.gamename = "redorchestra"
+
+[Info]
+game-name = "Red Orchestra: Ostfront 41-45"
+
+[Extra]
+release-year = 2006
