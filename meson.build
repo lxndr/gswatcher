@@ -1,6 +1,6 @@
 project('gswatcher', 'c', 'vala',
         version: '1.6.6',
-  meson_version: '>= 0.63.2',
+  meson_version: '>= 0.61.2',
 )
 
 gnome = import('gnome')
