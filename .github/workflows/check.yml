@@ -26,7 +26,6 @@ jobs:
           - { sys: ucrt64,  env: ucrt-x86_64 }
           #- { sys: clang32, env: clang-i686 }
           #- { sys: clang64, env: clang-x86_64 }
-          - { sys: clangarm64, env: clang-aarch64 }
     defaults:
       run:
         shell: msys2 {0}
