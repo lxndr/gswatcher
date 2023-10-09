@@ -30,5 +30,8 @@ jobs:
       - uses: msys2/setup-msys2@v2
         with:
           msystem: ${{matrix.sys}}
-          install: mingw-w64-${{matrix.env}}-meson mingw-w64-${{matrix.env}}-ninja mingw-w64-${{matrix.env}}-gettext mingw-w64-${{matrix.env}}-appstream  mingw-w64-${{matrix.env}}-vala mingw-w64-${{matrix.env}}-libgee mingw-w64-${{matrix.env}}-libadwaita mingw-w64-${{matrix.env}}-lua mingw-w64-${{matrix.env}}-geoip
+          install: mingw-w64-${{matrix.env}}-gettext mingw-w64-${{matrix.env}}-appstream  mingw-w64-${{matrix.env}}-vala mingw-w64-${{matrix.env}}-libgee mingw-w64-${{matrix.env}}-libadwaita mingw-w64-${{matrix.env}}-lua mingw-w64-${{matrix.env}}-geoip
+          pacboy: >-
+            meson:p
+            ninja:p
       - uses: actions/checkout@v4
