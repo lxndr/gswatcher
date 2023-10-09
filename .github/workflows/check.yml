@@ -22,4 +22,4 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Install packages
-      run: C:\msys64\bin\pacman.exe -Syu mingw-w64-x86_64-meson mingw-w64-ninja mingw-w64-gettext mingw-w64-appstream mingw-w64-vala mingw-w64-libgee mingw-w64-libadwaita mingw-w64-lua mingw-w64-geoip
+      run: C:\msys64\usr\bin\pacman.exe -Syu mingw-w64-x86_64-meson mingw-w64-ninja mingw-w64-gettext mingw-w64-appstream mingw-w64-vala mingw-w64-libgee mingw-w64-libadwaita mingw-w64-lua mingw-w64-geoip
