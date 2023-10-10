@@ -13,6 +13,7 @@ free_icons = files([
   'games/aoc.png',
   'games/as.png',
   'games/asrd.png',
+  'games/cs2.png',
   'games/nexuiz.png',
 ])
 
