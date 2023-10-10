@@ -59,8 +59,10 @@ class BuddyList : Widget {
 
 #if GSW_GTK_4_12_SUPPORTED
     selection.items_changed.connect ((position, removed, added) => {
-      if (added > 0)
-        view.scroll_to (position, null, SELECT | FOCUS, null);
+      if (view != null) {
+        if (added > 0)
+          view.scroll_to (position, null, SELECT | FOCUS, null);
+      }
     });
 #endif
   }
