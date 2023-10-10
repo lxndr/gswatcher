@@ -19,7 +19,7 @@ public class Querier : Object {
   private GameResolver game_resolver = GameResolver.get_instance ();
   private bool query_pending;
   private int64 query_time;
-  private uint timeout_source;
+  private uint timeout_id;
   private string? game_id;
   private bool plist_fields_resolved;
 
@@ -148,17 +148,22 @@ public class Querier : Object {
   private void start_timeout_timer () {
     stop_timeout_timer ();
 
-    timeout_source = Timeout.add (TIMEOUT_MS, () => {
+    timeout_id = Timeout.add (TIMEOUT_MS, () => {
       error = new QuerierError.TIMEOUT("failed to query %s:%d: %s", server.host, server.qport, "failed to receive a response in reasonable amount of time");
-      timeout_source = 0;
+      timeout_id = 0;
       return Source.REMOVE;
     });
   }
 
   private void stop_timeout_timer () {
-    if (timeout_source > 0) {
-      Source.remove (timeout_source);
-      timeout_source = 0;
+    if (timeout_id > 0) {
+      // NOTE: calling `Source.remove (timeout_id)` crashes the app
+      var timeout_source = MainContext.default ().find_source_by_id (timeout_id);
+
+      if (timeout_source != null && !timeout_source.is_destroyed ())
+        timeout_source.destroy ();
+
+      timeout_id = 0;
     }
   }
 }
