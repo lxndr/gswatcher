@@ -41,19 +41,6 @@ public bool parse_address (string address, out string host, out uint16 gport, ou
   return true;
 }
 
-public bool string_to_bool (string value, bool def) {
-  bool as_bool;
-  int as_int;
-
-  if (bool.try_parse (value, out as_bool))
-    return as_bool;
-
-  if (int.try_parse (value, out as_int))
-    return as_int != 0;
-
-  return def;
-}
-
 public Gee.List<File> get_data_dirs (string subdir, string? data_dir_env = null) {
   var dirs = new Gee.ArrayList<File> ();
   var prgname = Environment.get_prgname ();
@@ -122,30 +109,6 @@ public async Gee.List<DataFileContents> get_data_files_contents (string dirname,
   }
 
   return contents;
-}
-
-public void print_buffer (uint8[] buf) {
-  const int MAX_COLUMNS = 16;
-  var len = buf.length;
-
-  for (var idx = 0; idx < len;) {
-    var ncols = int.min (len - idx, MAX_COLUMNS);
-
-    for(var col = 0; col < ncols; col++) {
-      print (" %02X", buf[idx + col]);
-    }
-
-    for (var col = 0; col < (MAX_COLUMNS - ncols) * 3 + 2; col++) {
-      print (" ");
-    }
-
-    for (var col = 0; col < ncols; col++, idx++) {
-      var ch = (char) buf[idx];
-      print ("%c", ch.isprint () ? ch : '.');
-    }
-
-    print ("\n");
-  }
 }
 
 }
