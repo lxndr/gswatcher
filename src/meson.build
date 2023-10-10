@@ -1,8 +1,11 @@
-libadwaita_dep = dependency('libadwaita-1', version : '>=1.1.7')
+gtk4_dep = dependency('gtk4', version: '>=4.6.9')
+gtk4_dep_version = gtk4_dep.version()
+
+libadwaita_dep = dependency('libadwaita-1', version: '>=1.1.7')
 libadwaita_dep_version = libadwaita_dep.version()
 
 dependencies = [
-  dependency('gtk4', version : '>=4.6.9'),
+  gtk4_dep,
   libadwaita_dep,
   dependency('gee-0.8', version : '>=0.20.4'),
   dependency('lua', version : '>=5.4'),
@@ -19,6 +22,13 @@ add_project_arguments(
     '-DGETTEXT_PACKAGE="@0@"'.format(meson.project_name()),
     language: 'c',
 )
+
+if gtk4_dep_version.version_compare('>=4.12')
+  add_project_arguments(
+    '-D', 'GSW_GTK_4_12_SUPPORTED',
+    language: 'vala',
+  )
+endif
 
 if libadwaita_dep_version.version_compare('>=1.2.0')
   add_project_arguments(

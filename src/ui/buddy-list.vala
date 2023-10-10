@@ -57,10 +57,12 @@ class BuddyList : Widget {
 
     view.sort_by_column (name_column, SortType.ASCENDING);
 
+#if GSW_GTK_4_12_SUPPORTED
     selection.items_changed.connect ((position, removed, added) => {
       if (added > 0)
         view.scroll_to (position, null, SELECT | FOCUS, null);
     });
+#endif
   }
 
   protected override void dispose () {
