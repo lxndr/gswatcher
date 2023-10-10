@@ -59,7 +59,7 @@
             <child>
               <object class="GtkStackPage">
                 <property name="name">server_list_page</property>
-                <property name="title">Server list</property>
+                <property name="title" translatable="yes">Server list</property>
                 <property name="icon-name">network-wired</property>
                 <property name="child">
                   <object class="GtkPaned">
@@ -107,7 +107,7 @@
                         </child>
                         <child type="tab">
                           <object class="GtkLabel">
-                            <property name="label">Info</property>
+                            <property name="label" translatable="yes">Info</property>
                           </object>
                         </child>
                         <child>
@@ -121,7 +121,7 @@
                         </child>
                         <child type="tab">
                           <object class="GtkLabel">
-                            <property name="label">Details</property>
+                            <property name="label" translatable="yes">Details</property>
                           </object>
                         </child>
                         <child>
@@ -142,7 +142,7 @@
                         </child>
                         <child type="tab">
                           <object class="GtkLabel">
-                            <property name="label">Console</property>
+                            <property name="label" translatable="yes">Console</property>
                           </object>
                         </child>
                       </object>
@@ -155,7 +155,7 @@
             <child>
               <object class="GtkStackPage" id="buddy_list_page">
                 <property name="name">buddy_list</property>
-                <property name="title">Buddy list</property>
+                <property name="title" translatable="yes">Buddy list</property>
                 <property name="icon-name">contact-new</property>
                 <property name="child">
                   <object class="GswUiBuddyList">
@@ -174,7 +174,7 @@
             <child>
               <object class="GtkStackPage">
                 <property name="name">preferences</property>
-                <property name="title">Preferences</property>
+                <property name="title" translatable="yes">Preferences</property>
                 <property name="icon-name">preferences-system</property>
                 <property name="child">
                   <object class="GswUiPreferences" />

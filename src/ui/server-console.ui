@@ -58,7 +58,7 @@
 
             <child>
               <object class="GtkMenuButton">
-                <property name="label">Options</property>
+                <property name="label" translatable="yes">Options</property>
                 <property name="popover">
                   <object class="GtkPopover" id="options_popover">
                     <property name="child">

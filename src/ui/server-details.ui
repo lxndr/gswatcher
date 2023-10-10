@@ -46,7 +46,7 @@
 
             <child>
               <object class="GtkColumnViewColumn" id="key_column">
-                <property name="title">Key</property>
+                <property name="title" translatable="yes">Key</property>
                 <property name="sorter">key_column_sorter</property>
                 <property name="factory">
                   <object class="GtkBuilderListItemFactory">
@@ -76,7 +76,7 @@
 
             <child>
               <object class="GtkColumnViewColumn" id="value_column">
-                <property name="title">Value</property>
+                <property name="title" translatable="yes">Value</property>
                 <property name="expand">true</property>
                 <property name="factory">
                   <object class="GtkBuilderListItemFactory">

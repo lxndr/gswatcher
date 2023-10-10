@@ -13,7 +13,7 @@ class Application : Adw.Application {
 
   construct {
     add_main_option_entries ({
-      { "version", 'v', OptionFlags.NONE, OptionArg.NONE, null, "Display version number", null },
+      { "version", 'v', OptionFlags.NONE, OptionArg.NONE, null, _("Display version number"), null },
       { null }
     });
   }

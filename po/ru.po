@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unnamed project\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-06 21:25+0300\n"
-"PO-Revision-Date: 2023-10-07 18:56+0300\n"
+"POT-Creation-Date: 2023-10-10 08:56+0300\n"
+"PO-Revision-Date: 2023-10-10 08:59+0300\n"
 "Last-Translator: Alexander Burobin <alexandrburobin@gmail.com>\n"
 "Language-Team: Russian <>\n"
 "Language: ru\n"
@@ -16,6 +16,23 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
 "X-Generator: Gtranslator 45.2\n"
+
+#: src/ui/buddy-list.ui:53
+msgctxt "buddy-list"
+msgid "Name"
+msgstr "Имя:"
+
+#: src/ui/buddy-list.ui:111
+msgid "Notify"
+msgstr "Уведомления"
+
+#: src/ui/buddy-list.ui:148
+msgid "Address"
+msgstr "Адрес"
+
+#: src/ui/buddy-list.ui:177
+msgid "Last seen"
+msgstr "Был онлайн"
 
 #: src/ui/buddy-list.vala:7 src/ui/buddy-list.vala:89
 msgid "Click here to add new buddy"
@@ -40,6 +57,30 @@ msgstr "_О приложении"
 #: src/ui/main-window.ui:47
 msgid "Primary menu"
 msgstr "Главное меню"
+
+#: src/ui/main-window.ui:62
+msgid "Server list"
+msgstr "Список серверов"
+
+#: src/ui/main-window.ui:110
+msgid "Info"
+msgstr "Инфо"
+
+#: src/ui/main-window.ui:124
+msgid "Details"
+msgstr "Детали"
+
+#: src/ui/main-window.ui:145
+msgid "Console"
+msgstr "Консоль"
+
+#: src/ui/main-window.ui:158
+msgid "Buddy list"
+msgstr "Список друзей"
+
+#: src/ui/main-window.ui:177
+msgid "Preferences"
+msgstr "Настройки"
 
 #: src/ui/main-window.vala:35
 msgid "Remove server?"
@@ -83,6 +124,18 @@ msgstr "Уведомления"
 #: src/ui/preferences.ui:62
 msgid "Enable _notifications"
 msgstr "Включить _уведомления"
+
+#: src/ui/server-console.ui:61
+msgid "Options"
+msgstr "Настройки"
+
+#: src/ui/server-details.ui:49
+msgid "Key"
+msgstr "Параметр"
+
+#: src/ui/server-details.ui:79
+msgid "Value"
+msgstr "Значение"
 
 #: src/ui/server-info.ui:21
 msgid "Name:"
@@ -140,24 +193,63 @@ msgstr "нет"
 msgid "Timed out"
 msgstr "Таймаут"
 
+#: src/ui/server-list.ui:96
+msgctxt "server-list"
+msgid "Name"
+msgstr "Название"
+
+#: src/ui/server-list.ui:177
+msgid "Game"
+msgstr "Игра"
+
+#: src/ui/server-list.ui:235
+msgid "Map"
+msgstr "Карта"
+
+#: src/ui/server-list.ui:267
+msgid "Players"
+msgstr "Игроки"
+
+#: src/ui/server-list.ui:321
+msgid "Ping"
+msgstr "Пинг"
+
 #: src/ui/server-list.vala:150
 msgid "Error"
-msgstr ""
+msgstr "Ошибка"
 
 #: src/ui/server-list.vala:178
-#, fuzzy
 msgid "Click here to add new server"
-msgstr "Нажмите сюда, чтобы добавить нового друга"
-
-#: src/ui/utils.vala:19
-msgid "Cancel"
-msgstr ""
+msgstr "Нажмите сюда, чтобы добавить новый сервер"
 
 #: src/ui/utils.vala:20
-#, fuzzy
-msgid "Remove"
-msgstr "Удалить друга?"
+msgid "Cancel"
+msgstr "Отмена"
 
-#: src/ui/utils.vala:34
+#: src/ui/utils.vala:21
+msgid "Remove"
+msgstr "Удалить"
+
+#: src/ui/utils.vala:68
 msgid "OK"
+msgstr "ОК"
+
+#: src/application.vala:16
+msgid "Display version number"
+msgstr "Показать версию"
+
+#: src/application.vala:106
+#, c-format
+msgid "Player %s has connected"
+msgstr "Игрок %s подключился"
+
+#: src/application.vala:108
+#, c-format
+msgid ""
+"Address: %s\n"
+"Server: %s\n"
+"Players: %d / %d"
 msgstr ""
+"Адрес: %s\n"
+"Сервеор: %s\n"
+"Игроки: %d / %d"

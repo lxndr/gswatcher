@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gswatcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-06 21:25+0300\n"
+"POT-Creation-Date: 2023-10-10 08:56+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,23 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: src/ui/buddy-list.ui:53
+msgctxt "buddy-list"
+msgid "Name"
+msgstr ""
+
+#: src/ui/buddy-list.ui:111
+msgid "Notify"
+msgstr ""
+
+#: src/ui/buddy-list.ui:148
+msgid "Address"
+msgstr ""
+
+#: src/ui/buddy-list.ui:177
+msgid "Last seen"
+msgstr ""
 
 #: src/ui/buddy-list.vala:7 src/ui/buddy-list.vala:89
 msgid "Click here to add new buddy"
@@ -39,6 +56,30 @@ msgstr ""
 
 #: src/ui/main-window.ui:47
 msgid "Primary menu"
+msgstr ""
+
+#: src/ui/main-window.ui:62
+msgid "Server list"
+msgstr ""
+
+#: src/ui/main-window.ui:110
+msgid "Info"
+msgstr ""
+
+#: src/ui/main-window.ui:124
+msgid "Details"
+msgstr ""
+
+#: src/ui/main-window.ui:145
+msgid "Console"
+msgstr ""
+
+#: src/ui/main-window.ui:158
+msgid "Buddy list"
+msgstr ""
+
+#: src/ui/main-window.ui:177
+msgid "Preferences"
 msgstr ""
 
 #: src/ui/main-window.vala:35
@@ -82,6 +123,18 @@ msgstr ""
 
 #: src/ui/preferences.ui:62
 msgid "Enable _notifications"
+msgstr ""
+
+#: src/ui/server-console.ui:61
+msgid "Options"
+msgstr ""
+
+#: src/ui/server-details.ui:49
+msgid "Key"
+msgstr ""
+
+#: src/ui/server-details.ui:79
+msgid "Value"
 msgstr ""
 
 #: src/ui/server-info.ui:21
@@ -140,6 +193,27 @@ msgstr ""
 msgid "Timed out"
 msgstr ""
 
+#: src/ui/server-list.ui:96
+msgctxt "server-list"
+msgid "Name"
+msgstr ""
+
+#: src/ui/server-list.ui:177
+msgid "Game"
+msgstr ""
+
+#: src/ui/server-list.ui:235
+msgid "Map"
+msgstr ""
+
+#: src/ui/server-list.ui:267
+msgid "Players"
+msgstr ""
+
+#: src/ui/server-list.ui:321
+msgid "Ping"
+msgstr ""
+
 #: src/ui/server-list.vala:150
 msgid "Error"
 msgstr ""
@@ -148,14 +222,31 @@ msgstr ""
 msgid "Click here to add new server"
 msgstr ""
 
-#: src/ui/utils.vala:19
+#: src/ui/utils.vala:20
 msgid "Cancel"
 msgstr ""
 
-#: src/ui/utils.vala:20
+#: src/ui/utils.vala:21
 msgid "Remove"
 msgstr ""
 
-#: src/ui/utils.vala:34
+#: src/ui/utils.vala:68
 msgid "OK"
+msgstr ""
+
+#: src/application.vala:16
+msgid "Display version number"
+msgstr ""
+
+#: src/application.vala:106
+#, c-format
+msgid "Player %s has connected"
+msgstr ""
+
+#: src/application.vala:108
+#, c-format
+msgid ""
+"Address: %s\n"
+"Server: %s\n"
+"Players: %d / %d"
 msgstr ""

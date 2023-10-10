@@ -50,7 +50,7 @@
 
             <child>
               <object class="GtkColumnViewColumn" id="name_column">
-                <property name="title">Name</property>
+                <property name="title" translatable="yes" context="buddy-list">Name</property>
                 <property name="sorter">name_column_sorter</property>
                 <property name="expand">1</property>
                 <property name="factory">
@@ -86,7 +86,7 @@
                                       <class name="new-entry" />
                                     </style>
                                     <property name="hexpand">true</property>
-                                    <property name="text">Click here to add new buddy</property>
+                                    <property name="text" translatable="yes">Click here to add new buddy</property>
                                     <binding name="visible">
                                       <closure type="gboolean" function="is_editor_row">
                                         <lookup name="item">GtkListItem</lookup>
@@ -108,7 +108,7 @@
 
             <child>
               <object class="GtkColumnViewColumn" id="notifications_column">
-                <property name="title">Notify</property>
+                <property name="title" translatable="yes">Notify</property>
                 <property name="factory">
                   <object class="GtkBuilderListItemFactory">
                     <property name="bytes">
@@ -145,7 +145,7 @@
 
             <child>
               <object class="GtkColumnViewColumn" id="address_column">
-                <property name="title">Address</property>
+                <property name="title" translatable="yes">Address</property>
                 <property name="factory">
                   <object class="GtkBuilderListItemFactory">
                     <property name="bytes">
@@ -174,7 +174,7 @@
 
             <child>
               <object class="GtkColumnViewColumn" id="lastseen_column">
-                <property name="title">Last seen</property>
+                <property name="title" translatable="yes">Last seen</property>
                 <property name="factory">
                   <object class="GtkBuilderListItemFactory">
                     <property name="bytes">
