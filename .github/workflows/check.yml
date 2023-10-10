@@ -61,7 +61,7 @@ jobs:
           cp /${{matrix.sys}}/bin/{gdbus,glib-compile-schemas}.exe dist/bin
           cp /${{matrix.sys}}/bin/libgcc_s_dw2-1.dll dist/bin > /dev/null || :
           cp /${{matrix.sys}}/bin/libgcc_s_seh-1.dll dist/bin > /dev/null || :
-          cp /${{matrix.sys}}/bin/lib{adwaita-1-0,cairo-2,cairo-gobject-2,cairo-script-interpreter-2,curl-4,ffi-8,graphene-1.0-0,gdk_pixbuf-2.0-0,harfbuzz-0,pango-1.0-0,GeoIP-1,glib-2.0-0,gmodule-2.0-0,gee-0.8-2,gio-2.0-0,gobject-2.0-0,gtk-4-1,intl-8,appstream-5,fribidi-0,iconv-2,pcre2-8-0,xml2-2,xmlb-2,yaml-0-2}.dll dist/bin
+          cp /${{matrix.sys}}/bin/lib{adwaita-1-0,brotlicommon,brotlidec,cairo-2,cairo-gobject-2,cairo-script-interpreter-2,crypto-3-x64,idn2-0,nghttp2-14,ssh2-1,psl-5,curl-4,ffi-8,graphene-1.0-0,gdk_pixbuf-2.0-0,harfbuzz-0,pango-1.0-0,GeoIP-1,glib-2.0-0,gmodule-2.0-0,gee-0.8-2,gio-2.0-0,gobject-2.0-0,gtk-4-1,intl-8,appstream-5,fribidi-0,iconv-2,pcre2-8-0,xml2-2,xmlb-2,yaml-0-2,zstd,lzma-5,winpthread-1,stdc++-6,fontconfig-1,freetype-6,pixman-1-0,png16-16,lzo2-2}.dll dist/bin
           cp /${{matrix.sys}}/bin/{zlib1,lua54}.dll dist/bin
       - name: Archive artifacts
         uses: actions/upload-artifact@v3
