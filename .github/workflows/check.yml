@@ -53,3 +53,12 @@ jobs:
         run: cd builddir && ninja
       - name: Test
         run: cd builddir && ninja test
+      - name: Dist
+        run: |
+          mkdir dist
+          cp builddir/src/gswatcher.exe dist
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: win-dist-${{matrix.sys}}
+          path: dist
