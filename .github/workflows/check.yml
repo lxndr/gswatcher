@@ -55,7 +55,7 @@ jobs:
         run: cd builddir && ninja test
       - name: Dist
         run: |
-          mkdir dist
+          mkdir -p dist/{bin,lib}
           cp builddir/src/gswatcher.exe dist/bin
           cp /${{matrix.sys}}/lib/{libGeoIP-1.dll,libadwaita-1-0.dll,libgee-0.8-2.dll,libgio-2.0-0.dll,libglib-2.0-0.dll,libgobject-2.0-0.dll,libgtk-4-1.dll,libintl-8.dll,lua54.dll} dist/lib
       - name: Archive artifacts
