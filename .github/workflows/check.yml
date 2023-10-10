@@ -59,7 +59,9 @@ jobs:
           mkdir -p dist/bin
           cp builddir/src/gswatcher.exe dist/bin
           cp /${{matrix.sys}}/bin/{gdbus,glib-compile-schemas}.exe dist/bin
-          cp /${{matrix.sys}}/bin/lib{adwaita-1-0,gcc_s_seh-1,ffi-8,graphene-1.0-0,cairo-2,cairo-script-interpreter-2,cairo-gobject-2,gdk_pixbuf-2.0-0,harfbuzz-0,pango-1.0-0,GeoIP-1,glib-2.0-0,gmodule-2.0-0,gee-0.8-2,gio-2.0-0,gobject-2.0-0,gtk-4-1,intl-8,appstream-5,fribidi-0,iconv-2,pcre2-8-0}.dll dist/bin
+          cp /${{matrix.sys}}/bin/libgcc_s_dw2-1.dll dist/bin > /dev/null || :
+          cp /${{matrix.sys}}/bin/libgcc_s_seh-1.dll dist/bin > /dev/null || :
+          cp /${{matrix.sys}}/bin/lib{adwaita-1-0,ffi-8,graphene-1.0-0,cairo-2,cairo-script-interpreter-2,cairo-gobject-2,gdk_pixbuf-2.0-0,harfbuzz-0,pango-1.0-0,GeoIP-1,glib-2.0-0,gmodule-2.0-0,gee-0.8-2,gio-2.0-0,gobject-2.0-0,gtk-4-1,intl-8,appstream-5,fribidi-0,iconv-2,pcre2-8-0}.dll dist/bin
           cp /${{matrix.sys}}/bin/{zlib1,lua54}.dll dist/bin
       - name: Archive artifacts
         uses: actions/upload-artifact@v3
