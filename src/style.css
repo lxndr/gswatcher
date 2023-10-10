@@ -5,7 +5,7 @@ buddy-list cell .new-entry {
 }
 
 server-list #country_flag {
-  -gtk-icon-transform: scale(1.5) translateY(1px);
+  -gtk-icon-transform: scale(1.4);
 }
 
 server-list #players_cell.no-slots {
