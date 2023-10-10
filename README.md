@@ -30,8 +30,10 @@ yay -S gswatcher
 
 ### FlatHub
 
+https://flathub.org/apps/io.github.lxndr.gswatcher
+
 ```
-flatpak install --user https://dl.flathub.org/build-repo/54501/io.github.lxndr.gswatcher.flatpakref
+flatpak install flathub io.github.lxndr.gswatcher
 ```
 
 ## Development
