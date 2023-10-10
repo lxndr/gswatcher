@@ -56,6 +56,11 @@ class BuddyList : Widget {
     combined_list_store.append (new_item_list);
 
     view.sort_by_column (name_column, SortType.ASCENDING);
+
+    selection.items_changed.connect ((position, removed, added) => {
+      if (added > 0)
+        view.scroll_to (position, null, SELECT | FOCUS, null);
+    });
   }
 
   protected override void dispose () {
