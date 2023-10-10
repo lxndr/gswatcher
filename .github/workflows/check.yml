@@ -1,0 +1,55 @@
+name: Build Check
+on:
+  - push
+jobs:
+  Ubuntu_22_04:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Install packages
+      run: sudo apt-get update && sudo apt-get install -y meson ninja-build cmake gettext desktop-file-utils appstream-util valac libgee-0.8-dev libgtk-4-dev libadwaita-1-dev liblua5.4-dev libgeoip-dev
+    - name: Setup meson project
+      run: meson setup builddir
+    - name: Compile
+      run:  cd builddir && ninja
+    - name: Test
+      run: cd builddir && ninja test
+
+  Windows_2022:
+    runs-on: windows-2022
+    strategy:
+      matrix:
+        include:
+          - { sys: mingw32, env: i686 }
+          - { sys: mingw64, env: x86_64 }
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{matrix.sys}}
+          update: true
+          pacboy: >-
+            gcc:p
+            meson:p
+            ninja:p
+            pkg-config:p
+            gettext:p
+            appstream:p
+            vala:p
+            libgee:p
+            libadwaita:p
+            libadwaita:p
+            lua:p
+            geoip:p
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup meson project
+        run: meson setup builddir
+      - name: Compile
+        run: cd builddir && ninja
+      - name: Test
+        run: cd builddir && ninja test

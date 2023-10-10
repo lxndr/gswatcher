@@ -1,7 +1,8 @@
-libadwaita_dep = dependency('libadwaita-1', version : '>=1.2.2')
+libadwaita_dep = dependency('libadwaita-1', version : '>=1.1.7')
+libadwaita_dep_version = libadwaita_dep.version()
 
 dependencies = [
-  dependency('gtk4', version : '>=4.8.3'),
+  dependency('gtk4', version : '>=4.6.9'),
   libadwaita_dep,
   dependency('gee-0.8', version : '>=0.20.4'),
   dependency('lua', version : '>=5.4'),
@@ -19,7 +20,14 @@ add_project_arguments(
     language: 'c',
 )
 
-if libadwaita_dep.version().version_compare('>=1.3.0')
+if libadwaita_dep_version.version_compare('>=1.2.0')
+  add_project_arguments(
+    '-D', 'GSW_ADWAITA_1_2_SUPPORTED',
+    language: 'vala',
+  )
+endif
+
+if libadwaita_dep_version.version_compare('>=1.3.0')
   add_project_arguments(
     '-D', 'GSW_ADWAITA_1_3_SUPPORTED',
     language: 'vala',
