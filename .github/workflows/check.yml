@@ -55,9 +55,10 @@ jobs:
         run: cd builddir && ninja test
       - name: Dist
         run: |
-          mkdir -p dist/{bin,lib}
+          mkdir -p dist/bin
           cp builddir/src/gswatcher.exe dist/bin
-          cp /${{matrix.sys}}/lib/{libGeoIP-1.dll,libadwaita-1-0.dll,libgee-0.8-2.dll,libgio-2.0-0.dll,libglib-2.0-0.dll,libgobject-2.0-0.dll,libgtk-4-1.dll,libintl-8.dll,lua54.dll} dist/lib
+          cp /${{matrix.sys}}/bin/lib{GeoIP-1,adwaita-1-0,gee-0.8-2,gio-2.0-0,glib-2.0-0,gobject-2.0-0,gtk-4-1,intl-8}.dll dist/bin
+          cp /${{matrix.sys}}/bin/{lua54}.dll dist/bin
       - name: Archive artifacts
         uses: actions/upload-artifact@v3
         with:
