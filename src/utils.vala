@@ -42,4 +42,65 @@ namespace Gsw {
   public string? find_file_in_app_data_dirs (string path) {
     return find_file_in_data_dirs (Path.build_filename(Environment.get_prgname (), path));
   }
+
+  public bool settings_nullable_string_getter (Value value, Variant variant, void* user_data) {
+    if (!variant.is_of_type (VariantType.MAYBE))
+      return false;
+
+    var maybe = variant.get_maybe ();
+
+    if (maybe == null) {
+      value.set_string (null);
+      return true;
+    }
+
+    if (!maybe.is_of_type (VariantType.STRING))
+      return false;
+
+    var str = maybe.get_string ();
+    value.set_string (str);
+    return true;
+  }
+
+  public Variant settings_nullable_string_setter (Value value, VariantType expected_type, void* user_data) {
+    var str = value.get_string ();
+    var variant = str == null ? null : new Variant.string (str);
+    return new Variant.maybe (VariantType.STRING, variant);
+  }
+
+  public bool settings_nullable_datetime_getter (Value value, Variant variant, void* user_data) {
+    if (!variant.is_of_type (VariantType.MAYBE))
+      return false;
+
+    var maybe = variant.get_maybe ();
+
+    if (maybe == null) {
+      value.set_boxed (null);
+      return true;
+    }
+
+    if (!maybe.is_of_type (VariantType.STRING))
+      return false;
+
+    var str = maybe.get_string ();
+
+    if (str.length == 0) {
+      value.set_boxed (null);
+      return true;
+    }
+
+    var time = new DateTime.from_iso8601 (str, null);
+
+    if (time == null)
+      return false;
+
+    value.set_boxed (time);
+    return true;
+  }
+
+  public Variant settings_nullable_datetime_setter (Value value, VariantType expected_type, void* user_data) {
+    var time = (DateTime?) value.get_boxed ();
+    var variant = time == null ? null : new Variant.string (time.format_iso8601 ());
+    return new Variant.maybe (VariantType.STRING, variant);
+  }
 }

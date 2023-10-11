@@ -6,12 +6,12 @@
       <default>true</default>
       <summary>Notify if buddy is in game</summary>
     </key>
-    <key name="lastaddr" type="s">
-      <default>""</default>
+    <key name="lastaddr" type="ms">
+      <default>nothing</default>
       <summary>Last server the buddy was seen in</summary>
     </key>
-    <key name="lastseen" type="s">
-      <default>""</default>
+    <key name="lastseen" type="ms">
+      <default>nothing</default>
       <summary>Last time the buddy was seen at (ISO-8601)</summary>
     </key>
   </schema>
