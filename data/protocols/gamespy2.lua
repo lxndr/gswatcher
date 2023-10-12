@@ -1,6 +1,7 @@
-local to_boolean = require("lib/to_boolean")
+local rand_integer = require("lib/rand_integer")
 local DataWriter = require("lib/DataWriter")
 local DataReader = require("lib/DataReader")
+local gamespy = require("lib/gamespy")
 
 protocol = {
   id        = "gamespy2",
@@ -18,6 +19,8 @@ protocol = {
 local requestId = 0
 
 function query()
+  requestId = rand_integer(1, 0xffffffff)
+
   local w = DataWriter ()
     :u8(0xfe):u8(0xfd) -- header
     :u8(0x00)          -- delimiter
@@ -27,19 +30,6 @@ function query()
     :u8(0xff)          -- get team info
 
   gsw.send(w.buf)
-end
-
---- @param details table
-local function normalize_server_info(details)
-  return {
-    server_name = details.hostname,
-    num_players = tonumber(details.numplayers),
-    max_players = tonumber(details.maxplayers),
-    map = details.maptitle or details.mapname,
-    game_version = details.gamever,
-    game_mode = details.gametype or details.gamemode,
-    secure = to_boolean(details.sv_punkbuster),
-  }
 end
 
 --- @param r DataReader
@@ -116,12 +106,12 @@ function process(data)
   local reqid = r:u32le()
 
   if reqid ~= requestId then
-    error("InvalidResponseError: invalid request id")
+    error("invalid response: invalid request id")
   end
 
   local details = parse_server_info(r, delimiter)
   local pfields, players = parse_player_list(r, delimiter)
-  local inf = normalize_server_info(details)
+  local inf = gamespy.extract_server_info(details)
 
   gsw.sinfo(details, inf)
   gsw.plist(pfields, players)

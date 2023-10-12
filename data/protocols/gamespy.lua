@@ -1,5 +1,5 @@
-local to_boolean = require("lib/to_boolean")
 local CompoundResponse = require("lib/CompoundResponse")
+local gamespy = require("lib/gamespy")
 local quake2 = require("quake2")
 
 protocol = {
@@ -30,18 +30,6 @@ function query()
     players = "",
     info = "",
   }))
-end
-
-local function normalize_server_info(inf)
-  return {
-    server_name = inf.hostname,
-    num_players = tonumber(inf.numplayers),
-    max_players = tonumber(inf.maxplayers),
-    map = inf.maptitle or inf.mapname,
-    game_version = inf.gamever,
-    game_mode = inf.gametype or inf.gamemode,
-    private = to_boolean(inf.password),
-  }
 end
 
 local function get_players(inf)
@@ -114,7 +102,7 @@ function process(data)
   if response:got_all_packets() then
     local details = response:combine()
 
-    local inf = normalize_server_info(details)
+    local inf = gamespy.extract_server_info(details)
     gsw.sinfo(details, inf)
 
     local players = get_players(details)

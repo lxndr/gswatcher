@@ -35,6 +35,13 @@ function DataReader:u16le()
 end
 
 ---@return integer
+function DataReader:u16be()
+  local val, pos = string.unpack(">I2", self.buf, self.pos)
+  self.pos = pos
+  return val
+end
+
+---@return integer
 function DataReader:u32le()
   local val, pos = string.unpack("<I4", self.buf, self.pos)
   self.pos = pos
@@ -42,8 +49,22 @@ function DataReader:u32le()
 end
 
 ---@return integer
+function DataReader:u32be()
+  local val, pos = string.unpack(">I4", self.buf, self.pos)
+  self.pos = pos
+  return val
+end
+
+---@return integer
 function DataReader:u64le()
   local val, pos = string.unpack("<I8", self.buf, self.pos)
+  self.pos = pos
+  return val
+end
+
+---@return integer
+function DataReader:u64be()
+  local val, pos = string.unpack(">I8", self.buf, self.pos)
   self.pos = pos
   return val
 end
@@ -63,6 +84,13 @@ function DataReader:i16le()
 end
 
 ---@return integer
+function DataReader:i16be()
+  local val, pos = string.unpack(">i2", self.buf, self.pos)
+  self.pos = pos
+  return val
+end
+
+---@return integer
 function DataReader:i32le()
   local val, pos = string.unpack("<i4", self.buf, self.pos)
   self.pos = pos
@@ -70,8 +98,22 @@ function DataReader:i32le()
 end
 
 ---@return integer
+function DataReader:i32be()
+  local val, pos = string.unpack(">i4", self.buf, self.pos)
+  self.pos = pos
+  return val
+end
+
+---@return integer
 function DataReader:i64le()
   local val, pos = string.unpack("<i8", self.buf, self.pos)
+  self.pos = pos
+  return val
+end
+
+---@return integer
+function DataReader:i64be()
+  local val, pos = string.unpack(">i8", self.buf, self.pos)
   self.pos = pos
   return val
 end
@@ -84,8 +126,22 @@ function DataReader:f32le()
 end
 
 ---@return number
+function DataReader:f32be()
+  local val, pos = string.unpack(">f", self.buf, self.pos)
+  self.pos = pos
+  return val
+end
+
+---@return number
 function DataReader:f64le()
   local val, pos = string.unpack("<d", self.buf, self.pos)
+  self.pos = pos
+  return val
+end
+
+---@return number
+function DataReader:f64be()
+  local val, pos = string.unpack(">d", self.buf, self.pos)
   self.pos = pos
   return val
 end

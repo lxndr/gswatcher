@@ -25,6 +25,13 @@ end
 
 ---@param val integer
 ---@return DataWriter
+function DataWriter:u16be(val)
+  self.buf = self.buf .. string.pack(">I2", val)
+  return self
+end
+
+---@param val integer
+---@return DataWriter
 function DataWriter:u32le(val)
   self.buf = self.buf .. string.pack("<I4", val)
   return self
@@ -32,8 +39,22 @@ end
 
 ---@param val integer
 ---@return DataWriter
+function DataWriter:u32be(val)
+  self.buf = self.buf .. string.pack(">I4", val)
+  return self
+end
+
+---@param val integer
+---@return DataWriter
 function DataWriter:u64le(val)
   self.buf = self.buf .. string.pack("<I8", val)
+  return self
+end
+
+---@param val integer
+---@return DataWriter
+function DataWriter:u64be(val)
+  self.buf = self.buf .. string.pack(">I8", val)
   return self
 end
 
@@ -53,6 +74,13 @@ end
 
 ---@param val integer
 ---@return DataWriter
+function DataWriter:i16be(val)
+  self.buf = self.buf .. string.pack(">i2", val)
+  return self
+end
+
+---@param val integer
+---@return DataWriter
 function DataWriter:i32le(val)
   self.buf = self.buf .. string.pack("<i4", val)
   return self
@@ -60,8 +88,22 @@ end
 
 ---@param val integer
 ---@return DataWriter
+function DataWriter:i32be(val)
+  self.buf = self.buf .. string.pack(">i4", val)
+  return self
+end
+
+---@param val integer
+---@return DataWriter
 function DataWriter:i64le(val)
   self.buf = self.buf .. string.pack("<i8", val)
+  return self
+end
+
+---@param val integer
+---@return DataWriter
+function DataWriter:i64be(val)
+  self.buf = self.buf .. string.pack(">i8", val)
   return self
 end
 
@@ -74,8 +116,22 @@ end
 
 ---@param val number
 ---@return DataWriter
+function DataWriter:f32be(val)
+  self.buf = self.buf .. string.pack(">f", val)
+  return self
+end
+
+---@param val number
+---@return DataWriter
 function DataWriter:f64le(val)
   self.buf = self.buf .. string.pack("<d", val)
+  return self
+end
+
+---@param val number
+---@return DataWriter
+function DataWriter:f64be(val)
+  self.buf = self.buf .. string.pack(">d", val)
   return self
 end
 

@@ -11,8 +11,9 @@ local Object = require("lib/classic")
 ---@class CompoundResponse
 local CompoundResponse = Object:extend()
 
-function CompoundResponse:new()
-  self.reqid = nil
+---@param request_id integer
+function CompoundResponse:new(request_id)
+  self.reqid = request_id
   self.packets = {}
   self.total = nil
 end
