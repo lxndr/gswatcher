@@ -14,6 +14,8 @@
 -- You should have received a copy of the GNU Affero General Public License
 -- along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+-- https://wiki.unrealadmin.org/UT3_query_protocol
+
 local switch = require("lib/switch")
 local rand_integer = require("lib/rand_integer")
 local DataReader = require("lib/DataReader")
@@ -22,58 +24,68 @@ local CompoundResponse = require("lib/CompoundResponse")
 local gamespy = require("lib/gamespy")
 
 protocol = {
-  id        = "gamespy3",
-  name      = "GameSpy 3",
+  id        = "gamespy4",
+  name      = "GameSpy 4",
   feature   = "query",
   transport = "udp",
 }
 
+---@type integer | nil
+local session_id
+---@type integer | nil
+local challenge
 ---@type CompoundResponse
 local response
 
----@param request_id integer
-local function send_stat_packet(request_id)
+---@param session_id integer
+local function send_challenge_packet(session_id)
+  local w = DataWriter()
+    :u8(0xfe):u8(0xfd)
+    :u8(9)
+    :i32be(session_id)
+  gsw.send(w.buf)
+end
+
+---@param session_id integer
+---@param challenge integer
+local function send_stat_packet(session_id, challenge)
   local w = DataWriter()
     :u8(0xfe):u8(0xfd)
     :u8(0)
-    :i32be(request_id)
-    :u8(0xff)          -- get server info and rules
-    :u8(0xff)          -- get player info
-    :u8(0xff)          -- get team info
-    :u8(0x01)
-
+    :i32be(session_id)
+    -- :i32be(challenge)
+    :u32be(0xffffff01)
   gsw.send(w.buf)
 end
 
 function query()
-  local request_id = rand_integer(1, 0x7fffffff)
+  session_id = rand_integer(1, 0x7fffffff)
 
-  response = CompoundResponse(request_id)
-  response.details = {}
-  response.pfields = {}
-  response.plist = {}
-
-  send_stat_packet(request_id)
+  --if challenge == nil then
+  --  send_challenge_packet(session_id)
+  --else
+    response = CompoundResponse()
+    response.details = {}
+    response.pfields = {}
+    response.plist = {}
+    send_stat_packet(session_id, challenge)
+  --end
 end
 
----@param field_id string
-local function add_player_field(field_id)
-  for _, field in ipairs(response.pfields) do
-    if field.field == field_id then
-      return
-    end
+--- @param r DataReader
+local function parse_challenge_response(r)
+  local str = r:zstring()
+  local challenge = tonumber(str, 10)
+
+  if math.type(challenge) ~= "integer" then
+    error("invalid response: recieved challenge is not integer")
   end
 
-  table.insert(response.pfields, {
-    title = field_id:sub(1, 1):upper() .. field_id:sub(2, -2),
-    kind = "string",
-    field = field_id,
-  })
+  return challenge
 end
 
----@param r DataReader
----@param response_id integer
-local function parse_stat_response(r, response_id)
+--- @param r DataReader
+local function parse_stat_response(r)
   local splitnum = r:zstring()
 
   if splitnum ~= "splitnum" then
@@ -85,7 +97,7 @@ local function parse_stat_response(r, response_id)
   local number = (num_packets & 0x7f) + 1
 
   local packet = {
-    reqid = response_id,
+    reqid = session_id,
     number = number,
     data = {}
   }
@@ -120,49 +132,14 @@ local function parse_stat_response(r, response_id)
             break
           end
 
-          add_player_field(field)
-          local idx = r:u8() + 1
-
-          while not r:is_end() do
-            local val = r:zstring()
-
-            if #val == 0 then
-              break
-            end
-
-            if response.plist[idx] == nil then
-              response.plist[idx] = {}
-            end
-
-            response.plist[idx][field] = val
-            idx = idx + 1
-          end
+          local count = r:u8()
         end
       end,
-      -- team info
       [2] = function()
-        while not r:is_end() do
-          local field = r:zstring()
-
-          if #field == 0 then
-            break
-          end
-
-          local idx = r:u8() + 1
-
-          while not r:is_end() do
-            local val = r:zstring()
-
-            if #val == 0 then
-              break
-            end
-
-            -- print("Team info: " .. field .. " = " .. val)
-          end
-        end
+        r:zstring()
       end,
       default = function()
-        error("invalid response: invalid info type " .. info_type)
+        error("invalid response: invalid info type")
       end,
     }
   end
@@ -172,7 +149,6 @@ local function parse_stat_response(r, response_id)
   if response:got_all_packets() then
     local inf = gamespy.extract_server_info(response.details)
     gsw.sinfo(response.details, inf)
-    print(#response.pfields)
     gsw.plist(response.pfields, response.plist)
   end
 end
@@ -180,19 +156,23 @@ end
 ---@param data string
 function process(data)
   local r = DataReader(data)
-  local response_type = r:u8()
-  local response_id = r:u32be()
+  local kind = r:u8()
+  local res_session_id = r:u32be()
 
-  if response_id ~= response.reqid then
-    error("invalid response: invalid session id " .. response_id)
+  if res_session_id ~= session_id then
+    error("invalid response: invalid session id " .. res_session_id)
   end
 
-  switch (response_type) {
+  switch (kind) {
+    [9] = function()
+      challenge = parse_challenge_response(r)
+      query()
+    end,
     [0] = function()
-      parse_stat_response(r, response_id)
+      parse_stat_response(r)
     end,
     default = function()
-      error("invalid response: invalid response type " .. response_type)
+      error("invalid response: invalid response type " .. kind)
     end,
   }
 end
