@@ -41,6 +41,16 @@ public bool parse_address (string address, out string host, out uint16 gport, ou
   return true;
 }
 
+public string? get_filename_extension(File file) {
+  var fname = file.get_basename ();
+  var ext_pos = fname.last_index_of_char ('.');
+
+  if (ext_pos == -1)
+    return null;
+
+  return fname.substring (ext_pos + 1, -1);
+}
+
 public Gee.List<File> get_data_dirs (string subdir, string? data_dir_env = null) {
   var dirs = new Gee.ArrayList<File> ();
   var prgname = Environment.get_prgname ();

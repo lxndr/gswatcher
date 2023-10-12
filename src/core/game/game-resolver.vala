@@ -26,6 +26,11 @@ class GameResolver : Object {
 
     foreach (var ini_file in ini_files) {
       try {
+        var ext = get_filename_extension (ini_file.file);
+
+        if (ext != "ini")
+          continue;
+
         var kf = new KeyFile ();
         kf.set_list_separator (',');
         kf.load_from_bytes (new Bytes.static (ini_file.data), NONE);
