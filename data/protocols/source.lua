@@ -276,7 +276,7 @@ local function read_payload(r)
       got_challenge = read_challenge(r)
     end,
     default = function ()
-      error("unexpected response type " .. type)
+      error("invalid response: unexpected response type " .. type)
     end,
   }
 
@@ -346,7 +346,7 @@ function process(data)
       end
     end,
     default = function ()
-      error("unknown packet format")
+      error("invalid response: unknown packet format " .. format)
     end,
   }
 end

@@ -99,7 +99,7 @@ local function process_auth_response(pak)
   elseif pak.id == -1 then
     error("AuthError: authentication failed")
   else
-    error("InvalidResponseError: invalid authentication response")
+    error("invalid response: invalid authentication response")
   end
 end
 
@@ -111,7 +111,7 @@ local function process_response(pak)
       send_pending_command()
     end
   else
-    error("InvalidResponseError: invalid response id")
+    error("invalid response: invalid response id")
   end
 end
 
@@ -138,7 +138,7 @@ function process(data)
         process_response(pak)
       end,
       default = function()
-        error("InvalidResponseError: invalid response type")
+        error("invalid response: invalid response type")
       end,
     }
 

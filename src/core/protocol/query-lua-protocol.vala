@@ -68,8 +68,7 @@ public class QueryLuaProtocol : LuaProtocol, QueryProtocol {
         .push_buffer (data)
         .exec ();
     } catch (LuaError err) {
-      // NOTE: very naive to simply check if it contains InvalidResponseError
-      if (err.code == LuaError.RUNTIME_ERROR && err.message.index_of ("InvalidResponseError") >= 0) {
+      if (err.code == LuaError.RUNTIME_ERROR && err.message.index_of ("invalid response:") >= 0) {
         throw new ProtocolError.INVALID_RESPONSE (err.message);
       }
 

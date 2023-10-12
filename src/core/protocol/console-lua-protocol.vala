@@ -37,9 +37,8 @@ public class ConsoleLuaProtocol : LuaProtocol, ConsoleProtocol {
         .push_buffer (data)
         .exec ();
     } catch (LuaError err) {
-      // NOTE: very naive to simply check if it contains InvalidResponseError
       if (err.code == LuaError.RUNTIME_ERROR) {
-        if (err.message.index_of ("InvalidResponseError") >= 0)
+        if (err.message.index_of ("invalid response:") >= 0)
           throw new ProtocolError.INVALID_RESPONSE (err.message);
         if (err.message.index_of ("AuthError") >= 0)
           throw new ProtocolError.AUTH_FAILED ("authentication failed");

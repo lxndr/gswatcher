@@ -61,7 +61,7 @@ local function parse_stat_response(r, response_id)
   local splitnum = r:zstring()
 
   if splitnum ~= "splitnum" then
-    error("invalid reponse: invalid 'splitnum'")
+    error("invalid response: invalid 'splitnum'")
   end
 
   local num_packets = r:u8()

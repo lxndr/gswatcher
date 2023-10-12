@@ -127,7 +127,7 @@ function process(data)
   local sig = r:string(4)
 
   if sig ~= "EYE1" then
-    error("not an All-Seeing Eye response")
+    error("invalid response: not All-Seeing Eye")
   end
 
   local general_info = read_general_info(r)

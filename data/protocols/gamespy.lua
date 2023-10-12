@@ -75,13 +75,13 @@ function process(data)
   local queryid = info.queryid
 
   if not queryid then
-    error("no queryid found")
+    error("invalid response: no queryid found")
   end
 
   local reqid, fragment = queryid:match("^(%d+).(%d+)$")
 
   if not reqid then
-    error("invalid queryid")
+    error("invalid response: invalid queryid")
   end
 
   local pak = {
