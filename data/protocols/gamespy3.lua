@@ -68,7 +68,7 @@ function process(data)
 
   switch (response_type) {
     [0] = function()
-      local details, sinfo, pfields, plist = gamespy.parse_v3_stat_response(r, response, response_id)
+      local details, sinfo, pfields, plist = gamespy.parse_v3_stats_response(r, response, response_id)
 
       if details ~= nil then
         gsw.sinfo(details, sinfo)
