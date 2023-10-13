@@ -46,9 +46,10 @@ class BuddyWatcher : Object {
   private void on_buddy_added (Buddy buddy) {
     foreach (var client in client_list) {
       foreach (var player in client.plist) {
-        if (player.has_key ("name") && player["name"] == buddy.name) {
+        var player_name = get_player_name (player);
+
+        if (player_name != null && player_name == buddy.name)
           on_maybe_new_online (buddy, client);
-        }
       }
     }
   }
@@ -90,6 +91,9 @@ class BuddyWatcher : Object {
 
     if (player.has_key ("player"))
       return player["player"];
+
+    if (player.has_key ("player_"))
+      return player["player_"];
 
     return null;
   }
