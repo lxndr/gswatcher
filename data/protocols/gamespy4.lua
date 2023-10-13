@@ -14,16 +14,18 @@
 -- You should have received a copy of the GNU Affero General Public License
 -- along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+-- https://wiki.unrealadmin.org/UT3_query_protocol
+-- https://wiki.vg/Query
+
 local switch = require("lib/switch")
 local rand_integer = require("lib/rand_integer")
 local DataReader = require("lib/DataReader")
-local DataWriter = require("lib/DataWriter")
 local CompoundResponse = require("lib/CompoundResponse")
 local gamespy = require("lib/gamespy")
 
 protocol = {
-  id        = "gamespy3",
-  name      = "GameSpy 3",
+  id        = "gamespy4",
+  name      = "GameSpy 4",
   feature   = "query",
   transport = "udp",
 }
@@ -31,29 +33,38 @@ protocol = {
 ---@type CompoundResponse
 local response
 
----@param request_id integer
-local function send_stat_packet(request_id)
-  local w = DataWriter()
-    :u8(0xfe):u8(0xfd)
-    :u8(0)
-    :i32be(request_id)
-    :u8(0xff)          -- get server info and rules
-    :u8(0xff)          -- get player info
-    :u8(0xff)          -- get team info
-    :u8(0x01)
+---@param session_id integer
+local function send_challenge_packet(session_id)
+  local data = gamespy.create_challenge_request(session_id)
+  gsw.send(data)
+end
 
-  gsw.send(w.buf)
+---@param session_id integer
+---@param challenge integer
+local function send_stats_packet(session_id, challenge)
+  local data = gamespy.create_stats_request(session_id, challenge)
+  gsw.send(data)
 end
 
 function query()
   local request_id = rand_integer(1, 0x7fffffff)
-
   response = CompoundResponse(request_id)
   response.details = {}
   response.pfields = {}
   response.plist = {}
 
-  send_stat_packet(request_id)
+  send_challenge_packet(request_id)
+end
+
+---@param r DataReader
+local function parse_challenge_response(r)
+  local str = r:zstring()
+  local challenge = tonumber(str, 10)
+  if math.type(challenge) ~= "integer" then
+    error("invalid response: recieved challenge is not integer")
+  end
+
+  return challenge
 end
 
 ---@param data string
@@ -67,8 +78,12 @@ function process(data)
   end
 
   switch (response_type) {
+    [9] = function()
+      local challenge = parse_challenge_response(r)
+      send_stats_packet(response.reqid, challenge)
+    end,
     [0] = function()
-      local details, sinfo, pfields, plist = gamespy.parse_v3_stat_response(r, response, response_id)
+      local details, sinfo, pfields, plist = gamespy.parse_v3_stats_response(r, response, response_id)
 
       if details ~= nil then
         gsw.sinfo(details, sinfo)
