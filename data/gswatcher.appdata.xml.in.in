@@ -44,6 +44,22 @@
   <translation type="gettext">@app_id@</translation>
 
   <releases>
+    <release version="1.6.7" date="2023-10-13">
+      <description>
+        <p>This release adds more protocols and game definitions.</p>
+        <ul>
+          <li>Added GameSpy 3 and GameSpy 4 protocols</li>
+          <li>Updated game definitions: 7 Days to Die, ARK: Survival Evolved, Alien Arena, Alien Swarm, Alien Swarm: Reactive Drop, America's Army, America's Army 3, America's Army: Proving Grounds, Armed Assault, Armed Assault 2, Armed Assault 2: Operation Arrowhead, Armed Assault 3, Battlefield Vietnam</li>
+          <li>Added game definitions: Age of Chivalry, America's Army 2, Atlas, Avorion, Battlefield 2, Battlefield 1942, Battlefield 2142, Counter-Strike 2, Crysis, Crysis Wars, Red Orchestra: Ostfront 41-45, Minecraft, Unreal Tournament, Unreal Tournament 2004</li>
+          <li>Allowed some game icons to be installed by default</li>
+          <li>Changed license to AGPL-3.0-or-later</li>
+          <li>Increased preferences inputs width</li>
+          <li>Bug fixes</li>
+          <li>Updated translations</li>
+        </ul>
+      </description>
+      <url>https://github.com/lxndr/gswatcher/releases/tag/v1.6.7</url>
+    </release>
     <release version="1.6.6" date="2023-10-08">
       <description>
         <p>This release is meant to prepare for FlatHub release.</p>

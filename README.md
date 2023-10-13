@@ -3,7 +3,7 @@ the state of your favorite game servers and control remotely the servers of
 your own. It also has a buddy list and can notify you if a buddy joins any of
 servers.
 
-![Game Server Watcher](https://raw.githubusercontent.com/lxndr/gswatcher/v1.6.6/docs/screenshots/01.png)
+![Game Server Watcher](https://raw.githubusercontent.com/lxndr/gswatcher/v1.6.7/docs/screenshots/01.png)
 
 ## Features
 
