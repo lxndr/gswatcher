@@ -14,8 +14,7 @@
       "env": {
         // "G_DEBUG": "fatal-warnings",
         // "G_MESSAGES_DEBUG": "Gsw",
-        "DEBUGINFOD_URLS": "https://debuginfod.archlinux.org",
-        "GSETTINGS_SCHEMA_DIR": "${workspaceFolder}/tmp/schemas",
+        "GSETTINGS_SCHEMA_DIR": "${workspaceFolder}/builddir/data/gschemas/",
         "XDG_CONFIG_HOME": "${workspaceFolder}/tmp/config",
         "GSW_PROTOCOLS_DIR": "${workspaceFolder}/data/protocols",
         "GSW_GAMES_DIR": "${workspaceFolder}/data/games"

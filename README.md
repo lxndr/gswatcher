@@ -43,12 +43,6 @@ meson setup builddir
 meson compile -C builddir
 ```
 
-### Compile gsettings schemas
-
-```
-glib-compile-schemas --targetdir=tmp/schemas data/gschemas
-```
-
 ### Compile POT file
 
 In build directory
