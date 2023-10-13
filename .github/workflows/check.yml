@@ -54,15 +54,19 @@ jobs:
         run: cd builddir && ninja
       - name: Test
         run: cd builddir && ninja test
+      - name: Install
+        run: cd builddir && ninja install
       - name: Dist
         run: |
           mkdir -p dist/bin
-          cp builddir/src/gswatcher.exe dist/bin
-          cp /${{matrix.sys}}/bin/{gdbus,glib-compile-schemas}.exe dist/bin
+          cp /${{matrix.sys}}/bin/{gswatcher,gdbus,glib-compile-schemas}.exe dist/bin
           cp /${{matrix.sys}}/bin/libgcc_s_dw2-1.dll dist/bin > /dev/null || :
           cp /${{matrix.sys}}/bin/lib{gcc_s_seh-1,crypto-3-x64,ssl-3-x64}.dll dist/bin > /dev/null || :
           cp /${{matrix.sys}}/bin/lib{adwaita-1-0,brotlicommon,brotlidec,cairo-2,cairo-gobject-2,cairo-script-interpreter-2,idn2-0,epoxy-0,expat-1,jpeg-8,jbig-0,sharpyuv-0,datrie-1,graphite2,unistring-5,nghttp2-14,ssh2-1,deflate,Lerc,webp-7,psl-5,pangoft2-1.0-0,curl-4,ffi-8,bz2-1,thai-0,pangocairo-1.0-0,pangowin32-1.0-0,tiff-6,graphene-1.0-0,gdk_pixbuf-2.0-0,harfbuzz-0,pango-1.0-0,GeoIP-1,glib-2.0-0,gmodule-2.0-0,gee-0.8-2,gio-2.0-0,gobject-2.0-0,gtk-4-1,intl-8,appstream-5,fribidi-0,iconv-2,pcre2-8-0,xml2-2,xmlb-2,yaml-0-2,zstd,lzma-5,winpthread-1,stdc++-6,fontconfig-1,freetype-6,pixman-1-0,png16-16,lzo2-2}.dll dist/bin
           cp /${{matrix.sys}}/bin/{zlib1,lua54}.dll dist/bin
+          mkdir -p /${{matrix.sys}}/etc/fonts && cp /${{matrix.sys}}/etc/fonts/fonts.conf dist/etc/fonts
+          mkdir -p /${{matrix.sys}}/share && cp -r /${{matrix.sys}}/share/fontconfig dist/share
+          mkdir -p /${{matrix.sys}}/share/gswatcher && cp -r /${{matrix.sys}}/share/gswatcher dist/share
       - name: Archive artifacts
         uses: actions/upload-artifact@v3
         with:
