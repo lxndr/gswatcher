@@ -83,12 +83,12 @@ public class LuaEx : Lua {
 
     while (next (table_idx) != 0) {
       if (!is_none_or_nil (-1)) {
-        var key = to_string (-2);
+        var key = to_string (-2).make_valid ();
 
         if (type (-1) == Type.TABLE) {
           print ("TODO: handle table value\n");
         } else {
-          var val = to_string (-1);
+          var val = to_string (-1).make_valid ();
           map.set (key, val);
         }
       }
@@ -108,7 +108,7 @@ public class LuaEx : Lua {
       var key = to_string (-2);
 
       if (type == Type.STRING) {
-        var str = to_string (-1);
+        var str = to_string (-1).make_valid ();
         var pspec = object_class.find_property (key);
 
         if (pspec.value_type.is_enum ()) {
