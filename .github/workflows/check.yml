@@ -58,6 +58,7 @@ jobs:
         run: cd builddir && ninja install
       - name: Dist
         run: |
+          glib-compile-schemas.exe /${{matrix.sys}}/share/glib-2.0/schemas
           mkdir -p dist/bin
           cp /${{matrix.sys}}/bin/{gswatcher,gdbus,glib-compile-schemas}.exe dist/bin
           cp /${{matrix.sys}}/bin/libgcc_s_dw2-1.dll dist/bin > /dev/null || :
@@ -67,6 +68,7 @@ jobs:
           mkdir -p dist/etc && cp -r /${{matrix.sys}}/etc/fonts dist/etc
           mkdir -p dist/share && cp -r /${{matrix.sys}}/share/fontconfig dist/share
           mkdir -p dist/share && cp -r /${{matrix.sys}}/share/gswatcher dist/share
+          mkdir -p dist/share/glib-2.0/schemas && cp -r /${{matrix.sys}}/share/glib-2.0/schemas dist/share/share/glib-2.0
       - name: Archive artifacts
         uses: actions/upload-artifact@v3
         with:
