@@ -9,7 +9,7 @@ i18n = import('i18n')
 conf_data = configuration_data({
   'app_id': 'io.github.lxndr.gswatcher',
   'app_name': 'Game Server Watcher',
-  'app_summary': 'A simple game server browser and an administrative tool',
+  'app_summary': 'A simple game server browser and an administrative tool.',
   'app_exec': meson.project_name(),
   'app_version': meson.project_version(),
   'app_homepage': 'https://github.com/lxndr/gswatcher',
