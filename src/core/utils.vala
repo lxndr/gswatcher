@@ -105,14 +105,6 @@ public Gee.List<File> get_data_dirs (string subdir, string? data_dir_env = null)
   foreach (var dir in system_data_dirs)
     dirs.add (File.new_build_filename (dir, prgname, subdir));
 
-  var msg = "";
-  foreach (var dir in dirs) {
-    msg += dir.get_path () + "\n";
-  }
-
-  var dlg = new Gtk.AlertDialog (msg);
-  dlg.show(null);
-
   return dirs;
 }
 

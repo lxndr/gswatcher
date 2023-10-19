@@ -19,6 +19,7 @@
 namespace Gsw.Config {
   public const string APPID = "@app_id@";
   public const string APPNAME = "@app_name@";
+  public const string PRGNAME = "@app_exec@";
   public const string VERSION = "@app_version@";
   public const string HOMEPAGE = "@app_homepage@";
   public const string ISSUES = "@app_bugtracker@";
