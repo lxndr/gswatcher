@@ -120,6 +120,6 @@ executable(
   sources,
   'main.vala',
   dependencies: dependencies,
-  win_subsystem: 'windows',
+  win_subsystem: 'console',
   install: true,
 )
