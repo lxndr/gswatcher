@@ -69,6 +69,23 @@ public string? get_filename_extension(File file) {
   return fname.substring (ext_pos + 1, -1);
 }
 
+public string? find_file_in_data_dirs (string path) {
+  var dirs = new Gee.ArrayList<string> ();
+  dirs.add (Environment.get_user_data_dir ());
+
+  foreach (var dir in Environment.get_system_data_dirs ())
+    dirs.add (dir);
+
+  foreach (var data_dir in dirs) {
+    var filename = Path.build_filename (data_dir, path);
+
+    if (FileUtils.test (filename, FileTest.EXISTS))
+      return filename;
+  }
+
+  return null;
+}
+
 public Gee.List<File> get_data_dirs (string subdir, string? data_dir_env = null) {
   var dirs = new Gee.ArrayList<File> ();
   var prgname = Environment.get_prgname ();

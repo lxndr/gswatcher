@@ -20,65 +20,80 @@ namespace Gsw {
 
 [SingleInstance]
 public class GeoIPResolver : Object {
-  private GeoIP geoip;
+  private GeoIP? geoip;
+
+  public Error? init_error;
 
   public static GeoIPResolver get_instance () {
     return new GeoIPResolver ();
   }
 
   construct {
-    geoip = new GeoIP.open_type (CITY_REV1, STANDARD);
+    lock (geoip) {
+      var db_fname = find_file_in_data_dirs ("GeoIP/GeoIPCity.dat");
 
-    if (geoip == null) {
-      log (Config.LOG_DOMAIN, LEVEL_WARNING, "Failed to load GeoIPCity database");
+      if (db_fname == null) {
+        db_fname = find_file_in_data_dirs ("GeoIP/GeoIP.dat");
+      }
 
-      geoip = new GeoIP.open_type (COUNTRY, STANDARD);
+      if (db_fname == null) {
+        init_error = new IOError.FAILED (_("failed to find GeoIP database"));
+        log (Config.LOG_DOMAIN, LEVEL_WARNING, init_error.message);
+        return;
+      }
+
+      geoip = new GeoIP.open (db_fname, STANDARD | SILENCE);
 
       if (geoip == null) {
-        log (Config.LOG_DOMAIN, LEVEL_ERROR, "Failed to load GeoIP database");
+        init_error = new IOError.FAILED (_("failed to load GeoIP database"));
+        log (Config.LOG_DOMAIN, LEVEL_WARNING, init_error.message);
       }
     }
   }
 
   public string code_by_addr (string addr) {
-    if (geoip == null)
-      return "";
-
-    switch (geoip.database_edition ()) {
-      case GeoIP.Edition.CITY_REV1: {
-        var rec = geoip.record_by_addr (addr);
-        return rec == null ? "" : rec.country_code;
-      }
-      case GeoIP.Edition.COUNTRY: {
-        var country_id = geoip.id_by_addr (addr);
-        return GeoIP.code_by_id (country_id);
-      }
-      default:
+    lock (geoip) {
+      if (geoip == null)
         return "";
+
+      switch (geoip.database_edition ()) {
+        case GeoIP.Edition.CITY_REV1: {
+          var rec = geoip.record_by_addr (addr);
+          return rec == null ? "" : rec.country_code;
+        }
+        case GeoIP.Edition.COUNTRY: {
+          var country_id = geoip.id_by_addr (addr);
+          return GeoIP.code_by_id (country_id);
+        }
+        default:
+          return "";
+      }
     }
   }
 
   public string city_by_addr (string addr) {
-    if (geoip == null)
-      return "";
-
-    switch (geoip.database_edition ()) {
-      case GeoIP.Edition.CITY_REV1: {
-        var record = geoip.record_by_addr (addr);
-
-        if (record == null)
-          return "";
-
-        return record.city == null
-          ? record.country_name
-          : "%s, %s".printf (record.country_name, record.city);
-      }
-      case GeoIP.Edition.COUNTRY: {
-        var country_id = geoip.id_by_addr (addr);
-        return GeoIP.name_by_id (country_id);
-      }
-      default:
+    lock (geoip) {
+      if (geoip == null)
         return "";
+
+      switch (geoip.database_edition ()) {
+        case GeoIP.Edition.CITY_REV1: {
+          var record = geoip.record_by_addr (addr);
+
+          if (record == null)
+            return "";
+
+          return record.city == null
+            ? record.country_name
+            : "%s, %s".printf (record.country_name, record.city);
+        }
+        case GeoIP.Edition.COUNTRY: {
+          var country_id = geoip.id_by_addr (addr);
+          return GeoIP.name_by_id (country_id);
+        }
+        default:
+          return "";
+      }
     }
   }
 }

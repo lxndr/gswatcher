@@ -62,6 +62,8 @@ public class GeoIP {
 
   [CCode (cname = "GeoIP_new")]
   public GeoIP (Options options);
+  [CCode (cname = "GeoIP_open")]
+  public GeoIP.open (string filename, Options options);
   [CCode (cname = "GeoIP_open_type")]
   public GeoIP.open_type (Edition edition, Options options);
 
@@ -72,6 +74,7 @@ public class GeoIP {
   [CCode (cheader_filename = "GeoIPCity.h")]
   public Record? record_by_addr(string addr);
 
+  public static void setup_custom_directory (string dir);
   public static unowned string code_by_id (int id);
   public static unowned string name_by_id (int id);
 }

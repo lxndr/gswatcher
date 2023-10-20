@@ -40,23 +40,6 @@ namespace Gsw {
     return "%lld:%02lld".printf (minutes, seconds);
   }
 
-  public string? find_file_in_data_dirs (string path) {
-    var dirs = new Gee.ArrayList<string> ();
-    dirs.add (Environment.get_user_data_dir ());
-
-    foreach (var dir in Environment.get_system_data_dirs ())
-      dirs.add (dir);
-
-    foreach (var data_dir in dirs) {
-      var filename = Path.build_filename (data_dir, path);
-
-      if (FileUtils.test (filename, FileTest.EXISTS))
-        return filename;
-    }
-
-    return null;
-  }
-
   public string? find_file_in_app_data_dirs (string path) {
     return find_file_in_data_dirs (Path.build_filename(Environment.get_prgname (), path));
   }

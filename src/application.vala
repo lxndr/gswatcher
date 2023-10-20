@@ -56,6 +56,14 @@ class Application : Adw.Application {
       main_window = new Ui.MainWindow (this, server_list, buddy_list);
       main_window.show ();
       add_window (main_window);
+
+      // GeoIP
+      var geoip_resolver = new GeoIPResolver ();
+
+      if (geoip_resolver.init_error != null) {
+        var msg = _("Failed to initialize GeoIP: %s").printf (geoip_resolver.init_error.message);
+        show_error_dialog (main_window, msg);
+      }
     }
   }
 

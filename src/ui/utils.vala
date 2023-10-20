@@ -80,7 +80,7 @@ async ShowRemoveDialogResponse show_remove_dialog (Gtk.Window parent, string hea
 #endif
 }
 
-void show_error_dialog (Gtk.Window parent, string body) {
+void show_error_dialog (Gtk.Window? parent, string body) {
 #if GSW_ADWAITA_1_2_SUPPORTED
   var dlg = new Adw.MessageDialog (parent, null, body);
   dlg.add_response("ok", _("OK"));
@@ -89,7 +89,7 @@ void show_error_dialog (Gtk.Window parent, string body) {
   dlg.close_response = "ok";
   dlg.present ();
 #else
-  var dlg = new Gtk.MessageDialog (parent, MODAL, QUESTION, OK, body);
+  var dlg = new Gtk.MessageDialog (parent, MODAL, ERROR, OK, body);
   dlg.present ();
 #endif
 }
