@@ -77,14 +77,8 @@
     </binding>
   </object>
 
-  <object class="GtkFlattenListModel" id="combined_list">
-    <property name="model">
-      <object class="GListStore" id="combined_list_store" />
-    </property>
-  </object>
-
   <object class="GtkSingleSelection" id="selection">
-    <property name="model">combined_list</property>
+    <property name="model">sort_model</property>
     <property name="autoselect">1</property>
     <property name="can-unselect">0</property>
   </object>
@@ -127,13 +121,6 @@
                                   <object class="GtkLabel">
                                     <property name="xalign">0</property>
                                     <property name="hexpand">true</property>
-                                    <binding name="visible">
-                                      <closure type="gboolean" function="invert_boolean">
-                                        <closure type="gboolean" function="is_editor_row">
-                                          <lookup name="item">GtkListItem</lookup>
-                                        </closure>
-                                      </closure>
-                                    </binding>
                                     <binding name="label">
                                       <closure type="gchararray" function="format_server_name">
                                         <lookup type="GswServerInfo" name="server_name">
@@ -148,21 +135,6 @@
                                         </lookup>
                                       </closure>
                                     </binding>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkEditableLabel">
-                                    <style>
-                                      <class name="new-entry" />
-                                    </style>
-                                    <property name="hexpand">true</property>
-                                    <property name="text" translatable="yes">Click here to add new server</property>
-                                    <binding name="visible">
-                                      <closure type="gboolean" function="is_editor_row">
-                                        <lookup name="item">GtkListItem</lookup>
-                                      </closure>
-                                    </binding>
-                                    <signal name="notify::editing" handler="handle_editing_change"/>
                                   </object>
                                 </child>
                                 <child>
