@@ -43,17 +43,12 @@
 
         <child>
           <object class="AdwHeaderBar">
+            <property name="centering-policy">strict</property>
             <property name="title-widget">
-              <object class="AdwWindowTitle">
-                <property name="title">Game Server Watcher</property>
-              </object>
-            </property>
-
-            <child>
-              <object class="GtkStackSwitcher">
+              <object class="AdwViewSwitcherTitle" id="title">
                 <property name="stack">stack</property>
               </object>
-            </child>
+            </property>
 
             <child type="end">
               <object class="GtkMenuButton">
@@ -71,11 +66,11 @@
         </child>
 
         <child>
-          <object class="GtkStack" id="stack">
+          <object class="AdwViewStack" id="stack">
             <property name="vexpand">true</property>
 
             <child>
-              <object class="GtkStackPage">
+              <object class="AdwViewStackPage">
                 <property name="name">server_list_page</property>
                 <property name="title" translatable="yes">Server list</property>
                 <property name="icon-name">network-wired</property>
@@ -171,7 +166,7 @@
             </child>
 
             <child>
-              <object class="GtkStackPage" id="buddy_list_page">
+              <object class="AdwViewStackPage" id="buddy_list_page">
                 <property name="name">buddy_list</property>
                 <property name="title" translatable="yes">Buddy list</property>
                 <property name="icon-name">contact-new</property>
@@ -190,7 +185,7 @@
             </child>
 
             <child>
-              <object class="GtkStackPage">
+              <object class="AdwViewStackPage">
                 <property name="name">preferences</property>
                 <property name="title" translatable="yes">Preferences</property>
                 <property name="icon-name">preferences-system</property>
