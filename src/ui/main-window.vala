@@ -25,6 +25,12 @@ class MainWindow : Adw.ApplicationWindow {
   public Gsw.BuddyList buddy_list { get; construct; }
   public Gsw.ServerList client_list { get; construct; }
 
+  [GtkChild]
+  private unowned Popover add_server_popover;
+
+  [GtkChild]
+  private unowned Entry add_server_address_entry;
+
   class construct {
     typeof (Ui.ServerList).ensure ();
     typeof (Ui.ServerInfo).ensure ();
@@ -44,8 +50,9 @@ class MainWindow : Adw.ApplicationWindow {
   }
 
   [GtkCallback]
-  private void add_server (string address) {
-    client_list.add (address);
+  private void on_add_server_clicked () {
+    add_server_popover.popdown ();
+    client_list.add (add_server_address_entry.text);
   }
 
   [GtkCallback]

@@ -50,6 +50,82 @@
               </object>
             </property>
 
+            <child>
+              <object class="GtkMenuButton">
+                <property name="visible">True</property>
+                <property name="label">_Add server</property>
+                <property name="icon-name">list-add-symbolic</property>
+                <property name="popover">
+                  <object class="GtkPopover" id="add_server_popover">
+                    <child>
+                      <object class="GtkGrid">
+                        <property name="column-spacing">8</property>
+                        <property name="row-spacing">8</property>
+
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label" translatable="yes">Address:</property>
+                            <property name="xalign">0.0</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">0</property>
+                            </layout>
+                          </object>
+                        </child>
+
+                        <child>
+                          <object class="GtkEntry" id="add_server_address_entry">
+                            <property name="width-chars">30</property>
+                            <signal name="activate" handler="on_add_server_clicked"/>
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">0</property>
+                            </layout>
+                          </object>
+                        </child>
+
+                        <!-- child>
+                          <object class="GtkLabel">
+                            <property name="label" translatable="yes">Query port:</property>
+                            <property name="xalign">0.0</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">1</property>
+                            </layout>
+                          </object>
+                        </child>
+
+                        <child>
+                          <object class="GtkSpinButton" id="qport_entry">
+                            <property name="width-chars">30</property>
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">1</property>
+                            </layout>
+                          </object>
+                        </child -->
+
+                        <child>
+                          <object class="GtkButton" id="add_server_button">
+                            <property name="label" translatable="yes">Add</property>
+                            <property name="halign">end</property>
+                            <signal name="clicked" handler="on_add_server_clicked" />
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">2</property>
+                            </layout>
+                            <style>
+                              <class name="suggested-action" />
+                            </style>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+              </object>
+            </child>
+
             <child type="end">
               <object class="GtkMenuButton">
                 <property name="valign">center</property>
@@ -87,7 +163,6 @@
                             GswUiMainWindow
                           </lookup>
                         </binding>
-                        <signal name="add" handler="add_server" />
                         <signal name="remove" handler="remove_server" />
                       </object>
                     </child>

@@ -20,24 +20,10 @@ using Gtk;
 
 namespace Gsw.Ui {
 
-class NewClient : Client {
-  public NewClient () {
-    Object (server : new Server ("fake:0"));
-  }
-
-  public signal void add (string address);
-}
-
 [GtkTemplate (ui = "/io/github/lxndr/gswatcher/ui/server-list.ui")]
 class ServerList : Widget {
   public ListModel client_list { get; set; }
   public Client? selected { get; protected set; }
-
-  [GtkChild]
-  private unowned GLib.ListStore combined_list_store;
-
-  [GtkChild]
-  private unowned SortListModel sort_model;
 
   [GtkChild]
   private unowned SingleSelection selection;
@@ -48,7 +34,6 @@ class ServerList : Widget {
   [GtkChild]
   private unowned ColumnViewColumn name_column;
 
-  signal void add (string address);
   signal void remove (Client client);
 
   class construct {
@@ -75,15 +60,6 @@ class ServerList : Widget {
   }
 
   construct {
-    var new_client = new NewClient ();
-    new_client.add.connect (address => add (address));
-
-    var new_item_list = new GLib.ListStore (typeof (Client));
-    new_item_list.append (new_client);
-
-    combined_list_store.append (sort_model);
-    combined_list_store.append (new_item_list);
-
     view.sort_by_column (name_column, SortType.ASCENDING);
 
 #if GSW_GTK_4_12_SUPPORTED
@@ -99,14 +75,6 @@ class ServerList : Widget {
   public override void dispose () {
     get_first_child ().unparent ();
     base.dispose ();
-  }
-
-  [GtkCallback]
-  private bool is_editor_row (Client? client) {
-    if (client == null)
-      return false;
-
-    return client is NewClient;
   }
 
   [GtkCallback]
@@ -190,26 +158,6 @@ class ServerList : Widget {
     if (error == null)
       return null;
     return { "error" };
-  }
-
-  [GtkCallback]
-  private void handle_editing_change (Object obj, ParamSpec pspec) {
-    // NOTE: `this` is GtkListItem
-    var list_item = (ListItem) this;
-    var client = (NewClient) list_item.item;
-    var label = (Gtk.EditableLabel) obj;
-
-    if (label.editing) {
-      label.text = "";
-    } else {
-      var default_text = _("Click here to add new server");
-      var text = label.text;
-
-      if (text != "" && text != default_text)
-        client.add (text);
-
-      label.text = default_text;
-    }
   }
 }
 
