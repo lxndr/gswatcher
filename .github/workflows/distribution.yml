@@ -58,7 +58,7 @@ jobs:
           mkdir -p dist/share/icons && cp -r /${{matrix.sys}}/share/icons dist/share && rm -r dist/share/icons/Adwaita/cursors
           mkdir -p dist/share/locale && cp -r /${{matrix.sys}}/share/locale dist/share
           wget -O /tmp/GeoIPCity.dat.gz https://sources.archlinux.org/other/packages/geoip-database/20230901/GeoIPCity.dat.gz
-          mkdir -p dist/share/GeoIP && gzip -d /tmp/GeoIPCity.dat.gz > dist/share/GeoIP/GeoIPCity.dat
+          mkdir -p dist/share/GeoIP && gzip -dc /tmp/GeoIPCity.dat.gz > dist/share/GeoIP/GeoIPCity.dat
       - name: Archive artifacts
         uses: actions/upload-artifact@v3
         with:
