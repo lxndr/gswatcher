@@ -17,6 +17,7 @@
 */
 
 public static int main (string[] args) {
+  Environment.set_prgname (Gsw.Config.PRGNAME);
   Environment.set_application_name (Gsw.Config.APPNAME);
   var data_dirs = Environment.get_system_data_dirs ();
 

@@ -1,4 +1,4 @@
-name: Build Check
+name: Check Build
 on:
   - push
 jobs:
@@ -34,6 +34,7 @@ jobs:
           update: true
           pacboy: >-
             gcc:p
+            gcc-libs:p
             meson:p
             ninja:p
             pkg-config:p
