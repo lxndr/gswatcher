@@ -35,6 +35,13 @@ class MainWindow : Adw.ApplicationWindow {
   [GtkChild]
   private unowned Entry add_server_address_entry;
 
+  [GtkChild]
+  private unowned MenuButton add_buddy_menu_button;
+  [GtkChild]
+  private unowned Popover add_buddy_popover;
+  [GtkChild]
+  private unowned Entry add_buddy_name_entry;
+
   class construct {
     typeof (Ui.ServerList).ensure ();
     typeof (Ui.ServerInfo).ensure ();
@@ -55,13 +62,26 @@ class MainWindow : Adw.ApplicationWindow {
 
   [GtkCallback]
   private void on_stack_changed () {
-    add_server_menu_button.visible = stack.visible_child_name == "server_list_page";
+    add_server_menu_button.visible = stack.visible_child_name == "server_list";
+    add_buddy_menu_button.visible = stack.visible_child_name == "buddy_list";
   }
 
   [GtkCallback]
   private void on_add_server_clicked () {
     add_server_popover.popdown ();
-    client_list.add (add_server_address_entry.text);
+    var address = add_server_address_entry.text;
+
+    if (address.length == 0) {
+      return;
+    }
+
+    if (client_list.exists (address)) {
+      var msg = _("\"%s\" is already on your server list.").printf (address);
+      show_error_dialog (this, msg);
+      return;
+    }
+
+    client_list.add (address);
   }
 
   [GtkCallback]
@@ -77,7 +97,14 @@ class MainWindow : Adw.ApplicationWindow {
   }
 
   [GtkCallback]
-  private void add_buddy (string name) {
+  private void on_add_buddy_clicked () {
+    add_buddy_popover.popdown ();
+    var name = add_buddy_name_entry.text;
+
+    if (name.length == 0) {
+      return;
+    }
+
     if (buddy_list.exists (name)) {
       var msg = _("\"%s\" is already on your buddy list.").printf (name);
       show_error_dialog (this, msg);

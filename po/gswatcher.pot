@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gswatcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-10 08:56+0300\n"
+"POT-Creation-Date: 2023-10-25 18:47+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,233 +17,243 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/ui/buddy-list.ui:53
+#: src/ui/buddy-list.ui:65
 msgctxt "buddy-list"
 msgid "Name"
 msgstr ""
 
-#: src/ui/buddy-list.ui:111
+#: src/ui/buddy-list.ui:101
 msgid "Notify"
 msgstr ""
 
-#: src/ui/buddy-list.ui:148
+#: src/ui/buddy-list.ui:131 src/ui/main-window.ui:45
 msgid "Address"
 msgstr ""
 
-#: src/ui/buddy-list.ui:177
+#: src/ui/buddy-list.ui:160
 msgid "Last seen"
 msgstr ""
 
-#: src/ui/buddy-list.vala:7 src/ui/buddy-list.vala:89
-msgid "Click here to add new buddy"
-msgstr ""
-
-#: src/ui/console-option-list.ui:19
+#: src/ui/console-option-list.ui:37
 msgid "Port:"
 msgstr ""
 
-#: src/ui/console-option-list.ui:46
+#: src/ui/console-option-list.ui:64
 msgid "Password:"
 msgstr ""
 
-#: src/ui/main-window.ui:9
+#: src/ui/main-window.ui:27
 msgid "_Pause"
 msgstr ""
 
-#: src/ui/main-window.ui:13
+#: src/ui/main-window.ui:31
 msgid "_About"
 msgstr ""
 
-#: src/ui/main-window.ui:47
+#: src/ui/main-window.ui:68 src/ui/main-window.ui:114
+msgid "Add"
+msgstr ""
+
+#: src/ui/main-window.ui:92
+msgid "Buddy name"
+msgstr ""
+
+#: src/ui/main-window.ui:176
 msgid "Primary menu"
 msgstr ""
 
-#: src/ui/main-window.ui:62
-msgid "Server list"
+#: src/ui/main-window.ui:192
+msgid "_Server list"
 msgstr ""
 
-#: src/ui/main-window.ui:110
-msgid "Info"
+#: src/ui/main-window.ui:240
+msgid "_Info"
 msgstr ""
 
-#: src/ui/main-window.ui:124
-msgid "Details"
+#: src/ui/main-window.ui:255
+msgid "_Details"
 msgstr ""
 
-#: src/ui/main-window.ui:145
-msgid "Console"
+#: src/ui/main-window.ui:277
+msgid "_Console"
 msgstr ""
 
-#: src/ui/main-window.ui:158
-msgid "Buddy list"
+#: src/ui/main-window.ui:291
+msgid "_Buddy list"
 msgstr ""
 
-#: src/ui/main-window.ui:177
-msgid "Preferences"
+#: src/ui/main-window.ui:310
+msgid "_Preferences"
 msgstr ""
 
-#: src/ui/main-window.vala:35
+#: src/ui/main-window.vala:79
+#, c-format
+msgid "\"%s\" is already on your server list."
+msgstr ""
+
+#: src/ui/main-window.vala:89
 msgid "Remove server?"
 msgstr ""
 
-#: src/ui/main-window.vala:36
+#: src/ui/main-window.vala:90
 #, c-format
 msgid "Are you sure you want to remove \"%s\" from the server list?"
 msgstr ""
 
-#: src/ui/main-window.vala:48
+#: src/ui/main-window.vala:109
 #, c-format
 msgid "\"%s\" is already on your buddy list."
 msgstr ""
 
-#: src/ui/main-window.vala:58
+#: src/ui/main-window.vala:119
 msgid "Remove buddy?"
 msgstr ""
 
-#: src/ui/main-window.vala:59
+#: src/ui/main-window.vala:120
 #, c-format
 msgid "Are you sure you want to remove \"%s\" from the buddy list?"
 msgstr ""
 
-#: src/ui/preferences.ui:15
+#: src/ui/preferences.ui:33
 msgid "General"
 msgstr ""
 
-#: src/ui/preferences.ui:19
+#: src/ui/preferences.ui:37
 msgid "Query _interval"
 msgstr ""
 
-#: src/ui/preferences.ui:39
-msgid "Local UDP _port"
+#: src/ui/preferences.ui:58
+msgid "Local _UDP port"
 msgstr ""
 
-#: src/ui/preferences.ui:59
+#: src/ui/preferences.ui:79
 msgid "Notifications"
 msgstr ""
 
-#: src/ui/preferences.ui:62
+#: src/ui/preferences.ui:82
 msgid "Enable _notifications"
 msgstr ""
 
-#: src/ui/server-console.ui:61
+#: src/ui/server-console.ui:79
 msgid "Options"
 msgstr ""
 
-#: src/ui/server-details.ui:49
+#: src/ui/server-details.ui:67
 msgid "Key"
 msgstr ""
 
-#: src/ui/server-details.ui:79
+#: src/ui/server-details.ui:97
 msgid "Value"
 msgstr ""
 
-#: src/ui/server-info.ui:21
+#: src/ui/server-info.ui:39
 msgid "Name:"
 msgstr ""
 
-#: src/ui/server-info.ui:55
+#: src/ui/server-info.ui:73
 msgid "Address:"
 msgstr ""
 
-#: src/ui/server-info.ui:88
+#: src/ui/server-info.ui:106
 msgid "Location:"
 msgstr ""
 
-#: src/ui/server-info.ui:121
+#: src/ui/server-info.ui:139
 msgid "Game:"
 msgstr ""
 
-#: src/ui/server-info.ui:154
+#: src/ui/server-info.ui:172
 msgid "Mode:"
 msgstr ""
 
-#: src/ui/server-info.ui:187
+#: src/ui/server-info.ui:205
 msgid "Map:"
 msgstr ""
 
-#: src/ui/server-info.ui:220
+#: src/ui/server-info.ui:238
 msgid "Players:"
 msgstr ""
 
-#: src/ui/server-info.ui:262
+#: src/ui/server-info.ui:280
 msgid "Private:"
 msgstr ""
 
-#: src/ui/server-info.ui:295
+#: src/ui/server-info.ui:313
 msgid "Secure:"
 msgstr ""
 
-#: src/ui/server-info.ui:328
+#: src/ui/server-info.ui:346
 msgid "Version:"
 msgstr ""
 
-#: src/ui/server-info.vala:22
+#: src/ui/server-info.vala:40
 msgid "n/a"
 msgstr ""
 
-#: src/ui/server-info.vala:27
+#: src/ui/server-info.vala:45
 msgid "yes"
 msgstr ""
 
-#: src/ui/server-info.vala:27
+#: src/ui/server-info.vala:45
 msgid "no"
 msgstr ""
 
-#: src/ui/server-info.vala:51 src/ui/server-list.vala:148
+#: src/ui/server-info.vala:69 src/ui/server-list.vala:138
 msgid "Timed out"
 msgstr ""
 
-#: src/ui/server-list.ui:96
+#: src/ui/server-list.ui:108
 msgctxt "server-list"
 msgid "Name"
 msgstr ""
 
-#: src/ui/server-list.ui:177
+#: src/ui/server-list.ui:167
 msgid "Game"
 msgstr ""
 
-#: src/ui/server-list.ui:235
+#: src/ui/server-list.ui:225
 msgid "Map"
 msgstr ""
 
-#: src/ui/server-list.ui:267
+#: src/ui/server-list.ui:257
 msgid "Players"
 msgstr ""
 
-#: src/ui/server-list.ui:321
+#: src/ui/server-list.ui:311
 msgid "Ping"
 msgstr ""
 
-#: src/ui/server-list.vala:150
+#: src/ui/server-list.vala:140
 msgid "Error"
 msgstr ""
 
-#: src/ui/server-list.vala:178
-msgid "Click here to add new server"
-msgstr ""
-
-#: src/ui/utils.vala:20
+#: src/ui/utils.vala:38
 msgid "Cancel"
 msgstr ""
 
-#: src/ui/utils.vala:21
+#: src/ui/utils.vala:39
 msgid "Remove"
 msgstr ""
 
-#: src/ui/utils.vala:68
+#: src/ui/utils.vala:86
 msgid "OK"
 msgstr ""
 
-#: src/application.vala:16
+#: src/application.vala:34
 msgid "Display version number"
 msgstr ""
 
-#: src/application.vala:106
+#: src/application.vala:64
+#, c-format
+msgid "Failed to initialize GeoIP: %s"
+msgstr ""
+
+#: src/application.vala:132
 #, c-format
 msgid "Player %s has connected"
 msgstr ""
 
-#: src/application.vala:108
+#: src/application.vala:134
 #, c-format
 msgid ""
 "Address: %s\n"

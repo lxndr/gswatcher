@@ -58,6 +58,14 @@ public class ServerList : Object, ListModel {
       items_changed (idx, 1, 0);
     }
   }
+
+  public Client? find_by_name (string address) {
+    return list.first_match (client => client.server.address == address);
+  }
+
+  public bool exists (string address) {
+    return find_by_name (address) != null;
+  }
 }
 
 }

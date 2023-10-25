@@ -34,6 +34,99 @@
     </section>
   </menu>
 
+  <object class="GtkPopover" id="add_server_popover">
+    <child>
+      <object class="GtkGrid">
+        <property name="column-spacing">8</property>
+        <property name="row-spacing">8</property>
+
+        <child>
+          <object class="GtkLabel">
+            <property name="label" translatable="yes">Address</property>
+            <property name="xalign">0.0</property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">0</property>
+            </layout>
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkEntry" id="add_server_address_entry">
+            <property name="width-chars">30</property>
+            <property name="placeholder-text">host:game_port&lt;:query_port&gt;</property>
+            <signal name="activate" handler="on_add_server_clicked"/>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">1</property>
+            </layout>
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkButton" id="add_server_button">
+            <property name="label" translatable="yes">Add</property>
+            <property name="halign">end</property>
+            <signal name="clicked" handler="on_add_server_clicked" />
+            <layout>
+              <property name="column">0</property>
+              <property name="row">2</property>
+            </layout>
+            <style>
+              <class name="suggested-action" />
+            </style>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+
+  <object class="GtkPopover" id="add_buddy_popover">
+    <child>
+      <object class="GtkGrid">
+        <property name="column-spacing">8</property>
+        <property name="row-spacing">8</property>
+
+        <child>
+          <object class="GtkLabel">
+            <property name="label" translatable="yes">Buddy name</property>
+            <property name="xalign">0.0</property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">0</property>
+            </layout>
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkEntry" id="add_buddy_name_entry">
+            <property name="width-chars">30</property>
+            <signal name="activate" handler="on_add_buddy_clicked"/>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">1</property>
+            </layout>
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkButton" id="add_buddy_button">
+            <property name="label" translatable="yes">Add</property>
+            <property name="halign">end</property>
+            <signal name="clicked" handler="on_add_buddy_clicked" />
+            <layout>
+              <property name="column">0</property>
+              <property name="row">2</property>
+            </layout>
+            <style>
+              <class name="suggested-action" />
+            </style>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+
   <template class="GswUiMainWindow" parent="AdwApplicationWindow">
     <property name="default-width">1280</property>
     <property name="default-height">720</property>
@@ -54,81 +147,19 @@
               <object class="GtkMenuButton" id="add_server_menu_button">
                 <property name="label">_Add server</property>
                 <property name="use-underline">True</property>
-                <property name="popover">
-                  <object class="GtkPopover" id="add_server_popover">
-                    <child>
-                      <object class="GtkGrid">
-                        <property name="column-spacing">8</property>
-                        <property name="row-spacing">8</property>
+                <property name="popover">add_server_popover</property>
+                <style>
+                  <class name="suggested-action" />
+                </style>
+              </object>
+            </child>
 
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="label" translatable="yes">Address:</property>
-                            <property name="xalign">0.0</property>
-                            <layout>
-                              <property name="column">0</property>
-                              <property name="row">0</property>
-                            </layout>
-                          </object>
-                        </child>
-
-                        <child>
-                          <object class="GtkEntry" id="add_server_address_entry">
-                            <property name="width-chars">30</property>
-                            <property name="placeholder-text">host:game_port&lt;:query_port&gt;</property>
-                            <signal name="activate" handler="on_add_server_clicked"/>
-                            <layout>
-                              <property name="column">1</property>
-                              <property name="row">0</property>
-                            </layout>
-                          </object>
-                        </child>
-
-                        <!-- child>
-                          <object class="GtkLabel">
-                            <property name="label" translatable="yes">Query port:</property>
-                            <property name="xalign">0.0</property>
-                            <layout>
-                              <property name="column">0</property>
-                              <property name="row">1</property>
-                            </layout>
-                          </object>
-                        </child>
-
-                        <child>
-                          <object class="GtkSpinButton" id="add_server_qport_entry">
-                            <property name="width-chars">30</property>
-                            <property name="adjustment">
-                              <object class="GtkAdjustment">
-                                <property name="lower">1024</property>
-                                <property name="step-increment">1</property>
-                              </object>
-                            </property>
-                            <layout>
-                              <property name="column">1</property>
-                              <property name="row">1</property>
-                            </layout>
-                          </object>
-                        </child -->
-
-                        <child>
-                          <object class="GtkButton" id="add_server_button">
-                            <property name="label" translatable="yes">Add</property>
-                            <property name="halign">end</property>
-                            <signal name="clicked" handler="on_add_server_clicked" />
-                            <layout>
-                              <property name="column">1</property>
-                              <property name="row">2</property>
-                            </layout>
-                            <style>
-                              <class name="suggested-action" />
-                            </style>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                  </object>
-                </property>
+            <child type="start">
+              <object class="GtkMenuButton" id="add_buddy_menu_button">
+                <property name="label">_Add buddy</property>
+                <property name="use-underline">True</property>
+                <property name="popover">add_buddy_popover</property>
+                <property name="visible">False</property>
                 <style>
                   <class name="suggested-action" />
                 </style>
@@ -156,11 +187,11 @@
             <signal name="notify::visible-child-name" handler="on_stack_changed" />
 
             <child>
-              <object class="AdwViewStackPage">
-                <property name="name">server_list_page</property>
+              <object class="AdwViewStackPage" id="server_list_page">
+                <property name="name">server_list</property>
                 <property name="title" translatable="yes">_Server list</property>
                 <property name="use-underline">True</property>
-                <property name="icon-name">network-wired</property>
+                <property name="icon-name">network-server-symbolic</property>
                 <property name="child">
                   <object class="GtkPaned">
                     <property name="orientation">GTK_ORIENTATION_VERTICAL</property>
@@ -259,7 +290,7 @@
                 <property name="name">buddy_list</property>
                 <property name="title" translatable="yes">_Buddy list</property>
                 <property name="use-underline">True</property>
-                <property name="icon-name">contact-new</property>
+                <property name="icon-name">face-laugh-symbolic</property>
                 <property name="child">
                   <object class="GswUiBuddyList">
                     <binding name="buddy-list">
@@ -267,7 +298,6 @@
                         GswUiMainWindow
                       </lookup>
                     </binding>
-                    <signal name="add" handler="add_buddy" />
                     <signal name="remove" handler="remove_buddy" />
                   </object>
                 </property>
@@ -275,11 +305,11 @@
             </child>
 
             <child>
-              <object class="AdwViewStackPage">
+              <object class="AdwViewStackPage" id="preferences_page">
                 <property name="name">preferences</property>
                 <property name="title" translatable="yes">_Preferences</property>
                 <property name="use-underline">True</property>
-                <property name="icon-name">preferences-system</property>
+                <property name="icon-name">preferences-system-symbolic</property>
                 <property name="child">
                   <object class="GswUiPreferences" />
                 </property>

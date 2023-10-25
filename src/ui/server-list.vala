@@ -78,11 +78,6 @@ class ServerList : Widget {
   }
 
   [GtkCallback]
-  private bool invert_boolean (bool b) {
-    return !b;
-  }
-
-  [GtkCallback]
   private string format_server_name (string? server_name, string address) {
     return (server_name == null || server_name.length == 0) ? address : server_name;
   }
