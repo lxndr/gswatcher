@@ -1,6 +1,10 @@
 name: Distribution
+
 on:
-  - push
+  push:
+    tags:
+      - "v*.*.*"
+
 jobs:
   Windows_Portable:
     runs-on: windows-2022
@@ -47,7 +51,7 @@ jobs:
           glib-compile-schemas.exe /${{matrix.sys}}/share/glib-2.0/schemas
           mkdir -p dist/bin
           cp /${{matrix.sys}}/bin/{gswatcher,gdbus}.exe dist/bin
-          cp /${{matrix.sys}}/bin/libgcc_s_dw2-1.dll dist/bin > /dev/null || :
+          cp /${{matrix.sys}}/bin/lib{gcc_s_dw2-1,crypto-3,ssl-3}.dll dist/bin > /dev/null || :
           cp /${{matrix.sys}}/bin/lib{gcc_s_seh-1,crypto-3-x64,ssl-3-x64}.dll dist/bin > /dev/null || :
           cp /${{matrix.sys}}/bin/lib{adwaita-1-0,brotlicommon,brotlidec,cairo-2,cairo-gobject-2,cairo-script-interpreter-2,idn2-0,epoxy-0,expat-1,jpeg-8,jbig-0,sharpyuv-0,datrie-1,graphite2,unistring-5,nghttp2-14,ssh2-1,deflate,Lerc,webp-7,psl-5,pangoft2-1.0-0,curl-4,ffi-8,bz2-1,thai-0,pangocairo-1.0-0,pangowin32-1.0-0,tiff-6,graphene-1.0-0,gdk_pixbuf-2.0-0,harfbuzz-0,pango-1.0-0,GeoIP-1,glib-2.0-0,gmodule-2.0-0,gee-0.8-2,gio-2.0-0,gobject-2.0-0,gtk-4-1,intl-8,appstream-5,fribidi-0,iconv-2,pcre2-8-0,xml2-2,xmlb-2,yaml-0-2,zstd,lzma-5,winpthread-1,stdc++-6,fontconfig-1,freetype-6,pixman-1-0,png16-16,lzo2-2}.dll dist/bin
           cp /${{matrix.sys}}/bin/{zlib1,lua54}.dll dist/bin
@@ -59,8 +63,9 @@ jobs:
           mkdir -p dist/share/locale && cp -r /${{matrix.sys}}/share/locale dist/share
           wget -O /tmp/GeoIPCity.dat.gz https://sources.archlinux.org/other/packages/geoip-database/20230901/GeoIPCity.dat.gz
           mkdir -p dist/share/GeoIP && gzip -dc /tmp/GeoIPCity.dat.gz > dist/share/GeoIP/GeoIPCity.dat
-      - name: Archive artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: win-dist-${{matrix.sys}}
-          path: dist
+      - name: Create archive
+        run: zip windows-${{matrix.env}}-portable-${GITHUB_REF##*/}.zip dist
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        files: windows-${{matrix.env}}-portable-${GITHUB_REF##*/}.zip
