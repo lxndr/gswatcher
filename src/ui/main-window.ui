@@ -1,3 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
 <!--
   Game Server Watcher
   Copyright (C) 2023  Alexander Burobin
@@ -15,8 +17,6 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -->
-
-<?xml version="1.0" encoding="UTF-8"?>
 
 <interface>
   <requires lib="gtk+" version="4.0"/>
@@ -50,11 +50,10 @@
               </object>
             </property>
 
-            <child>
-              <object class="GtkMenuButton">
-                <property name="visible">True</property>
+            <child type="start">
+              <object class="GtkMenuButton" id="add_server_menu_button">
                 <property name="label">_Add server</property>
-                <property name="icon-name">list-add-symbolic</property>
+                <property name="use-underline">True</property>
                 <property name="popover">
                   <object class="GtkPopover" id="add_server_popover">
                     <child>
@@ -76,6 +75,7 @@
                         <child>
                           <object class="GtkEntry" id="add_server_address_entry">
                             <property name="width-chars">30</property>
+                            <property name="placeholder-text">host:game_port&lt;:query_port&gt;</property>
                             <signal name="activate" handler="on_add_server_clicked"/>
                             <layout>
                               <property name="column">1</property>
@@ -96,8 +96,14 @@
                         </child>
 
                         <child>
-                          <object class="GtkSpinButton" id="qport_entry">
+                          <object class="GtkSpinButton" id="add_server_qport_entry">
                             <property name="width-chars">30</property>
+                            <property name="adjustment">
+                              <object class="GtkAdjustment">
+                                <property name="lower">1024</property>
+                                <property name="step-increment">1</property>
+                              </object>
+                            </property>
                             <layout>
                               <property name="column">1</property>
                               <property name="row">1</property>
@@ -123,6 +129,9 @@
                     </child>
                   </object>
                 </property>
+                <style>
+                  <class name="suggested-action" />
+                </style>
               </object>
             </child>
 
@@ -144,11 +153,13 @@
         <child>
           <object class="AdwViewStack" id="stack">
             <property name="vexpand">true</property>
+            <signal name="notify::visible-child-name" handler="on_stack_changed" />
 
             <child>
               <object class="AdwViewStackPage">
                 <property name="name">server_list_page</property>
-                <property name="title" translatable="yes">Server list</property>
+                <property name="title" translatable="yes">_Server list</property>
+                <property name="use-underline">True</property>
                 <property name="icon-name">network-wired</property>
                 <property name="child">
                   <object class="GtkPaned">
@@ -195,7 +206,8 @@
                         </child>
                         <child type="tab">
                           <object class="GtkLabel">
-                            <property name="label" translatable="yes">Info</property>
+                            <property name="label" translatable="yes">_Info</property>
+                            <property name="use-underline">True</property>
                           </object>
                         </child>
                         <child>
@@ -209,7 +221,8 @@
                         </child>
                         <child type="tab">
                           <object class="GtkLabel">
-                            <property name="label" translatable="yes">Details</property>
+                            <property name="label" translatable="yes">_Details</property>
+                            <property name="use-underline">True</property>
                           </object>
                         </child>
                         <child>
@@ -230,7 +243,8 @@
                         </child>
                         <child type="tab">
                           <object class="GtkLabel">
-                            <property name="label" translatable="yes">Console</property>
+                            <property name="label" translatable="yes">_Console</property>
+                            <property name="use-underline">True</property>
                           </object>
                         </child>
                       </object>
@@ -243,7 +257,8 @@
             <child>
               <object class="AdwViewStackPage" id="buddy_list_page">
                 <property name="name">buddy_list</property>
-                <property name="title" translatable="yes">Buddy list</property>
+                <property name="title" translatable="yes">_Buddy list</property>
+                <property name="use-underline">True</property>
                 <property name="icon-name">contact-new</property>
                 <property name="child">
                   <object class="GswUiBuddyList">
@@ -262,7 +277,8 @@
             <child>
               <object class="AdwViewStackPage">
                 <property name="name">preferences</property>
-                <property name="title" translatable="yes">Preferences</property>
+                <property name="title" translatable="yes">_Preferences</property>
+                <property name="use-underline">True</property>
                 <property name="icon-name">preferences-system</property>
                 <property name="child">
                   <object class="GswUiPreferences" />

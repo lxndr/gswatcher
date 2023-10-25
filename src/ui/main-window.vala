@@ -26,8 +26,12 @@ class MainWindow : Adw.ApplicationWindow {
   public Gsw.ServerList client_list { get; construct; }
 
   [GtkChild]
-  private unowned Popover add_server_popover;
+  private unowned Adw.ViewStack stack;
 
+  [GtkChild]
+  private unowned MenuButton add_server_menu_button;
+  [GtkChild]
+  private unowned Popover add_server_popover;
   [GtkChild]
   private unowned Entry add_server_address_entry;
 
@@ -47,6 +51,11 @@ class MainWindow : Adw.ApplicationWindow {
       client_list : client_list,
       buddy_list : buddy_list
     );
+  }
+
+  [GtkCallback]
+  private void on_stack_changed () {
+    add_server_menu_button.visible = stack.visible_child_name == "server_list_page";
   }
 
   [GtkCallback]
