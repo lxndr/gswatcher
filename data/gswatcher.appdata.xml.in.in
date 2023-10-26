@@ -44,6 +44,22 @@
   <translation type="gettext">@app_id@</translation>
 
   <releases>
+    <release version="1.7.0" date="2023-11-01">
+      <description>
+        <p>This release improves UI and adds Windows support.</p>
+        <ul>
+          <li>Added Windows portable releases.</li>
+          <li>Added game definitions: Conan Exiles, Day of Infamy.</li>
+          <li>Added error message if GeoIP database failed to load.</li>
+          <li>Added error message if user tries to add existing server address.</li>
+          <li>Improved header UI.</li>
+          <li>Added separate UI in the header to add servers and buddies.</li>
+          <li>Improved keyboard shortcuts.</li>
+          <li>Updated translations.</li>
+        </ul>
+      </description>
+      <url>https://github.com/lxndr/gswatcher/releases/tag/v1.6.7</url>
+    </release>
     <release version="1.6.7" date="2023-10-13">
       <description>
         <p>This release adds more protocols and game definitions.</p>
