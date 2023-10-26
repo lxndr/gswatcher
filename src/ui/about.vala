@@ -88,6 +88,7 @@ namespace Gsw.Ui {
     dlg.license_type = License.AGPL_3_0;
     dlg.system_information = format_debug_info (transports, protocols);
     dlg.transient_for = win;
+    dlg.modal = true;
     dlg.present ();
 #endif
   }
