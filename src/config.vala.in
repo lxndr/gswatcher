@@ -25,4 +25,5 @@ namespace Gsw.Config {
   public const string ISSUES = "@app_bugtracker@";
   public const string LOG_DOMAIN = "@app_log_domain@";
   public const string GETTEXT_PACKAGE = "@app_exec@";
+  public const string VALA_VERSION = "@app_vala_version@";
 }

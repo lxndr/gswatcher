@@ -35,6 +35,9 @@ namespace Gsw.Ui {
       sysinfo += "\tRun time: error getting version: %s\n".printf (err.message);
     }
 
+    sysinfo += "\nVala version:\n";
+    sysinfo += "\tBuild time: %s\n".printf (Config.VALA_VERSION);
+
     sysinfo += "\nRegistered transports:\n";
 
     foreach (var transport in transports) {

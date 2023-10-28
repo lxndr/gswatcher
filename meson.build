@@ -5,6 +5,7 @@ project('gswatcher', 'c', 'vala',
 
 gnome = import('gnome')
 i18n = import('i18n')
+vala_compiler = meson.get_compiler('vala')
 
 conf_data = configuration_data({
   'app_id': 'io.github.lxndr.gswatcher',
@@ -15,6 +16,7 @@ conf_data = configuration_data({
   'app_homepage': 'https://github.com/lxndr/gswatcher',
   'app_bugtracker': 'https://github.com/lxndr/gswatcher/issues',
   'app_log_domain': 'Gsw',
+  'app_vala_version': vala_compiler.version(),
 })
 
 gsw_datadir = join_paths(get_option('datadir'), meson.project_name())
