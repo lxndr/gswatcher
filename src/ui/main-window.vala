@@ -70,6 +70,7 @@ class MainWindow : Adw.ApplicationWindow {
   private void on_add_server_clicked () {
     add_server_popover.popdown ();
     var address = add_server_address_entry.text;
+    add_server_address_entry.text = "";
 
     if (address.length == 0) {
       return;
@@ -100,6 +101,7 @@ class MainWindow : Adw.ApplicationWindow {
   private void on_add_buddy_clicked () {
     add_buddy_popover.popdown ();
     var name = add_buddy_name_entry.text;
+    add_buddy_name_entry.text = "";
 
     if (name.length == 0) {
       return;
