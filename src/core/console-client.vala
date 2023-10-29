@@ -30,7 +30,7 @@ public class ConsoleClient : Object {
   public ConsoleProtocol protocol { get; construct; }
   public NetTransport transport { get; construct; }
 
-  private uint timeout_source;
+  private uint timeout_id;
 
   public signal void connected ();
   public signal void disconnected ();
@@ -102,17 +102,17 @@ public class ConsoleClient : Object {
   private void start_timeout_timer () {
     stop_timeout_timer ();
 
-    timeout_source = Timeout.add (TIMEOUT_MS, () => {
+    timeout_id = Timeout.add (TIMEOUT_MS, () => {
       on_error (new ConsoleError.TIMEOUT ("failed to query %s:%d: %s", transport.host, transport.port, "failed to receive a response in reasonable amount of time"));
-      timeout_source = 0;
+      timeout_id = 0;
       return Source.REMOVE;
     });
   }
 
   private void stop_timeout_timer () {
-    if (timeout_source > 0) {
-      Source.remove (timeout_source);
-      timeout_source = 0;
+    if (timeout_id > 0) {
+      Source.remove (timeout_id);
+      timeout_id = 0;
     }
   }
 }

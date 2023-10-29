@@ -175,12 +175,7 @@ public class Querier : Object {
 
   private void stop_timeout_timer () {
     if (timeout_id > 0) {
-      // NOTE: calling `Source.remove (timeout_id)` crashes the app
-      var timeout_source = MainContext.default ().find_source_by_id (timeout_id);
-
-      if (timeout_source != null && !timeout_source.is_destroyed ())
-        timeout_source.destroy ();
-
+      Source.remove (timeout_id);
       timeout_id = 0;
     }
   }
