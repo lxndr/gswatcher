@@ -1,0 +1,73 @@
+name: gswatcher
+base: core22
+grade: stable
+confinement: strict
+adopt-info: gswatcher
+
+slots:
+  gswatcher:
+    interface: dbus
+    bus: session
+    name: io.github.lxndr.gswatcher
+
+apps:
+  gswatcher:
+    extensions:
+      - gnome
+    command: usr/bin/gswatcher
+    desktop: usr/share/applications/io.github.lxndr.gswatcher.desktop
+    common-id: io.github.lxndr.gswatcher
+    plugs:
+      - network
+
+parts:
+  vala:
+    plugin: autotools
+    source: https://gitlab.gnome.org/GNOME/vala.git
+    source-type: git
+    source-tag: 0.56.13
+    source-depth: 1
+    build-packages:
+      - autoconf-archive
+      - flex
+      - bison
+    autotools-configure-parameters:
+      - --prefix=/usr
+    prime:
+      - -**
+  gswatcher:
+    plugin: meson
+    source: https://github.com/lxndr/gswatcher.git
+    source-type: git
+    source-branch: main
+    source-depth: 1
+    meson-parameters:
+      - --prefix=/usr
+      - --buildtype=release
+      - -Diso-flags-dir-name=iso-flags-png-320x240
+    parse-info:
+      - usr/share/metainfo/io.github.lxndr.gswatcher.appdata.xml
+    build-packages:
+      - liblua5.4-dev
+      - libgeoip-dev
+    stage-packages:
+      - iso-flags-png-320x240
+  lua:
+    plugin: nil
+    stage-packages:
+      - liblua5.4-0
+    stage:
+      - usr/lib/*/liblua5.4.so.*
+  geoip:
+    plugin: nil
+    override-pull: |
+      curl -sSLO https://sources.archlinux.org/other/packages/geoip-database/20230901/GeoIPCity.dat.gz
+      echo "3fe1e42b1992060165c79168e6a18cf7ccfed26e5cba641052435eb68f1db32b GeoIPCity.dat.gz" | sha256sum -c
+    override-build: |
+      mkdir -p "$CRAFT_PART_INSTALL/usr/share/GeoIP"
+      gzip -dc GeoIPCity.dat.gz > "$CRAFT_PART_INSTALL/usr/share/GeoIP/GeoIPCity.dat"
+    stage-packages:
+      - libgeoip1
+    stage:
+      - usr/lib/*/libGeoIP.so.*
+      - usr/share/GeoIP/GeoIPCity.dat
