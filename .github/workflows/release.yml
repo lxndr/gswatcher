@@ -67,6 +67,8 @@ jobs:
           mkdir -p dist/share/locale && cp -r /${{matrix.sys}}/share/locale dist/share
           wget -O /tmp/GeoIPCity.dat.gz https://sources.archlinux.org/other/packages/geoip-database/20230901/GeoIPCity.dat.gz
           mkdir -p dist/share/GeoIP && gzip -dc /tmp/GeoIPCity.dat.gz > dist/share/GeoIP/GeoIPCity.dat
+          wget -O /tmp/flags_1.0.2.tar.xz http://packages.linuxmint.com/pool/main/f/flags/flags_1.0.2.tar.xz
+          tar -xf /tmp/flags_1.0.2.tar.xz -C /tmp && cp -r /tmp/flags/usr/share/iso-flag-png dist/share
       - name: Create archive
         run: |
           mv dist ${{env.RELEASE_FILENAME}}
