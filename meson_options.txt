@@ -1,2 +1,3 @@
 option('tests', type: 'boolean', value: true, description: 'build tests')
 option('proprietary-icons', type: 'boolean', value: false, description: 'Enable proprietary icons')
+option('iso-flags-dir-name', type: 'string', value: 'iso-flag-png', description: '`iso-flags-png` direcotry name')

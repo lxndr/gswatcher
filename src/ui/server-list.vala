@@ -89,7 +89,7 @@ class ServerList : Widget {
 
     var geoip_resolver = GeoIPResolver.get_instance ();
     var country_code = geoip_resolver.code_by_addr (ip_address).ascii_down ();
-    return find_file_in_data_dirs ("iso-flag-png/" + country_code + ".png");
+    return find_file_in_data_dirs (@"$(Config.ISO_FLAGS_DIR_NAME)/$(country_code).png");
   }
 
   [GtkCallback]
