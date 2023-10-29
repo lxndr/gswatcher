@@ -164,11 +164,16 @@ public class Querier : Object {
   }
 
   private void start_timeout_timer () {
+    var self = this; // `this` does not get passed on Ubuntu 22.04
     stop_timeout_timer ();
 
     timeout_id = Timeout.add (TIMEOUT_MS, () => {
-      error = new QuerierError.TIMEOUT("failed to query %s:%d: %s", server.host, server.qport, "failed to receive a response in reasonable amount of time");
-      timeout_id = 0;
+      self.error = new QuerierError.TIMEOUT(
+        "failed to query %s:%d: %s",
+        self.server.host,
+        self.server.qport, "failed to receive a response in reasonable amount of time"
+      );
+      self.timeout_id = 0;
       return Source.REMOVE;
     });
   }
