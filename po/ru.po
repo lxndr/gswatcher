@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unnamed project\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-25 18:47+0300\n"
-"PO-Revision-Date: 2023-10-25 18:51+0300\n"
+"POT-Creation-Date: 2023-10-31 09:19+0300\n"
+"PO-Revision-Date: 2023-10-31 09:21+0300\n"
 "Last-Translator: Alexander Burobin <alexandrburobin@gmail.com>\n"
 "Language-Team: Russian <>\n"
 "Language: ru\n"
@@ -58,58 +58,66 @@ msgstr "Добавить"
 msgid "Buddy name"
 msgstr "Имя друга"
 
-#: src/ui/main-window.ui:176
+#: src/ui/main-window.ui:149
+msgid "_Add server"
+msgstr "Д_обавить сервер"
+
+#: src/ui/main-window.ui:160
+msgid "_Add buddy"
+msgstr "Д_обавить друга"
+
+#: src/ui/main-window.ui:177
 msgid "Primary menu"
 msgstr "Главное меню"
 
-#: src/ui/main-window.ui:192
+#: src/ui/main-window.ui:193
 msgid "_Server list"
 msgstr "Список _серверов"
 
-#: src/ui/main-window.ui:240
+#: src/ui/main-window.ui:241
 msgid "_Info"
 msgstr "_Инфо"
 
-#: src/ui/main-window.ui:255
+#: src/ui/main-window.ui:256
 msgid "_Details"
 msgstr "_Детали"
 
-#: src/ui/main-window.ui:277
+#: src/ui/main-window.ui:278
 msgid "_Console"
 msgstr "_Консоль"
 
-#: src/ui/main-window.ui:291
+#: src/ui/main-window.ui:292
 msgid "_Buddy list"
 msgstr "Список д_рузей"
 
-#: src/ui/main-window.ui:310
+#: src/ui/main-window.ui:311
 msgid "_Preferences"
 msgstr "_Настройки"
 
-#: src/ui/main-window.vala:79
+#: src/ui/main-window.vala:80
 #, c-format
 msgid "\"%s\" is already on your server list."
 msgstr "\"%s\" уже в списке серверов."
 
-#: src/ui/main-window.vala:89
+#: src/ui/main-window.vala:90
 msgid "Remove server?"
 msgstr "Удалить сервер?"
 
-#: src/ui/main-window.vala:90
+#: src/ui/main-window.vala:91
 #, c-format
 msgid "Are you sure you want to remove \"%s\" from the server list?"
 msgstr "Вы уверены, что хотите удалить \"%s\" из списка серверов?"
 
-#: src/ui/main-window.vala:109
+#: src/ui/main-window.vala:111
 #, c-format
 msgid "\"%s\" is already on your buddy list."
 msgstr "\"%s\" уже в списке друзей."
 
-#: src/ui/main-window.vala:119
+#: src/ui/main-window.vala:121
 msgid "Remove buddy?"
 msgstr "Удалить друга?"
 
-#: src/ui/main-window.vala:120
+#: src/ui/main-window.vala:122
 #, c-format
 msgid "Are you sure you want to remove \"%s\" from the buddy list?"
 msgstr "Вы уверены, что хотите удалить \"%s\" из списка друзей?"
@@ -235,7 +243,7 @@ msgstr "Отмена"
 msgid "Remove"
 msgstr "Удалить"
 
-#: src/ui/utils.vala:86
+#: src/ui/utils.vala:88
 msgid "OK"
 msgstr "ОК"
 

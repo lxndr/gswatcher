@@ -146,7 +146,7 @@
 
             <child type="start">
               <object class="GtkMenuButton" id="add_server_menu_button">
-                <property name="label">_Add server</property>
+                <property name="label" translatable="yes">_Add server</property>
                 <property name="use-underline">True</property>
                 <property name="popover">add_server_popover</property>
                 <style>
@@ -157,7 +157,7 @@
 
             <child type="start">
               <object class="GtkMenuButton" id="add_buddy_menu_button">
-                <property name="label">_Add buddy</property>
+                <property name="label" translatable="yes">_Add buddy</property>
                 <property name="use-underline">True</property>
                 <property name="popover">add_buddy_popover</property>
                 <property name="visible">False</property>
