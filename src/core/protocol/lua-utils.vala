@@ -82,15 +82,30 @@ public class LuaEx : Lua {
     push_nil ();
 
     while (next (table_idx) != 0) {
-      if (!is_none_or_nil (-1)) {
-        var key = to_string (-2).make_valid ();
+      var type_id = type (-1);
+      var key = to_string (-2).make_valid ();
 
-        if (type (-1) == Type.TABLE) {
-          print ("TODO: handle table value\n");
-        } else {
+      switch (type_id) {
+        case NUMBER:
+          if (is_integer (-1)) {
+            var val = to_integer (-1);
+            map.set (key, val.to_string ());
+          } else {
+            var val = to_number (-1);
+            map.set (key, val.to_string ());
+          }
+          break;
+        case BOOLEAN:
+        case STRING:
           var val = to_string (-1).make_valid ();
           map.set (key, val);
-        }
+          break;
+        case NONE:
+        case NIL:
+          break;
+        default:
+          log (Config.LOG_DOMAIN, LEVEL_WARNING, _("failed to retrieve value from Lua table under key '%s': unsupported type '%s'"), key, l_type_name (type_id));
+          break;
       }
 
       pop (1);
@@ -119,7 +134,7 @@ public class LuaEx : Lua {
           object.set (key, str);
         }
       } else if (type == Type.NUMBER) {
-        object.set (key, (int) to_integer (-1));
+        object.set (key, (int) to_number (-1));
       } else if (type == Type.BOOLEAN) {
         object.set (key, to_boolean (-1));
       }
