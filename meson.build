@@ -16,8 +16,9 @@ conf_data = configuration_data({
   'app_homepage': 'https://github.com/lxndr/gswatcher',
   'app_bugtracker': 'https://github.com/lxndr/gswatcher/issues',
   'app_log_domain': 'Gsw',
-  'app_vala_version': vala_compiler.version(),
-  'app_iso_flags_dir_name': get_option('iso-flags-dir-name'),
+  'locale_dir': join_paths(get_option('prefix'), get_option('localedir')),
+  'vala_version': vala_compiler.version(),
+  'iso_flags_dir_name': get_option('iso-flags-dir-name'),
 })
 
 gsw_datadir = join_paths(get_option('datadir'), meson.project_name())
