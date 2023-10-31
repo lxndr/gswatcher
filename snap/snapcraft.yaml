@@ -66,6 +66,8 @@ parts:
     override-build: |
       mkdir -p "$CRAFT_PART_INSTALL/usr/share/GeoIP"
       gzip -dc GeoIPCity.dat.gz > "$CRAFT_PART_INSTALL/usr/share/GeoIP/GeoIPCity.dat"
+    build-packages:
+      - curl
     stage-packages:
       - libgeoip1
     stage:
