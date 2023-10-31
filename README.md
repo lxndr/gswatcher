@@ -36,6 +36,14 @@ https://flathub.org/apps/io.github.lxndr.gswatcher
 flatpak install flathub io.github.lxndr.gswatcher
 ```
 
+### Snap
+
+https://snapcraft.io/gswatcher
+
+```
+sudo snap install gswatcher
+```
+
 ### Windows
 
 There are Windows portable builds available in Release section. Be warned that some features don't work like notifications.
