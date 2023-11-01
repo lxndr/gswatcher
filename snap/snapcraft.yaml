@@ -4,6 +4,9 @@ grade: stable
 confinement: strict
 adopt-info: gswatcher
 
+architectures:
+  - amd64
+
 slots:
   gswatcher:
     interface: dbus
