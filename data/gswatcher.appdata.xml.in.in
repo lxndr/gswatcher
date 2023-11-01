@@ -44,7 +44,7 @@
   <translation type="gettext">@app_id@</translation>
 
   <releases>
-    <release version="1.7.0-beta2" date="2023-10-29">
+    <release version="1.7.0-beta3" date="2023-11-01">
       <description>
         <p>This release improves UI and adds Windows support.</p>
         <ul>
@@ -56,6 +56,7 @@
           <li>Added separate UI in the header to add servers and buddies.</li>
           <li>Improved keyboard shortcuts.</li>
           <li>Updated translations.</li>
+          <li>Fix locales directory path.</li>
         </ul>
       </description>
       <url>https://github.com/lxndr/gswatcher/releases/tag/v1.6.7</url>
