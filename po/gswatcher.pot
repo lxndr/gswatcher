@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gswatcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-31 09:19+0300\n"
+"POT-Creation-Date: 2023-11-01 13:14+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,32 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: src/core/protocol/lua-utils.vala:107
+#, c-format
+msgid ""
+"failed to retrieve value from Lua table under key '%s': unsupported type '%s'"
+msgstr ""
+
+#: src/core/client.vala:210
+msgid "Connected"
+msgstr ""
+
+#: src/core/client.vala:214
+msgid "Disonnected"
+msgstr ""
+
+#: src/core/client.vala:219
+msgid "Authenticated"
+msgstr ""
+
+#: src/core/geoip-resolver.vala:40
+msgid "failed to find GeoIP database"
+msgstr ""
+
+#: src/core/geoip-resolver.vala:48
+msgid "failed to load GeoIP database"
+msgstr ""
 
 #: src/ui/buddy-list.ui:65
 msgctxt "buddy-list"

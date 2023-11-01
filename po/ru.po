@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unnamed project\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-31 09:19+0300\n"
-"PO-Revision-Date: 2023-10-31 09:21+0300\n"
+"POT-Creation-Date: 2023-11-01 13:14+0300\n"
+"PO-Revision-Date: 2023-11-01 13:17+0300\n"
 "Last-Translator: Alexander Burobin <alexandrburobin@gmail.com>\n"
 "Language-Team: Russian <>\n"
 "Language: ru\n"
@@ -16,6 +16,33 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
 "X-Generator: Gtranslator 45.3\n"
+
+#: src/core/protocol/lua-utils.vala:107
+#, c-format
+msgid ""
+"failed to retrieve value from Lua table under key '%s': unsupported type '%s'"
+msgstr ""
+"ошибка чтения значения Lua таблицы с ключом '%s': тип '%s' не поддерживается"
+
+#: src/core/client.vala:210
+msgid "Connected"
+msgstr "Подключен"
+
+#: src/core/client.vala:214
+msgid "Disonnected"
+msgstr "Отключен"
+
+#: src/core/client.vala:219
+msgid "Authenticated"
+msgstr "Авторизован"
+
+#: src/core/geoip-resolver.vala:40
+msgid "failed to find GeoIP database"
+msgstr "ошибка поиска базы данных GeoIP"
+
+#: src/core/geoip-resolver.vala:48
+msgid "failed to load GeoIP database"
+msgstr "ошибка загрузки базы данных GeoIP"
 
 #: src/ui/buddy-list.ui:65
 msgctxt "buddy-list"
