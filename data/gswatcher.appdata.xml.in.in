@@ -39,12 +39,16 @@
       <caption>Remote console panel</caption>
       <image>https://raw.githubusercontent.com/lxndr/gswatcher/v@app_version@/docs/screenshots/02.png</image>
     </screenshot>
+    <screenshot>
+      <caption>Buddy list</caption>
+      <image>https://raw.githubusercontent.com/lxndr/gswatcher/v@app_version@/docs/screenshots/03.png</image>
+    </screenshot>
   </screenshots>
 
   <translation type="gettext">@app_id@</translation>
 
   <releases>
-    <release version="1.7.0-beta3" date="2023-11-01">
+    <release version="1.7.0" date="2023-11-02">
       <description>
         <p>This release improves UI and adds Windows support.</p>
         <ul>
@@ -56,10 +60,10 @@
           <li>Added separate UI in the header to add servers and buddies.</li>
           <li>Improved keyboard shortcuts.</li>
           <li>Updated translations.</li>
-          <li>Fix locales directory path.</li>
+          <li>Fix locale directory.</li>
         </ul>
       </description>
-      <url>https://github.com/lxndr/gswatcher/releases/tag/v1.6.7</url>
+      <url>https://github.com/lxndr/gswatcher/releases/tag/v1.7.0</url>
     </release>
     <release version="1.6.7" date="2023-10-13">
       <description>

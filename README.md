@@ -1,4 +1,4 @@
-Game Server Watcher (GSWatcher) is a simple application that helps you to watch
+Game Server Watcher is a simple application that helps you to monitor
 the state of your favorite game servers and control remotely the servers of
 your own. It also has a buddy list and can notify you if a buddy joins any of
 servers.
