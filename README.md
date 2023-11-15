@@ -1,9 +1,11 @@
+[![Organic - Made by Humans](https://img.shields.io/static/v1?label=Organic&message=Made+by+Humans&color=brightgreen)](https://github.com/lxndr/gswatcher)
+
 Game Server Watcher is a simple application that helps you to monitor
 the state of your favorite game servers and control remotely the servers of
 your own. It also has a buddy list and can notify you if a buddy joins any of
 servers.
 
-![Game Server Watcher](https://raw.githubusercontent.com/lxndr/gswatcher/v1.6.7/docs/screenshots/01.png)
+![Game Server Watcher](https://raw.githubusercontent.com/lxndr/gswatcher/v1.7.0/docs/screenshots/01.png)
 
 ## Features
 
@@ -11,7 +13,7 @@ servers.
 * Buddy list
 * Notifications when your buddy is on a server
 * Multiple query protocols
-* Remote console (Source only)
+* Remote console (Source Engine only)
 
 ## For users
 
