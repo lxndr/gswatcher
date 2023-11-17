@@ -51,6 +51,7 @@ parts:
     parse-info:
       - usr/share/metainfo/io.github.lxndr.gswatcher.appdata.xml
     build-packages:
+      - imagemagick
       - liblua5.4-dev
       - libgeoip-dev
     stage-packages:
