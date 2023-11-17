@@ -1,0 +1,14 @@
+[Game]
+id = ahl
+protocol = source
+port = 27015
+
+;[Match]
+;inf.gamename = "ahl"
+
+[Info]
+game-name = "Action Half-Life"
+
+[Extra]
+release-year = 1999
+icon-source = https://github.com/GameServerManagers/LinuxGSM/blob/master/lgsm/data/gameicons/ahl-icon.png

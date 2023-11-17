@@ -1,3 +1,4 @@
 option('tests', type: 'boolean', value: true, description: 'build tests')
-option('proprietary-icons', type: 'boolean', value: false, description: 'Enable proprietary icons')
 option('iso-flags-dir-name', type: 'string', value: 'iso-flag-png', description: '`iso-flags-png` direcotry name')
+option('game-icon-size', type: 'integer', min : 16, value: 32, description: 'game icon size (px)')
+option('game-icon-ext', type: 'combo', choices : ['png', 'webp'], value : 'png', description: 'game icon format')
