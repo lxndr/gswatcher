@@ -21,7 +21,7 @@ icons = [
 
 convert = find_program('convert')
 icon_size = get_option('game-icon-size')
-icon_ext = get_option('game-icon-size')
+icon_ext = get_option('game-icon-ext')
 
 foreach icon : icons
   custom_target(icon,
