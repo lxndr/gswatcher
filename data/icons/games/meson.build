@@ -38,6 +38,6 @@ foreach icon : icons
     ],
     build_by_default: true,
     install : true,
-    install_dir : join_paths(gsw_datadir, 'icons'),
+    install_dir : join_paths(gsw_datadir, 'icons', 'games'),
   )
 endforeach
