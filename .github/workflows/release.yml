@@ -11,8 +11,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - { sys: mingw32, env: i686 }
-          - { sys: mingw64, env: x86_64 }
+          - { sys: ucrt64, env: x86_64 }
     defaults:
       run:
         shell: msys2 {0}
@@ -37,10 +36,10 @@ jobs:
             vala:p
             libgee:p
             libadwaita:p
-            libadwaita:p
             lua:p
             geoip:p
             imagemagick:p
+            inkscape:p
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup meson project

@@ -183,16 +183,16 @@ public class Lua {
   public unowned string l_type_name (int index);
 
   // standard library
-  [CCode (cname = "luaopen_base")]
+  [CCode (cheader_filename = "lualib.h", cname = "luaopen_base")]
   public static int open_base (Lua vm);
-  [CCode (cname = "luaopen_math")]
+  [CCode (cheader_filename = "lualib.h", cname = "luaopen_math")]
   public static int open_math (Lua vm);
-  [CCode (cname = "luaopen_package")]
+  [CCode (cheader_filename = "lualib.h", cname = "luaopen_package")]
   public static int open_package (Lua vm);
-  [CCode (cname = "luaopen_string")]
+  [CCode (cheader_filename = "lualib.h", cname = "luaopen_string")]
   public static int open_string (Lua vm);
-  [CCode (cname = "luaopen_table")]
+  [CCode (cheader_filename = "lualib.h", cname = "luaopen_table")]
   public static int open_table (Lua vm);
-  [CCode (cname = "luaopen_debug")]
+  [CCode (cheader_filename = "lualib.h", cname = "luaopen_debug")]
   public static int open_debug (Lua vm);
 }
