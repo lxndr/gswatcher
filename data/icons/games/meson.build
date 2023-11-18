@@ -14,8 +14,11 @@ icons = [
   'iosoccer.png',
   'mc.webp',
   'mta.png',
+  'nexuiz.svg',
+  'openarena.svg',
   'syn.png',
   'warsow.svg',
+  'xonotic.svg',
   'zp.png',
 ]
 
