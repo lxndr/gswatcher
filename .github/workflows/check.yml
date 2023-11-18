@@ -8,7 +8,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Install packages
-      run: sudo apt-get update && sudo apt-get install -y meson ninja-build cmake gettext desktop-file-utils appstream-util valac libgee-0.8-dev libgtk-4-dev libadwaita-1-dev liblua5.4-dev libgeoip-dev
+      run: sudo apt-get update && sudo apt-get install -y meson ninja-build cmake gettext desktop-file-utils appstream-util valac imagemagick libgee-0.8-dev libgtk-4-dev libadwaita-1-dev liblua5.4-dev libgeoip-dev
     - name: Setup meson project
       run: meson setup builddir
     - name: Compile
@@ -46,6 +46,7 @@ jobs:
             libadwaita:p
             lua:p
             geoip:p
+            imagemagick:p
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup meson project

@@ -40,6 +40,7 @@ jobs:
             libadwaita:p
             lua:p
             geoip:p
+            imagemagick:p
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup meson project
