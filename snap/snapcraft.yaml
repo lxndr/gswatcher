@@ -22,14 +22,13 @@ apps:
     common-id: io.github.lxndr.gswatcher
     plugs:
       - network
+    environment:
+      GSW_GAME_ICONS_DIR: $SNAP_DATA/nonfree-icons/games
 
 parts:
   vala:
     plugin: autotools
-    source: https://gitlab.gnome.org/GNOME/vala.git
-    source-type: git
-    source-tag: 0.56.13
-    source-depth: 1
+    source: .
     build-packages:
       - autoconf-archive
       - flex
@@ -77,3 +76,13 @@ parts:
     stage:
       - usr/lib/*/libGeoIP.so.*
       - usr/share/GeoIP/GeoIPCity.dat
+  nonfree:
+    plugin: nil
+    stage-packages:
+      - wget
+
+hooks:
+  post-refresh:
+    plugs:
+      - network
+
