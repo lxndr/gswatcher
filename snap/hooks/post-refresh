@@ -1,0 +1,6 @@
+#!/bin/env sh
+
+curl -sSLO https://github.com/lxndr/gswatcher-nonfree-icons/releases/download/v1.7.1/nonfree-icons.tar.gz
+echo "93b624962da89c1d8462eb415c7f8e19d7f0cd666a4bca180c7c52a6c39eeed0 nonfree-icons.tar.gz" | sha256sum -c
+tar -xf nonfree-icons.tar.gz -C /share/gswatcher/icons
+rm nonfree-icons.tar.gz
