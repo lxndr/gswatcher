@@ -19,6 +19,7 @@ conf_data = configuration_data({
   'locale_dir': join_paths(get_option('prefix'), get_option('localedir')),
   'vala_version': vala_compiler.version(),
   'iso_flags_dir_name': get_option('iso-flags-dir-name'),
+  'game_icon_ext': get_option('game-icon-ext'),
 })
 
 gsw_datadir = join_paths(get_option('datadir'), meson.project_name())

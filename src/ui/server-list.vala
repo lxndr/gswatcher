@@ -97,7 +97,7 @@ class ServerList : Widget {
     if (game_id == null)
       return null;
 
-    return find_file_in_app_data_dirs ("icons/games/" + game_id + ".png");
+    return find_file_in_app_data_dirs (@"$(game_id).$(Config.GAME_ICON_EXT)", "icons/games", "GSW_GAME_ICONS_DIR");
   }
 
   [GtkCallback]

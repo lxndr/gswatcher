@@ -144,7 +144,7 @@ class Application : Adw.Application {
   }
 
   private async void register_protocols () {
-    var files = yield get_data_files ("protocols", "GSW_PROTOCOLS_DIR");
+    var files = yield get_app_data_files ("protocols", "GSW_PROTOCOLS_DIR");
 
     foreach (var file in files) {
       var script = file.get_path ();

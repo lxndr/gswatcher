@@ -69,7 +69,23 @@ public string? get_filename_extension(File file) {
   return fname.substring (ext_pos + 1, -1);
 }
 
-public string? find_file_in_data_dirs (string path) {
+public string? find_file_in_dirs (string path, Gee.List<File> dirs) {
+  foreach (var dir in dirs) {
+    var filename = Path.build_filename (dir.get_path (), path);
+
+    if (FileUtils.test (filename, FileTest.EXISTS))
+      return filename;
+  }
+
+  return null;
+}
+
+public string? find_file_in_app_data_dirs (string path, string subdir, string? data_dir_env = null) {
+  var dirs = get_app_data_dirs (subdir, data_dir_env);
+  return find_file_in_dirs (path, dirs);
+}
+
+public string? find_file_in_data_dirs (string path, string? data_dir_env = null) {
   var dirs = new Gee.ArrayList<string> ();
   dirs.add (Environment.get_user_data_dir ());
 
@@ -86,7 +102,7 @@ public string? find_file_in_data_dirs (string path) {
   return null;
 }
 
-public Gee.List<File> get_data_dirs (string subdir, string? data_dir_env = null) {
+public Gee.List<File> get_app_data_dirs (string subdir, string? data_dir_env = null) {
   var dirs = new Gee.ArrayList<File> ();
   var prgname = Environment.get_prgname ();
 
@@ -108,9 +124,9 @@ public Gee.List<File> get_data_dirs (string subdir, string? data_dir_env = null)
   return dirs;
 }
 
-public async Gee.List<File> get_data_files (string subdir, string? data_dir_env = null, Cancellable? cancellable = null) {
+public async Gee.List<File> get_app_data_files (string subdir, string? data_dir_env = null, Cancellable? cancellable = null) {
   var files = new Gee.ArrayList<File> ();
-  var data_dirs = get_data_dirs (subdir, data_dir_env);
+  var data_dirs = get_app_data_dirs (subdir, data_dir_env);
 
   foreach (var data_dir in data_dirs) {
     try {
@@ -135,9 +151,9 @@ public class DataFileContents {
   public uint8[] data;
 }
 
-public async Gee.List<DataFileContents> get_data_files_contents (string dirname, string? data_dir_env = null, Cancellable? cancellable = null) throws Error {
+public async Gee.List<DataFileContents> get_app_data_files_contents (string dirname, string? data_dir_env = null, Cancellable? cancellable = null) throws Error {
   var contents = new Gee.ArrayList<DataFileContents> ();
-  var files = yield get_data_files (dirname, data_dir_env, cancellable);
+  var files = yield get_app_data_files (dirname, data_dir_env, cancellable);
 
   foreach (var file in files) {
     try {

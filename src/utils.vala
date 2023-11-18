@@ -40,10 +40,6 @@ namespace Gsw {
     return "%lld:%02lld".printf (minutes, seconds);
   }
 
-  public string? find_file_in_app_data_dirs (string path) {
-    return find_file_in_data_dirs (Path.build_filename(Environment.get_prgname (), path));
-  }
-
   public bool settings_nullable_string_getter (Value value, Variant variant, void* user_data) {
     if (!variant.is_of_type (VariantType.MAYBE))
       return false;

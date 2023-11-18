@@ -60,7 +60,7 @@ public abstract class LuaProtocol : Object, Initable, Protocol {
     // pacakge library
     // TODO: disable c libraries
     var patterns = new Gee.ArrayList<string> ();
-    var dirs = get_data_dirs ("protocols", "GSW_PROTOCOLS_DIR");
+    var dirs = get_app_data_dirs ("protocols", "GSW_PROTOCOLS_DIR");
     foreach (var dir in dirs) patterns.add (Path.build_filename (dir.get_path (), "?.lua"));
     var path = string.joinv (";", patterns.to_array ());
 

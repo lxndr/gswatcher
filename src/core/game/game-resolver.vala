@@ -40,7 +40,7 @@ class GameResolver : Object {
   }
 
   private async void load_games () throws Error {
-    var ini_files = yield get_data_files_contents ("games", "GSW_GAMES_DIR", null);
+    var ini_files = yield get_app_data_files_contents ("games", "GSW_GAMES_DIR", null);
 
     foreach (var ini_file in ini_files) {
       try {

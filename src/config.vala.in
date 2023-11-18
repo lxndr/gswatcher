@@ -28,4 +28,5 @@ namespace Gsw.Config {
   public const string GETTEXT_PACKAGE = "@app_exec@";
   public const string VALA_VERSION = "@vala_version@";
   public const string ISO_FLAGS_DIR_NAME = "@iso_flags_dir_name@";
+  public const string GAME_ICON_EXT = "@game_icon_ext@";
 }
