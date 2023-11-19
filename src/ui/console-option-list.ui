@@ -74,6 +74,7 @@
             <property name="input-purpose">GTK_INPUT_PURPOSE_PASSWORD</property>
             <property name="visibility">False</property>
             <property name="width-chars">30</property>
+            <signal name="activate" handler="on_password_activate" />
           </object>
         </child>
       </object>

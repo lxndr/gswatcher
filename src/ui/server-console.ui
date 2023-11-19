@@ -80,7 +80,7 @@
                 <property name="popover">
                   <object class="GtkPopover" id="options_popover">
                     <property name="child">
-                      <object class="GswUiConsoleOptionList">
+                      <object class="GswUiConsoleOptionList" id="options_activate">
                         <binding name="server">
                           <lookup type="GswClient" name="server">
                             <lookup type="GswUiServerConsole" name="client">
@@ -88,6 +88,7 @@
                             </lookup>
                           </lookup>
                         </binding>
+                        <signal name="activate" handler="options_activate"/>
                       </object>
                     </property>
                   </object>

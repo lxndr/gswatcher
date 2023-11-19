@@ -25,7 +25,13 @@ class ServerConsole : Widget {
   public Client? _client;
 
   [GtkChild]
-  private unowned Gtk.TextView text_view;
+  private unowned TextView text_view;
+
+  [GtkChild]
+  private unowned Entry entry;
+
+  [GtkChild]
+  private unowned Popover options_popover;
 
   private Gee.BidirIterator<string>? history_iter;
 
@@ -134,6 +140,12 @@ class ServerConsole : Widget {
     entry.text = history_iter.get ();
     entry.set_position ((int) entry.text_length);
     return true;
+  }
+
+  [GtkCallback]
+  private void options_activate () {
+    options_popover.popdown ();
+    entry.grab_focus ();
   }
 
   private void scroll_to_bottom () {

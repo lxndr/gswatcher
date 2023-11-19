@@ -30,6 +30,8 @@ class ConsoleOptionList : Widget {
   [GtkChild]
   private unowned Entry password_entry;
 
+  public new signal void activate ();
+
   class construct {
     set_layout_manager_type (typeof (BinLayout));
   }
@@ -66,6 +68,11 @@ class ConsoleOptionList : Widget {
 
   private void password_changed (Editable entry) {
     server.console_password = entry.text;
+  }
+
+  [GtkCallback]
+  private void on_password_activate () {
+    activate ();
   }
 }
 
