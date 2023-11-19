@@ -70,6 +70,10 @@
               <property name="column">1</property>
               <property name="row">1</property>
             </layout>
+            <property name="input-hints">GTK_INPUT_HINT_NO_SPELLCHECK | GTK_INPUT_HINT_PRIVATE</property>
+            <property name="input-purpose">GTK_INPUT_PURPOSE_PASSWORD</property>
+            <property name="visibility">False</property>
+            <property name="width-chars">30</property>
           </object>
         </child>
       </object>
