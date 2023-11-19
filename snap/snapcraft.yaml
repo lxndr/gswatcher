@@ -28,7 +28,10 @@ apps:
 parts:
   vala:
     plugin: autotools
-    source: .
+    source: https://gitlab.gnome.org/GNOME/vala.git
+    source-type: git
+    source-tag: 0.56.14
+    source-depth: 1
     build-packages:
       - autoconf-archive
       - flex
@@ -39,10 +42,7 @@ parts:
       - -**
   gswatcher:
     plugin: meson
-    source: https://github.com/lxndr/gswatcher.git
-    source-type: git
-    source-branch: main
-    source-depth: 1
+    source: .
     meson-parameters:
       - --prefix=/usr
       - --buildtype=release
