@@ -48,6 +48,21 @@
   <translation type="gettext">@app_id@</translation>
 
   <releases>
+      <release version="1.7.1" date="2023-11-21">
+      <description>
+        <p>This release adds back non-free game icons and improves remote console.</p>
+        <ul>
+          <li>Non-free game icons are now downloaded during installation.</li>
+          <li>Added/updated game definitions: Action Quake 2, Atlas, Counter-Strike 2, Nexuiz, OpenArena, Rust, Warsow, Xonotic.</li>
+          <li>Decreased icon size in bytes.</li>
+          <li>Console port now defaults to game port.</li>
+          <li>Increased width of password field for console options.</li>
+          <li>Console field is now masked.</li>
+          <li>Server/buddy list is now properly focusd after item addition/removal.</li>
+        </ul>
+      </description>
+      <url>https://github.com/lxndr/gswatcher/releases/tag/v1.7.1</url>
+    </release>
     <release version="1.7.0" date="2023-11-02">
       <description>
         <p>This release improves UI and adds Windows support.</p>
