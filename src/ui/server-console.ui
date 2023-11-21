@@ -78,19 +78,13 @@
               <object class="GtkMenuButton">
                 <property name="label" translatable="yes">Options</property>
                 <property name="popover">
-                  <object class="GtkPopover" id="options_popover">
-                    <property name="child">
-                      <object class="GswUiConsoleOptionList" id="options_activate">
-                        <binding name="server">
-                          <lookup type="GswClient" name="server">
-                            <lookup type="GswUiServerConsole" name="client">
-                              GswUiServerConsole
-                            </lookup>
-                          </lookup>
-                        </binding>
-                        <signal name="activate" handler="options_activate"/>
-                      </object>
-                    </property>
+                  <object class="GswUiConsoleOptionList" id="options_popover">
+                    <binding name="client">
+                      <lookup type="GswUiServerConsole" name="client">
+                        GswUiServerConsole
+                      </lookup>
+                    </binding>
+                    <signal name="values_changed" handler="on_options_values_changed"/>
                   </object>
                 </property>
               </object>

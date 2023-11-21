@@ -43,6 +43,7 @@ class ServerConsole : Widget {
     set {
       if (_client != null) {
         _client.notify["console-command-history"].disconnect(handle_history_change);
+        _client.notify["console-log-buffer"].disconnect(handle_log_buffer_change);
 
         if (_client.console_log_buffer != null)
           _client.console_log_buffer.changed.disconnect(scroll_to_bottom);
@@ -52,9 +53,10 @@ class ServerConsole : Widget {
 
       if (_client != null) {
         _client.notify["console-command-history"].connect(handle_history_change);
+        _client.notify["console-log-buffer"].connect(handle_log_buffer_change);
+        handle_log_buffer_change ();
 
         if (_client.console_log_buffer != null) {
-          text_view.buffer = _client.console_log_buffer;
           _client.console_log_buffer.changed.connect(scroll_to_bottom);
           scroll_to_bottom ();
         }
@@ -71,6 +73,11 @@ class ServerConsole : Widget {
   protected override void dispose () {
     get_first_child ().unparent ();
     base.dispose ();
+  }
+
+  private void handle_log_buffer_change () {
+    if (_client.console_log_buffer != null)
+      text_view.buffer = _client.console_log_buffer;
   }
 
   private void handle_history_change () {
@@ -143,7 +150,9 @@ class ServerConsole : Widget {
   }
 
   [GtkCallback]
-  private void options_activate () {
+  private void on_options_values_changed (uint16 port, string password) {
+    client.console_port = port;
+    client.console_password = password;
     options_popover.popdown ();
     entry.grab_focus ();
   }

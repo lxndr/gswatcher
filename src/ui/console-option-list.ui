@@ -21,8 +21,10 @@
 <interface>
   <requires lib="gtk+" version="4.0"/>
 
-  <template class="GswUiConsoleOptionList" parent="GtkWidget">
-    <child>
+  <template class="GswUiConsoleOptionList" parent="GtkPopover">
+    <signal name="closed" handler="on_closed" />
+
+    <property name="child">
       <object class="GtkGrid">
         <property name="column-spacing">8</property>
         <property name="row-spacing">4</property>
@@ -49,6 +51,13 @@
                 <property name="step-increment">1</property>
                 <property name="lower">1024</property>
                 <property name="upper">49151</property>
+                <binding name="value">
+                  <lookup type="GswClient" name="console-port">
+                    <lookup type="GswUiConsoleOptionList" name="client">
+                      GswUiConsoleOptionList
+                    </lookup>
+                  </lookup>
+                </binding>
               </object>
             </property>
           </object>
@@ -74,10 +83,17 @@
             <property name="input-purpose">GTK_INPUT_PURPOSE_PASSWORD</property>
             <property name="visibility">False</property>
             <property name="width-chars">30</property>
-            <signal name="activate" handler="on_password_activate" />
+            <binding name="text">
+              <lookup type="GswClient" name="console-password">
+                <lookup type="GswUiConsoleOptionList" name="client">
+                  GswUiConsoleOptionList
+                </lookup>
+              </lookup>
+            </binding>
+            <signal name="activate" handler="on_password_activated" />
           </object>
         </child>
       </object>
-    </child>
+    </property>
   </template>
 </interface>

@@ -21,8 +21,8 @@ using Gtk;
 namespace Gsw.Ui {
 
 [GtkTemplate (ui = "/io/github/lxndr/gswatcher/ui/console-option-list.ui")]
-class ConsoleOptionList : Widget {
-  private Server? _server;
+class ConsoleOptionList : Popover {
+  public Client? client { get; set; }
 
   [GtkChild]
   private unowned Adjustment port_entry;
@@ -30,49 +30,16 @@ class ConsoleOptionList : Widget {
   [GtkChild]
   private unowned Entry password_entry;
 
-  public new signal void activate ();
+  public signal void values_changed (uint16 port, string password);
 
-  class construct {
-    set_layout_manager_type (typeof (BinLayout));
-  }
-
-  protected override void dispose () {
-    get_first_child ().unparent ();
-    base.dispose ();
-  }
-
-  public Server server {
-    get {
-      return _server;
-    }
-
-    set {
-      port_entry.value_changed.disconnect (port_changed);
-      password_entry.changed.disconnect (password_changed);
-
-      _server = value;
-
-      if (_server != null) {
-        port_entry.value = _server.console_port;
-        port_entry.value_changed.connect (port_changed);
-
-        password_entry.text = _server.console_password;
-        password_entry.changed.connect (password_changed);
-      }
-    }
-  }
-
-  private void port_changed (Adjustment entry) {
-    server.console_port = (uint16) entry.value;
-  }
-
-  private void password_changed (Editable entry) {
-    server.console_password = entry.text;
+  [GtkCallback]
+  private void on_password_activated () {
+    popdown ();
   }
 
   [GtkCallback]
-  private void on_password_activate () {
-    activate ();
+  private void on_closed () {
+    values_changed ((uint16) port_entry.value, password_entry.text);
   }
 }
 

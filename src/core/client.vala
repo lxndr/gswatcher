@@ -38,7 +38,9 @@ public class Client : Object {
   public ListStore? plist_fields { get; construct set; }
 
   // remote console
-  public bool is_console_supported { get; private set; }
+  public uint16 console_port { get; set; default = 0; }
+  public string console_password { get; set; default = ""; }
+  public bool is_console_supported { get; private set; default = false; }
   public ConsoleClient? console_client { get; private set; }
   public Gtk.TextBuffer? console_log_buffer { get; private set; }
   public Gee.ArrayList<string>? console_command_history { get; set; }
@@ -65,6 +67,8 @@ public class Client : Object {
     sinfo.notify["game-id"].connect(setup_console_feature);
     plist = new PlayerList ();
     plist_fields = new ListStore (typeof (PlayerField));
+    notify["console-port"].connect(on_console_options_changed);
+    notify["console-password"].connect(on_console_options_changed);
 
     var game_resolver = GameResolver.get_instance ();
     game_resolver.notify["ready"].connect(on_game_resolver_ready_change);
@@ -184,9 +188,11 @@ public class Client : Object {
       is_console_supported = false;
       console_log_buffer = null;
     } else {
-      is_console_supported = true;
+      if (console_port <= 1024)
+        console_port = server.gport;
       console_log_buffer = new Gtk.TextBuffer (console_log_buffer_tag_table);
       console_command_history = new Gee.ArrayList<string> ((a, b) => a == b);
+      is_console_supported = true;
     }
   }
 
@@ -195,7 +201,7 @@ public class Client : Object {
 
     try {
       var proto = (ConsoleProtocol) ProtocolRegistry.get_instance ().create (console_protocol);
-      console_client = new ConsoleClient (server, proto);
+      console_client = new ConsoleClient (server.host, console_port, console_password, proto);
       console_client.connected.connect (on_console_connected);
       console_client.authenticated.connect (on_console_authenticated);
       console_client.disconnected.connect (on_console_disconnected);
@@ -229,6 +235,10 @@ public class Client : Object {
     else
       log_to_console (err.message, "err");
 
+    console_client = null;
+  }
+
+  private void on_console_options_changed () {
     console_client = null;
   }
 

@@ -26,7 +26,9 @@ errordomain ConsoleError {
 }
 
 public class ConsoleClient : Object {
-  public Server server { get; construct; }
+  public string host { get; construct; }
+  public uint16 port { get; construct; }
+  public string password { get; construct; }
   public ConsoleProtocol protocol { get; construct; }
   public NetTransport transport { get; construct; }
 
@@ -42,7 +44,7 @@ public class ConsoleClient : Object {
     protocol.data_send.connect (send_data);
     protocol.response.connect (on_response);
 
-    transport = TransportRegistry.get_instance ().create_net_transport (protocol.info.transport, server.host, server.console_port);
+    transport = TransportRegistry.get_instance ().create_net_transport (protocol.info.transport, host, port);
     transport.connected.connect (() => connected ());
     transport.authenticated.connect (() => authenticated ());
     transport.disconnected.connect (() => disconnected ());
@@ -50,8 +52,13 @@ public class ConsoleClient : Object {
     transport.error.connect (on_transport_error);
   }
 
-  public ConsoleClient (Server server, ConsoleProtocol protocol) {
-    Object (server : server, protocol : protocol);
+  public ConsoleClient (string host, uint16 port, string password, ConsoleProtocol protocol) {
+    Object (
+      host : host,
+      port : port,
+      password : password,
+      protocol : protocol
+    );
   }
 
   ~ConsoleClient () {
@@ -61,7 +68,7 @@ public class ConsoleClient : Object {
   public void exec_command (string command) {
     try {
       var options = new Gee.HashMap<string, string> ();
-      options.set ("password", server.console_password);
+      options.set ("password", password);
       protocol.send_command (command, options);
       start_timeout_timer ();
     } catch (Error err) {
