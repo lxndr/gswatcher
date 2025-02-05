@@ -44,6 +44,20 @@ if libadwaita_dep_version.version_compare('>=1.3.0')
   )
 endif
 
+if libadwaita_dep_version.version_compare('>=1.5.0')
+  add_project_arguments(
+    '-D', 'GSW_ADWAITA_1_5_SUPPORTED',
+    language: 'vala',
+  )
+endif
+
+if libadwaita_dep_version.version_compare('>=1.6.0')
+  add_project_arguments(
+    '-D', 'GSW_ADWAITA_1_6_SUPPORTED',
+    language: 'vala',
+  )
+endif
+
 core_sources = files(
   'core/game/expression-parser.vala',
   'core/game/expression.vala',

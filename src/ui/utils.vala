@@ -34,7 +34,12 @@ enum ShowRemoveDialogResponse {
 
 async ShowRemoveDialogResponse show_remove_dialog (Gtk.Window parent, string heading, string body) {
 #if GSW_ADWAITA_1_2_SUPPORTED
-  var dlg = new Adw.MessageDialog (parent, heading, body);
+  #if GSW_ADWAITA_1_6_SUPPORTED
+    var dlg = new Adw.AlertDialog (heading, body);
+  #else
+    var dlg = new Adw.MessageDialog (parent, heading, body);
+  #endif
+
   dlg.add_response("cancel", _("Cancel"));
   dlg.add_response("remove", _("Remove"));
   dlg.set_response_appearance ("remove", DESTRUCTIVE);
@@ -42,9 +47,15 @@ async ShowRemoveDialogResponse show_remove_dialog (Gtk.Window parent, string hea
   dlg.close_response = "cancel";
 
   #if GSW_ADWAITA_1_3_SUPPORTED
-    return (yield dlg.choose (null)) == "remove"
-      ? ShowRemoveDialogResponse.REMOVE
-      : ShowRemoveDialogResponse.CANCEL;
+    #if GSW_ADWAITA_1_6_SUPPORTED
+      return (yield dlg.choose (parent, null)) == "remove"
+        ? ShowRemoveDialogResponse.REMOVE
+        : ShowRemoveDialogResponse.CANCEL;
+    #else
+      return (yield dlg.choose (null)) == "remove"
+        ? ShowRemoveDialogResponse.REMOVE
+        : ShowRemoveDialogResponse.CANCEL;
+    #endif
   #else
     var promise = new Gee.Promise<string> ();
 
@@ -83,7 +94,14 @@ async ShowRemoveDialogResponse show_remove_dialog (Gtk.Window parent, string hea
 }
 
 void show_error_dialog (Gtk.Window? parent, string body) {
-#if GSW_ADWAITA_1_2_SUPPORTED
+#if GSW_ADWAITA_1_6_SUPPORTED
+  var dlg = new Adw.AlertDialog (_("Error"), body);
+  dlg.add_response("ok", _("OK"));
+  dlg.set_response_appearance ("ok", SUGGESTED);
+  dlg.default_response = "ok";
+  dlg.close_response = "ok";
+  dlg.present (parent);
+#elif GSW_ADWAITA_1_2_SUPPORTED
   var dlg = new Adw.MessageDialog (parent, null, body);
   dlg.add_response("ok", _("OK"));
   dlg.set_response_appearance ("ok", SUGGESTED);

@@ -69,7 +69,18 @@ namespace Gsw.Ui {
       null,
     };
 
-#if GSW_ADWAITA_1_2_SUPPORTED
+#if GSW_ADWAITA_1_5_SUPPORTED
+    var dlg = new Adw.AboutDialog ();
+    dlg.application_name = Config.APPNAME;
+    dlg.application_icon = Config.APPID;
+    dlg.version = Config.VERSION;
+    dlg.website = Config.HOMEPAGE;
+    dlg.developers = authors;
+    dlg.license_type = License.AGPL_3_0;
+    dlg.issue_url = Config.ISSUES;
+    dlg.debug_info = format_debug_info (transports, protocols);
+    dlg.present (win);
+#elif GSW_ADWAITA_1_2_SUPPORTED
     var dlg = new Adw.AboutWindow ();
     dlg.application_name = Config.APPNAME;
     dlg.application_icon = Config.APPID;
