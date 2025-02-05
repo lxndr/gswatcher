@@ -65,7 +65,7 @@ jobs:
           mkdir -p out/share/glib-2.0/schemas && cp -r /${{matrix.sys}}/share/glib-2.0/schemas out/share/glib-2.0
           mkdir -p out/share/icons && cp -r /${{matrix.sys}}/share/icons out/share && rm -r out/share/icons/Adwaita/cursors
           mkdir -p out/share/locale && cp -r /${{matrix.sys}}/share/locale out/share
-          wget -O /tmp/GeoIPCity.dat.gz https://sources.archlinux.org/other/packages/geoip-database/20230901/GeoIPCity.dat.gz
+          wget -O /tmp/GeoIPCity.dat.gz https://sources.archlinux.org/other/packages/geoip-database/20250129/GeoIPCity.dat.gz
           mkdir -p out/share/GeoIP && gzip -dc /tmp/GeoIPCity.dat.gz > out/share/GeoIP/GeoIPCity.dat
           wget -O /tmp/flags_1.0.2.tar.xz http://packages.linuxmint.com/pool/main/f/flags/flags_1.0.2.tar.xz
           tar -xf /tmp/flags_1.0.2.tar.xz -C /tmp && cp -r /tmp/flags/usr/share/iso-flag-png out/share

@@ -64,8 +64,8 @@ parts:
   geoip:
     plugin: nil
     override-pull: |
-      curl -sSLO https://sources.archlinux.org/other/packages/geoip-database/20230901/GeoIPCity.dat.gz
-      echo "3fe1e42b1992060165c79168e6a18cf7ccfed26e5cba641052435eb68f1db32b GeoIPCity.dat.gz" | sha256sum -c
+      curl -sSLO https://sources.archlinux.org/other/packages/geoip-database/20250129/GeoIPCity.dat.gz
+      echo "bf2e8452642514ca64e2ba6aace3c3bf08be7b79f0d994fd98d68dc87b395ce4 GeoIPCity.dat.gz" | sha256sum -c
     override-build: |
       mkdir -p "$CRAFT_PART_INSTALL/usr/share/GeoIP"
       gzip -dc GeoIPCity.dat.gz > "$CRAFT_PART_INSTALL/usr/share/GeoIP/GeoIPCity.dat"
@@ -85,4 +85,3 @@ hooks:
   post-refresh:
     plugs:
       - network
-
