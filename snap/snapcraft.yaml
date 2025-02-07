@@ -1,5 +1,5 @@
 name: gswatcher
-base: core22
+base: core24
 grade: stable
 confinement: strict
 adopt-info: gswatcher
@@ -30,7 +30,7 @@ parts:
     plugin: autotools
     source: https://gitlab.gnome.org/GNOME/vala.git
     source-type: git
-    source-tag: 0.56.14
+    source-tag: 0.56.17
     source-depth: 1
     build-packages:
       - autoconf-archive
