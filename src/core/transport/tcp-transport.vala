@@ -115,7 +115,7 @@ class TcpTransport : NetTransport {
         throw new IOError.FAILED ("socket has hung up");
 
       if (ERR in cond)
-        throw new IOError.FAILED ("socket error has occured");
+        throw new IOError.FAILED ("socket error has occurred");
 
       if (OUT in cond) {
         if (socket.check_connect_result ()) {

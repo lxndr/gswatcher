@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gswatcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-01 13:14+0300\n"
+"POT-Creation-Date: 2025-02-07 18:36+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,15 +23,15 @@ msgid ""
 "failed to retrieve value from Lua table under key '%s': unsupported type '%s'"
 msgstr ""
 
-#: src/core/client.vala:210
+#: src/core/client.vala:216
 msgid "Connected"
 msgstr ""
 
-#: src/core/client.vala:214
-msgid "Disonnected"
+#: src/core/client.vala:220
+msgid "Disconnected"
 msgstr ""
 
-#: src/core/client.vala:219
+#: src/core/client.vala:225
 msgid "Authenticated"
 msgstr ""
 
@@ -60,11 +60,11 @@ msgstr ""
 msgid "Last seen"
 msgstr ""
 
-#: src/ui/console-option-list.ui:37
+#: src/ui/console-option-list.ui:39
 msgid "Port:"
 msgstr ""
 
-#: src/ui/console-option-list.ui:64
+#: src/ui/console-option-list.ui:73
 msgid "Password:"
 msgstr ""
 
@@ -232,7 +232,7 @@ msgstr ""
 msgid "no"
 msgstr ""
 
-#: src/ui/server-info.vala:69 src/ui/server-list.vala:138
+#: src/ui/server-info.vala:69 src/ui/server-list.vala:143
 msgid "Timed out"
 msgstr ""
 
@@ -257,19 +257,19 @@ msgstr ""
 msgid "Ping"
 msgstr ""
 
-#: src/ui/server-list.vala:140
+#: src/ui/server-list.vala:145 src/ui/utils.vala:98
 msgid "Error"
 msgstr ""
 
-#: src/ui/utils.vala:38
+#: src/ui/utils.vala:43
 msgid "Cancel"
 msgstr ""
 
-#: src/ui/utils.vala:39
+#: src/ui/utils.vala:44
 msgid "Remove"
 msgstr ""
 
-#: src/ui/utils.vala:88
+#: src/ui/utils.vala:99 src/ui/utils.vala:106
 msgid "OK"
 msgstr ""
 

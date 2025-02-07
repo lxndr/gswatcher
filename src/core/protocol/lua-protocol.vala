@@ -57,7 +57,7 @@ public abstract class LuaProtocol : Object, Initable, Protocol {
     vm.l_requiref ("base", Lua.open_base, false);
     vm.pop (1);
 
-    // pacakge library
+    // package library
     // TODO: disable c libraries
     var patterns = new Gee.ArrayList<string> ();
     var dirs = get_app_data_dirs ("protocols", "GSW_PROTOCOLS_DIR");

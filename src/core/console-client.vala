@@ -38,7 +38,7 @@ public class ConsoleClient : Object {
   public signal void disconnected ();
   public signal void authenticated ();
   public signal void response_received (string response);
-  public signal void error_occured (Error error);
+  public signal void error_occurred (Error error);
 
   construct {
     protocol.data_send.connect (send_data);
@@ -103,7 +103,7 @@ public class ConsoleClient : Object {
 
   private void on_error (Error err) {
     stop_timeout_timer ();
-    error_occured (err);
+    error_occurred (err);
   }
 
   private void start_timeout_timer () {

@@ -206,7 +206,7 @@ public class Client : Object {
       console_client.authenticated.connect (on_console_authenticated);
       console_client.disconnected.connect (on_console_disconnected);
       console_client.response_received.connect (on_console_response_received);
-      console_client.error_occured.connect (on_console_error_occured);
+      console_client.error_occurred.connect (on_console_error_occurred);
     } catch (Error err) {
       log (Config.LOG_DOMAIN, LEVEL_ERROR, "failed to create protocol '%s': %s", console_protocol, err.message);
     }
@@ -217,7 +217,7 @@ public class Client : Object {
   }
 
   private void on_console_disconnected () {
-    log_to_console (_("Disonnected"), "inf");
+    log_to_console (_("Disconnected"), "inf");
     console_client = null;
   }
 
@@ -229,7 +229,7 @@ public class Client : Object {
     log_to_console (response);
   }
 
-  private void on_console_error_occured (Error err) {
+  private void on_console_error_occurred (Error err) {
     if (err is ConsoleError.AUTH_FAILED)
       log_to_console ("Authentication failed.", "err");
     else
