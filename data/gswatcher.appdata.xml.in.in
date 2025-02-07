@@ -48,7 +48,18 @@
   <translation type="gettext">@app_id@</translation>
 
   <releases>
-      <release version="1.7.1" date="2023-11-21">
+    <release version="1.7.2" date="2025-02-07">
+      <description>
+        <p>Maintenance release.</p>
+        <ul>
+          <li>Updated GeoIP database.</li>
+          <li>Updated flatpak GNOME runtime to version 47.</li>
+          <li>Updated Snap runtime to core24.</li>
+        </ul>
+      </description>
+      <url>https://github.com/lxndr/gswatcher/releases/tag/v1.7.2</url>
+    </release>
+    <release version="1.7.1" date="2023-11-21">
       <description>
         <p>This release adds back non-free game icons and improves remote console.</p>
         <ul>
@@ -58,7 +69,7 @@
           <li>Console port now defaults to game port.</li>
           <li>Increased width of password field for console options.</li>
           <li>Console field is now masked.</li>
-          <li>Server/buddy list is now properly focusd after item addition/removal.</li>
+          <li>Server/buddy list is now properly focused after item addition/removal.</li>
         </ul>
       </description>
       <url>https://github.com/lxndr/gswatcher/releases/tag/v1.7.1</url>
