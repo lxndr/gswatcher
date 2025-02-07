@@ -4,8 +4,8 @@ grade: stable
 confinement: strict
 adopt-info: gswatcher
 
-architectures:
-  - amd64
+platforms:
+  amd64:
 
 slots:
   gswatcher:
