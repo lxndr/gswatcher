@@ -18,6 +18,13 @@
 
 namespace Gsw {
 
+const string GAME_GROUP = "Game";
+const string FEATURES_GROUP = "Features";
+const string MATCH_GROUP = "Match";
+const string PLAYER_GROUP = "Player";
+const string INFO_GROUP = "Info";
+const string EXTRA_GROUP = "Extra";
+
 [SingleInstance]
 class GameResolver : Object {
   public bool ready { get; private set; }
@@ -61,35 +68,35 @@ class GameResolver : Object {
   }
 
   private Game load_game (KeyFile kf) throws Error {
-    var game_id = kf.get_value ("Game", "id");
-    var protocol = kf.get_value ("Game", "protocol");
+    var game_id = kf.get_value (GAME_GROUP, "id");
+    var protocol = kf.get_value (GAME_GROUP, "protocol");
     var game = new Game (game_id, protocol);
 
     foreach (var group in kf.get_groups ()) {
       switch (group) {
-        case "Games":
-          if (kf.has_key ("Game", "port")) {
-            var port = kf.get_integer ("Game", "port");
+        case GAME_GROUP:
+          if (kf.has_key (GAME_GROUP, "port")) {
+            var port = kf.get_integer (GAME_GROUP, "port");
             if (!(port > 0 && port <= uint16.MAX))
               throw new KeyFileError.INVALID_VALUE ("invalid port value");
             game.port = (uint16) port;
           }
 
-          if (kf.has_key ("Game", "qport-diff")) {
-            var qport_diff = kf.get_integer ("Game", "qport-diff");
+          if (kf.has_key (GAME_GROUP, "qport-diff")) {
+            var qport_diff = kf.get_integer (GAME_GROUP, "qport-diff");
             if (!(qport_diff >= int16.MIN && qport_diff <= int16.MAX))
               throw new KeyFileError.INVALID_VALUE ("invalid qport-diff value");
             game.qport_diff = (int16) qport_diff;
           }
 
         break;
-      case "Features":
-        if (kf.has_key ("Features", "console"))
-          game.features.set (CONSOLE, kf.get_string ("Features", "console"));
+      case FEATURES_GROUP:
+        if (kf.has_key (FEATURES_GROUP, "console"))
+          game.features.set (CONSOLE, kf.get_string (FEATURES_GROUP, "console"));
         break;
-      case "Match":
-        foreach (var key in kf.get_keys ("Match")) {
-          var value = kf.get_string ("Match", key);
+      case MATCH_GROUP:
+        foreach (var key in kf.get_keys (MATCH_GROUP)) {
+          var value = kf.get_string (MATCH_GROUP, key);
           var parts = key.split (".", 2);
           var key1 = parts[0];
           var key2 = parts[1];
@@ -108,10 +115,10 @@ class GameResolver : Object {
         }
 
         break;
-      case "Info":
-        if (kf.has_group ("Info")) {
-          foreach (var key in kf.get_keys ("Info")) {
-            var val = kf.get_string ("Info", key);
+      case INFO_GROUP:
+        if (kf.has_group (INFO_GROUP)) {
+          foreach (var key in kf.get_keys (INFO_GROUP)) {
+            var val = kf.get_string (INFO_GROUP, key);
 
             try {
               var parser = new ExpressionParser (val);
@@ -123,9 +130,11 @@ class GameResolver : Object {
         }
 
         break;
-      case "Player":
-        if (kf.has_group ("Player"))
+      case PLAYER_GROUP:
+        if (kf.has_group (PLAYER_GROUP))
           load_player_fields (kf, ref game);
+        break;
+      case EXTRA_GROUP:
         break;
       default:
         var map = new Gee.HashMap<string, string> ();
@@ -142,9 +151,9 @@ class GameResolver : Object {
   }
 
   private void load_player_fields (KeyFile kf, ref Game game) throws Error {
-    foreach (var key in kf.get_keys ("Player")) {
+    foreach (var key in kf.get_keys (PLAYER_GROUP)) {
       // title = field;type;main
-      var options = kf.get_string_list ("Player", key);
+      var options = kf.get_string_list (PLAYER_GROUP, key);
 
       var field = new PlayerField () {
         field = options[0],
