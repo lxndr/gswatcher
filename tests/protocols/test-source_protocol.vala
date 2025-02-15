@@ -24,72 +24,76 @@ public static int main (string[] args) {
   Test.init (ref args);
 
   Test.add_data_func ("/protocols/source/without_challenge", () => {
-    try {
-      var sinfo = create_sinfo ();
-      var plist_fields = create_plist_fields ();
-      var plist = create_plist ();
+    var sinfo = create_sinfo ();
+    var plist_fields = create_plist_fields ();
+    var plist = create_plist ();
 
-      new ProtocolTestRunner ("../data/protocols/source.lua")
-        // query server info
-        .expect_data (sinfo_request)
-        .response (sinfo_response)
-        // query player list
-        .expect_data (plist_request)
-        .response (plist_response)
-        .expect_sinfo(sinfo)
-        .expect_plist(plist_fields, plist)
-        .run ();
-    } catch (Error err) {
-      assert_no_error (err);
-    }
+    new ProtocolTestRunner ("../data/protocols/source.lua")
+      // query server info
+      .expect_data (sinfo_request)
+      .response (sinfo_response)
+      // query player list
+      .expect_data (plist_request)
+      .response (plist_response)
+      .expect_sinfo(sinfo)
+      .expect_plist(plist_fields, plist)
+      .run ();
   });
 
   Test.add_data_func ("/protocols/source/with_challenge", () => {
-    try {
-      var sinfo = create_sinfo ();
-      var plist_fields = create_plist_fields ();
-      var plist = create_plist ();
+    var sinfo = create_sinfo ();
+    var plist_fields = create_plist_fields ();
+    var plist = create_plist ();
 
-      new ProtocolTestRunner ("../data/protocols/source.lua")
-        // query server info
-        .expect_data (sinfo_request)
-        .response (challenge_response)
-        // query server info with challenge
-        .expect_data (sinfo_request_with_challenge)
-        .response (sinfo_response)
-        // query player list
-        .expect_data (plist_request)
-        .response (challenge_response)
-        // query player list with challenge
-        .expect_data (plist_request_with_challenge)
-        .response (plist_response)
-        .expect_sinfo(sinfo)
-        .expect_plist(plist_fields, plist)
-        .run ();
-    } catch (Error err) {
-      assert_no_error (err);
-    }
+    new ProtocolTestRunner ("../data/protocols/source.lua")
+      // query server info
+      .expect_data (sinfo_request)
+      .response (challenge_response)
+      // query server info with challenge
+      .expect_data (sinfo_request_with_challenge)
+      .response (sinfo_response)
+      // query player list
+      .expect_data (plist_request)
+      .response (challenge_response)
+      // query player list with challenge
+      .expect_data (plist_request_with_challenge)
+      .response (plist_response)
+      .expect_sinfo(sinfo)
+      .expect_plist(plist_fields, plist)
+      .run ();
   });
 
   Test.add_data_func ("/protocols/source/the_ship", () => {
-    try {
-      var sinfo = create_the_ship_sinfo ();
-      var plist_fields = create_the_ship_plist_fields ();
-      var plist = create_the_ship_plist ();
+    var sinfo = create_the_ship_sinfo ();
+    var plist_fields = create_the_ship_plist_fields ();
+    var plist = create_the_ship_plist ();
 
-      new ProtocolTestRunner ("../data/protocols/source.lua")
-        // query server info
-        .expect_data (sinfo_request)
-        .response (the_ship_sinfo_response)
-        // query player list
-        .expect_data (plist_request)
-        .response (the_ship_plist_response)
-        .expect_sinfo(sinfo)
-        .expect_plist(plist_fields, plist)
-        .run ();
-    } catch (Error err) {
-      assert_no_error (err);
-    }
+    new ProtocolTestRunner ("../data/protocols/source.lua")
+      // query server info
+      .expect_data (sinfo_request)
+      .response (the_ship_sinfo_response)
+      // query player list
+      .expect_data (plist_request)
+      .response (the_ship_plist_response)
+      .expect_sinfo(sinfo)
+      .expect_plist(plist_fields, plist)
+      .run ();
+  });
+
+  Test.add_data_func ("/protocols/source/invalid_format", () => {
+    new ProtocolTestRunner ("../data/protocols/source.lua")
+      .expect_data (sinfo_request)
+      .response (challenge_response_invalid_format)
+      .expect_error (new ProtocolError.INVALID_RESPONSE("invalid response: unknown packet format -3"))
+      .run ();
+  });
+
+  Test.add_data_func ("/protocols/source/invalid_type", () => {
+    new ProtocolTestRunner ("../data/protocols/source.lua")
+      .expect_data (sinfo_request)
+      .response (challenge_response_invalid_type)
+      .expect_error (new ProtocolError.INVALID_RESPONSE("invalid response: unexpected response type"))
+      .run ();
   });
 
   Test.run ();
@@ -154,6 +158,14 @@ private const uint8[] the_ship_plist_response = {
   0xC4, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC4, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   0xC4, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC4, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   0xC4, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC4, 0x09, 0x00, 0x00
+};
+
+private const uint8[] challenge_response_invalid_format = {
+  0xFD, 0xFF, 0xFF, 0xFF, 0x41, 0x0A, 0x08, 0x5E, 0xEA
+};
+
+private const uint8[] challenge_response_invalid_type = {
+  0xFF, 0xFF, 0xFF, 0xFF, 0x10, 0x0A, 0x08, 0x5E, 0xEA
 };
 
 private Gee.Map<string, string> create_sinfo () {

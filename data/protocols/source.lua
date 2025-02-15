@@ -101,6 +101,7 @@ function query()
   next_query()
 end
 
+--- @param r DataReader
 local function read_server_info_gold(r)
   local inf = {
     address = r:zstring(),
@@ -135,6 +136,7 @@ local function read_server_info_gold(r)
   return inf
 end
 
+--- @param r DataReader
 local function read_server_info(r)
   local inf = {
     protocol_version = r:u8(),
@@ -261,10 +263,12 @@ local function read_player_list(r, inf)
   return players
 end
 
+--- @param r DataReader
 local function read_challenge(r)
   return r:i32le()
 end
 
+--- @param r DataReader
 local function read_payload(r)
   local type = r:string(1)
 
@@ -298,6 +302,7 @@ local function read_payload(r)
   next_query ()
 end
 
+--- @param r DataReader
 local function read_header_gold(r)
   local packet = {
     reqid = r:u32le(),
@@ -311,6 +316,7 @@ local function read_header_gold(r)
   response:add_packet(packet)
 end
 
+--- @param r DataReader
 local function read_header(r)
   local packet = {
     reqid = r:u32le(),
@@ -331,18 +337,18 @@ local function read_header(r)
   response:add_packet(packet)
 end
 
+--- @param r DataReader
 local function try_read_header(r)
   local pos = r.pos
-  local ok, pak = pcall(read_header_gold, r)
+  local ok = pcall(read_header_gold, r)
 
   if not ok then
     r.pos = pos
-    pak = read_header(r)
+    read_header(r)
   end
-
-  return pak
 end
 
+--- @param data string
 function process(data)
   local r = DataReader(data)
   local format = r:i32le()

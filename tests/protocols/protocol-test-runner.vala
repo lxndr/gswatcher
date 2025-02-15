@@ -35,6 +35,7 @@ class ProtocolTestRunner {
   private Gee.Map<string, string> expected_sinfo = new Gee.HashMap<string, string> ();
   private Gee.List<PlayerField> expected_plist_fields = new Gee.ArrayList<PlayerField> ();
   private Gee.List<Player> expected_plist = new Gee.ArrayList<Player> ();
+  private Error? expected_error = null;
 
   public ProtocolTestRunner (string script_path) {
     this.script_path = script_path;
@@ -74,44 +75,61 @@ class ProtocolTestRunner {
     return this;
   }
 
-  public void run () throws Error {
-    QueryProtocol proto = new QueryLuaProtocol (script_path);
-    Gee.Map<string, string> actual_sinfo = new Gee.HashMap<string, string> ();
-    Gee.List<PlayerField> actual_plist_fields = new Gee.ArrayList <PlayerField> ();
-    Gee.List<Player> actual_plist = new Gee.ArrayList <Player> ();
+  public ProtocolTestRunner expect_error (Error error) {
+    expected_error = error;
+    return this;
+  }
 
-    proto.data_send.connect ((data) => {
-      assert_false (expected_data_flow.is_empty);
+  public void run () {
+    try {
+      QueryProtocol proto = new QueryLuaProtocol (script_path);
+      Gee.Map<string, string> actual_sinfo = new Gee.HashMap<string, string> ();
+      Gee.List<PlayerField> actual_plist_fields = new Gee.ArrayList <PlayerField> ();
+      Gee.List<Player> actual_plist = new Gee.ArrayList <Player> ();
 
-      var expected_packet = expected_data_flow.poll ();
+      proto.data_send.connect ((data) => {
+        assert_false (expected_data_flow.is_empty);
 
-      assert_true (expected_packet.direction == REQUEST);
-      assert_cmpmem (data, expected_packet.data.get_data ());
+        var expected_packet = expected_data_flow.poll ();
 
-      while (!expected_data_flow.is_empty && expected_data_flow.peek ().direction == RESPONSE) {
-        try {
-          var packet = expected_data_flow.poll ();
-          proto.process_response (packet.data.get_data ());
-        } catch (Error err) {
-          assert_no_error (err);
+        assert_true (expected_packet.direction == REQUEST);
+        assert_cmpmem (data, expected_packet.data.get_data ());
+
+        while (!expected_data_flow.is_empty && expected_data_flow.peek ().direction == RESPONSE) {
+          try {
+            var packet = expected_data_flow.poll ();
+            proto.process_response (packet.data.get_data ());
+          } catch (Error err) {
+            if (expected_error == null) {
+              assert_no_error (err);
+            } else {
+              assert_error (err, expected_error.domain, expected_error.code);
+            }
+          }
         }
+      });
+
+      proto.sinfo_update.connect ((sinfo) => {
+        actual_sinfo = sinfo;
+      });
+
+      proto.plist_update.connect ((plist_fields, plist) => {
+        actual_plist_fields = plist_fields;
+        actual_plist = plist;
+      });
+
+      proto.query ();
+
+      assert_sinfo (actual_sinfo);
+      assert_plist_fields (actual_plist_fields);
+      assert_plist (actual_plist);
+    } catch (Error err) {
+      if (expected_error == null) {
+        assert_no_error (err);
+      } else {
+        assert_error (err, expected_error.domain, expected_error.code);
       }
-    });
-
-    proto.sinfo_update.connect ((sinfo) => {
-      actual_sinfo = sinfo;
-    });
-
-    proto.plist_update.connect ((plist_fields, plist) => {
-      actual_plist_fields = plist_fields;
-      actual_plist = plist;
-    });
-
-    proto.query ();
-
-    assert_sinfo (actual_sinfo);
-    assert_plist_fields (actual_plist_fields);
-    assert_plist (actual_plist);
+    }
   }
 
   private void assert_sinfo (Gee.Map<string, string> actual_sinfo) {
