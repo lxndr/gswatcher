@@ -1,3 +1,5 @@
+subdir('protocols')
+
 test('core/utils/parse_address', executable(
   'test-parse_address',
   core_sources,
