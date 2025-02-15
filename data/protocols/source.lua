@@ -42,6 +42,10 @@ local info_map = {
   secure       = "vac",
 }
 
+local known_app_ids = {
+  the_ship = 2400,
+}
+
 local response = nil
 local got_challenge = -1
 local got_server_info = nil
@@ -63,10 +67,7 @@ end
 local function send_server_info_packet(challenge)
   local w = DataWriter()
   w:zstring("Source Engine Query")
-
-  if challenge then
-    w:i32le(challenge)
-  end
+  w:i32le(challenge)
 
   send_packet("T", w.buf)
 end
@@ -151,12 +152,10 @@ local function read_server_info(r)
     vac = r:u8(),
   }
 
-  if inf.appid == 2400 then -- The Ship
-    inf.the_ship = {
-      mode = r:u8(),
-      witnesses = r:u8(),
-      duration = r:u8(),
-    }
+  if inf.appid == known_app_ids.the_ship then
+    inf.the_ship_mode = r:u8()
+    inf.the_ship_witnesses = r:u8()
+    inf.the_ship_duration = r:u8()
   end
 
   inf.version = r:zstring()
@@ -222,14 +221,14 @@ local function create_player_fields(inf)
     },
   }
 
-  if inf.appid == 2400 then -- The Ship
-    fields:insert({
+  if inf.appid == known_app_ids.the_ship then
+    table.insert(fields, {
       title = "Deaths",
       kind = "number",
       field = "deaths",
     })
 
-    fields:insert({
+    table.insert(fields, {
       title = "Money",
       kind = "number",
       field = "money",
@@ -244,19 +243,19 @@ local function read_player_list(r, inf)
   local count = r:u8()
 
   for idx = 1, count do
-    local player = {
+    players[idx] = {
       index = r:u8(),
       name = r:zstring(),
       score = r:i32le(),
       duration = r:f32le(),
     }
+  end
 
-    if inf.appid == 2400 then -- The Ship
-      player.deaths = r:u32le()
-      player.money = r:u32le()
+  if inf.appid == known_app_ids.the_ship then
+    for idx = 1, count do
+      players[idx].deaths = r:u32le()
+      players[idx].money = r:u32le()
     end
-
-    players[idx] = player
   end
 
   return players
