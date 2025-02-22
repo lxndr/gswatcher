@@ -119,6 +119,7 @@ class ProtocolTestRunner {
       });
 
       proto.query ();
+      run_main_context ();
 
       assert_sinfo (actual_sinfo);
       assert_plist_fields (actual_plist_fields);
@@ -188,6 +189,15 @@ private void assert_hashmap (string hash_map_name, Gee.Map<string, string> actua
       assert_false (actual.has_key (entry.key));
     }
   }
+}
+
+private void run_main_context () {
+  var context = MainContext.default ();
+  assert_true (context.acquire ());
+
+  while (context.pending ())
+    context.dispatch ();
+  context.release ();
 }
 
 }
