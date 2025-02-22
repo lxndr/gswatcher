@@ -44,10 +44,10 @@ class ProtocolRegistry : Object {
   }
 
   public void register (ProtocolDesc desc)
-    ensures (desc.id != null && desc.id != "")
-    ensures (desc.name != null && desc.name != "")
-    ensures (desc.transport != null && desc.transport != "")
-    ensures (desc.class_type.is_a (typeof (Protocol)))
+    requires (desc.id != null && desc.id != "")
+    requires (desc.name != null && desc.name != "")
+    requires (desc.transport != null && desc.transport != "")
+    requires (desc.class_type.is_a (typeof (Protocol)))
   {
     protocols.set (desc.id, desc);
   }

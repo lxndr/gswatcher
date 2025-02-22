@@ -143,6 +143,12 @@ public class LuaEx : Lua {
     }
   }
 
+  public bool is_stack_empty {
+    get {
+      return get_top () == 0;
+    }
+  }
+
   public void push_error_handler () {
     push_cfunction (lua_error);
   }
@@ -156,10 +162,10 @@ public class LuaEx : Lua {
 
 [Compact (opaque = true)]
 public class GlobalRoutine {
-  unowned LuaEx vm;
-  string routine;
-  int initial_top;
-  int nargs;
+  private unowned LuaEx vm;
+  private string routine;
+  private int initial_top;
+  private int nargs;
 
   public GlobalRoutine (LuaEx vm, string routine) throws Error {
     this.vm = vm;
@@ -186,7 +192,7 @@ public class GlobalRoutine {
 
   private void call_routine () throws Error {
     if (vm.pcall (nargs, 0, initial_top + 1) != OK)
-    throw new LuaError.RUNTIME_ERROR ("failed to call function: %s", vm.to_string (-1));
+      throw new LuaError.RUNTIME_ERROR ("failed to call function: %s", vm.to_string (-1));
   }
 
   public unowned GlobalRoutine push_string (string str) {
@@ -216,30 +222,40 @@ public class GlobalRoutine {
 
 [Compact (opaque = true)]
 public class GlobalObject {
-  unowned LuaEx vm;
-  string path;
-  string[] path_parts;
+  private unowned LuaEx vm;
+  private string path;
+  private string[] path_parts;
+  private void* object_pointer;
 
   public GlobalObject(LuaEx vm, string path) throws Error {
     this.vm = vm;
     this.path = path;
+    this.path_parts = path.split (".");
 
-    path_parts = path.split (".");
     vm.push_globaltable ();
 
-    foreach (var path_part in path_parts) {
+    foreach (var path_part in this.path_parts) {
+      assert_cmpstr (path_part, NE, "");
       var type = vm.get_field (-1, path_part);
 
       if (type != Lua.Type.TABLE)
         throw new LuaError.MISSING_GLOBAL ("global '%s' is not object", path);
     }
+
+    object_pointer = vm.to_pointer (-1);
   }
 
   ~GlobalObject() {
     vm.pop (path_parts.length + 1);
   }
 
-  private void require_prop (string name) throws Error {
+  private bool is_valid_object {
+    get {
+      return object_pointer == vm.to_pointer (-1);
+    }
+  }
+
+  private void require_prop (string name) throws Error requires (is_valid_object) {
     var type = vm.get_field (-1, name);
 
     if (type == Lua.Type.NIL || type == Lua.Type.NONE) {

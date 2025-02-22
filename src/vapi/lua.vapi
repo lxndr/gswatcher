@@ -82,12 +82,33 @@ public class Lua {
   public Integer to_integer (int index);
   [CCode (cname = "lua_tostring")]
   public unowned string to_string (int index);
+
+  /**
+   * Converts the value at the given index to a generic C pointer (void*).
+   * The value can be a userdata, a table, a thread, a string, or a function; otherwise, `lua_topointer` returns NULL.
+   * Different objects will give different pointers. There is no way to convert the pointer back to its original value.
+   *
+   * Typically this function is used only for hashing and debug information.
+   */
+  [CCode (cname = "lua_topointer")]
+  public void* to_pointer (int index);
+
   [CCode (cname = "lua_toboolean")]
   public bool to_boolean (int index);
+
+  /**
+   * Returns the index of the top element in the stack. Because indices start at 1, this result is equal to the number of elements in the stack; in particular, 0 means an empty stack.
+   *
+   * Notice that a negative index -x is equivalent to the positive index gettop - x + 1.
+   */
   [CCode (cname = "lua_gettop")]
   public int get_top ();
   [CCode (cname = "lua_settop")]
   public void set_top (int index);
+
+  /**
+   * Pops n elements from the stack.
+   */
   public void pop (int n);
   public Lua.Type type (int index);
   public Status pcall (int nargs, int nresults, int errfunc);
@@ -98,11 +119,13 @@ public class Lua {
   public void push_cfunction (CFunction fn);
   [CCode (cname = "lua_pushstring")]
   public void push_string (string s);
+  [CCode (cname = "lua_pushinteger")]
+  public void push_integer (Integer i);
 
   [CCode (cname = "lua_pushlstring")]
-  public unowned string push_lstring (string s, size_t size);
+  public void push_lstring (string s, size_t size);
   [CCode (cname = "lua_pushlstring", array_length = false)]
-  public unowned uint8[] push_buffer ([CCode (array_length_type = "size_t")] uint8[] data);
+  public void push_buffer ([CCode (array_length_type = "size_t")] uint8[] data);
 
   [CCode (cname = "lua_pushlightuserdata")]
   public void push_lightuserdata (void* p);
@@ -116,6 +139,10 @@ public class Lua {
   public void set_global (string name);
   [CCode (cname = "lua_getglobal")]
   public Type get_global (string name);
+
+  /**
+   * Pushes the global environment onto the stack.
+   */
   [CCode (cname = "lua_pushglobaltable")]
   public void push_globaltable ();
   [CCode (cname = "lua_setfield")]
