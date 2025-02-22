@@ -43,7 +43,11 @@ local info_map = {
 }
 
 local known_app_ids = {
+  source_sdk_base_2006 = 215,
+  counter_strike_source = 240,
   the_ship = 2400,
+  eternal_silence = 17550,
+  insurgency = 17700,
 }
 
 local response = nil
@@ -326,7 +330,6 @@ local function read_header(r)
   }
 
   packet.compressed = to_boolean(packet.reqid >> 31)
-  assert(not packet.compressed, "compressed split packets are not supported")
 
   if packet.number == 1 and packet.compressed then
     packet.dataSize = r:u32le()
@@ -362,6 +365,20 @@ function process(data)
 
       if response:got_all_packets() then
         local data = response:combine()
+
+        local packet = response.packets[1]
+        assert(not packet.compressed, "compressed split packets are not supported")
+
+        -- local uncompressed_data = bz2:uncompress(data)
+
+        -- if #uncompressed_data ~= packet.size then
+        --   error("invalid response: invalid uncompressed data size")
+        -- end
+
+        -- if crc32:hash(uncompressed_data) ~= packet.crc32 then
+        --   error("invalid response: failed to crc32 validate uncompressed data")
+        -- end
+
         local r = DataReader(data)
         read_payload(r)
       end
