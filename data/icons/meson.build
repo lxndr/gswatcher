@@ -5,3 +5,5 @@ install_data(
 )
 
 subdir('games')
+
+windows_rc_inc = include_directories('.')
