@@ -23,11 +23,11 @@ class Game {
   public string protocol;
   public uint16 port;
   public int16 qport_diff;
-  public Gee.Map<string, Expression> inf_matches = new Gee.HashMap<string, Expression> ();
-  public Gee.Map<string, Expression> inf = new Gee.HashMap<string, Expression> ();
+  public Gee.Map<string, GameDef.Expression> inf_matches = new Gee.HashMap<string, GameDef.Expression> ();
+  public Gee.Map<string, GameDef.Expression> inf = new Gee.HashMap<string, GameDef.Expression> ();
   public Gee.List<PlayerField> pfields = new Gee.ArrayList<PlayerField> ();
   public Gee.Map<ProtocolFeature, string> features = new Gee.HashMap<ProtocolFeature, string> ();
-  public Gee.Map<string, Gee.Map<string, string>> maps = new Gee.HashMap<string, Gee.Map<string, string>> ();
+  public GameDef.ExpressionContext maps = new GameDef.ExpressionContext ();
 
   public Game (string id, string protocol) {
     this.id = id;
@@ -38,25 +38,34 @@ class Game {
     if (protocol != protocol_id)
       return false;
 
-    var ctx = new Gee.HashMap<string, Gee.Map<string, string>> ();
+    var ctx = new GameDef.ExpressionContext ();
     ctx.set ("inf", details);
 
-    foreach (var entry in inf_matches.entries)
-      if (details.get (entry.key) != entry.value.eval (ctx))
-        return false;
+    foreach (var entry in inf_matches.entries) {
+      try {
+        if (details.get (entry.key) != entry.value.eval (ctx))
+          return false;
+      } catch (GameDef.ExpressionError err) {
+        warning ("failed to evaluate value of '%s' for '%s': %s", entry.key, id, err.message);
+      }
+    }
 
     return true;
   }
 
   public void enhance_sinfo (ServerInfo sinfo, Gee.Map<string, string> details) {
-    var ctx = new Gee.HashMap<string, Gee.Map<string, string>> ();
+    var ctx = new GameDef.ExpressionContext ();
     ctx.set ("inf", details);
     ctx.set_all (maps);
 
     foreach (var item in inf) {
-      var value = Value (typeof (string));
-      value.set_string (item.value.eval (ctx));
-      sinfo.set_property (item.key, value);
+      try {
+        var value = Value (typeof (string));
+        value.set_string (item.value.eval (ctx));
+        sinfo.set_property (item.key, value);
+      } catch (GameDef.ExpressionError err) {
+        warning ("failed to evaluate value of '%s' for '%s': %s", item.key, id, err.message);
+      }
     }
 
     sinfo.set ("game-id", id);

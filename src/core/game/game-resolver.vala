@@ -102,14 +102,14 @@ class GameResolver : Object {
           var key2 = parts[1];
 
           try {
-            var parser = new ExpressionParser (value);
+            var parser = new GameDef.ExpressionParser (value);
 
             switch (key1) {
               case "inf":
                 game.inf_matches[key2] = parser.parse ();
                 break;
             }
-          } catch (ExpressionParserError parser_err) {
+          } catch (GameDef.ExpressionParserError parser_err) {
             throw new IOError.INVALID_DATA ("failed to parse expression at '%s' (group 'Match'): %s", key, parser_err.message);
           }
         }
@@ -121,9 +121,9 @@ class GameResolver : Object {
             var val = kf.get_string (INFO_GROUP, key);
 
             try {
-              var parser = new ExpressionParser (val);
+              var parser = new GameDef.ExpressionParser (val);
               game.inf[key] = parser.parse ();
-            } catch (ExpressionParserError parser_err) {
+            } catch (GameDef.ExpressionParserError parser_err) {
               throw new IOError.INVALID_DATA ("failed to parse expression at '%s' (group 'Match'): %s", key, parser_err.message);
             }
           }

@@ -18,10 +18,17 @@
 
 using Gee;
 
-namespace Gsw {
+namespace Gsw.GameDef {
+
+errordomain ExpressionError {
+  INVALID_MAP,
+  INVALID_FUNCTION,
+}
+
+class ExpressionContext : HashMap<string, Map<string, string>> {}
 
 abstract class Expression {
-  public abstract string eval (Map<string, Map<string, string>> ctx);
+  public abstract string eval (ExpressionContext ctx) throws ExpressionError;
 }
 
 class LiteralExpression : Expression {
@@ -31,65 +38,100 @@ class LiteralExpression : Expression {
     this.value = value;
   }
 
-  public override string eval (Map<string, Map<string, string>> ctx) {
+  public override string eval (ExpressionContext ctx) throws ExpressionError {
     return value;
   }
 }
 
 class ValueExpression : Expression {
-  private string map;
+  private string map_name;
   private Expression key_expr;
 
   public ValueExpression (string map, Expression key_expr) {
-    this.map = map;
+    this.map_name = map;
     this.key_expr = key_expr;
   }
 
-  public override string eval (Map<string, Map<string, string>> ctx) {
-    return ctx[map][key_expr.eval (ctx)];
+  public override string eval (ExpressionContext ctx) throws ExpressionError {
+    if (!ctx.has_key (map_name))
+      throw new ExpressionError.INVALID_MAP ("map '%s' does not exist", map_name);
+
+    var map = ctx[map_name];
+    var key = key_expr.eval (ctx);
+
+    if (!map.has_key (key))
+      throw new ExpressionError.INVALID_MAP ("key '%s' does not exist in map '%s'", key, map_name);
+
+    return map[key];
   }
 }
 
 abstract class FunctionExpression : Expression {
-  protected Gee.List<Expression> args;
+  private string name;
+  private Gee.List<Expression> args;
 
-  public override string eval (Map<string, Map<string, string>> ctx) {
-    return "";
+  protected FunctionExpression (string name, Gee.List<Expression> args) {
+    this.name = name;
+    this.args = args;
+  }
+
+  protected Expression get_arg (int arg_index) throws ExpressionError {
+    if (arg_index >= args.size)
+      throw new ExpressionError.INVALID_FUNCTION ("missing argument %d", arg_index);
+
+    return args[arg_index];
+  }
+
+  protected string eval_arg (ExpressionContext ctx, int arg_index) throws ExpressionError {
+    try {
+      var expression = get_arg (arg_index);
+      return expression.eval (ctx);
+    } catch (ExpressionError err) {
+      throw new ExpressionError.INVALID_FUNCTION ("failed to evaluate argument %d of '%s()': %s", arg_index, name, err.message);
+    }
   }
 }
 
 class RegexExpression : FunctionExpression {
   public RegexExpression (Gee.List<Expression> args) {
-    this.args = args;
+    base ("regex", args);
   }
 
-  public override string eval (Map<string, Map<string, string>> ctx) {
+  public override string eval (ExpressionContext ctx) throws ExpressionError {
+    var pattern = eval_arg (ctx, 0);
+    var input = eval_arg (ctx, 1);
+    var regex = create_regex (pattern, input);
+    return match_regex (regex, input);
+  }
+
+  private Regex create_regex (string pattern, string input) throws ExpressionError {
     try {
-      var regex = new Regex (args[0].eval (ctx));
-      var input = args[1].eval (ctx);
-
-      MatchInfo match_info;
-      if (!regex.match (input, 0, out match_info))
-        return "";
-
-      return match_info.fetch (1);
-    } catch (Error err) {
-      log (Config.LOG_DOMAIN, LEVEL_ERROR, err.message);
-      return "";
+      return new Regex (pattern);
+    } catch (RegexError err) {
+      throw new ExpressionError.INVALID_FUNCTION ("failed to create regex for /%s/: %s", pattern, err.message);
     }
+  }
+
+  private string match_regex (Regex regex, string input) {
+    MatchInfo match_info;
+
+    if (!regex.match (input, 0, out match_info))
+      return "";
+
+    return match_info.fetch (1);
   }
 }
 
 class MapKeywordExpression : FunctionExpression {
   public MapKeywordExpression (Gee.List<Expression> args) {
-    this.args = args;
+    base ("mapKeyword", args);
   }
 
-  public override string eval (Map<string, Map<string, string>> ctx) {
-    var keywords_str = args[0].eval (ctx);
-    var delimiter = args[1].eval (ctx);
-    var map_name = args[2].eval (ctx);
-    var def = args[3].eval (ctx);
+  public override string eval (ExpressionContext ctx) throws ExpressionError {
+    var keywords_str = eval_arg (ctx, 0);
+    var delimiter = eval_arg (ctx, 1);
+    var map_name = eval_arg (ctx, 2);
+    var def = eval_arg (ctx, 3);
 
     if (keywords_str.length == 0)
       return def;
