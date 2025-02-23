@@ -129,6 +129,22 @@ sources += gnome.compile_resources(
     'gswatcher.gresource.xml',
 )
 
+if host_machine.system() == 'windows'
+  windows = import('windows')
+
+  windows_rc = configure_file(input: 'windows.rc.in',
+    output: 'windows.rc',
+    configuration: conf_data,
+  )
+
+  windows_resources = windows.compile_resources(
+    windows_rc,
+    include_directories: join_paths(meson.project_source_root(), 'data'),
+  )
+
+  sources += windows_resources
+endif
+
 executable(
   meson.project_name(),
   sources,
