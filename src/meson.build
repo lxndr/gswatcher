@@ -139,7 +139,7 @@ if host_machine.system() == 'windows'
 
   windows_resources = windows.compile_resources(
     windows_rc,
-    include_directories: join_paths(meson.project_source_root(), 'data'),
+    include_directories: include_directories(join_paths(meson.project_source_root(), 'data', 'icons')),
   )
 
   sources += windows_resources
