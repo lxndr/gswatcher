@@ -14,14 +14,27 @@
 -- You should have received a copy of the GNU Affero General Public License
 -- along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-local function switch(val)
-  return function (cases)
-    local fn = cases[val] or cases.default
+local CompoundResponse = require("lib/CompoundResponse")
 
-    if fn then
-      fn()
-    end
-  end
+---@class (exact) CompoundBufferResponse: CompoundResponse
+---@field super CompoundResponse
+---@overload fun(request_id?: integer): CompoundBufferResponse
+local CompoundBufferResponse = CompoundResponse:extend()
+
+function CompoundBufferResponse:__tostring()
+  return "CompoundBufferResponse"
 end
 
-return switch
+---@param packet Packet
+function CompoundBufferResponse:add_packet(packet)
+  assert(type(packet.data) == "string")
+  CompoundBufferResponse.super.add_packet(self, packet)
+end
+
+---@return Buffer
+function CompoundBufferResponse:combine()
+  assert(self:got_all_packets())
+  return table.concat(self.packets)
+end
+
+return CompoundBufferResponse

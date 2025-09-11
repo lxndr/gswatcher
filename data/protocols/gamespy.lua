@@ -14,10 +14,11 @@
 -- You should have received a copy of the GNU Affero General Public License
 -- along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-local CompoundResponse = require("lib/CompoundResponse")
+local CompoundDictionaryResponse = require("lib/CompoundDictionaryResponse")
 local gamespy = require("lib/gamespy")
 local quake2 = require("quake2")
 
+---@type ProtocolInfo
 protocol = {
   id        = "gamespy",
   name      = "GameSpy",
@@ -25,9 +26,11 @@ protocol = {
   transport = "udp",
 }
 
----@type CompoundResponse
+---@type CompoundDictionaryResponse
 local response = nil
 
+---@param values Dictionary
+---@return Buffer
 local function create_packet(values)
   local data = ""
 
@@ -39,7 +42,7 @@ local function create_packet(values)
 end
 
 function query()
-  response = CompoundResponse()
+  response = CompoundDictionaryResponse()
 
   gsw.send(create_packet({
     basic = "",
@@ -48,6 +51,8 @@ function query()
   }))
 end
 
+---@param inf Dictionary
+---@return Dictionary[]
 local function get_players(inf)
   local players = {}
 
@@ -70,6 +75,8 @@ local function get_players(inf)
   return players
 end
 
+---@param players Dictionary[]
+---@return PlayerField[]
 local function get_pfields(players)
   local pfields = {}
 
@@ -86,6 +93,7 @@ local function get_pfields(players)
   return pfields
 end
 
+---@param data Buffer
 function process(data)
   local info = quake2.parse_info(data)
   local queryid = info.queryid

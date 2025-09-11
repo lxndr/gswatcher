@@ -16,12 +16,18 @@
 
 -- https://developer.valvesoftware.com/wiki/Server_Queries
 
+---@class PacketHeader: Packet
+---@field compressed boolean
+---@field data_size? number
+---@field crc32? number
+
 local switch = require("lib/switch")
 local to_boolean = require("lib/to_boolean")
 local DataReader = require("lib/DataReader")
 local DataWriter = require("lib/DataWriter")
-local CompoundResponse = require("lib/CompoundResponse")
+local CompoundBufferResponse = require("lib/CompoundBufferResponse")
 
+---@type ProtocolInfo
 protocol = {
   id        = "source",
   name      = "Source Engine",
@@ -29,6 +35,13 @@ protocol = {
   transport = "udp",
 }
 
+---@enum RequestPacketType
+local RequestPacketType = {
+  SERVER_INFO = "T",
+  PLAYER_LIST = "U",
+}
+
+---@type ServerInfo
 local info_map = {
   game_name    = "game",
   game_version = "version",
@@ -42,6 +55,7 @@ local info_map = {
   secure       = "vac",
 }
 
+---@type table<string, integer>
 local known_app_ids = {
   source_sdk_base_2006 = 215,
   counter_strike_source = 240,
@@ -50,11 +64,23 @@ local known_app_ids = {
   insurgency = 17700,
 }
 
-local response = nil
+---@type CompoundBufferResponse
+local response = CompoundBufferResponse()
+
+---@type boolean
+local is_gold_source = false
+
+---@type integer
 local got_challenge = -1
+
+---@type Dictionary|nil
 local got_server_info = nil
+
+---@type Dictionary[]|nil
 local got_player_list = nil
 
+---@param type RequestPacketType
+---@param payload? Buffer
 local function send_packet(type, payload)
   local w = DataWriter()
 
@@ -68,14 +94,16 @@ local function send_packet(type, payload)
   gsw.send(w.buf)
 end
 
+---@param challenge integer
 local function send_server_info_packet(challenge)
   local w = DataWriter()
   w:zstring("Source Engine Query")
   w:i32le(challenge)
 
-  send_packet("T", w.buf)
+  send_packet(RequestPacketType.SERVER_INFO, w.buf)
 end
 
+---@param challenge integer
 local function send_player_list_packet(challenge)
   local w = DataWriter()
 
@@ -83,10 +111,12 @@ local function send_player_list_packet(challenge)
     w:i32le(challenge)
   end
 
-  send_packet("U", w.buf)
+  send_packet(RequestPacketType.PLAYER_LIST, w.buf)
 end
 
 local function next_query()
+  response = CompoundBufferResponse()
+
   if not got_server_info then
     send_server_info_packet(got_challenge)
     return
@@ -98,14 +128,14 @@ local function next_query()
 end
 
 function query()
-  response = CompoundResponse()
+  is_gold_source = false
   got_challenge = -1
   got_server_info = nil
   got_player_list = nil
   next_query()
 end
 
---- @param r DataReader
+---@param r DataReader
 local function read_server_info_gold(r)
   local inf = {
     address = r:zstring(),
@@ -140,7 +170,7 @@ local function read_server_info_gold(r)
   return inf
 end
 
---- @param r DataReader
+---@param r DataReader
 local function read_server_info(r)
   local inf = {
     protocol_version = r:u8(),
@@ -198,6 +228,8 @@ local function read_server_info(r)
   return inf
 end
 
+---@param details Dictionary
+---@return ServerInfo
 local function normalize_server_info(details)
   local info = {}
 
@@ -208,7 +240,10 @@ local function normalize_server_info(details)
   return info
 end
 
+---@param inf Dictionary
+---@return PlayerField[]
 local function create_player_fields(inf)
+  ---@type PlayerField[]
   local fields = {
     {
       title = "Name",
@@ -267,12 +302,12 @@ local function read_player_list(r, inf)
   return players
 end
 
---- @param r DataReader
+---@param r DataReader
 local function read_challenge(r)
   return r:i32le()
 end
 
---- @param r DataReader
+---@param r DataReader
 local function read_payload(r)
   local type = r:string(1)
 
@@ -286,12 +321,18 @@ local function read_payload(r)
     m = function ()
       got_challenge = -1
       got_server_info = read_server_info_gold(r)
+      is_gold_source = true
       local normalized_server_info = normalize_server_info(got_server_info)
       gsw.sinfo(got_server_info, normalized_server_info)
     end,
     D = function ()
       got_challenge = -1
       got_player_list = read_player_list(r, got_server_info)
+
+      if not got_server_info then
+        error("invalid response: got player list before server info")
+      end
+
       local pfields = create_player_fields(got_server_info)
       gsw.plist(pfields, got_player_list)
     end,
@@ -306,85 +347,127 @@ local function read_payload(r)
   next_query ()
 end
 
---- @param r DataReader
+---@param r DataReader
+---@return PacketHeader
 local function read_header_gold(r)
-  local packet = {
-    reqid = r:u32le(),
+  local reqid = r:u32le()
+  local byte = r:u8()
+  local total = byte & 0x0f
+  local number = (byte >> 4) + 1
+
+  if total < 2 then
+    error("total number of packets (" .. total .. ") less than 2")
+  end
+
+  if total > 15 then
+    error("total number of packets (" .. total .. ") more than 15")
+  end
+
+  if number > total then
+    error("packet number (" .. number .. ") is greater then total number of packets (" .. total .. ")")
+  end
+
+  local data = r:data()
+
+  return {
+    reqid = reqid,
+    total = total,
+    number = number,
+    data = data,
   }
-
-  local number = r:u8()
-  packet.total = number & 0x0f
-  packet.number = (number >> 4) + 1
-
-  packet.data = r:data()
-  response:add_packet(packet)
 end
 
---- @param r DataReader
+---@param r DataReader
+---@return PacketHeader
 local function read_header(r)
   local packet = {
     reqid = r:u32le(),
     total = r:u8(),
     number = r:u8() + 1,
-    size = r:u16le(),
+    size = r:u16le(), -- FIXME: Orange Box Engine and above only.
   }
+
+  if packet.total < 2 then
+    error("total number of packets (" .. packet.total .. ") less than 2")
+  end
+
+  if packet.number > packet.total then
+    error("packet number (" .. packet.number .. ") is greater then total number of packets (" .. packet.total .. ")")
+  end
 
   packet.compressed = to_boolean(packet.reqid >> 31)
 
   if packet.number == 1 and packet.compressed then
-    packet.dataSize = r:u32le()
+    packet.data_size = r:u32le()
     packet.crc32 = r:u32le()
   end
 
   packet.data = r:data()
-  response:add_packet(packet)
+  return packet
 end
 
---- @param r DataReader
-local function try_read_header(r)
-  local pos = r.pos
-  local ok = pcall(read_header_gold, r)
-
-  if not ok then
-    r.pos = pos
-    read_header(r)
-  end
-end
-
---- @param data string
-function process(data)
-  local r = DataReader(data)
+---@param r DataReader
+---@return PacketHeader
+local function read_packet(r)
   local format = r:i32le()
 
-  switch (format) {
-    [-1] = function ()
-      read_payload(r)
-    end,
-    [-2] = function ()
-      try_read_header(r)
+  if format == -1 then
+    return {
+      reqid = 0,
+      total = 1,
+      number = 1,
+      compressed = false,
+      data = r:data(),
+    }
+  end
 
-      if response:got_all_packets() then
-        local data = response:combine()
+  if format == -2 then
+    if is_gold_source then
+      return read_header_gold(r)
+    else
+      return read_header(r)
+    end
+  end
 
-        local packet = response.packets[1]
-        assert(not packet.compressed, "compressed split packets are not supported")
+  error("invalid response: unknown packet format " .. format)
+end
 
-        -- local uncompressed_data = bz2:uncompress(data)
+---@param data Buffer
+function process(data)
+  local reader = DataReader(data)
+  local packet = read_packet(reader)
 
-        -- if #uncompressed_data ~= packet.size then
-        --   error("invalid response: invalid uncompressed data size")
-        -- end
+  if not response.reqid then
+    response.reqid = packet.reqid
+  end
 
-        -- if crc32:hash(uncompressed_data) ~= packet.crc32 then
-        --   error("invalid response: failed to crc32 validate uncompressed data")
-        -- end
+  response:add_packet(packet)
 
-        local r = DataReader(data)
-        read_payload(r)
-      end
-    end,
-    default = function ()
-      error("invalid response: unknown packet format " .. format)
-    end,
-  }
+  if not response:got_all_packets() then
+    return
+  end
+
+  data = response:combine()
+
+  local first_packet = response.packets[1]
+  assert(not first_packet.compressed, "compressed split packets are not supported")
+
+  -- local uncompressed_data = bz2:uncompress(data)
+
+  -- if #uncompressed_data ~= first_packet.size then
+  --   error("invalid response: invalid uncompressed data size")
+  -- end
+
+  -- if crc32:hash(uncompressed_data) ~= first_packet.crc32 then
+  --   error("invalid response: failed to crc32 validate uncompressed data")
+  -- end
+
+  reader = DataReader(data)
+
+  -- Some titles when using the split packet method have been observed erroneously nesting the single message header inside the split payload
+  if reader:i32le() ~= -1 then
+    reader:skip(-4)
+  end
+
+  read_payload(reader)
 end

@@ -17,6 +17,7 @@
 local DataWriter = require("lib/DataWriter")
 local quake2 = require("quake2")
 
+---@type ProtocolInfo
 protocol = {
   id        = "quake3",
   name      = "Quake 3",
@@ -31,6 +32,7 @@ function query()
   gsw.send(w.buf)
 end
 
+---@param data Buffer
 function process(data)
   quake2.process_response(data, -1, "statusResponse")
 end

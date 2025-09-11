@@ -14,10 +14,9 @@
 -- You should have received a copy of the GNU Affero General Public License
 -- along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
----@meta
-
 ---@param min integer
 ---@param max integer
+---@return integer
 local function rand_integer(min, max)
   local rnd = math.random()
   return math.floor(rnd * (max - min)) + min

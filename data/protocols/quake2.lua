@@ -20,6 +20,7 @@ local to_boolean = require("lib/to_boolean")
 local DataReader = require("lib/DataReader")
 local DataWriter = require("lib/DataWriter")
 
+---@type ProtocolInfo
 protocol = {
   id        = "quake2",
   name      = "Quake 2",
@@ -99,7 +100,7 @@ local function parse_player(str)
   }
 end
 
----@param data string
+---@param data Buffer
 ---@param header integer
 ---@param signature string
 local function process_response(data, header, signature)
@@ -134,6 +135,7 @@ local function process_response(data, header, signature)
   gsw.plist(pfields, players)
 end
 
+---@param data Buffer
 function process(data)
   process_response(data, -1, "print")
 end

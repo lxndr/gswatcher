@@ -14,14 +14,12 @@
 -- You should have received a copy of the GNU Affero General Public License
 -- along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
----@meta
-
 local switch = require("lib/switch")
 local to_boolean = require("lib/to_boolean")
-local DataReader = require("lib/DataReader")
 local DataWriter = require("lib/DataWriter")
 
 ---@param d table Server variables (details)
+---@return table<string, string|integer|boolean>
 local function extract_server_info(d)
   return {
     server_name = d.hostname,
@@ -37,6 +35,7 @@ local function extract_server_info(d)
 end
 
 ---@param r DataReader
+---@return string[]
 local function read_string_list(r)
   local list = {}
 
@@ -54,6 +53,7 @@ local function read_string_list(r)
 end
 
 ---@param request_id integer
+---@return Buffer
 local function create_challenge_request(request_id)
   return DataWriter()
     :u8(0xfe):u8(0xfd)
@@ -64,6 +64,7 @@ end
 
 ---@param request_id integer
 ---@param challenge? integer
+---@return Buffer
 local function create_stats_request(request_id, challenge)
   local w = DataWriter()
     :u8(0xfe):u8(0xfd)
@@ -78,6 +79,7 @@ local function create_stats_request(request_id, challenge)
   return w.buf
 end
 
+---@param pfields PlayerField[]
 ---@param field_id string
 local function add_player_field(pfields, field_id)
   for _, field in ipairs(pfields) do
@@ -94,6 +96,7 @@ local function add_player_field(pfields, field_id)
 end
 
 ---@param r DataReader
+---@param response CompoundDictionaryResponse
 ---@param response_id integer
 local function parse_v3_stats_response(r, response, response_id)
   local splitnum = r:zstring()
@@ -178,8 +181,6 @@ local function parse_v3_stats_response(r, response, response_id)
             if #val == 0 then
               break
             end
-
-            -- print("Team info: " .. field .. " = " .. val)
           end
         end
       end,

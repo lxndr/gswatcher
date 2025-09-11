@@ -19,17 +19,13 @@ local DataWriter = require("lib/DataWriter")
 local DataReader = require("lib/DataReader")
 local gamespy = require("lib/gamespy")
 
+---@type ProtocolInfo
 protocol = {
   id        = "gamespy2",
   name      = "GameSpy 2",
   feature   = "query",
   transport = "udp",
 }
-
----@class Field
----@field title string
----@field kind string
----@field field string
 
 ---@type integer
 local requestId = 0
@@ -48,8 +44,9 @@ function query()
   gsw.send(w.buf)
 end
 
---- @param r DataReader
---- @param delimiter string
+---@param r DataReader
+---@param delimiter string
+---@return Dictionary
 local function parse_server_info(r, delimiter)
   local details = {}
 
@@ -67,10 +64,10 @@ local function parse_server_info(r, delimiter)
   return details
 end
 
---- @param r DataReader
---- @param delimiter string
+---@param r DataReader
+---@param delimiter string
+---@return PlayerField[]
 local function read_player_fields(r, delimiter)
-  ---@type Field[]
   local fields = {}
 
   while not r:is_end() do
@@ -90,8 +87,9 @@ local function read_player_fields(r, delimiter)
   return fields
 end
 
---- @param r DataReader
---- @param delimiter string
+---@param r DataReader
+---@param delimiter string
+---@return PlayerField[], Dictionary[]
 local function parse_player_list(r, delimiter)
   local players = {}
   local player_count = r:u8()
@@ -115,7 +113,7 @@ local function parse_player_list(r, delimiter)
   return pfields, players
 end
 
----@param data string
+---@param data Buffer
 function process(data)
   local r = DataReader(data)
   local delimiter = string.char(r:u8())

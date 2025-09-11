@@ -93,7 +93,7 @@ class ProtocolTestRunner {
         var expected_packet = expected_data_flow.poll ();
 
         assert_true (expected_packet.direction == REQUEST);
-        assert_cmpmem (data, expected_packet.data.get_data ());
+        expect_memory (data).to_equal(expected_packet.data.get_data ());
 
         while (!expected_data_flow.is_empty && expected_data_flow.peek ().direction == RESPONSE) {
           try {
@@ -121,72 +121,15 @@ class ProtocolTestRunner {
       proto.query ();
       run_main_context ();
 
-      assert_sinfo (actual_sinfo);
-      assert_plist_fields (actual_plist_fields);
-      assert_plist (actual_plist);
+      expect_string_map ("sinfo", actual_sinfo).to_equal (expected_sinfo);
+      expect_player_fields ("plist_fields", actual_plist_fields).to_equal (expected_plist_fields);
+      expect_player_list ("plist", actual_plist).to_equal (expected_plist);
     } catch (Error err) {
       if (expected_error == null) {
         assert_no_error (err);
       } else {
         assert_error (err, expected_error.domain, expected_error.code);
       }
-    }
-  }
-
-  private void assert_sinfo (Gee.Map<string, string> actual_sinfo) {
-    assert_hashmap ("sinfo", actual_sinfo, expected_sinfo);
-    assert_cmpuint (actual_sinfo.size, EQ, expected_sinfo.size);
-
-    foreach (var entry in actual_sinfo.entries) {
-      assert_true (expected_sinfo.has (entry.key, entry.value));
-    }
-  }
-
-  private void assert_plist_fields (Gee.List<PlayerField> actual_plist_fields) {
-    assert_cmpuint (actual_plist_fields.size, EQ, expected_plist_fields.size);
-
-    for (var i = 0; i < actual_plist_fields.size; i++) {
-      assert_cmpstr (actual_plist_fields[i].title, EQ, expected_plist_fields[i].title);
-      assert_cmpstr (actual_plist_fields[i].field, EQ, expected_plist_fields[i].field);
-      assert_cmpint (actual_plist_fields[i].kind, EQ, expected_plist_fields[i].kind);
-    }
-  }
-
-  private void assert_plist (Gee.List<Player> actual_plist) {
-    assert_cmpuint (actual_plist.size, EQ, expected_plist.size);
-
-    for (var i = 0; i < actual_plist.size; i++) {
-      assert_hashmap (@"plist[$(i)]", actual_plist[i], expected_plist[i]);
-    }
-  }
-}
-
-private void assert_hashmap (string hash_map_name, Gee.Map<string, string> actual, Gee.Map<string, string> expected) {
-  foreach (var entry in expected) {
-    if (!(actual.has_key (entry.key) && actual[entry.key] == expected[entry.key])) {
-      Test.message (
-        "FAIL: expected '%s' to have key/value %s = '%s', got '%s'",
-        hash_map_name, entry.key, entry.value, actual[entry.key]
-      );
-    }
-  }
-
-  foreach (var entry in actual) {
-    if (!expected.has_key (entry.key)) {
-      Test.message (
-        "FAIL: unexpected actual '%s' to have key %s",
-        hash_map_name, entry.key
-      );
-    }
-  }
-
-  foreach (var entry in expected) {
-    assert_true (actual.has (entry.key, entry.value));
-  }
-
-  foreach (var entry in actual) {
-    if (!expected.has_key (entry.key)) {
-      assert_false (actual.has_key (entry.key));
     }
   }
 }

@@ -8,11 +8,12 @@
 --
 
 
+---@class Object
 local Object = {}
 Object.__index = Object
 
 
-function Object:new()
+function Object:new(...)
 end
 
 

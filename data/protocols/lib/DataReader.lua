@@ -14,17 +14,23 @@
 -- You should have received a copy of the GNU Affero General Public License
 -- along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
----@meta
-
 local Object = require("lib/classic")
 
----@class DataReader
+---@class (exact) DataReader: Object
+---@field buf Buffer
+---@field pos integer
+---@overload fun(buf: Buffer): DataReader
 local DataReader = Object:extend()
 
----@param buf string
+---@package
+---@param buf Buffer
 function DataReader:new(buf)
   self.buf = buf
   self.pos = 1
+end
+
+function DataReader:__tostring()
+  return "DataReader"
 end
 
 function DataReader:is_end()
@@ -192,7 +198,7 @@ function DataReader:zstring(delimiter)
   return val
 end
 
----@return string
+---@return Buffer
 function DataReader:data()
   local data = self.buf:sub(self.pos)
   self.pos = #self.buf

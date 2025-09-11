@@ -14,8 +14,6 @@
 -- You should have received a copy of the GNU Affero General Public License
 -- along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
----@meta
-
 local truthy_values = {
   [true]   = true,
   [1]      = true,
@@ -25,6 +23,7 @@ local truthy_values = {
   ["on"]   = true,
 }
 
+---@return boolean
 local function to_boolean(val)
   return truthy_values[val] or false
 end

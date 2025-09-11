@@ -14,9 +14,10 @@
 -- You should have received a copy of the GNU Affero General Public License
 -- along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-local DataReader = require "lib/DataReader"
-local concat_tables = require "lib/concat_tables"
+local DataReader = require("lib/DataReader")
+local concat_tables = require("lib/concat_tables")
 
+---@type ProtocolInfo
 protocol = {
   id = "ase",
   name = "All-Seeing Eye",
@@ -24,6 +25,7 @@ protocol = {
   transport = "udp",
 }
 
+---@type Dictionary
 local info_map = {
   game_name    = "game",
   game_version = "version",
@@ -39,6 +41,8 @@ function query()
   gsw.send("s")
 end
 
+---@type DataReader
+---@return Dictionary
 local function read_general_info(r)
   return {
     game_name = r:lstring(),
@@ -53,6 +57,8 @@ local function read_general_info(r)
   }
 end
 
+---@type DataReader
+---@return Dictionary
 local function read_key_values(r)
   local info = {}
 
@@ -69,6 +75,8 @@ local function read_key_values(r)
   return info
 end
 
+---@type DataReader
+---@return Dictionary[]
 local function read_player_list(r)
   local players = {}
 
@@ -106,6 +114,8 @@ local function read_player_list(r)
   return players
 end
 
+---@param players Dictionary[]
+---@return PlayerField[]
 local function get_pfields(players)
   local pfields = {
     {
@@ -128,6 +138,8 @@ local function get_pfields(players)
   return pfields
 end
 
+---@param details Dictionary
+---@return Dictionary
 local function normalize_server_info(details)
   local info = {}
 
@@ -138,6 +150,7 @@ local function normalize_server_info(details)
   return info
 end
 
+---@param data Buffer
 function process(data)
   local r = DataReader(data)
   local sig = r:string(4)

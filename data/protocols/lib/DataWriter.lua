@@ -14,15 +14,20 @@
 -- You should have received a copy of the GNU Affero General Public License
 -- along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
----@meta
-
 local Object = require("lib/classic")
 
----@class DataWriter
+---@class (exact) DataWriter: Object
+---@field buf Buffer
+---@overload fun(): DataWriter
 local DataWriter = Object:extend()
 
+---@package
 function DataWriter:new()
   self.buf = ""
+end
+
+function DataWriter:__tostring()
+  return "DataWriter"
 end
 
 ---@param val integer
@@ -159,15 +164,15 @@ function DataWriter:zstring(val)
 end
 
 ---@param val string
----@param len integer
+---@param len? integer
 ---@return DataWriter
 function DataWriter:string(val, len)
   self.buf = self.buf .. val:sub(1, len or #val)
   return self
 end
 
----@param val string
----@param len integer
+---@param val Buffer
+---@param len? integer
 ---@return DataWriter
 function DataWriter:data(val, len)
   self.buf = self.buf .. val:sub(1, len or #val)

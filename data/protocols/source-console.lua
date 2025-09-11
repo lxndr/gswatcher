@@ -20,6 +20,7 @@ local switch = require("lib/switch")
 local DataWriter = require("lib/DataWriter")
 local DataReader = require("lib/DataReader")
 
+---@type ProtocolInfo
 protocol = {
   id        = "source-console",
   name      = "Source Engine Remote Console",
@@ -131,7 +132,7 @@ local function process_response(pak)
   end
 end
 
----@param data string
+---@param data Buffer
 function process(data)
   buffer = buffer .. data
 

@@ -18,9 +18,10 @@ local switch = require("lib/switch")
 local rand_integer = require("lib/rand_integer")
 local DataReader = require("lib/DataReader")
 local DataWriter = require("lib/DataWriter")
-local CompoundResponse = require("lib/CompoundResponse")
+local CompoundDictionaryResponse = require("lib/CompoundDictionaryResponse")
 local gamespy = require("lib/gamespy")
 
+---@type ProtocolInfo
 protocol = {
   id        = "gamespy3",
   name      = "GameSpy 3",
@@ -28,7 +29,7 @@ protocol = {
   transport = "udp",
 }
 
----@type CompoundResponse
+---@type CompoundDictionaryResponse
 local response
 
 ---@param request_id integer
@@ -48,7 +49,7 @@ end
 function query()
   local request_id = rand_integer(1, 0x7fffffff)
 
-  response = CompoundResponse(request_id)
+  response = CompoundDictionaryResponse(request_id)
   response.details = {}
   response.pfields = {}
   response.plist = {}
@@ -56,7 +57,7 @@ function query()
   send_stat_packet(request_id)
 end
 
----@param data string
+---@param data Buffer
 function process(data)
   local r = DataReader(data)
   local response_type = r:u8()
