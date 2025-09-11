@@ -124,7 +124,7 @@ class GameResolver : Object {
               var parser = new GameDef.ExpressionParser (val);
               game.inf[key] = parser.parse ();
             } catch (GameDef.ExpressionParserError parser_err) {
-              throw new IOError.INVALID_DATA ("failed to parse expression at '%s' (group 'Match'): %s", key, parser_err.message);
+              throw new IOError.INVALID_DATA ("failed to parse expression at '%s' (group 'Info'): %s", key, parser_err.message);
             }
           }
         }
@@ -178,14 +178,14 @@ class GameResolver : Object {
   }
 
   public Gee.List<PlayerField>? get_plist_fields (string? game_id) {
-    if (!(game_id != null && games.has_key (game_id)))
+    if (game_id == null || !games.has_key (game_id))
       return null;
 
     return games[game_id].pfields;
   }
 
   public string? get_feature_protocol (string? game_id, ProtocolFeature feature) {
-    if (!(game_id != null && games.has_key (game_id)))
+    if (game_id == null || !games.has_key (game_id))
       return null;
 
     var game = games[game_id];

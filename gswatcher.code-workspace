@@ -144,6 +144,7 @@
 			"reqid",
 			"requiref",
 			"saddr",
+			"schemalist",
 			"setfield",
 			"setfuncs",
 			"setglobal",

@@ -45,7 +45,10 @@ class ExpressionParser {
       case IDENTIFIER:
         return parse_identifier ();
       default:
-        throw new ExpressionParserError.INVALID_TOKEN ("invalid token at position %u", scanner.position);
+        throw new ExpressionParserError.INVALID_TOKEN (
+          "invalid token at position %u, expected string, integer, float or identifier",
+          scanner.position
+        );
     }
   }
 
@@ -58,17 +61,25 @@ class ExpressionParser {
       case LEFT_PAREN:
         return parse_function (name);
       default:
-        throw new ExpressionParserError.INVALID_TOKEN ("invalid token at position %u", scanner.position);
+        throw new ExpressionParserError.INVALID_TOKEN (
+          "failed to parse identifier: invalid token at position %u, expected '[' or '('",
+          scanner.position
+        );
     }
   }
 
   private Expression parse_value (string name) throws ExpressionParserError {
     var key_expr = parse_expression ();
 
-    if (scanner.get_next_token () != RIGHT_BRACE)
-      throw new ExpressionParserError.INVALID_TOKEN ("invalid token at position %u", scanner.position);
-
-    return new ValueExpression (name, key_expr);
+    switch (scanner.get_next_token ()) {
+      case RIGHT_BRACE:
+        return new ValueExpression (name, key_expr);
+      default:
+        throw new ExpressionParserError.INVALID_TOKEN (
+          "failed to parse value: invalid token at position %u, expected ']'",
+          scanner.position
+        );
+    }
   }
 
   private Expression parse_function (string name) throws ExpressionParserError {
@@ -80,7 +91,10 @@ class ExpressionParser {
       case "mapKeyword":
         return new MapKeywordExpression (args);
       default:
-        throw new ExpressionParserError.INVALID_TOKEN ("unknown function '%s' at position %u", name, scanner.position);
+        throw new ExpressionParserError.INVALID_TOKEN (
+          "failed to parse function: unknown function '%s' at position %u, only supported 'regex' or 'mapKeyword'",
+          name, scanner.position
+        );
     }
   }
 
@@ -105,7 +119,10 @@ class ExpressionParser {
         continue;
       }
 
-      throw new ExpressionParserError.INVALID_TOKEN ("invalid token at position %u", scanner.position);
+      throw new ExpressionParserError.INVALID_TOKEN (
+        "failed to parse function arguments: invalid token at position %u, expected ')' or ','",
+        scanner.position
+      );
     }
 
     return args;
