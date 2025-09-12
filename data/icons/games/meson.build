@@ -22,7 +22,7 @@ icons = [
   'zp.png',
 ]
 
-magick = find_program('magick', version: '>=7.0.0')
+convert = find_program('convert', version: '>=6.0.0')
 icon_size = get_option('game-icon-size')
 icon_ext = get_option('game-icon-ext')
 
@@ -31,8 +31,7 @@ foreach icon : icons
     input: icon,
     output: '@BASENAME@.@0@'.format(icon_ext),
     command: [
-      magick,
-      'convert',
+      convert,
       '@INPUT@',
       '-resize', '@0@x@0@'.format(icon_size),
       '-define', 'png:compression-level=9',

@@ -1,3 +1,4 @@
+# Ubuntu 22.04 LTS, Debian 12
 gtk4_dep = dependency('gtk4', version: '>=4.6.9')
 gtk4_dep_version = gtk4_dep.version()
 
@@ -7,6 +8,7 @@ libadwaita_dep_version = libadwaita_dep.version()
 dependencies = [
   gtk4_dep,
   libadwaita_dep,
+  dependency('glib-2.0', version : '>=2.72'),
   dependency('gee-0.8', version : '>=0.20.4'),
   dependency('lua', version : '>=5.4'),
   dependency('geoip', version : '>=1.6.12'),
