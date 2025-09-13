@@ -41,6 +41,7 @@ public class Querier : Object {
   private string? game_id;
   private bool plist_fields_resolved;
 
+  public signal void address_resolve (string address);
   public signal void details_update (Gee.Map<string, string> details);
   public signal void sinfo_update (ServerInfo sinfo);
   public signal void plist_fields_update (Gee.List<PlayerField> plist_fields);
@@ -54,6 +55,7 @@ public class Querier : Object {
     protocol.plist_update.connect (on_plist_updated);
 
     transport = TransportRegistry.get_instance ().create_net_transport (protocol.info.transport, server.host, server.qport);
+    transport.resolved.connect (on_address_resolved);
     transport.data_received.connect (on_data_received);
 
     game_resolver.notify["ready"].connect (handle_pending_query);
@@ -75,6 +77,7 @@ public class Querier : Object {
     protocol.data_send.disconnect (send_data);
     protocol.sinfo_update.disconnect (on_sinfo_updated);
     protocol.plist_update.disconnect (on_plist_updated);
+    transport.resolved.disconnect (on_address_resolved);
     transport.data_received.disconnect (on_data_received);
     game_resolver.notify["ready"].disconnect (handle_pending_query);
   }
@@ -103,6 +106,10 @@ public class Querier : Object {
   private void handle_pending_query () {
     if (query_pending && game_resolver.ready)
       query ();
+  }
+
+  private void on_address_resolved (string address) {
+    address_resolve (address);
   }
 
   private void on_data_received (uint8[] data) {

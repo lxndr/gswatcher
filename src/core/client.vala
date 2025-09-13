@@ -23,13 +23,14 @@ private static Gtk.TextTagTable console_log_buffer_tag_table;
 public class Client : Object {
   private QuerierManager querier_manager = QuerierManager.get_instance ();
   private Gee.List<Querier> tmp_queriers = new Gee.ArrayList<Querier> ();
-  private Querier? querier;
 
   public Server server { get; construct set; }
   public string? ip_address { get; protected set; }
   public string? protocol_id { get; protected set; }
 
   // query
+  private Querier? _querier;
+  private Gee.List<Binding> querier_bindings = new Gee.ArrayList<Binding> ();
   public Error? error { get; protected set; }
   public int64 ping { get; protected set; default = -1; }
   public ServerDetailsList details { get; construct set; }
@@ -41,7 +42,7 @@ public class Client : Object {
   public uint16 console_port { get; set; default = 0; }
   public string console_password { get; set; default = ""; }
   public bool is_console_supported { get; private set; default = false; }
-  public ConsoleClient? console_client { get; private set; }
+  public ConsoleClient? _console_client;
   public Gtk.TextBuffer? console_log_buffer { get; private set; }
   public Gee.ArrayList<string>? console_command_history { get; set; }
 
@@ -80,8 +81,36 @@ public class Client : Object {
   }
 
   ~Client () {
-    tmp_queriers.clear ();
-    GameResolver.get_instance ().notify["ready"].disconnect (on_game_resolver_ready_change);
+    sinfo.notify["game-id"].disconnect(setup_console_feature);
+    notify["console-port"].disconnect(on_console_options_changed);
+    notify["console-password"].disconnect(on_console_options_changed);
+
+    querier = null;
+    console_client = null;
+
+    var game_resolver = GameResolver.get_instance ();
+    game_resolver.notify["ready"].disconnect (on_game_resolver_ready_change);
+  }
+
+  private Querier? querier {
+    get {
+      return _querier;
+    }
+
+    set {
+      if (_querier != null) {
+        querier_bindings.clear ();
+      }
+
+      _querier = value;
+
+      if (_querier != null) {
+        querier_bindings.add_all_array ({
+          querier.bind_property ("ping", this, "ping", DEFAULT | SYNC_CREATE),
+          querier.bind_property ("error", this, "error", DEFAULT | SYNC_CREATE),
+        });
+      }
+    }
   }
 
   private void activate () {
@@ -123,11 +152,11 @@ public class Client : Object {
 
   private Querier setup_querier (Server server, string protocol_id) throws Error {
     var querier = querier_manager.create_querier (server, protocol_id);
-    querier.details_update.connect (on_details_update);
+    querier.address_resolve.connect(on_address_resolve);
     querier.sinfo_update.connect (on_sinfo_update);
+    querier.details_update.connect (on_details_update);
     querier.plist_fields_update.connect (on_plist_fields_updated);
     querier.plist_update.connect (on_plist_update);
-    querier.transport.resolved.connect(on_address_resolve);
     return querier;
   }
 
@@ -171,9 +200,37 @@ public class Client : Object {
   private void on_protocol_detected (Querier querier) {
     this.querier = querier;
     this.protocol_id = querier.protocol.info.id;
-    querier.bind_property ("ping", this, "ping", DEFAULT | SYNC_CREATE);
-    querier.bind_property ("error", this, "error", DEFAULT | SYNC_CREATE);
     tmp_queriers.clear ();
+  }
+
+  /*
+   * Remote console
+   */
+  
+  public ConsoleClient? console_client {
+    get {
+      return _console_client;
+    }
+
+    private set {
+      if (_console_client != null) {
+        console_client.connected.disconnect (on_console_connected);
+        console_client.authenticated.disconnect (on_console_authenticated);
+        console_client.disconnected.disconnect (on_console_disconnected);
+        console_client.response_received.disconnect (on_console_response_received);
+        console_client.error_occurred.disconnect (on_console_error_occurred);
+      }
+
+      _console_client = value;
+
+      if (_console_client != null) {
+        console_client.connected.connect (on_console_connected);
+        console_client.authenticated.connect (on_console_authenticated);
+        console_client.disconnected.connect (on_console_disconnected);
+        console_client.response_received.connect (on_console_response_received);
+        console_client.error_occurred.connect (on_console_error_occurred);
+      }
+    }
   }
 
   private void setup_console_feature () {
@@ -202,11 +259,6 @@ public class Client : Object {
     try {
       var proto = (ConsoleProtocol) ProtocolRegistry.get_instance ().create (console_protocol);
       console_client = new ConsoleClient (server.host, console_port, console_password, proto);
-      console_client.connected.connect (on_console_connected);
-      console_client.authenticated.connect (on_console_authenticated);
-      console_client.disconnected.connect (on_console_disconnected);
-      console_client.response_received.connect (on_console_response_received);
-      console_client.error_occurred.connect (on_console_error_occurred);
     } catch (Error err) {
       log (Config.LOG_DOMAIN, LEVEL_ERROR, "failed to create protocol '%s': %s", console_protocol, err.message);
     }
