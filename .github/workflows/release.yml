@@ -4,8 +4,87 @@ on:
   push:
     tags:
       - "v*.*.*"
+  pull_request:
 
 jobs:
+  Linux_AppImage:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        arch: [x64]
+    env:
+      APP_NAME: gswatcher
+      APP_ID: io.github.lxndr.gswatcher
+      RELEASE_FILENAME: ${{matrix.arch}}-appimage-${{github.ref_name || github.sha}}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            meson \
+            ninja-build \
+            valac \
+            libgee-0.8-dev \
+            libadwaita-1-dev \
+            liblua5.4-dev \
+            libgeoip-dev \
+            gettext \
+            desktop-file-utils \
+            appstream \
+            librsvg2-bin \
+            imagemagick \
+            patchelf
+
+      - name: Setup meson project
+        run: meson setup builddir --prefix=/usr
+
+      - name: Compile
+        run: cd builddir && ninja
+
+      - name: Install to AppDir
+        run: |
+          mkdir -p AppDir
+          DESTDIR=AppDir ninja -C builddir install
+          
+          # Create necessary directories
+          mkdir -p AppDir/usr/lib AppDir/usr/share/icons/hicolor/256x256/apps
+          
+          # Copy necessary runtime dependencies
+          ldd AppDir/usr/bin/gswatcher | grep "=> /" | awk '{print $3}' | xargs -I '{}' cp -v '{}' AppDir/usr/lib/ 2>/dev/null || true
+          
+          # Also copy specific libraries that might be needed
+          for lib in liblua5.4.so.0 libGeoIP.so.1 libgee-0.8.so.2 libadwaita-1.so.0 libgdk-1.0.so.0 libgtk-4-1 libgdk_pixbuf-2.0.so.0 libgraphene-1.0.so.0; do
+            find /usr/lib* -name "$lib*" -exec cp {} AppDir/usr/lib/ 2>/dev/null \;
+          done
+          
+          # Create AppRun symlink
+          ln -s usr/bin/gswatcher AppDir/AppRun
+          
+          # Copy desktop file and icon
+          cp AppDir/usr/share/applications/io.github.lxndr.gswatcher.desktop AppDir/
+          find AppDir/usr/share/icons -name "gswatcher.png" -exec cp {} AppDir/ \; 2>/dev/null || cp data/icons/gswatcher.png AppDir/usr/share/icons/hicolor/256x256/apps/ && cp AppDir/usr/share/icons/hicolor/256x256/apps/gswatcher.png AppDir/ 2>/dev/null
+
+      - name: Download AppImageTool
+        run: |
+          wget -c "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+          chmod +x appimagetool-x86_64.AppImage
+
+      - name: Create AppImage
+        run: |
+          ./appimagetool-x86_64.AppImage AppDir --appimage-extract-and-run
+          mv *.AppImage ${{env.RELEASE_FILENAME}}.AppImage
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          draft: true
+          generate_release_notes: false
+          files: ${{env.RELEASE_FILENAME}}.AppImage
+
   Windows_Portable:
     runs-on: windows-2022
     strategy:
@@ -16,7 +95,7 @@ jobs:
       run:
         shell: msys2 {0}
     env:
-      RELEASE_FILENAME: windows-${{matrix.env}}-portable-${{github.ref_name}}
+      RELEASE_FILENAME: windows-${{matrix.env}}-portable-${{github.ref_name || github.sha}}
     steps:
       - name: Setup MSYS2
         uses: msys2/setup-msys2@v2
@@ -75,6 +154,7 @@ jobs:
           zip -r -9 -q ${{env.RELEASE_FILENAME}}.zip ${{env.RELEASE_FILENAME}}
       - name: Release
         uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           draft: true
           generate_release_notes: false
