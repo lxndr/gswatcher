@@ -47,7 +47,7 @@ jobs:
       - name: Install to AppDir
         run: |
           mkdir -p AppDir
-          DESTDIR=AppDir ninja -C builddir install
+          cd builddir && DESTDIR=../AppDir ninja install && cd ..
           
           # Create necessary directories
           mkdir -p AppDir/usr/lib AppDir/usr/share/icons/hicolor/256x256/apps
