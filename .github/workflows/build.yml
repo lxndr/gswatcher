@@ -1,0 +1,340 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-linux:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+
+    runs-on: ${{ matrix.os }}
+
+    env:
+      OUTDIR: out
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v5
+
+    - name: Setup Ubuntu dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y meson ninja-build cmake gettext desktop-file-utils appstream-util valac imagemagick libgee-0.8-dev libgtk-4-dev libadwaita-1-dev liblua5.4-dev libgeoip-dev
+
+    - name: Setup meson project
+      run: meson setup builddir --buildtype=release --prefix=$GITHUB_WORKSPACE/${{ env.OUTDIR }}
+
+    - name: Compile
+      run: cd builddir && ninja
+
+    - name: Run tests
+      run: cd builddir && ninja test
+
+    - name: Install application
+      run: cd builddir && ninja install
+
+    - name: Extract version from meson.build
+      run: |
+        VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
+        echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+        echo "Build version: $VERSION"
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: gswatcher-v${{ env.APP_VERSION }}-${{ matrix.os }}-build-${{ github.run_number }}
+        path: ${{ env.OUTDIR }}
+
+  build-windows:
+    strategy:
+      matrix:
+        os: [windows-2022]
+
+    runs-on: ${{ matrix.os }}
+
+    env:
+      OUTDIR: out
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v5
+
+    - name: Setup Windows dependencies
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: UCRT64
+        update: true
+        pacboy: >-
+            gcc:p
+            gcc-libs:p
+            meson:p
+            ninja:p
+            pkg-config:p
+            gettext:p
+            appstream:p
+            vala:p
+            libgee:p
+            libadwaita:p
+            lua:p
+            geoip:p
+            imagemagick:p
+            inkscape:p
+
+    - name: Setup meson project
+      run: meson setup builddir --buildtype=release --prefix=$GITHUB_WORKSPACE/${{ env.OUTDIR }}
+
+    - name: Compile
+      run: cd builddir && ninja
+
+    - name: Run tests
+      run: cd builddir && ninja test
+
+    - name: Install application
+      run: cd builddir && ninja install
+
+    - name: Extract version from meson.build
+      run: |
+        VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
+        echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+        echo "Build version: $VERSION"
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: gswatcher-v${{ env.APP_VERSION }}-${{ matrix.os }}-build-${{ github.run_number }}
+        path: ${{env.OUTDIR}}
+
+  build-macos:
+    strategy:
+      matrix:
+        os: [macos-13, macos-14]
+
+    runs-on: ${{ matrix.os }}
+
+    env:
+      OUTDIR: out
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v5
+
+    - name: Setup macOS dependencies
+      run: brew install meson ninja cmake gettext desktop-file-utils vala gobject-introspection libgee gtk4 libadwaita lua geoip
+
+    - name: Setup meson project
+      run: meson setup builddir --buildtype=release --prefix=$GITHUB_WORKSPACE/${{ env.OUTDIR }}
+
+    - name: Compile
+      run: cd builddir && ninja
+
+    - name: Run tests
+      run: cd builddir && ninja test
+
+    - name: Install application
+      run: cd builddir && ninja install
+
+    - name: Extract version from meson.build
+      run: |
+        VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
+        echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+        echo "Build version: $VERSION"
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: gswatcher-v${{ env.APP_VERSION }}-${{ matrix.os }}-build-${{ github.run_number }}
+        path: ${{ env.OUTDIR }}
+
+  create-windows-portable:
+    strategy:
+      matrix:
+        os: [windows-2022]
+
+    runs-on: ${{ matrix.os }}
+
+    needs: build-windows
+    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') || github.event_name == 'pull_request' }}
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    env:
+      OUTDIR: out
+      ARCH: x86_64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup dependencies
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          pacboy: >-
+            vala:p
+            libgee:p
+            libadwaita:p
+            lua:p
+            geoip:p
+            zip:
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: gswatcher-v*-${{ matrix.os }}-build-*
+          path: temp_artifacts
+
+      - name: Extract build artifacts
+        run: |
+          ARTIFACT_DIR=$(find temp_artifacts -maxdepth 1 -type d -name "gswatcher-v*-${{ matrix.os }}-build-*" | head -n 1)
+          mkdir ${{ env.OUTDIR }}
+          cp -r "$ARTIFACT_DIR"/* ${{ env.OUTDIR }}/
+          rm -rf temp_artifacts
+
+      - name: Create distribution
+        run: |
+          ldd ${{ env.OUTDIR }}/bin/gswatcher.exe | grep -o '/.*\.dll' | while read -r dll; do
+            cp "$dll" ${{ env.OUTDIR }}/bin/
+          done
+          
+          cp /$(echo $MSYSTEM | tr '[:upper:]' '[:lower:]')/bin/gdbus.exe ${{ env.OUTDIR }}/bin/
+
+          mkdir -p "${{ env.OUTDIR }}/share/GeoIP"
+          wget -O /tmp/GeoIPCity.dat.gz https://sources.archlinux.org/other/packages/geoip-database/20250129/GeoIPCity.dat.gz
+          gzip -dc /tmp/GeoIPCity.dat.gz > ${{ env.OUTDIR }}/share/GeoIP/GeoIPCity.dat
+          
+          wget -O /tmp/flags_1.0.4.tar.xz http://packages.linuxmint.com/pool/main/f/flags/flags_1.0.4.tar.xz
+          tar -xf /tmp/flags_1.0.4.tar.xz -C /tmp && cp -r /tmp/flags/usr/share/iso-flag-png ${{ env.OUTDIR }}/share
+          
+          glib-compile-schemas.exe ${{ env.OUTDIR }}/share/glib-2.0/schemas
+
+      - name: Set release filename
+        run: |
+          # Extract version from meson.build
+          VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
+          echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+          
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "RELEASE_FILENAME=windows-${{ env.ARCH }}-portable-v${{ env.APP_VERSION }}-pr-${{ github.event.number }}" >> $GITHUB_ENV
+          elif [ "${{ github.event_name }}" = "push" ] && [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "RELEASE_FILENAME=windows-${{ env.ARCH }}-portable-v${{ env.APP_VERSION }}-${{ github.ref_name }}-build-${{ github.run_number }}" >> $GITHUB_ENV
+          else
+            # For other events, use a default
+            echo "RELEASE_FILENAME=windows-${{ env.ARCH }}-portable-v${{ env.APP_VERSION }}-build-${{ github.run_number }}" >> $GITHUB_ENV
+          fi
+
+      - name: Create archive
+        run: |
+          mv ${{ env.OUTDIR }} ${{ env.RELEASE_FILENAME }}
+          zip -r -9 -q ${{ env.RELEASE_FILENAME }}.zip ${{ env.RELEASE_FILENAME }}
+
+      - name: Upload PR artifact
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: gswatcher-v${{ env.APP_VERSION }}-windows-portable-pr-${{github.event.number}}-build-${{ github.run_number }}
+          path: ${{env.RELEASE_FILENAME}}.zip
+
+      - name: Upload release artifact
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v4
+        with:
+          name: gswatcher-v${{ env.APP_VERSION }}-windows-portable-${{github.ref_name}}-build-${{ github.run_number }}
+          path: ${{env.RELEASE_FILENAME}}.zip
+
+  create-appimage:
+    runs-on: ubuntu-24.04
+    needs: build-linux
+    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') || github.event_name == 'pull_request' }}
+
+    env:
+      OUTDIR: out
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: gswatcher-v*-ubuntu-24.04-build-*
+          path: temp_artifacts
+
+      - name: Extract build artifacts
+        run: |
+          ARTIFACT_DIR=$(find temp_artifacts -maxdepth 1 -type d -name "gswatcher-v*-ubuntu-24.04-build-*" | head -n 1)
+          mkdir ${{ env.OUTDIR }}
+          cp -r "$ARTIFACT_DIR"/* ${{ env.OUTDIR }}/
+          rm -rf temp_artifacts
+
+      - name: Install AppImageTool
+        run: |
+          wget -c https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x appimagetool-x86_64.AppImage
+          
+      - name: Extract version from meson.build
+        run: |
+          VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
+          echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Build version: $VERSION"
+
+      - name: Create AppDir
+        run: |
+          # Create AppDir structure
+          mkdir -p AppDir/usr/bin
+          mkdir -p AppDir/usr/lib
+          mkdir -p AppDir/usr/share/applications
+          mkdir -p AppDir/usr/share/icons/hicolor/512x512/apps
+          
+          # Copy the built application to AppDir
+          cp -r ${{ env.OUTDIR }}/* AppDir/usr/
+          
+          # Create the desktop file from the template
+          sed "s/@app_name@/Game Server Watcher/g; s/@app_summary@/Monitor and admin game servers/g; s/@app_exec@/gswatcher/g; s/@app_id@/io.github.lxndr.gswatcher/g" data/gswatcher.desktop.in.in > AppDir/gswatcher.desktop
+          cp AppDir/gswatcher.desktop AppDir/usr/share/applications/io.github.lxndr.gswatcher.desktop
+          
+          # Copy icon
+          cp data/icons/gswatcher.png AppDir/usr/share/icons/hicolor/512x512/apps/io.github.lxndr.gswatcher.png
+          
+          # Create AppRun script
+          echo '#!/bin/bash' > AppDir/AppRun
+          echo 'HERE="$(dirname "$(readlink -f "${0}")")"' >> AppDir/AppRun
+          echo 'export LD_LIBRARY_PATH="${HERE}/usr/lib:${HERE}/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"' >> AppDir/AppRun
+          echo 'export PATH="${HERE}/usr/bin:$PATH"' >> AppDir/AppRun
+          echo 'export GSETTINGS_SCHEMA_DIR="${HERE}/usr/share/glib-2.0/schemas"' >> AppDir/AppRun
+          echo 'exec "${HERE}/usr/bin/gswatcher" "$@"' >> AppDir/AppRun
+          chmod +x AppDir/AppRun
+
+      - name: Create AppImage using appimagetool
+        run: ARCH=x86_64 ./appimagetool-x86_64.AppImage -n AppDir gswatcher-${{ env.APP_VERSION }}-x86_64.AppImage
+        
+      - name: Set release filename
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "RELEASE_FILENAME=gswatcher-${{ env.APP_VERSION }}-x86_64-pr-${{ github.event.number }}" >> $GITHUB_ENV
+          elif [ "${{ github.event_name }}" = "push" ] && [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "RELEASE_FILENAME=gswatcher-${{ env.APP_VERSION }}-${{ github.ref_name }}-x86_64" >> $GITHUB_ENV
+          else
+            # For other events, use a default
+            echo "RELEASE_FILENAME=gswatcher-${{ env.APP_VERSION }}-x86_64-build-${{ github.run_number }}" >> $GITHUB_ENV
+          fi
+          
+          # Rename the AppImage with the proper name
+          mv gswatcher-${{ env.APP_VERSION }}-x86_64.AppImage ${{ env.RELEASE_FILENAME }}.AppImage
+
+      - name: Upload AppImage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gswatcher-${{ env.APP_VERSION }}-x86_64.AppImage
+          path: ${{env.RELEASE_FILENAME}}.AppImage
