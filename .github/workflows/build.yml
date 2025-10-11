@@ -21,15 +21,15 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v5
 
-    - name: Extract version
-      run: |
-        VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
-        echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
-
     - name: Setup dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y meson ninja-build cmake gettext desktop-file-utils appstream-util valac imagemagick libgee-0.8-dev libgtk-4-dev libadwaita-1-dev liblua5.4-dev libgeoip-dev
+
+    - name: Extract version
+      run: |
+        VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
+        echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
 
     - name: Setup meson project
       run: meson setup builddir --buildtype=release --prefix=$GITHUB_WORKSPACE/${{ env.OUTDIR }}
@@ -67,11 +67,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v5
 
-    - name: Extract version
-      run: |
-        VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
-        echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
-
     - name: Setup dependencies
       uses: msys2/setup-msys2@v2
       with:
@@ -92,6 +87,11 @@ jobs:
             geoip:p
             imagemagick:p
             inkscape:p
+
+    - name: Extract version
+      run: |
+        VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
+        echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
 
     - name: Setup meson project
       run: meson setup builddir --buildtype=release --prefix=$GITHUB_WORKSPACE/${{ env.OUTDIR }}
@@ -133,11 +133,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Extract version
-        run: |
-          VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
-          echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
-
       - name: Setup dependencies
         uses: msys2/setup-msys2@v2
         with:
@@ -150,6 +145,11 @@ jobs:
             lua:p
             geoip:p
             zip:
+
+      - name: Extract version
+        run: |
+          VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
+          echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
