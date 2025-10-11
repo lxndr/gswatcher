@@ -105,11 +105,14 @@ jobs:
     - name: Install application
       run: cd builddir && DESTDIR=$GITHUB_WORKSPACE/${{ env.OUTDIR }} ninja install
 
+    - name: CHECK
+      run: ls -al ${{ env.OUTDIR }}
+
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: gswatcher-v${{ env.APP_VERSION }}-${{ matrix.os }}-build${{ github.run_number }}
-        path: ${{env.OUTDIR}}
+        path: ${{ env.OUTDIR }}
 
   create-windows-portable:
     strategy:
