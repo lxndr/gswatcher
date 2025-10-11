@@ -42,7 +42,6 @@ jobs:
       run: |
         VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
         echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
-        echo "Build version: $VERSION"
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -105,7 +104,6 @@ jobs:
       run: |
         VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
         echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
-        echo "Build version: $VERSION"
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -170,48 +168,20 @@ jobs:
               cp "$dll" ${{ env.OUTDIR }}/bin/
             fi
           done
-          
+
           cp ${SYS}/bin/gdbus.exe ${{ env.OUTDIR }}/bin/
 
           mkdir -p "${{ env.OUTDIR }}/share/GeoIP"
           wget -O /tmp/GeoIPCity.dat.gz https://sources.archlinux.org/other/packages/geoip-database/20250129/GeoIPCity.dat.gz
           gzip -dc /tmp/GeoIPCity.dat.gz > ${{ env.OUTDIR }}/share/GeoIP/GeoIPCity.dat
-          
+
           wget -O /tmp/flags_1.0.4.tar.xz http://packages.linuxmint.com/pool/main/f/flags/flags_1.0.4.tar.xz
           tar -xf /tmp/flags_1.0.4.tar.xz -C /tmp && cp -r /tmp/flags/usr/share/iso-flag-png ${{ env.OUTDIR }}/share
-          
+
           glib-compile-schemas.exe ${{ env.OUTDIR }}/share/glib-2.0/schemas
 
-      - name: Set release filename
-        run: |
-          # Extract version from meson.build
-          VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
-          echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
-          
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo "RELEASE_FILENAME=windows-${{ env.ARCH }}-portable-v${{ env.APP_VERSION }}-pr-${{ github.event.number }}" >> $GITHUB_ENV
-          elif [ "${{ github.event_name }}" = "push" ] && [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            echo "RELEASE_FILENAME=windows-${{ env.ARCH }}-portable-v${{ env.APP_VERSION }}-${{ github.ref_name }}-build-${{ github.run_number }}" >> $GITHUB_ENV
-          else
-            # For other events, use a default
-            echo "RELEASE_FILENAME=windows-${{ env.ARCH }}-portable-v${{ env.APP_VERSION }}-build-${{ github.run_number }}" >> $GITHUB_ENV
-          fi
-
-      - name: Create archive
-        run: |
-          mv ${{ env.OUTDIR }} ${{ env.RELEASE_FILENAME }}
-          zip -r -9 -q ${{ env.RELEASE_FILENAME }}.zip ${{ env.RELEASE_FILENAME }}
-
-      - name: Upload PR artifact
-        if: github.event_name == 'pull_request'
+      - name: Upload portable artifact
         uses: actions/upload-artifact@v4
         with:
-          name: gswatcher-v${{ env.APP_VERSION }}-windows-portable-pr-${{github.event.number}}-build-${{ github.run_number }}
-          path: ${{env.RELEASE_FILENAME}}.zip
-
-      - name: Upload release artifact
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-        uses: actions/upload-artifact@v4
-        with:
-          name: gswatcher-v${{ env.APP_VERSION }}-windows-portable-${{github.ref_name}}-build-${{ github.run_number }}
-          path: ${{env.RELEASE_FILENAME}}.zip
+          name: gswatcher-v${{ env.APP_VERSION }}-windows-portable-${{ matrix.os }-${{ github.run_number }}
+          path: ${{ env.OUTDIR }}
