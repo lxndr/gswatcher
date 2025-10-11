@@ -46,7 +46,7 @@ jobs:
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: gswatcher-v${{ env.APP_VERSION }}-${{ matrix.os }}-build-${{ github.run_number }}
+        name: gswatcher-v${{ env.APP_VERSION }}-${{ matrix.os }}-build${{ github.run_number }}
         path: ${{ env.OUTDIR }}
 
   build-windows:
@@ -108,7 +108,7 @@ jobs:
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: gswatcher-v${{ env.APP_VERSION }}-${{ matrix.os }}-build-${{ github.run_number }}
+        name: gswatcher-v${{ env.APP_VERSION }}-${{ matrix.os }}-build${{ github.run_number }}
         path: ${{env.OUTDIR}}
 
   create-windows-portable:
@@ -154,12 +154,12 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: gswatcher-v*-${{ matrix.os }}-build-*
+          pattern: gswatcher-v*-${{ matrix.os }}-build*
           path: temp_artifacts
 
       - name: Extract build artifacts
         run: |
-          ARTIFACT_DIR=$(find temp_artifacts -maxdepth 1 -type d -name "gswatcher-v*-${{ matrix.os }}-build-*" | head -n 1)
+          ARTIFACT_DIR=$(find temp_artifacts -maxdepth 1 -type d -name "gswatcher-v*-${{ matrix.os }}-build*" | head -n 1)
           mkdir ${{ env.OUTDIR }}
           cp -r "$ARTIFACT_DIR"/* ${{ env.OUTDIR }}/
           rm -rf temp_artifacts
@@ -188,5 +188,5 @@ jobs:
       - name: Upload portable artifact
         uses: actions/upload-artifact@v4
         with:
-          name: gswatcher-v${{ env.APP_VERSION }}-windows-portable-${{ matrix.os }}-${{ github.run_number }}
+          name: gswatcher-v${{ env.APP_VERSION }}-${{ matrix.os }}-portable-build${{ github.run_number }}
           path: ${{ env.OUTDIR }}
