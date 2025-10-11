@@ -21,7 +21,12 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v5
 
-    - name: Setup Ubuntu dependencies
+    - name: Extract version
+      run: |
+        VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
+        echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+
+    - name: Setup dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y meson ninja-build cmake gettext desktop-file-utils appstream-util valac imagemagick libgee-0.8-dev libgtk-4-dev libadwaita-1-dev liblua5.4-dev libgeoip-dev
@@ -37,11 +42,6 @@ jobs:
 
     - name: Install application
       run: cd builddir && ninja install
-
-    - name: Extract version from meson.build
-      run: |
-        VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
-        echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -67,7 +67,12 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v5
 
-    - name: Setup Windows dependencies
+    - name: Extract version
+      run: |
+        VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
+        echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+
+    - name: Setup dependencies
       uses: msys2/setup-msys2@v2
       with:
         msystem: UCRT64
@@ -100,11 +105,6 @@ jobs:
     - name: Install application
       run: cd builddir && ninja install
 
-    - name: Extract version from meson.build
-      run: |
-        VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
-        echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
-
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -132,6 +132,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Extract version
+        run: |
+          VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
+          echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Setup dependencies
         uses: msys2/setup-msys2@v2
