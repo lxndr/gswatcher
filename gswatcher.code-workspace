@@ -47,6 +47,7 @@
 			"dofile",
 			"dostring",
 			"elif",
+			"endforeach",
 			"enumc",
 			"ERRERR",
 			"ERRFILE",
