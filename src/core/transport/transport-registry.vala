@@ -24,7 +24,7 @@ public class TransportDesc {
 }
 
 [SingleInstance]
-class TransportRegistry : Object {
+public class TransportRegistry : Object {
   private Gee.Map<string, TransportDesc> transports = new Gee.HashMap<string, TransportDesc> ();
 
   public static TransportRegistry get_instance () {

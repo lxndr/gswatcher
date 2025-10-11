@@ -25,7 +25,7 @@ public class ProtocolDesc : ProtocolInfo {
 }
 
 [SingleInstance]
-class ProtocolRegistry : Object {
+public class ProtocolRegistry : Object {
   private Gee.Map<string, ProtocolDesc> protocols = new Gee.HashMap<string, ProtocolDesc> ();
 
   public static ProtocolRegistry get_instance () {

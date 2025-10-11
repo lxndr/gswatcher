@@ -18,7 +18,7 @@
 
 namespace Gsw {
 
-class ProtocolTestRunner {
+public class ProtocolTestRunner {
   private enum DataDirection {
     REQUEST,
     RESPONSE,
