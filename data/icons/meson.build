@@ -8,7 +8,8 @@ foreach size : icon_sizes
   install_dir = join_paths(get_option('datadir'), 'icons/hicolor', '@0@x@0@'.format(size), 'apps')
   install_filename = '@0@.png'.format(conf_data.get('app_exec'))
 
-  app_icon = custom_target(output_filename,
+  app_icon = custom_target(
+    output_filename,
     input: app_icon_source,
     output: output_filename,
     command: [
@@ -24,7 +25,7 @@ foreach size : icon_sizes
   )
 
   install_data(
-    app_icon.full_path(),
+    app_icon.outputs()[0],
     install_dir: install_dir,
     rename: install_filename,
   )
