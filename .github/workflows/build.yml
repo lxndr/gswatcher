@@ -113,47 +113,6 @@ jobs:
         name: gswatcher-v${{ env.APP_VERSION }}-${{ matrix.os }}-build-${{ github.run_number }}
         path: ${{env.OUTDIR}}
 
-  build-macos:
-    strategy:
-      matrix:
-        os: [macos-13, macos-14]
-
-    runs-on: ${{ matrix.os }}
-
-    env:
-      OUTDIR: out
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v5
-
-    - name: Setup macOS dependencies
-      run: brew install meson ninja cmake gettext desktop-file-utils vala gobject-introspection libgee gtk4 libadwaita lua geoip
-
-    - name: Setup meson project
-      run: meson setup builddir --buildtype=release --prefix=$GITHUB_WORKSPACE/${{ env.OUTDIR }}
-
-    - name: Compile
-      run: cd builddir && ninja
-
-    - name: Run tests
-      run: cd builddir && ninja test
-
-    - name: Install application
-      run: cd builddir && ninja install
-
-    - name: Extract version from meson.build
-      run: |
-        VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
-        echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
-        echo "Build version: $VERSION"
-
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: gswatcher-v${{ env.APP_VERSION }}-${{ matrix.os }}-build-${{ github.run_number }}
-        path: ${{ env.OUTDIR }}
-
   create-windows-portable:
     strategy:
       matrix:
@@ -291,23 +250,13 @@ jobs:
 
       - name: Create AppDir
         run: |
-          # Create AppDir structure
-          mkdir -p AppDir/usr/bin
-          mkdir -p AppDir/usr/lib
-          mkdir -p AppDir/usr/share/applications
-          mkdir -p AppDir/usr/share/icons/hicolor/512x512/apps
-          
-          # Copy the built application to AppDir
           cp -r ${{ env.OUTDIR }}/* AppDir/usr/
           
-          # Create the desktop file from the template
           sed "s/@app_name@/Game Server Watcher/g; s/@app_summary@/Monitor and admin game servers/g; s/@app_exec@/gswatcher/g; s/@app_id@/io.github.lxndr.gswatcher/g" data/gswatcher.desktop.in.in > AppDir/gswatcher.desktop
           cp AppDir/gswatcher.desktop AppDir/usr/share/applications/io.github.lxndr.gswatcher.desktop
           
-          # Copy icon
-          cp data/icons/gswatcher.png AppDir/usr/share/icons/hicolor/512x512/apps/io.github.lxndr.gswatcher.png
+          cp data/icons/gswatcher.png AppDir/usr/share/icons/hicolor/256x256/apps/io.github.lxndr.gswatcher.png
           
-          # Create AppRun script
           echo '#!/bin/bash' > AppDir/AppRun
           echo 'HERE="$(dirname "$(readlink -f "${0}")")"' >> AppDir/AppRun
           echo 'export LD_LIBRARY_PATH="${HERE}/usr/lib:${HERE}/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"' >> AppDir/AppRun
