@@ -47,7 +47,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: gswatcher-v${{ env.APP_VERSION }}-${{ matrix.os }}-build${{ github.run_number }}
-        path: ${{ env.OUTDIR }}
+        path: ${{ env.OUTDIR }}/usr
 
   build-windows:
     strategy:
@@ -94,7 +94,7 @@ jobs:
         echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
 
     - name: Setup meson project
-      run: meson setup builddir --buildtype=release --prefix=/usr
+      run: meson setup builddir --buildtype=release
 
     - name: Compile
       run: cd builddir && ninja
@@ -115,7 +115,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: gswatcher-v${{ env.APP_VERSION }}-${{ matrix.os }}-build${{ github.run_number }}
-        path: ${{ env.OUTDIR }}
+        path: ${{ env.OUTDIR }}/a/tmp/msys64/usr
 
   create-windows-portable:
     strategy:
