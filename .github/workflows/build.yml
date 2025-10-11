@@ -32,7 +32,7 @@ jobs:
         echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
 
     - name: Setup meson project
-      run: meson setup builddir --buildtype=release --prefix=$GITHUB_WORKSPACE/${{ env.OUTDIR }}
+      run: meson setup builddir --buildtype=release
 
     - name: Compile
       run: cd builddir && ninja
@@ -41,7 +41,7 @@ jobs:
       run: cd builddir && ninja test
 
     - name: Install application
-      run: cd builddir && ninja install
+      run: cd builddir && DESTDIR=$GITHUB_WORKSPACE/${{ env.OUTDIR }} ninja install
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -94,7 +94,7 @@ jobs:
         echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
 
     - name: Setup meson project
-      run: meson setup builddir --buildtype=release --prefix=$GITHUB_WORKSPACE/${{ env.OUTDIR }}
+      run: meson setup builddir --buildtype=release
 
     - name: Compile
       run: cd builddir && ninja
@@ -103,7 +103,7 @@ jobs:
       run: cd builddir && ninja test
 
     - name: Install application
-      run: cd builddir && ninja install
+      run: cd builddir && DESTDIR=$GITHUB_WORKSPACE/${{ env.OUTDIR }} ninja install
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
