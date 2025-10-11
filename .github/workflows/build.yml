@@ -106,7 +106,10 @@ jobs:
       run: cd builddir && DESTDIR=$GITHUB_WORKSPACE/${{ env.OUTDIR }} ninja install
 
     - name: CHECK
-      run: ls -al ${{ env.OUTDIR }}
+      run: |
+        pwd
+        ls -al $GITHUB_WORKSPACE/${{ env.OUTDIR }}
+        ls -al ${{ env.OUTDIR }}
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
