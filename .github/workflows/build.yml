@@ -183,5 +183,5 @@ jobs:
       - name: Upload portable artifact
         uses: actions/upload-artifact@v4
         with:
-          name: gswatcher-v${{ env.APP_VERSION }}-windows-portable-${{ matrix.os }-${{ github.run_number }}
+          name: gswatcher-v${{ env.APP_VERSION }}-windows-portable-${{ matrix.os }}-${{ github.run_number }}
           path: ${{ env.OUTDIR }}
