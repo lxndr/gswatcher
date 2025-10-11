@@ -94,7 +94,7 @@ jobs:
         echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
 
     - name: Setup meson project
-      run: meson setup builddir --buildtype=release
+      run: meson setup builddir --buildtype=release --prefix=/usr
 
     - name: Compile
       run: cd builddir && ninja
