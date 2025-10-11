@@ -1,12 +1,14 @@
 convert = find_program('convert', version: '>=6.0.0')
 
-app_icon_source = 'gswatcher.png'
-icon_sizes = [16, 24, 32, 48, 64, 128, 256, 512]
+app_exec = conf_data.get('app_exec')
+app_icon_name = f'@app_exec@.png'
+app_icon_source = files(app_icon_name)
+app_icon_sizes = [16, 24, 32, 48, 64, 128, 256, 512]
 
-foreach size : icon_sizes
-  output_filename = '@0@-@1@x@1@.png'.format(conf_data.get('app_exec'), size)
-  install_dir = join_paths(get_option('datadir'), 'icons/hicolor', '@0@x@0@'.format(size), 'apps')
-  install_filename = '@0@.png'.format(conf_data.get('app_exec'))
+foreach size : app_icon_sizes
+  size_str = f'@size@x@size@'
+  output_filename = f'@app_exec@-@size_str@.png'
+  install_dir = join_paths(get_option('datadir'), 'icons/hicolor', size_str, 'apps')
 
   app_icon = custom_target(
     output_filename,
@@ -15,19 +17,16 @@ foreach size : icon_sizes
     command: [
       convert,
       '@INPUT@',
-      '-resize', '@0@x@0@'.format(size),
+      '-resize', size_str,
       '-define', 'png:compression-level=9',
       '-define', 'png:compression-strategy=1',
       '-define', 'png:exclude-chunk=all',
       '@OUTPUT@',
     ],
     build_by_default: true,
-  )
-
-  install_data(
-    app_icon.outputs()[0],
+    install: true,
     install_dir: install_dir,
-    rename: install_filename,
+    install_tag: 'icons'
   )
 endforeach
 
