@@ -166,15 +166,20 @@ jobs:
 
       - name: Create distribution
         run: |
-          SYS="/$(echo $MSYSTEM | tr '[:upper:]' '[:lower:]')"
+          SYS="$(echo $MSYSTEM | tr '[:upper:]' '[:lower:]')"
 
           ldd ${{ env.OUTDIR }}/bin/gswatcher.exe | grep -o '/.*\.dll' | while read -r dll; do
-            if [[ "$dll" == ${SYS}/bin/* ]]; then
+            if [[ "$dll" == /${SYS}/bin/* ]]; then
               cp "$dll" ${{ env.OUTDIR }}/bin/
             fi
           done
 
-          cp ${SYS}/bin/gdbus.exe ${{ env.OUTDIR }}/bin/
+          cp /${SYS}/bin/gdbus.exe ${{ env.OUTDIR }}/bin
+          mkdir -p out/etc && cp -r /${SYS}/etc/fonts ${{ env.OUTDIR }}/etc
+          cp -r /${SYS}/share/fontconfig ${{ env.OUTDIR }}/share
+          cp -r /${SYS}/share/glib-2.0/schemas ${{ env.OUTDIR }}/share/glib-2.0
+          cp -r /${SYS}/share/icons ${{ env.OUTDIR }}/share && rm -r ${{ env.OUTDIR }}/share/icons/Adwaita/cursors
+          cp -r /${SYS}/share/locale ${{ env.OUTDIR }}/share
 
           mkdir -p "${{ env.OUTDIR }}/share/GeoIP"
           wget -O /tmp/GeoIPCity.dat.gz https://sources.archlinux.org/other/packages/geoip-database/20250129/GeoIPCity.dat.gz
