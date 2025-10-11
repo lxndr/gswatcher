@@ -250,6 +250,7 @@ jobs:
 
       - name: Create AppDir
         run: |
+          mkdir -p AppDir/usr/
           cp -r ${{ env.OUTDIR }}/* AppDir/usr/
           
           sed "s/@app_name@/Game Server Watcher/g; s/@app_summary@/Monitor and admin game servers/g; s/@app_exec@/gswatcher/g; s/@app_id@/io.github.lxndr.gswatcher/g" data/gswatcher.desktop.in.in > AppDir/gswatcher.desktop
