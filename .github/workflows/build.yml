@@ -1,0 +1,198 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-linux:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+
+    runs-on: ${{ matrix.os }}
+
+    env:
+      OUTDIR: out
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v5
+
+    - name: Setup dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y meson ninja-build cmake gettext desktop-file-utils appstream-util valac imagemagick libgee-0.8-dev libgtk-4-dev libadwaita-1-dev liblua5.4-dev libgeoip-dev
+
+    - name: Extract version
+      run: |
+        VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
+        echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+
+    - name: Setup meson project
+      run: meson setup builddir --buildtype=release --prefix=/usr
+
+    - name: Compile
+      run: cd builddir && ninja
+
+    - name: Run tests
+      run: cd builddir && ninja test
+
+    - name: Install application
+      run: cd builddir && DESTDIR=$GITHUB_WORKSPACE/${{ env.OUTDIR }} ninja install
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: gswatcher-v${{ env.APP_VERSION }}-${{ matrix.os }}-build${{ github.run_number }}
+        path: ${{ env.OUTDIR }}/usr
+
+  build-windows:
+    strategy:
+      matrix:
+        include:
+          - { image: windows-2022, arch: x86_64, sys: ucrt64 }
+
+    runs-on: ${{ matrix.image }}
+
+    env:
+      OUTDIR: out
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v5
+
+    - name: Setup dependencies
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: ${{ matrix.sys }}
+        update: true
+        pacboy: >-
+            gcc:p
+            gcc-libs:p
+            meson:p
+            ninja:p
+            pkg-config:p
+            gettext:p
+            appstream:p
+            vala:p
+            libgee:p
+            libadwaita:p
+            lua:p
+            geoip:p
+            imagemagick:p
+            inkscape:p
+
+    - name: Extract version
+      run: |
+        VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
+        echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+
+    - name: Setup meson project
+      run: meson setup builddir --buildtype=release
+
+    - name: Compile
+      run: cd builddir && ninja
+
+    - name: Run tests
+      run: cd builddir && ninja test
+
+    - name: Install application
+      run: cd builddir && DESTDIR=$GITHUB_WORKSPACE/${{ env.OUTDIR }} ninja install
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: gswatcher-v${{ env.APP_VERSION }}-${{ matrix.image }}-build${{ github.run_number }}
+        path: ${{ env.OUTDIR }}/a/_temp/msys64/${{ matrix.sys }} # FIXME: why so complicated?
+
+  create-windows-portable:
+    strategy:
+      matrix:
+        include:
+          - { image: windows-2022, arch: x86_64, sys: ucrt64 }
+
+    runs-on: ${{ matrix.image }}
+
+    needs: build-windows
+    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') || github.event_name == 'pull_request' }}
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    env:
+      OUTDIR: out
+      ARCH: ${{ matrix.arch }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup dependencies
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.sys }}
+          update: true
+          pacboy: >-
+            vala:p
+            libgee:p
+            libadwaita:p
+            lua:p
+            geoip:p
+            zip:
+
+      - name: Extract version
+        run: |
+          VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
+          echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: gswatcher-v*-${{ matrix.image }}-build*
+          path: temp_artifacts
+
+      - name: Extract build artifacts
+        run: |
+          ARTIFACT_DIR=$(find temp_artifacts -maxdepth 1 -type d -name "gswatcher-v*-${{ matrix.image }}-build*" | head -n 1)
+          mkdir ${{ env.OUTDIR }}
+          cp -r "$ARTIFACT_DIR"/* ${{ env.OUTDIR }}/
+          rm -rf temp_artifacts
+
+      - name: Create distribution
+        run: |
+          ldd ${{ env.OUTDIR }}/bin/gswatcher.exe | grep -o '/.*\.dll' | while read -r dll; do
+            if [[ "$dll" == /${{ matrix.sys }}/bin/* ]]; then
+              cp "$dll" ${{ env.OUTDIR }}/bin/
+            fi
+          done
+
+          mkdir -p ${{ env.OUTDIR }}/etc
+          cp /${{ matrix.sys }}/bin/gdbus.exe ${{ env.OUTDIR }}/bin
+          cp -r /${{ matrix.sys }}/etc/fonts ${{ env.OUTDIR }}/etc
+          cp -r /${{ matrix.sys }}/share/fontconfig ${{ env.OUTDIR }}/share
+          cp -r /${{ matrix.sys }}/share/glib-2.0/schemas ${{ env.OUTDIR }}/share/glib-2.0
+          cp -r /${{ matrix.sys }}/share/icons ${{ env.OUTDIR }}/share && rm -r ${{ env.OUTDIR }}/share/icons/Adwaita/cursors
+          cp -r /${{ matrix.sys }}/share/locale ${{ env.OUTDIR }}/share
+
+          mkdir -p "${{ env.OUTDIR }}/share/GeoIP"
+          wget -O /tmp/GeoIPCity.dat.gz https://sources.archlinux.org/other/packages/geoip-database/20250129/GeoIPCity.dat.gz
+          gzip -dc /tmp/GeoIPCity.dat.gz > ${{ env.OUTDIR }}/share/GeoIP/GeoIPCity.dat
+
+          wget -O /tmp/flags_1.0.4.tar.xz http://packages.linuxmint.com/pool/main/f/flags/flags_1.0.4.tar.xz
+          tar -xf /tmp/flags_1.0.4.tar.xz -C /tmp && cp -r /tmp/flags/usr/share/iso-flag-png ${{ env.OUTDIR }}/share
+
+          glib-compile-schemas.exe ${{ env.OUTDIR }}/share/glib-2.0/schemas
+
+      - name: Upload portable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gswatcher-v${{ env.APP_VERSION }}-${{ matrix.image }}-portable-build${{ github.run_number }}
+          path: ${{ env.OUTDIR }}
