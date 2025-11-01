@@ -53,6 +53,17 @@
   <translation type="gettext">@app_id@</translation>
 
   <releases>
+    <release version="1.7.3" date="2025-11-01">
+      <description>
+        <p>Maintenance release.</p>
+        <ul>
+          <li>Improved source protocol handling, split packets in particular.</li>
+          <li>Updated app icon.</li>
+          <li>Updated flatpak GNOME runtime to version 49.</li>
+        </ul>
+      </description>
+      <url>https://github.com/lxndr/gswatcher/releases/tag/v1.7.3</url>
+    </release>
     <release version="1.7.2" date="2025-02-07">
       <description>
         <p>Maintenance release.</p>
