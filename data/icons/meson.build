@@ -1,7 +1,9 @@
 convert = find_program('convert', version: '>=6.0.0')
 
+app_exec = conf_data.get('app_exec')
 app_id = conf_data.get('app_id')
-app_icon_name = f'@app_id@.png'
+
+app_icon_name = f'@app_exec@.png'
 app_icon_source = files(app_icon_name)
 # app_icon_sizes = [16, 24, 32, 48, 64, 128, 256, 512]
 app_icon_sizes = [512]
