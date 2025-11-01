@@ -38,7 +38,7 @@ if host_machine.system() == 'windows'
   # Generate ICO file from PNG for Windows
   ico_output = f'@app_exec@.ico'
 
-  custom_target(
+  windows_ico = custom_target(
     ico_output,
     input: app_icon_source,
     output: ico_output,
@@ -51,8 +51,8 @@ if host_machine.system() == 'windows'
     install: false,  # ICO file is only used for Windows resource compilation
     build_by_default: true,
   )
+
+  windows_rc_inc = include_directories('.')
 endif
 
 subdir('games')
-
-windows_rc_inc = include_directories('.')
