@@ -202,3 +202,22 @@ jobs:
         with:
           name: gswatcher-v${{ env.APP_VERSION }}-${{ matrix.image }}-portable-build${{ github.run_number }}
           path: ${{ env.OUTDIR }}
+
+  release:
+    runs-on: ubuntu-24.04
+    needs: [create-windows-portable]
+    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
+    
+    steps:
+      - name: Download Windows portable artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: gswatcher-v*-windows-*-portable-*
+          path: ./artifacts
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          generate_release_notes: false
+          files: ./artifacts/**
