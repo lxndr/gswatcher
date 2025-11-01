@@ -18,7 +18,7 @@ foreach size : app_icon_sizes
   custom_target(
     output_filename,
     input: app_icon_source,
-    output: app_icon_name,
+    output: output_filename,
     command: [
       convert,
       '@INPUT@',
