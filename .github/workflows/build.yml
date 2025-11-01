@@ -2,15 +2,21 @@ name: Build
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+    tags:
+      - v*.*.*
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   build-linux:
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-24.04]
+        os:
+          - ubuntu-22.04
+          - ubuntu-24.04
 
     runs-on: ${{ matrix.os }}
 
