@@ -34,6 +34,25 @@ endforeach
 # Rename installed icons to have the correct name for icon theme compliance
 meson.add_install_script('rename-icons.sh', get_option('prefix'), get_option('datadir'), app_id)
 
+if host_machine.system() == 'windows'
+  # Generate ICO file from PNG for Windows
+  ico_output = f'@app_exec@.ico'
+
+  custom_target(
+    ico_output,
+    input: app_icon_source,
+    output: ico_output,
+    command: [
+      convert,
+      '@INPUT@',
+      '-define', 'icon:auto-resize',
+      '@OUTPUT@',
+    ],
+    install: false,  # ICO file is only used for Windows resource compilation
+    build_by_default: true,
+  )
+endif
+
 subdir('games')
 
 windows_rc_inc = include_directories('.')

@@ -1,7 +1,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-GSW_ICON ICON "gswatcher.ico"
+GSW_ICON ICON "@app_exec@.ico"
 
 VS_VERSION_INFO VERSIONINFO
   FILEVERSION @app_major_version@,@app_minor_version@,@app_patch_version@,0
