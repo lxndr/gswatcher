@@ -139,7 +139,11 @@ if host_machine.system() == 'windows'
     configuration: conf_data,
   )
 
-  windows_resources = windows.compile_resources(windows_rc, include_directories: windows_rc_inc)
+  windows_resources = windows.compile_resources(
+    windows_rc,
+    depends: windows_ico,
+    include_directories: windows_rc_inc,
+  )
 
   sources += windows_resources
 endif

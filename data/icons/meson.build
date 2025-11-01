@@ -1,6 +1,8 @@
 convert = find_program('convert', version: '>=6.0.0')
 
 app_exec = conf_data.get('app_exec')
+app_id = conf_data.get('app_id')
+
 app_icon_name = f'@app_exec@.png'
 app_icon_source = files(app_icon_name)
 # app_icon_sizes = [16, 24, 32, 48, 64, 128, 256, 512]
@@ -30,6 +32,27 @@ foreach size : app_icon_sizes
     install_dir: install_dir,
   )
 endforeach
+
+if host_machine.system() == 'windows'
+  # Generate ICO file from PNG for Windows
+  ico_output = f'@app_exec@.ico'
+
+  windows_ico = custom_target(
+    ico_output,
+    input: app_icon_source,
+    output: ico_output,
+    command: [
+      convert,
+      '@INPUT@',
+      '-define', 'icon:auto-resize',
+      '@OUTPUT@',
+    ],
+    install: false,  # ICO file is only used for Windows resource compilation
+    build_by_default: true,
+  )
+
+  windows_rc_inc = include_directories('.')
+endif
 
 subdir('games')
 
