@@ -6,8 +6,6 @@ on:
       - Build
     types:
       - completed
-    branches:
-      - main
 
 jobs:
   release:
