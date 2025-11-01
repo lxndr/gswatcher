@@ -2,7 +2,7 @@
 Name=@app_name@
 Comment=@app_summary@
 Exec=@app_exec@
-Icon=@app_id@
+Icon=@app_exec@
 Terminal=false
 Type=Application
 Categories=Network;
