@@ -26,8 +26,8 @@
   <url type="bugtracker">@app_bugtracker@</url>
 
   <branding>
-    <color type="primary" scheme_preference="light">#99c1f1</color>
-    <color type="primary" scheme_preference="dark">#1a5fb4</color>
+    <color type="primary" scheme_preference="light">#6a5d83</color>
+    <color type="primary" scheme_preference="dark">#1a365d</color>
   </branding>
 
   <supports>
