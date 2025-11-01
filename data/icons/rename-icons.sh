@@ -5,12 +5,12 @@ prefix="$1"
 datadir="$2"
 app_id="$3"
 
+DESTDIR="${DESTDIR:-}"
+
 for size in 16 24 32 48 64 128 256 512; do
-  size_dir="${prefix}/${datadir}/icons/hicolor/${size}x${size}/apps"
+  size_dir="${DESTDIR}${prefix}/${datadir}/icons/hicolor/${size}x${size}/apps"
   old_file="${size_dir}/${app_id}_${size}.png"
   new_file="${size_dir}/${app_id}.png"
-
-  echo "size_dir" "${size_dir}" "${old_file}" "${new_file}"
   
   if [ -f "$old_file" ]; then
     mv "$old_file" "$new_file"
