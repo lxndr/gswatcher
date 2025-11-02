@@ -1,5 +1,5 @@
 #
-# Alexander Burobin <alexandrburobin@gmail.com>, 2023-2025.
+# Alexander Burobin <alexandrburobin@gmail.com>, 2010-2026.
 #
 msgid ""
 msgstr ""
