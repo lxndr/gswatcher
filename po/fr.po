@@ -1,5 +1,5 @@
 #
-# German translation for gswatcher
+# French translation for gswatcher
 # Copyright (C) 2025 THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the gswatcher package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
@@ -9,62 +9,62 @@ msgstr ""
 "Project-Id-Version: gswatcher\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-11-08 16:50+0300\n"
-"PO-Revision-Date: 2025-11-02 11:54+0300\n"
+"PO-Revision-Date: 2025-11-08 19:36+0300\n"
 "Last-Translator: Automatically generated\n"
-"Language-Team: German\n"
-"Language: de\n"
+"Language-Team: French\n"
+"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 #: src/core/geo-location-resolver/maxmind-location-resolver.vala:40
 msgid "failed to find GeoIP database"
-msgstr "GeoIP-Datenbank nicht gefunden"
+msgstr "impossible de trouver la base de données GeoIP"
 
 #: src/core/geo-location-resolver/maxmind-location-resolver.vala:48
 msgid "failed to load GeoIP database"
-msgstr "GeoIP-Datenbank konnte nicht geladen werden"
+msgstr "impossible de charger la base de données GeoIP"
 
 #: src/core/protocol/lua-utils.vala:107
 #, c-format
 msgid ""
 "failed to retrieve value from Lua table under key '%s': unsupported type '%s'"
 msgstr ""
-"Fehler beim Abrufen des Werts aus Lua-Tabelle mit Schlüssel '%s': nicht "
-"unterstützter Typ '%s'"
+"impossible de récupérer la valeur de la table Lua sous la clé '%s' : type "
+"'%s' non supporté"
 
 #: src/core/client.vala:268
 msgid "Connected"
-msgstr "Verbunden"
+msgstr "Connecté"
 
 #: src/core/client.vala:272
 msgid "Disconnected"
-msgstr "Getrennt"
+msgstr "Déconnecté"
 
 #: src/core/client.vala:277
 msgid "Authenticated"
-msgstr "Authentifiziert"
+msgstr "Authentifié"
 
 #: src/ui/about.vala:73
 msgid "IP to location data provided by MaxMind"
-msgstr "IP-Standortdaten bereitgestellt von MaxMind"
+msgstr "Données de localisation IP fournies par MaxMind"
 
 #: src/ui/about.vala:87 src/ui/about.vala:100
 msgid "IP to location"
-msgstr "IP zu Standort"
+msgstr "Localisation IP"
 
 #: src/ui/about.vala:113
 msgid "Acknowledgements"
-msgstr "Danksagungen"
+msgstr "Remerciements"
 
 #: src/ui/buddy-list.ui:65
 msgctxt "buddy-list"
 msgid "Name"
-msgstr "Name"
+msgstr "Nom"
 
 #: src/ui/buddy-list.ui:101
 msgid "Notify"
-msgstr "Benachrichtigen"
+msgstr "Notifier"
 
 #: src/ui/buddy-list.ui:131 src/ui/main-window.ui:45
 msgid "Address"
@@ -72,15 +72,15 @@ msgstr "Adresse"
 
 #: src/ui/buddy-list.ui:160
 msgid "Last seen"
-msgstr "Zuletzt gesehen"
+msgstr "Vu pour la dernière fois"
 
 #: src/ui/console-option-list.ui:39
 msgid "Port:"
-msgstr "Port:"
+msgstr "Port :"
 
 #: src/ui/console-option-list.ui:73
 msgid "Password:"
-msgstr "Passwort:"
+msgstr "Mot de passe :"
 
 #: src/ui/main-window.ui:27
 msgid "_Pause"
@@ -88,187 +88,185 @@ msgstr "_Pause"
 
 #: src/ui/main-window.ui:31
 msgid "_About"
-msgstr "_Info"
+msgstr "_À propos"
 
 #: src/ui/main-window.ui:68 src/ui/main-window.ui:114
 msgid "Add"
-msgstr "Hinzufügen"
+msgstr "Ajouter"
 
 #: src/ui/main-window.ui:92
 msgid "Buddy name"
-msgstr "Name des Freundes"
+msgstr "Nom du contact"
 
 #: src/ui/main-window.ui:149
 msgid "_Add server"
-msgstr "_Server hinzufügen"
+msgstr "_Ajouter un serveur"
 
 #: src/ui/main-window.ui:160
 msgid "_Add buddy"
-msgstr "_Freund hinzufügen"
+msgstr "_Ajouter un contact"
 
 #: src/ui/main-window.ui:177
 msgid "Primary menu"
-msgstr "Hauptmenü"
+msgstr "Menu principal"
 
 #: src/ui/main-window.ui:193
 msgid "_Server list"
-msgstr "_Serverliste"
+msgstr "_Liste des serveurs"
 
 #: src/ui/main-window.ui:241
 msgid "_Info"
-msgstr "_Info"
+msgstr "_Informations"
 
 #: src/ui/main-window.ui:256
 msgid "_Details"
-msgstr "_Details"
+msgstr "_Détails"
 
 #: src/ui/main-window.ui:278
 msgid "_Console"
-msgstr "_Konsole"
+msgstr "_Console"
 
 #: src/ui/main-window.ui:292
 msgid "_Buddy list"
-msgstr "_Freundesliste"
+msgstr "_Liste des contacts"
 
 #: src/ui/main-window.ui:311
 msgid "_Preferences"
-msgstr "_Einstellungen"
+msgstr "_Préférences"
 
 #: src/ui/main-window.vala:80
 #, c-format
 msgid "\"%s\" is already on your server list."
-msgstr "\"%s\" ist bereits in Ihrer Serverliste."
+msgstr "\"%s\" est déjà dans votre liste de serveurs."
 
 #: src/ui/main-window.vala:90
 msgid "Remove server?"
-msgstr "Server entfernen?"
+msgstr "Supprimer le serveur ?"
 
 #: src/ui/main-window.vala:91
 #, c-format
 msgid "Are you sure you want to remove \"%s\" from the server list?"
-msgstr ""
-"Sind Sie sicher, dass Sie \"%s\" aus der Serverliste entfernen möchten?"
+msgstr "Êtes-vous sûr de vouloir supprimer \"%s\" de la liste des serveurs ?"
 
 #: src/ui/main-window.vala:111
 #, c-format
 msgid "\"%s\" is already on your buddy list."
-msgstr "\"%s\" ist bereits in Ihrer Freundesliste."
+msgstr "\"%s\" est déjà dans votre liste de contacts."
 
 #: src/ui/main-window.vala:121
 msgid "Remove buddy?"
-msgstr "Freund entfernen?"
+msgstr "Supprimer le contact ?"
 
 #: src/ui/main-window.vala:122
 #, c-format
 msgid "Are you sure you want to remove \"%s\" from the buddy list?"
-msgstr ""
-"Sind Sie sicher, dass Sie \"%s\" aus der Freundesliste entfernen möchten?"
+msgstr "Êtes-vous sûr de vouloir supprimer \"%s\" de la liste des contacts ?"
 
 #: src/ui/preferences.ui:33
 msgid "General"
-msgstr "Allgemein"
+msgstr "Général"
 
 #: src/ui/preferences.ui:37
 msgid "Query _interval"
-msgstr "Abfrage_intervall"
+msgstr "_Intervalle de requête"
 
 #: src/ui/preferences.ui:58
 msgid "Local _UDP port"
-msgstr "Lokaler _UDP-Port"
+msgstr "Port _UDP local"
 
 #: src/ui/preferences.ui:79
 msgid "Notifications"
-msgstr "Benachrichtigungen"
+msgstr "Notifications"
 
 #: src/ui/preferences.ui:82
 msgid "Enable _notifications"
-msgstr "_Benachrichtigungen aktivieren"
+msgstr "Activer les _notifications"
 
 #: src/ui/server-console.ui:79
 msgid "Options"
-msgstr "Optionen"
+msgstr "Options"
 
 #: src/ui/server-details.ui:67
 msgid "Key"
-msgstr "Schlüssel"
+msgstr "Clé"
 
 #: src/ui/server-details.ui:97
 msgid "Value"
-msgstr "Wert"
+msgstr "Valeur"
 
 #: src/ui/server-info.ui:39
 msgctxt "server-info"
 msgid "Name:"
-msgstr "Name:"
+msgstr "Nom :"
 
 #: src/ui/server-info.ui:73
 msgid "Address:"
-msgstr "Adresse:"
+msgstr "Adresse :"
 
 #: src/ui/server-info.ui:106
 msgid "Location:"
-msgstr "Standort:"
+msgstr "Emplacement :"
 
 #: src/ui/server-info.ui:139
 msgid "Game:"
-msgstr "Spiel:"
+msgstr "Jeu :"
 
 #: src/ui/server-info.ui:172
 msgid "Mode:"
-msgstr "Modus:"
+msgstr "Mode :"
 
 #: src/ui/server-info.ui:205
 msgid "Map:"
-msgstr "Karte:"
+msgstr "Carte :"
 
 #: src/ui/server-info.ui:238
 msgid "Players:"
-msgstr "Spieler:"
+msgstr "Joueurs :"
 
 #: src/ui/server-info.ui:280
 msgid "Private:"
-msgstr "Privat:"
+msgstr "Privé :"
 
 #: src/ui/server-info.ui:313
 msgid "Secure:"
-msgstr "Sicher:"
+msgstr "Sécurisé :"
 
 #: src/ui/server-info.ui:346
 msgid "Version:"
-msgstr "Version:"
+msgstr "Version :"
 
 #: src/ui/server-info.vala:40
 msgid "n/a"
-msgstr "n.v."
+msgstr "n/d"
 
 #: src/ui/server-info.vala:45
 msgid "yes"
-msgstr "ja"
+msgstr "oui"
 
 #: src/ui/server-info.vala:45
 msgid "no"
-msgstr "nein"
+msgstr "non"
 
 #: src/ui/server-info.vala:68 src/ui/server-list.vala:148
 msgid "Timed out"
-msgstr "Zeitüberschreitung"
+msgstr "Délai expiré"
 
 #: src/ui/server-list.ui:108
 msgctxt "server-list"
 msgid "Name"
-msgstr "Name"
+msgstr "Nom"
 
 #: src/ui/server-list.ui:167
 msgid "Game"
-msgstr "Spiel"
+msgstr "Jeu"
 
 #: src/ui/server-list.ui:225
 msgid "Map"
-msgstr "Karte"
+msgstr "Carte"
 
 #: src/ui/server-list.ui:257
 msgid "Players"
-msgstr "Spieler"
+msgstr "Joueurs"
 
 #: src/ui/server-list.ui:311
 msgid "Ping"
@@ -276,15 +274,15 @@ msgstr "Ping"
 
 #: src/ui/server-list.vala:150 src/ui/utils.vala:98
 msgid "Error"
-msgstr "Fehler"
+msgstr "Erreur"
 
 #: src/ui/utils.vala:43
 msgid "Cancel"
-msgstr "Abbrechen"
+msgstr "Annuler"
 
 #: src/ui/utils.vala:44
 msgid "Remove"
-msgstr "Entfernen"
+msgstr "Supprimer"
 
 #: src/ui/utils.vala:99 src/ui/utils.vala:106
 msgid "OK"
@@ -292,17 +290,17 @@ msgstr "OK"
 
 #: src/application.vala:34
 msgid "Display version number"
-msgstr "Versionsnummer anzeigen"
+msgstr "Afficher le numéro de version"
 
 #: src/application.vala:63
 #, c-format
 msgid "Failed to initialize GeoIP: %s"
-msgstr "GeoIP-Initialisierung fehlgeschlagen: %s"
+msgstr "Échec de l'initialisation de GeoIP : %s"
 
 #: src/application.vala:131
 #, c-format
 msgid "Player %s has connected"
-msgstr "Spieler %s hat verbunden"
+msgstr "Le joueur %s s'est connecté"
 
 #: src/application.vala:133
 #, c-format
@@ -311,6 +309,6 @@ msgid ""
 "Server: %s\n"
 "Players: %d / %d"
 msgstr ""
-"Adresse: %s\n"
-"Server: %s\n"
-"Spieler: %d / %d"
+"Adresse : %s\n"
+"Serveur : %s\n"
+"Joueurs : %d / %d"
