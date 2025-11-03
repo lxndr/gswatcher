@@ -59,7 +59,7 @@ jobs:
               format('gswatcher_{0}+{1}.pr{2}.build{3}', env.APP_VERSION, matrix.image, github.event.number, github.run_number)) ||
             (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') &&
               format('gswatcher_{0}+linux.{1}', env.APP_VERSION, matrix.arch)) ||
-            format('gswatcher-v{0}-{1}-build{2}', env.APP_VERSION, matrix.image, github.run_number)
+            format('gswatcher_{0}+{1}.build{2}', env.APP_VERSION, matrix.image, github.run_number)
           }}
         path: ${{ env.OUTDIR }}/usr
 
@@ -130,7 +130,7 @@ jobs:
               format('gswatcher_{0}+{1}.pr{2}.build{3}', env.APP_VERSION, matrix.image, github.event.number, github.run_number)) ||
             (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') &&
               format('gswatcher_{0}+windows.{1}', env.APP_VERSION, matrix.arch)) ||
-            format('gswatcher-v{0}-{1}-build{2}', env.APP_VERSION, matrix.image, github.run_number)
+            format('gswatcher-{0}.{1}.build{2}', env.APP_VERSION, matrix.image, github.run_number)
           }}
         path: ${{ env.OUTDIR }}/a/_temp/msys64/${{ matrix.sys }} # FIXME: why so complicated?
 
@@ -223,13 +223,16 @@ jobs:
                 format('gswatcher_{0}+{1}.pr{2}.build{3}', env.APP_VERSION, matrix.image, github.event.number, github.run_number)) ||
               (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') &&
                 format('gswatcher_{0}+windows.{1}-portable', env.APP_VERSION, matrix.arch)) ||
-              format('gswatcher-v{0}-{1}-portable-build{2}', env.APP_VERSION, matrix.image, github.run_number)
+              format('gswatcher-{0}.{1}-build{2}', env.APP_VERSION, matrix.image, github.run_number)
             }}
           path: ${{ env.OUTDIR }}
 
   release:
     runs-on: ubuntu-24.04
-    needs: [create-windows-portable]
+
+    needs:
+      - create-windows-portable
+
     if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
 
     steps:
