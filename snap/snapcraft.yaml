@@ -6,6 +6,7 @@ adopt-info: gswatcher
 
 platforms:
   amd64:
+  arm64:
 
 slots:
   gswatcher:
