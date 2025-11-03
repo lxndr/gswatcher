@@ -126,7 +126,7 @@ jobs:
           ${{
             (github.event_name == 'pull_request' &&
               format('gswatcher_{0}+{1}.pr{2}.build{3}', env.APP_VERSION, matrix.image, github.event.number, github.run_number)) ||
-            format('gswatcher-{0}.{1}.build{2}', env.APP_VERSION, matrix.image, github.run_number)
+            format('gswatcher_{0}+{1}.build{2}', env.APP_VERSION, matrix.image, github.run_number)
           }}
         path: ${{ env.OUTDIR }}/a/_temp/msys64/${{ matrix.sys }} # FIXME: why so complicated?
 
@@ -180,7 +180,7 @@ jobs:
 
       - name: Extract build artifacts
         run: |
-          ARTIFACT_DIR=$(find temp_artifacts -maxdepth 1 -type d -name "gswatcher*-${{ matrix.image }}-build*" | head -n 1)
+          ARTIFACT_DIR=$(find temp_artifacts -maxdepth 1 -type d -name "gswatcher_${{ env.APP_VERSION }}+${{ matrix.image }}.build*" | head -n 1)
           mkdir ${{ env.OUTDIR }}
           cp -r "$ARTIFACT_DIR"/* ${{ env.OUTDIR }}/
           rm -rf temp_artifacts
@@ -217,7 +217,7 @@ jobs:
             ${{
               (github.event_name == 'pull_request' &&
                 format('gswatcher_{0}+windows-portable.pr{2}.build{3}', env.APP_VERSION, github.event.number, github.run_number)) ||
-              format('gswatcher-{0}+windows-portable.build{2}', env.APP_VERSION, github.run_number)
+              format('gswatcher_{0}+windows-portable.build{2}', env.APP_VERSION, github.run_number)
             }}
           path: ${{ env.OUTDIR }}
 
@@ -233,7 +233,7 @@ jobs:
       - name: Download Windows portable artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: gswatcher_*+windows-portable
+          pattern: gswatcher_*+windows-portable.*
           path: ./artifacts
 
       - name: Release
