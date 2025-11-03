@@ -14,12 +14,12 @@ jobs:
   build-linux:
     strategy:
       matrix:
-        os:
-          - ubuntu-22.04
-          - ubuntu-24.04
-          - ubuntu-24.04-arm
+        include:
+          - { image: ubuntu-22.04,     arch: x86_64  }
+          - { image: ubuntu-24.04,     arch: x86_64  }
+          - { image: ubuntu-24.04-arm, arch: aarch64 }
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.image }}
 
     env:
       OUTDIR: out
@@ -53,7 +53,12 @@ jobs:
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: gswatcher-v${{ env.APP_VERSION }}-${{ matrix.os }}-build${{ github.run_number }}
+        name: >-
+          ${{
+            (github.event_name == 'pull_request' &&
+              format('gswatcher_{0}+{1}.pr{2}.build{3}', env.APP_VERSION, matrix.image, github.event.number, github.run_number)) ||
+            format('gswatcher_{0}+{1}.build{2}', env.APP_VERSION, matrix.image, github.run_number)
+          }}
         path: ${{ env.OUTDIR }}/usr
 
   build-windows:
@@ -117,7 +122,12 @@ jobs:
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: gswatcher-v${{ env.APP_VERSION }}-${{ matrix.image }}-build${{ github.run_number }}
+        name: >-
+          ${{
+            (github.event_name == 'pull_request' &&
+              format('gswatcher_{0}+{1}.pr{2}.build{3}', env.APP_VERSION, matrix.image, github.event.number, github.run_number)) ||
+            format('gswatcher_{0}+{1}.build{2}', env.APP_VERSION, matrix.image, github.run_number)
+          }}
         path: ${{ env.OUTDIR }}/a/_temp/msys64/${{ matrix.sys }} # FIXME: why so complicated?
 
   create-windows-portable:
@@ -165,12 +175,12 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: gswatcher-v*-${{ matrix.image }}-build*
+          pattern: gswatcher_${{ env.APP_VERSION }}+${{ matrix.image }}.*
           path: temp_artifacts
 
       - name: Extract build artifacts
         run: |
-          ARTIFACT_DIR=$(find temp_artifacts -maxdepth 1 -type d -name "gswatcher-v*-${{ matrix.image }}-build*" | head -n 1)
+          ARTIFACT_DIR=$(find temp_artifacts -maxdepth 1 -type d -name "gswatcher_${{ env.APP_VERSION }}+${{ matrix.image }}.*" | head -n 1)
           mkdir ${{ env.OUTDIR }}
           cp -r "$ARTIFACT_DIR"/* ${{ env.OUTDIR }}/
           rm -rf temp_artifacts
@@ -203,19 +213,27 @@ jobs:
       - name: Upload portable artifact
         uses: actions/upload-artifact@v4
         with:
-          name: gswatcher-v${{ env.APP_VERSION }}-${{ matrix.image }}-portable-build${{ github.run_number }}
+          name: >-
+            ${{
+              (github.event_name == 'pull_request' &&
+                format('gswatcher_{0}+windows-portable.{1}.pr{2}.build{3}', env.APP_VERSION, matrix.arch, github.event.number, github.run_number)) ||
+              format('gswatcher_{0}+windows-portable.{1}.build{2}', env.APP_VERSION, matrix.arch, github.run_number)
+            }}
           path: ${{ env.OUTDIR }}
 
   release:
     runs-on: ubuntu-24.04
-    needs: [create-windows-portable]
+
+    needs:
+      - create-windows-portable
+
     if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
 
     steps:
       - name: Download Windows portable artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: gswatcher-v*-windows-*-portable-*
+          pattern: gswatcher_*+windows-portable.*
           path: ./artifacts
 
       - name: Release
