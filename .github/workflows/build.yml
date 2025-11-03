@@ -215,17 +215,17 @@ jobs:
           glib-compile-schemas.exe ${{ env.OUTDIR }}/share/glib-2.0/schemas
 
       - name: Upload portable artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: >-
-          ${{
-            (github.event_name == 'pull_request' &&
-              format('gswatcher_{0}+{1}.pr{2}.build{3}', env.APP_VERSION, matrix.image, github.event.number, github.run_number)) ||
-            (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') &&
-              format('gswatcher_{0}+windows.{1}-portable', env.APP_VERSION, matrix.arch)) ||
-            format('gswatcher-v{0}-{1}-portable-build{2}', env.APP_VERSION, matrix.image, github.run_number)
-          }}
-        path: ${{ env.OUTDIR }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: >-
+            ${{
+              (github.event_name == 'pull_request' &&
+                format('gswatcher_{0}+{1}.pr{2}.build{3}', env.APP_VERSION, matrix.image, github.event.number, github.run_number)) ||
+              (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') &&
+                format('gswatcher_{0}+windows.{1}-portable', env.APP_VERSION, matrix.arch)) ||
+              format('gswatcher-v{0}-{1}-portable-build{2}', env.APP_VERSION, matrix.image, github.run_number)
+            }}
+          path: ${{ env.OUTDIR }}
 
   release:
     runs-on: ubuntu-24.04
