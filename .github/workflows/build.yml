@@ -216,8 +216,8 @@ jobs:
           name: >-
             ${{
               (github.event_name == 'pull_request' &&
-                format('gswatcher_{0}+windows-portable.pr{1}.build{2}', env.APP_VERSION, github.event.number, github.run_number)) ||
-              format('gswatcher_{0}+windows-portable.build{1}', env.APP_VERSION, github.run_number)
+                format('gswatcher_{0}+windows-portable.{1}.pr{2}.build{3}', env.APP_VERSION, matrix.arch, github.event.number, github.run_number)) ||
+              format('gswatcher_{0}+windows-portable.{1}.build{2}', env.APP_VERSION, matrix.arch, github.run_number)
             }}
           path: ${{ env.OUTDIR }}
 
