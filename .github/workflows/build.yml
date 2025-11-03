@@ -216,8 +216,8 @@ jobs:
           name: >-
             ${{
               (github.event_name == 'pull_request' &&
-                format('gswatcher_{0}+windows.pr{2}.build{3}', env.APP_VERSION, github.event.number, github.run_number)) ||
-              format('gswatcher-{0}+windows.build{2}', env.APP_VERSION, github.run_number)
+                format('gswatcher_{0}+windows-portable.pr{2}.build{3}', env.APP_VERSION, github.event.number, github.run_number)) ||
+              format('gswatcher-{0}+windows-portable.build{2}', env.APP_VERSION, github.run_number)
             }}
           path: ${{ env.OUTDIR }}
 
@@ -233,7 +233,7 @@ jobs:
       - name: Download Windows portable artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: gswatcher_*+windows
+          pattern: gswatcher_*+windows-portable
           path: ./artifacts
 
       - name: Release
