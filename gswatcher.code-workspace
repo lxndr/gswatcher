@@ -120,6 +120,7 @@
 			"mapname",
 			"maptitle",
 			"maxclients",
+			"maxmind",
 			"maxplayers",
 			"mesonbuild",
 			"metainfo",

@@ -72,3 +72,9 @@ In build directory
 ```
 meson compile gswatcher-update-po
 ```
+
+## Acknowledgements
+
+This application uses IP to location data provided by MaxMind. Many thanks to MaxMind for providing the GeoIP database that enables location resolution functionality.
+
+For more information about MaxMind and their products, visit: https://www.maxmind.com/

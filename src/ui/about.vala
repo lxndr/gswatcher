@@ -69,6 +69,11 @@ namespace Gsw.Ui {
       null,
     };
 
+    string[] acknowledgements = {
+      _("IP to location data provided by MaxMind") + " https://www.maxmind.com/",
+      null,
+    };
+
 #if GSW_ADWAITA_1_5_SUPPORTED
     var dlg = new Adw.AboutDialog ();
     dlg.application_name = Config.APPNAME;
@@ -79,6 +84,7 @@ namespace Gsw.Ui {
     dlg.license_type = License.AGPL_3_0;
     dlg.issue_url = Config.ISSUES;
     dlg.debug_info = format_debug_info (transports, protocols);
+    dlg.add_acknowledgement_section (_("IP to location"), {acknowledgements[0]});
     dlg.present (win);
 #elif GSW_ADWAITA_1_2_SUPPORTED
     var dlg = new Adw.AboutWindow ();
@@ -91,6 +97,7 @@ namespace Gsw.Ui {
     dlg.issue_url = Config.ISSUES;
     dlg.debug_info = format_debug_info (transports, protocols);
     dlg.transient_for = win;
+    dlg.add_acknowledgement_section (_("IP to location"), {acknowledgements[0]});
     dlg.present ();
 #else
     var dlg = new AboutDialog ();
@@ -103,6 +110,7 @@ namespace Gsw.Ui {
     dlg.system_information = format_debug_info (transports, protocols);
     dlg.transient_for = win;
     dlg.modal = true;
+    dlg.add_credit_section (_("Acknowledgements"), acknowledgements);
     dlg.present ();
 #endif
   }

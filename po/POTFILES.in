@@ -1,6 +1,6 @@
+src/core/geo-location-resolver/maxmind-location-resolver.vala
 src/core/protocol/lua-utils.vala
 src/core/client.vala
-src/core/geoip-resolver.vala
 src/ui/about.vala
 src/ui/buddy-list.ui
 src/ui/buddy-list.vala
