@@ -50,9 +50,8 @@ class ServerInfo : Widget {
     if (ip_address == null)
       return null;
 
-    var geoip_resolver = GeoIPResolver.get_instance ();
-    var location = geoip_resolver.city_by_addr (ip_address);
-    return location;
+    var geoip_resolver = MaxMindLocationResolver.get_instance ();
+    return geoip_resolver.location_by_ip (ip_address);
   }
 
   [GtkCallback]

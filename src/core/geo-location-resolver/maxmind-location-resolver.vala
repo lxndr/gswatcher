@@ -19,13 +19,13 @@
 namespace Gsw {
 
 [SingleInstance]
-public class GeoIPResolver : Object {
+public class MaxMindLocationResolver : Object, GeoLocationResolver {
   private GeoIP? geoip;
 
   public Error? init_error;
 
-  public static GeoIPResolver get_instance () {
-    return new GeoIPResolver ();
+  public static MaxMindLocationResolver get_instance () {
+    return new MaxMindLocationResolver ();
   }
 
   construct {
@@ -51,7 +51,7 @@ public class GeoIPResolver : Object {
     }
   }
 
-  public string code_by_addr (string addr) {
+  public string? country_code_by_ip (string addr) {
     lock (geoip) {
       if (geoip == null)
         return "";
@@ -71,7 +71,7 @@ public class GeoIPResolver : Object {
     }
   }
 
-  public string city_by_addr (string addr) {
+  public string? location_by_ip (string addr) {
     lock (geoip) {
       if (geoip == null)
         return "";

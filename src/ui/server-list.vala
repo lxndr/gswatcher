@@ -92,8 +92,13 @@ class ServerList : Widget {
     if (ip_address == null)
       return null;
 
-    var geoip_resolver = GeoIPResolver.get_instance ();
-    var country_code = geoip_resolver.code_by_addr (ip_address).ascii_down ();
+    var geoip_resolver = MaxMindLocationResolver.get_instance ();
+    var country_code = geoip_resolver.country_code_by_ip (ip_address).ascii_down ();
+
+    if (country_code == null) {
+      return null;
+    }
+
     return find_file_in_data_dirs (@"$(Config.ISO_FLAGS_DIR_NAME)/$(country_code).png");
   }
 

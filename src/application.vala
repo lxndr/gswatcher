@@ -57,11 +57,10 @@ class Application : Adw.Application {
       main_window.show ();
       add_window (main_window);
 
-      // GeoIP
-      var geoip_resolver = new GeoIPResolver ();
+      var location_resolver = new MaxMindLocationResolver ();
 
-      if (geoip_resolver.init_error != null) {
-        var msg = _("Failed to initialize GeoIP: %s").printf (geoip_resolver.init_error.message);
+      if (location_resolver.init_error != null) {
+        var msg = _("Failed to initialize GeoIP: %s").printf (location_resolver.init_error.message);
         show_error_dialog (main_window, msg);
       }
     }
