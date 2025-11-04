@@ -4,10 +4,6 @@ grade: stable
 confinement: strict
 adopt-info: gswatcher
 
-platforms:
-  amd64:
-  arm64:
-
 slots:
   gswatcher:
     interface: dbus
@@ -31,7 +27,7 @@ parts:
     plugin: autotools
     source: https://gitlab.gnome.org/GNOME/vala.git
     source-type: git
-    source-tag: 0.56.17
+    source-tag: 0.56.18
     source-depth: 1
     build-packages:
       - autoconf-archive
