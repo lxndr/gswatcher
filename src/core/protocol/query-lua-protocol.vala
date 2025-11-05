@@ -29,7 +29,7 @@ public class QueryLuaProtocol : LuaProtocol, QueryProtocol {
     vm.check_type (1, Lua.Type.TABLE);
     vm.check_type (2, Lua.Type.TABLE);
 
-    var details = new Gee.HashMap<string, string> ();
+    var details = new ServerDetails ();
     vm.extract_object_to_map (1, details);
 
     var sinfo = new ServerInfo ();
