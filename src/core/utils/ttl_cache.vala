@@ -48,7 +48,7 @@ public class TtlCache<K, V> {
     }
 
     private set {
-      _default_ttl = value.clamp (Duration.seconds (1), Duration.MAX);
+      _default_ttl = value.clamp (TimeSpan.SECOND, int64.MAX);
     }
   }
 
@@ -67,7 +67,7 @@ public class TtlCache<K, V> {
    *
    * @param default_ttl Default time-to-live as a TimeSpan for entries
    */
-  public TtlCache (TimeSpan default_ttl = Duration.seconds (60)) {
+  public TtlCache (TimeSpan default_ttl = 60 * TimeSpan.SECOND) {
     this.default_ttl = default_ttl;
 
     start_periodic_cleanup ();
@@ -98,7 +98,7 @@ public class TtlCache<K, V> {
    * @param ttl Time to live as a TimeSpan
    */
   public void set_with_ttl (K key, V value, TimeSpan ttl) {
-    int64 expiry_time = get_real_time () + ttl.clamp (Duration.seconds (1), Duration.MAX);
+    int64 expiry_time = get_real_time () + ttl.clamp (TimeSpan.SECOND, int64.MAX);
     _cache.set (key, { value, expiry_time });
   }
 

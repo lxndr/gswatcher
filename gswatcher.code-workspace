@@ -191,6 +191,7 @@
 			"uchar",
 			"ucrt",
 			"unparent",
+			"usleep",
 			"valac",
 			"vapi",
 			"vapidir",

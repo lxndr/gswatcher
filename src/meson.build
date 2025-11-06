@@ -82,7 +82,6 @@ core_sources = files(
   'core/transport/transport.vala',
   'core/transport/udp-transport-manager.vala',
   'core/transport/udp-transport.vala',
-  'core/utils/duration.vala',
   'core/utils/hash_string_map.vala',
   'core/utils/hashable_string_map.vala',
   'core/utils/ttl_cache.vala',
