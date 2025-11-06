@@ -25,11 +25,14 @@ const string PLAYER_GROUP = "Player";
 const string INFO_GROUP = "Info";
 const string EXTRA_GROUP = "Extra";
 
+const int64 GAME_CACHE_TTL_MS = 30 * TimeSpan.MINUTE;
+
 [SingleInstance]
 class GameResolver : Object {
   public bool ready { get; private set; }
 
   private Gee.Map<string, Game> games = new Gee.HashMap<string, Game> ();
+  private TtlCache<ServerDetails, Game> details_to_game_cache = new TtlCache<ServerDetails, Game> (GAME_CACHE_TTL_MS);
 
   construct {
     load_games.begin ((obj, res) => {
@@ -167,8 +170,26 @@ class GameResolver : Object {
     }
   }
 
-  public bool resolve (string protocol_id, ServerInfo sinfo, Gee.Map<string, string> details) {
-    var game = games.values.first_match (game => game.matches (protocol_id, details));
+  public bool resolve (string protocol_id, ServerInfo sinfo, ServerDetails details) {
+    var game = details_to_game_cache.get (details);
+
+    if (game == null) {
+      var matching_games = new Gee.ArrayList<Game> ();
+
+      foreach (var current_game in games.values) {
+        if (current_game.matches (protocol_id, details)) {
+          matching_games.add (current_game);
+        }
+      }
+
+      if (matching_games.is_empty)
+        return false;
+
+      matching_games.sort ((a, b) => b.weight - a.weight);
+      game = matching_games[0];
+
+      details_to_game_cache.set (details, game);
+    }
 
     if (game == null)
       return false;

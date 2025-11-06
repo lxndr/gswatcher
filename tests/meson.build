@@ -30,3 +30,19 @@ test('core/utils/parse_address', executable(
   'test-parse_address.vala',
   dependencies : dependencies,
 ))
+
+test('core/utils/hashable_string_map', executable(
+  'test-hashable_string_map',
+  core_sources,
+  test_core_sources,
+  'test-hashable-string-map.vala',
+  dependencies : dependencies,
+))
+
+test('core/utils/ttl_cache', executable(
+  'test-ttl_cache',
+  core_sources,
+  test_core_sources,
+  'test-ttl_cache.vala',
+  dependencies : dependencies,
+))

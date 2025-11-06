@@ -126,7 +126,7 @@ public class Querier : Object {
     }
   }
 
-  private void on_sinfo_updated (Gee.Map<string, string> details, ServerInfo sinfo) {
+  private void on_sinfo_updated (ServerDetails details, ServerInfo sinfo) {
     stop_timeout_timer ();
     game_resolver.resolve (protocol.info.id, sinfo, details);
 

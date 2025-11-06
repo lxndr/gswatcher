@@ -40,7 +40,7 @@ public class PlayerField : Object {
 }
 
 public abstract interface QueryProtocol : Protocol {
-  public signal void sinfo_update (Gee.Map<string, string> details, ServerInfo sinfo);
+  public signal void sinfo_update (ServerDetails details, ServerInfo sinfo);
   public signal void plist_update (Gee.List<PlayerField> plist_fields, Gee.ArrayList<Player> plist);
 
   public abstract void query () throws Error;

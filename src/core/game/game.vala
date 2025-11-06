@@ -34,6 +34,12 @@ class Game {
     this.protocol = protocol;
   }
 
+  public int weight {
+    get {
+      return inf_matches.size;
+    }
+  }
+
   public bool matches (string protocol_id, Gee.Map<string, string> details) {
     if (protocol != protocol_id)
       return false;
