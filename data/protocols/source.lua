@@ -21,6 +21,32 @@
 ---@field data_size? number
 ---@field crc32? number
 
+---@class SourceServerInfo
+---@field protocol_version integer
+---@field address? string
+---@field name string
+---@field map string
+---@field folder string
+---@field game string
+---@field appid integer
+---@field num_players integer
+---@field max_players integer
+---@field num_bots integer
+---@field server_type string
+---@field environment string
+---@field visibility integer
+---@field vac integer
+---@field version string
+---@field port? integer
+---@field steamid? integer
+---@field sourcetv_port? integer
+---@field sourcetv_name? integer
+---@field keywords? string
+---@field gameid? integer
+---@field the_ship_mode? integer
+---@field the_ship_witnesses? integer
+---@field the_ship_duration? integer
+
 local switch = require("lib/switch")
 local to_boolean = require("lib/to_boolean")
 local DataReader = require("lib/DataReader")
@@ -41,7 +67,7 @@ local RequestPacketType = {
   PLAYER_LIST = "U",
 }
 
----@type ServerInfo
+---@type Dictionary
 local info_map = {
   game_name    = "game",
   game_version = "version",
@@ -73,10 +99,10 @@ local is_gold_source = false
 ---@type integer
 local got_challenge = -1
 
----@type Dictionary|nil
+---@type SourceServerInfo|nil
 local got_server_info = nil
 
----@type Dictionary[]|nil
+---@type Player[]|nil
 local got_player_list = nil
 
 ---@param type RequestPacketType
@@ -136,6 +162,7 @@ function query()
 end
 
 ---@param r DataReader
+---@return SourceServerInfo
 local function read_server_info_gold(r)
   local inf = {
     address = r:zstring(),
@@ -171,6 +198,7 @@ local function read_server_info_gold(r)
 end
 
 ---@param r DataReader
+---@return SourceServerInfo
 local function read_server_info(r)
   local inf = {
     protocol_version = r:u8(),
@@ -207,14 +235,12 @@ local function read_server_info(r)
   end
 
   if (edf & 0x10) > 0 then
-    inf.steamid = tostring(r:u64le())
+    inf.steamid = r:u64le()
   end
 
   if (edf & 0x40) > 0 then
-    inf.sourcetv = {
-      port = r:u16le(),
-      name = r:zstring(),
-    }
+    inf.sourcetv_port = r:u16le()
+    inf.sourcetv_name = r:zstring()
   end
 
   if (edf & 0x20) > 0 then
@@ -279,6 +305,8 @@ local function create_player_fields(inf)
   return fields
 end
 
+---@param r DataReader
+---@param inf SourceServerInfo
 local function read_player_list(r, inf)
   local players = {}
   local count = r:u8()
@@ -327,12 +355,12 @@ local function read_payload(r)
     end,
     D = function ()
       got_challenge = -1
-      got_player_list = read_player_list(r, got_server_info)
 
       if not got_server_info then
         error("invalid response: got player list before server info")
       end
 
+      got_player_list = read_player_list(r, got_server_info)
       local pfields = create_player_fields(got_server_info)
       gsw.plist(pfields, got_player_list)
     end,
