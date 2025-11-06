@@ -16,22 +16,16 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-server-list cell .new-entry,
-buddy-list cell .new-entry {
-  color: grey;
-  font-style: italic;
-}
-
 server-list #country_flag {
   -gtk-icon-transform: scale(1.4);
 }
 
 server-list #players_cell.no-slots {
-  color:  darkRed;
+  color: var(--warning-color);
 }
 
 server-list #players_cell.not-empty {
-  color: darkGreen;
+  color: var(--success-color);
 }
 
 server-info {
@@ -39,9 +33,5 @@ server-info {
 }
 
 server-info #error {
-  font-weight: bold;
-}
-
-preferences .group-title {
   font-weight: bold;
 }
