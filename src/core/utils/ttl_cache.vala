@@ -33,7 +33,7 @@ public class TtlCache<K, V> {
     public int64 expiry_time;
   }
 
-  private HashMap<K, Entry?> _cache = new HashMap<K, Entry?> ();
+  private HashMap<K, Entry?> _cache; // INFO: do not initialize the HashMap here, it will have Invalid type for K
   private TimeSpan _default_ttl;
   private uint _cleanup_interval_id;
 
@@ -68,9 +68,12 @@ public class TtlCache<K, V> {
    * @param default_ttl Default time-to-live as a TimeSpan for entries
    */
   public TtlCache (TimeSpan default_ttl = 60 * TimeSpan.SECOND) {
+    this._cache = new HashMap<K, Entry?> ();
     this.default_ttl = default_ttl;
 
     start_periodic_cleanup ();
+
+    assert (this._cache.key_type == typeof (K)); // INFO: Vala bug check
   }
 
   /**

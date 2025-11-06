@@ -32,7 +32,7 @@ public class HashableStringMap : Gee.HashMap<string, string>, Gee.Hashable<Gee.H
     }
 
     foreach (var key in this.keys) {
-      if (!another_map.has_key(key) || this.get(key) != another_map.get(key)) {
+      if (!another_map.has_key (key) || this.get (key) != another_map.get (key)) {
         return false;
       }
     }
@@ -49,27 +49,27 @@ public class HashableStringMap : Gee.HashMap<string, string>, Gee.Hashable<Gee.H
     return _hash;
   }
 
-  public override void clear() {
-    base.clear();
-    invalidate_hash();
+  public override void clear () {
+    base.clear ();
+    invalidate_hash ();
   }
 
   public override void set(string key, string value) {
     base.set(key, value);
-    invalidate_hash();
+    invalidate_hash ();
   }
 
-  public override bool unset(string key, out string value = null) {
-    bool result = base.unset(key, out value);
+  public override bool unset (string key, out string value = null) {
+    bool result = base.unset (key, out value);
 
     if (result) {
-      invalidate_hash();
+      invalidate_hash ();
     }
 
     return result;
   }
 
-  private void invalidate_hash() {
+  private void invalidate_hash () {
     _hash_valid = false;
   }
 }
