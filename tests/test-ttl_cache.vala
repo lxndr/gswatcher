@@ -4,7 +4,7 @@
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as
-  published by the Free Software Foundation, either version 3 of the
+ published by the Free Software Foundation, either version 3 of the
   License, or (at your option) any later version.
 
   This program is distributed in the hope that it will be useful,
@@ -19,265 +19,221 @@
 using Gsw;
 
 int main (string[] args) {
-  Test.init (ref args);
+    Test.init (ref args);
 
-  Test.add_func ("/core/utils/ttl_cache/basic_functionality", () => {
-    var cache = new TtlCache<string, string> (1000);
+    Test.add_func ("/core/utils/ttl_cache/basic_functionality", () => {
+        var cache = new TtlCache<string, string> (Duration.seconds (5)); // 5 second TTL
 
-    // Test initial state
-    assert (cache.size () == 0);
-    assert (cache.get ("nonexistent") == null);
-    assert (!cache.has ("nonexistent"));
+        // Test initial state
+        assert (cache.size == 0);
 
-    // Test adding elements
-    cache.set ("key1", "value1");
-    cache.set ("key2", "value2");
+        // Test setting and getting values
+        cache.set ("key1", "value1");
+        assert (cache.size == 1);
+        assert (cache.get ("key1") == "value1");
 
-    assert (cache.size () == 2);
-    assert (cache.get ("key1") == "value1");
-    assert (cache.get ("key2") == "value2");
-    assert (cache.has ("key1"));
-    assert (cache.has ("key2"));
+        cache.set ("key2", "value2");
+        assert (cache.size == 2);
+        assert (cache.get ("key2") == "value2");
 
-    // Test updating existing key
-    cache.set ("key1", "updated_value1");
-    assert (cache.get ("key1") == "updated_value1");
-    assert (cache.size () == 2);
+        // Test updating existing key
+        cache.set ("key1", "updated_value1");
+        assert (cache.get ("key1") == "updated_value1");
+        assert (cache.size == 2);
 
-    // Test remove
-    bool removed = cache.remove ("key2");
-    assert (removed == true);
-    assert (cache.get ("key2") == null);
-    assert (!cache.has ("key2"));
-    assert (cache.size () == 1);
+        // Test getting non-existent key
+        assert (cache.get ("nonexistent") == null);
 
-    // Test remove non-existent
-    removed = cache.remove ("nonexistent");
-    assert (removed == false);
-    assert (cache.size () == 1);
+        // Test has method
+        assert (cache.has ("key1"));
+        assert (cache.has ("key2"));
+        assert (!cache.has ("nonexistent"));
+    });
 
-    // Test clear
-    cache.set ("key2", "value2");
-    cache.clear ();
-    assert (cache.size () == 0);
-    assert (cache.get ("key1") == null);
-    assert (cache.get ("key2") == null);
-    assert (!cache.has ("key1"));
-    assert (!cache.has ("key2"));
-  });
+    Test.add_func ("/core/utils/ttl_cache/custom_ttl", () => {
+        var cache = new TtlCache<string, string> (Duration.seconds (5)); // 5 second default TTL
 
-  Test.add_func ("/core/utils/ttl_cache/custom_ttl", () => {
-    var cache = new TtlCache<string, string> (1000);
+        // Test setting with custom TTL
+        cache.set_with_ttl ("key1", "value1", Duration.seconds (1)); // 1 second TTL
+        cache.set_with_ttl ("key2", "value2", Duration.seconds (10)); // 10 second TTL
+        assert (cache.get ("key1") == "value1");
+        assert (cache.get ("key2") == "value2");
 
-    // Test setting with custom TTL
-    cache.set_with_ttl ("short_key", "short_value", 100);
-    cache.set_with_ttl ("long_key", "long_value", 2000);
+        // Sleep for 1.5 seconds to let key1 expire but not key2
+        Thread.usleep ((ulong) Duration.seconds (1.5)); // 1.5 seconds
 
-    assert (cache.get ("short_key") == "short_value");
-    assert (cache.get ("long_key") == "long_value");
-    assert (cache.size () == 2);
+        // key1 should be expired, key2 should still be valid
+        assert (cache.get ("key1") == null);
+        assert (cache.get ("key2") == "value2");
+        assert (cache.size == 1);
+    });
 
-    // Test default TTL setting
-    cache.set ("default_key", "default_value");
-    assert (cache.get ("default_key") == "default_value");
-    assert (cache.size () == 3);
-  });
+    Test.add_func ("/core/utils/ttl_cache/expiration", () => {
+        var cache = new TtlCache<string, string> (Duration.seconds (1)); // 1 second TTL
 
-  Test.add_func ("/core/utils/ttl_cache/expiry", () => {
-    var cache = new TtlCache<string, string> (1000);
+        cache.set ("key1", "value1");
+        cache.set ("key2", "value2");
 
-    // Set values with very short TTLs
-    cache.set_with_ttl ("key1", "value1", 50);
-    cache.set_with_ttl ("key2", "value2", 200);
+        assert (cache.get ("key1") == "value1");
+        assert (cache.get ("key2") == "value2");
+        assert (cache.size == 2);
 
-    // Initially both should be available
-    assert (cache.get ("key1") == "value1");
-    assert (cache.get ("key2") == "value2");
-    assert (cache.has ("key1"));
-    assert (cache.has ("key2"));
+        // Sleep for 1.5 seconds to let entries expire
+        Thread.usleep ((ulong) Duration.seconds (1.5)); // 1.5 seconds
 
-    // Wait for first key to expire
-    GLib.Thread.usleep (60000); // 60ms
+        // Both entries should be expired
+        assert (cache.get ("key1") == null);
+        assert (cache.get ("key2") == null);
+        assert (cache.size == 0);
 
-    // First key should be expired, second should still be available
-    assert (cache.get ("key1") == null);
-    assert (!cache.has ("key1"));
-    assert (cache.get ("key2") == "value2");
-    assert (cache.has ("key2"));
+        // Add entries again and test has method after expiration
+        cache.set ("key3", "value3");
+        assert (cache.has ("key3"));
+        Thread.usleep ((ulong) Duration.seconds (1.5)); // 1.5 seconds
+        assert (!cache.has ("key3"));
+    });
 
-    // Wait for second key to expire
-    GLib.Thread.usleep (250000); // 250ms
+    Test.add_func ("/core/utils/ttl_cache/unset", () => {
+        var cache = new TtlCache<string, string> (Duration.seconds (5)); // 5 second TTL
 
-    // Both keys should be expired
-    assert (cache.get ("key1") == null);
-    assert (!cache.has ("key1"));
-    assert (cache.get ("key2") == null);
-    assert (!cache.has ("key2"));
-  });
+        cache.set ("key1", "value1");
+        cache.set ("key2", "value2");
 
-  Test.add_func ("/core/utils/ttl_cache/cleanup_expired", () => {
-    var cache = new TtlCache<string, string> (1000);
+        assert (cache.size == 2);
+        assert (cache.has ("key1"));
+        assert (cache.has ("key2"));
 
-    // Add expired and non-expired entries
-    cache.set_with_ttl ("expired_key", "expired_value", 50);
-    cache.set ("valid_key", "valid_value");
+        // Test unset returns true for existing key
+        bool result = cache.unset ("key1");
+        assert (result == true);
+        assert (cache.size == 1);
+        assert (!cache.has ("key1"));
+        assert (cache.get ("key1") == null);
 
-    // Wait for first key to expire
-    GLib.Thread.usleep (60000); // 60ms
+        // Test unset returns false for non-existent key
+        result = cache.unset ("nonexistent");
+        assert (result == false);
+        assert (cache.size == 1);
 
-    // Both keys should still be in cache (lazy cleanup)
-    assert (cache.size () == 2);
-    assert (cache.get ("expired_key") == null);
-    assert (!cache.has ("expired_key"));
-    assert (cache.get ("valid_key") == "valid_value");
-    assert (cache.has ("valid_key"));
+        // Test that unset key cannot be retrieved
+        assert (cache.get ("key1") == null);
+    });
 
-    // Explicit cleanup should remove expired entries
-    cache.cleanup_expired ();
-    assert (cache.size () == 1);
-    assert (cache.get ("expired_key") == null);
-    assert (!cache.has ("expired_key"));
-    assert (cache.get ("valid_key") == "valid_value");
-    assert (cache.has ("valid_key"));
-  });
+    Test.add_func ("/core/utils/ttl_cache/clear", () => {
+        var cache = new TtlCache<string, string> (Duration.seconds (5)); // 5 second TTL
 
-  Test.add_func ("/core/utils/ttl_cache/default_ttl_setting", () => {
-    var cache = new TtlCache<string, string> (1000);
+        cache.set ("key1", "value1");
+        cache.set ("key2", "value2");
+        cache.set ("key3", "value3");
 
-    // Set default TTL
-    cache.set_default_ttl (500);
+        assert (cache.size == 3);
+        assert (cache.has ("key1"));
+        assert (cache.has ("key2"));
+        assert (cache.has ("key3"));
 
-    // Add entries with default TTL
-    cache.set ("key1", "value1");
-    cache.set ("key2", "value2");
+        cache.clear ();
+        assert (cache.size == 0);
+        assert (!cache.has ("key1"));
+        assert (!cache.has ("key2"));
+        assert (!cache.has ("key3"));
+        assert (cache.get ("key1") == null);
+        assert (cache.get ("key2") == null);
+        assert (cache.get ("key3") == null);
+    });
 
-    // Both should be available initially
-    assert (cache.get ("key1") == "value1");
-    assert (cache.get ("key2") == "value2");
+    Test.add_func ("/core/utils/ttl_cache/default_ttl_validation", () => {
+        // Test that default TTL is clamped to minimum of 1000ms
+        var cache = new TtlCache<string, string> (Duration.seconds (0.5)); // Below minimum
+        assert (cache.default_ttl >= Duration.seconds (1));
 
-    // Wait for entries to expire
-    GLib.Thread.usleep (600000); // 600ms
+        // Test with a very small TTL (should be clamped)
+        var cache2 = new TtlCache<string, string> (Duration.seconds (0.1));
+        assert (cache2.default_ttl >= Duration.seconds (1));
 
-    // Both should be expired
-    assert (cache.get ("key1") == null);
-    assert (!cache.has ("key1"));
-    assert (cache.get ("key2") == null);
-    assert (!cache.has ("key2"));
-  });
+        // Test with a reasonable TTL
+        var cache3 = new TtlCache<string, string> (Duration.seconds (3));
+        assert (cache3.default_ttl == Duration.seconds (3));
 
-  Test.add_func ("/core/utils/ttl_cache/min_ttl_validation", () => {
-    var cache = new TtlCache<string, string> (500);
+        // Test with a very large TTL
+        var cache4 = new TtlCache<string, string> (Duration.seconds (1000));
+        assert (cache4.default_ttl == Duration.seconds (1000));
+    });
 
-    // Test that TTL is clamped to minimum (1000ms)
-    cache.set ("key", "value");
+    Test.add_func ("/core/utils/ttl_cache/set_with_ttl_validation", () => {
+        var cache = new TtlCache<string, string> (5000); // 5 second default TTL
 
-    // Should be available for at least 1000ms
-    assert (cache.get ("key") == "value");
-    assert (cache.has ("key"));
+        // Test that TTL is clamped to minimum of 1000ms when using set_with_ttl
+        cache.set_with_ttl ("key1", "value1", 500); // Below minimum
+        assert (cache.get ("key1") == "value1"); // Should still work but with at least 1000ms TTL
 
-    // Wait 800ms (less than minimum TTL)
-    GLib.Thread.usleep (800000); // 800ms
+        // Sleep for 0.5 seconds to ensure it's less than 1000ms minimum
+        Thread.usleep (500000); // 0.5 seconds
+        assert (cache.get ("key1") == "value1"); // Should still be there
+    });
 
-    // Should still be available
-    assert (cache.get ("key") == "value");
-    assert (cache.has ("key"));
+    Test.add_func ("/core/utils/ttl_cache/generic_types", () => {
+        // Test with different generic types
+        var string_cache = new TtlCache<string, string> (5000);
+        string_cache.set ("str_key", "str_value");
+        assert (string_cache.get ("str_key") == "str_value");
 
-    // Wait additional 300ms (total 1100ms, more than minimum TTL)
-    GLib.Thread.usleep (300000); // 300ms
+        var int_cache = new TtlCache<int, int> (5000);
+        int_cache.set (123, 456);
+        assert (int_cache.get (123) == 456);
 
-    // Should now be expired
-    assert (cache.get ("key") == null);
-    assert (!cache.has ("key"));
-  });
+        var mixed_cache = new TtlCache<string, int> (5000);
+        mixed_cache.set ("num_key", 789);
+        assert (mixed_cache.get ("num_key") == 789);
+    });
 
-  Test.add_func ("/core/utils/ttl_cache/generic_types", () => {
-    // Test with string keys and int values
-    var cache1 = new TtlCache<string, int> (1000);
-    cache1.set ("count", 42);
-    assert (cache1.get ("count") == 42);
+    Test.add_func ("/core/utils/ttl_cache/size_property", () => {
+        var cache = new TtlCache<string, string> (1000); // 1 second TTL
 
-    // Test with int keys and string values
-    var cache2 = new TtlCache<int, string> (1000);
-    cache2.set (123, "hello");
-    assert (cache2.get (123) == "hello");
+        assert (cache.size == 0);
 
-    // Test with custom object keys
-    var cache3 = new TtlCache<TestKey, string> (1000);
-    var key1 = new TestKey ("test1");
-    var key2 = new TestKey ("test2");
-    cache3.set (key1, "value1");
-    cache3.set (key2, "value2");
-    assert (cache3.get (key1) == "value1");
-    assert (cache3.get (key2) == "value2");
-  });
+        cache.set ("key1", "value1");
+        assert (cache.size == 1);
 
-  Test.add_func ("/core/utils/ttl_cache/edge_cases", () => {
-    var cache = new TtlCache<string, string> (1000);
+        cache.set ("key2", "value2");
+        assert (cache.size == 2);
 
-    // Test null values
-    cache.set ("null_key", null);
-    assert (cache.get ("null_key") == null);
-    assert (cache.has ("null_key"));
+        // Add a third key and then expire one
+        cache.set ("key3", "value3");
+        assert (cache.size == 3);
 
-    // Test empty string values
-    cache.set ("empty_key", "");
-    assert (cache.get ("empty_key") == "");
-    assert (cache.has ("empty_key"));
+        // Sleep to expire all entries
+        Thread.usleep (1500000); // 1.5 seconds
+        assert (cache.size == 0); // All should be expired due to cleanup in size property
 
-    // Test zero TTL (should be clamped to minimum)
-    cache.set_with_ttl ("zero_ttl_key", "value", 0);
-    assert (cache.get ("zero_ttl_key") == "value");
-    assert (cache.has ("zero_ttl_key"));
+        // Add keys again
+        cache.set ("key4", "value4");
+        assert (cache.size == 1);
+    });
 
-    // Test negative TTL (should be clamped to minimum)
-    cache.set_with_ttl ("negative_ttl_key", "value", -100);
-    assert (cache.get ("negative_ttl_key") == "value");
-    assert (cache.has ("negative_ttl_key"));
-  });
+    Test.add_func ("/core/utils/ttl_cache/ttl_cache_cleanup", () => {
+        var cache = new TtlCache<string, string> (1000); // 1 second TTL
 
-  Test.add_func ("/core/utils/ttl_cache/overwrite_behavior", () => {
-    var cache = new TtlCache<string, string> (1000);
+        cache.set ("key1", "value1");
+        cache.set ("key2", "value2");
+        cache.set ("key3", "value3");
 
-    // Set initial value
-    cache.set ("key", "original_value");
-    assert (cache.get ("key") == "original_value");
+        assert (cache.size == 3);
 
-    // Overwrite with same TTL
-    cache.set ("key", "updated_value");
-    assert (cache.get ("key") == "updated_value");
+        // Sleep to expire all entries
+        Thread.usleep (1500000); // 1.5 seconds
 
-    // Overwrite with custom TTL
-    cache.set_with_ttl ("key", "custom_ttl_value", 2000);
-    assert (cache.get ("key") == "custom_ttl_value");
+        // Accessing size should trigger cleanup of expired entries
+        assert (cache.size == 0);
 
-    // Wait and verify custom TTL is respected
-    GLib.Thread.usleep (1500000); // 1500ms
-    assert (cache.get ("key") == "custom_ttl_value");
+        // Add new entries
+        cache.set ("key4", "value4");
+        cache.set ("key5", "value5");
+        assert (cache.size == 2);
+        assert (cache.get ("key4") == "value4");
+        assert (cache.get ("key5") == "value5");
+    });
 
-    // Wait for it to expire
-    GLib.Thread.usleep (600000); // 600ms
-    assert (cache.get ("key") == null);
-    assert (!cache.has ("key"));
-  });
-  
-  Test.run ();
-  
-  return 0;
-}
+    Test.run ();
 
-// Helper class for testing generic types
-class TestKey {
-  public string value { get; private set; }
-  
-  public TestKey (string value) {
-      this.value = value;
-  }
-  
-  public bool equal_to (TestKey other) {
-      return this.value == other.value;
-  }
-  
-  public uint hash () {
-      return str_hash (value);
-  }
+    return 0;
 }

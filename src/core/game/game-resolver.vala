@@ -25,7 +25,7 @@ const string PLAYER_GROUP = "Player";
 const string INFO_GROUP = "Info";
 const string EXTRA_GROUP = "Extra";
 
-const int64 GAME_CACHE_TTL_MS = 60 * 60 * 1000;
+const int64 GAME_CACHE_TTL_MS = 30 * TimeSpan.MINUTE;
 
 [SingleInstance]
 class GameResolver : Object {

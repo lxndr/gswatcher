@@ -25,22 +25,50 @@ namespace Gsw {
  * removes entries after a specified time period.
  */
 public class TtlCache<K, V> {
+  /**
+   * Represents a cached entry with its value and expiry time.
+   */
   private struct Entry<V> {
     public V value;
     public int64 expiry_time;
   }
 
   private HashMap<K, Entry?> _cache = new HashMap<K, Entry?> ();
-  private int64 _default_ttl;
+  private TimeSpan _default_ttl;
   private uint _cleanup_interval_id;
+
+  /**
+   * Default time-to-live for cache entries as a TimeSpan (in microseconds).
+   * This value is used when adding entries with the set() method.
+   * The minimum allowed value is 1 second (1000000 microseconds).
+   */
+  public TimeSpan default_ttl {
+    get {
+      return _default_ttl;
+    }
+
+    private set {
+      _default_ttl = value.clamp (Duration.seconds (1), Duration.MAX);
+    }
+  }
+
+  /**
+   * Current number of entries in the cache.
+   */
+  public int size {
+    get {
+      cleanup_expired ();
+      return _cache.size;
+    }
+  }
 
   /**
    * Creates a new TTL cache with the specified default time-to-live.
    *
-   * @param default_ttl Default time-to-live in milliseconds for entries
+   * @param default_ttl Default time-to-live as a TimeSpan for entries
    */
-  public TtlCache (int64 default_ttl = 60000) {
-    _default_ttl = default_ttl.clamp (1000, int64.MAX);
+  public TtlCache (TimeSpan default_ttl = Duration.seconds (60)) {
+    this.default_ttl = default_ttl;
 
     start_periodic_cleanup ();
   }
@@ -59,7 +87,7 @@ public class TtlCache<K, V> {
    * @param value The value to store
    */
   public void set (K key, V value) {
-    set_with_ttl (key, value, _default_ttl);
+    set_with_ttl (key, value, default_ttl);
   }
 
   /**
@@ -67,10 +95,10 @@ public class TtlCache<K, V> {
    *
    * @param key The key to store the value under
    * @param value The value to store
-   * @param ttl Time to live in milliseconds
+   * @param ttl Time to live as a TimeSpan
    */
-  public void set_with_ttl (K key, V value, int64 ttl) {
-    int64 expiry_time = get_current_time_ms () + ttl.clamp (1000, int64.MAX);
+  public void set_with_ttl (K key, V value, TimeSpan ttl) {
+    int64 expiry_time = get_real_time () + ttl.clamp (Duration.seconds (1), Duration.MAX);
     _cache.set (key, { value, expiry_time });
   }
 
@@ -117,7 +145,7 @@ public class TtlCache<K, V> {
    * @param key The key to remove
    * @return true if the key was removed, false if it didn't exist
    */
-  public bool remove (K key) {
+  public bool unset (K key) {
     return _cache.unset (key);
   }
 
@@ -129,29 +157,11 @@ public class TtlCache<K, V> {
   }
 
   /**
-   * Returns the number of entries in the cache (including expired ones that haven't been cleaned up yet).
-   *
-   * @return The number of entries in the cache
-   */
-  public int size () {
-    return _cache.size;
-  }
-
-  /**
-   * Sets the default TTL for this cache.
-   *
-   * @param ttl The new default TTL in milliseconds
-   */
-  public void set_default_ttl (int64 ttl) {
-    _default_ttl = ttl;
-  }
-
-  /**
    * Starts the periodic cleanup timer.
    */
   private void start_periodic_cleanup () {
     if (_cleanup_interval_id == 0) {
-      _cleanup_interval_id = GLib.Timeout.add((uint) _default_ttl, () => {
+      _cleanup_interval_id = Timeout.add((uint) default_ttl, () => {
         cleanup_expired ();
         return Source.CONTINUE;
       });
@@ -163,7 +173,7 @@ public class TtlCache<K, V> {
    */
   private void stop_periodic_cleanup () {
     if (_cleanup_interval_id != 0) {
-      GLib.Source.remove (_cleanup_interval_id);
+      Source.remove (_cleanup_interval_id);
       _cleanup_interval_id = 0;
     }
   }
@@ -171,7 +181,7 @@ public class TtlCache<K, V> {
   /**
    * Removes all expired entries from the cache.
    */
-  public void cleanup_expired () {
+  private void cleanup_expired () {
     var iter = _cache.map_iterator ();
 
     while (iter.next ()) {
@@ -188,16 +198,7 @@ public class TtlCache<K, V> {
    * @return true if the entry has expired, false otherwise
    */
   private bool is_expired (Entry entry) {
-    return get_current_time_ms () > entry.expiry_time;
-  }
-
-  /**
-   * Gets the current time in milliseconds since the Unix epoch.
-   *
-   * @return Current time in milliseconds
-   */
-  private int64 get_current_time_ms () {
-    return GLib.get_real_time () / 1000;
+    return get_real_time () > entry.expiry_time;
   }
 }
 
