@@ -31,10 +31,24 @@ class ExpressionParser {
   }
 
   public Expression parse () throws ExpressionParserError {
-    return parse_expression ();
+    var expr = parse_expression ();
+
+    switch (scanner.peek_next_token ()) {
+      case EOF:
+        return expr;
+      case IDENTIFIER:
+        if (scanner.next_value.identifier != "or") {
+          scanner.get_next_token ();
+          throw_invalid_token (null, "expression");
+        }
+
+        return parse_or_expression (expr);
+      default:
+        throw_invalid_token (null, "EOF or 'or'");
+    }
   }
 
-  private Expression parse_expression () throws ExpressionParserError {
+  private EvaluatableExpression parse_expression () throws ExpressionParserError {
     switch (scanner.get_next_token ()) {
       case STRING:
         return new LiteralExpression (scanner.value.string);
@@ -52,7 +66,7 @@ class ExpressionParser {
     }
   }
 
-  private Expression parse_identifier () throws ExpressionParserError {
+  private EvaluatableExpression parse_identifier () throws ExpressionParserError {
     var name = scanner.value.identifier;
 
     switch (scanner.get_next_token ()) {
@@ -68,7 +82,7 @@ class ExpressionParser {
     }
   }
 
-  private Expression parse_value (string name) throws ExpressionParserError {
+  private EvaluatableExpression parse_value (string name) throws ExpressionParserError {
     var key_expr = parse_expression ();
 
     switch (scanner.get_next_token ()) {
@@ -82,7 +96,7 @@ class ExpressionParser {
     }
   }
 
-  private Expression parse_function (string name) throws ExpressionParserError {
+  private EvaluatableExpression parse_function (string name) throws ExpressionParserError {
     var args = parse_function_args ();
 
     switch (name) {
@@ -98,8 +112,8 @@ class ExpressionParser {
     }
   }
 
-  private Gee.List<Expression> parse_function_args () throws ExpressionParserError {
-    var args = new Gee.ArrayList<Expression> ();
+  private Gee.List<EvaluatableExpression> parse_function_args () throws ExpressionParserError {
+    var args = new Gee.ArrayList<EvaluatableExpression> ();
 
     if (scanner.peek_next_token () == RIGHT_PAREN) {
       scanner.get_next_token ();
@@ -126,6 +140,93 @@ class ExpressionParser {
     }
 
     return args;
+  }
+
+  private Expression parse_or_expression (EvaluatableExpression first_expr) throws ExpressionParserError {
+    var expressions = new Gee.ArrayList<EvaluatableExpression> ();
+    expressions.add (first_expr);
+
+    while (!scanner.eof ()) {
+      var token = scanner.get_next_token ();
+
+      if (token == EOF) {
+        break;
+      }
+
+      if (!(token == IDENTIFIER && scanner.value.identifier == "or")) {
+        throw_invalid_token (null, "'or'");
+      }
+
+      var expr = parse_expression ();
+      expressions.add (expr);
+    }
+
+    return new OrExpression (expressions);
+  }
+
+  [NoReturn]
+  private void throw_invalid_token (string? msg, string expected) throws ExpressionParserError {
+    throw new ExpressionParserError.INVALID_TOKEN (
+      (msg == null ? "" : @"$(msg): ") + "invalid token %s at position %u, expected %s",
+      current_token (),
+      scanner.position,
+      expected
+    );
+  }
+
+  private string current_token () {
+    switch (scanner.cur_token ()) {
+      case EOF:
+        return "EOF";
+      case LEFT_PAREN:
+        return "(";
+      case RIGHT_PAREN:
+        return ")";
+      case LEFT_CURLY:
+        return "{";
+      case RIGHT_CURLY:
+        return "}";
+      case LEFT_BRACE:
+        return "[";
+      case RIGHT_BRACE:
+        return "]";
+      case EQUAL_SIGN:
+        return "=";
+      case COMMA:
+        return ",";
+      case NONE:
+        return "NONE";
+      case ERROR:
+        return "ERROR";
+      case CHAR:
+        return @"'$(scanner.cur_value ().char)'";
+      case BINARY:
+        return @"'$(scanner.cur_value ().binary)'";
+      case OCTAL:
+        return @"'$(scanner.cur_value ().octal)'";
+      case INT:
+        return @"'$(scanner.cur_value ().int)'";
+      case HEX:
+        return @"'$(scanner.cur_value ().hex)'";
+      case FLOAT:
+        return @"'$(scanner.cur_value ().float)'";
+      case STRING:
+        return @"\"$(scanner.cur_value ().string)\"";
+      case SYMBOL:
+        return @"SYMBOL $((ulong) scanner.cur_value ().symbol)";
+      case IDENTIFIER:
+        return @"$(scanner.cur_value ().identifier)";
+      case IDENTIFIER_NULL:
+        return "NULL";
+      case COMMENT_SINGLE:
+        return "COMMENT";
+      case COMMENT_MULTI:
+        return "MULTILINE COMMENT";
+      case LAST:
+        return "LAST";
+    }
+
+    return "";
   }
 }
 

@@ -42,6 +42,9 @@ public static int main (string[] args) {
     { name: "fn_unknown",       pattern: "unknownFn()",                                             result: null,           error: new GameDef.ExpressionParserError.INVALID_TOKEN ("failed to parse function: unknown function 'unknownFn' at position 11, only supported 'regex' or 'mapKeyword'") },
     { name: "fn_malformed",     pattern: "regex(\"user (\\\\d)\",",                                 result: null,           error: new GameDef.ExpressionParserError.INVALID_TOKEN ("invalid token at position 19, expected string, integer, float or identifier")                                   },
     { name: "fn_missing_arg",   pattern: "regex(\"user\")",                                         result: null,           error: new GameDef.ExpressionError.INVALID_FUNCTION ("failed to evaluate argument 1 of 'regex()': missing argument 1")                                                   },
+    { name: "or_expr_one",      pattern: "\"one\" or \"two\"",                                      result: "one",          error: null                                                                                                                                                              },
+    { name: "or_expr_two",      pattern: "\"one\" or \"two\"",                                      result: "two",          error: null                                                                                                                                                              },
+    { name: "or_expr_three",    pattern: "\"one\" or \"two\" or 3",                                 result: "3",            error: null                                                                                                                                                              },
   };
 
   var ctx = new GameDef.ExpressionContext ();
@@ -53,9 +56,16 @@ public static int main (string[] args) {
       try {
         var parser = new GameDef.ExpressionParser (row.pattern);
         var expression = parser.parse ();
-        var value = expression.eval (ctx);
 
-        assert_cmpstr (value, EQ, row.result);
+        if (expression is GameDef.EvaluatableExpression) {
+          var value = expression.eval (ctx);
+          assert_cmpstr (value, EQ, row.result);
+        }
+
+        if (expression is GameDef.LogicalExpression) {
+          var result = expression.eval (ctx, row.result);
+          assert_true (result);
+        }
       } catch (Error error) {
         if (row.error == null) {
           assert_no_error (error);
