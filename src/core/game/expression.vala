@@ -20,39 +20,45 @@ using Gee;
 
 namespace Gsw.GameDef {
 
-errordomain ExpressionError {
+public errordomain ExpressionError {
   INVALID_MAP,
   INVALID_FUNCTION,
 }
 
-class ExpressionContext : HashMap<string, Map<string, string>> {}
+public class ExpressionContext : HashMap<string, Map<string, string>> {}
 
-abstract class Expression {
+public abstract class Expression : Object {}
+
+public interface EvaluatableExpression : Expression {
   public abstract string eval (ExpressionContext ctx) throws ExpressionError;
 }
 
-class LiteralExpression : Expression {
+public interface LogicalExpression : Expression {
+  public abstract bool eval (ExpressionContext ctx, string value) throws ExpressionError;
+}
+
+class LiteralExpression : Expression, EvaluatableExpression {
   private string value = "";
 
   public LiteralExpression (string value) {
     this.value = value;
   }
 
-  public override string eval (ExpressionContext ctx) throws ExpressionError {
+  public string eval (ExpressionContext ctx) throws ExpressionError {
     return value;
   }
 }
 
-class ValueExpression : Expression {
+class ValueExpression : Expression, EvaluatableExpression {
   private string map_name;
-  private Expression key_expr;
+  private EvaluatableExpression key_expr;
 
-  public ValueExpression (string map, Expression key_expr) {
+  public ValueExpression (string map, EvaluatableExpression key_expr) {
     this.map_name = map;
     this.key_expr = key_expr;
   }
 
-  public override string eval (ExpressionContext ctx) throws ExpressionError {
+  public string eval (ExpressionContext ctx) throws ExpressionError {
     if (!ctx.has_key (map_name))
       throw new ExpressionError.INVALID_MAP ("map '%s' does not exist", map_name);
 
@@ -66,16 +72,18 @@ class ValueExpression : Expression {
   }
 }
 
-abstract class FunctionExpression : Expression {
+abstract class FunctionExpression : Expression, EvaluatableExpression {
   private string name;
-  private Gee.List<Expression> args;
+  private Gee.List<EvaluatableExpression> args;
 
-  protected FunctionExpression (string name, Gee.List<Expression> args) {
+  protected FunctionExpression (string name, Gee.List<EvaluatableExpression> args) {
     this.name = name;
     this.args = args;
   }
 
-  protected Expression get_arg (int arg_index) throws ExpressionError {
+  public abstract string eval (ExpressionContext ctx) throws ExpressionError;
+
+  protected EvaluatableExpression get_arg (int arg_index) throws ExpressionError {
     if (arg_index >= args.size)
       throw new ExpressionError.INVALID_FUNCTION ("missing argument %d", arg_index);
 
@@ -93,7 +101,7 @@ abstract class FunctionExpression : Expression {
 }
 
 class RegexExpression : FunctionExpression {
-  public RegexExpression (Gee.List<Expression> args) {
+  public RegexExpression (Gee.List<EvaluatableExpression> args) {
     base ("regex", args);
   }
 
@@ -123,7 +131,7 @@ class RegexExpression : FunctionExpression {
 }
 
 class MapKeywordExpression : FunctionExpression {
-  public MapKeywordExpression (Gee.List<Expression> args) {
+  public MapKeywordExpression (Gee.List<EvaluatableExpression> args) {
     base ("mapKeyword", args);
   }
 
@@ -150,6 +158,24 @@ class MapKeywordExpression : FunctionExpression {
         return map[keyword];
 
     return def;
+  }
+}
+
+public class OrExpression : Expression, LogicalExpression {
+  private Gee.List<EvaluatableExpression> expressions;
+
+  public OrExpression (Gee.List<EvaluatableExpression> expressions) {
+    this.expressions = expressions;
+  }
+
+  public bool eval (ExpressionContext ctx, string value) throws ExpressionError {
+    foreach (var expr in expressions) {
+      if (value == expr.eval (ctx)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }
 

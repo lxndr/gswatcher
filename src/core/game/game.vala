@@ -24,7 +24,7 @@ class Game {
   public uint16 port;
   public int16 qport_diff;
   public Gee.Map<string, GameDef.Expression> inf_matches = new Gee.HashMap<string, GameDef.Expression> ();
-  public Gee.Map<string, GameDef.Expression> inf = new Gee.HashMap<string, GameDef.Expression> ();
+  public Gee.Map<string, GameDef.EvaluatableExpression> inf = new Gee.HashMap<string, GameDef.EvaluatableExpression> ();
   public Gee.List<PlayerField> pfields = new Gee.ArrayList<PlayerField> ();
   public Gee.Map<ProtocolFeature, string> features = new Gee.HashMap<ProtocolFeature, string> ();
   public GameDef.ExpressionContext maps = new GameDef.ExpressionContext ();
@@ -49,8 +49,16 @@ class Game {
 
     foreach (var entry in inf_matches.entries) {
       try {
-        if (details.get (entry.key) != entry.value.eval (ctx))
-          return false;
+        var expr = entry.value;
+        var value = details.get (entry.key);
+
+        if (expr is GameDef.EvaluatableExpression && value == expr.eval (ctx))
+          return true;
+
+        if (expr is GameDef.LogicalExpression && expr.eval (ctx, value))
+          return true;
+
+        return false;
       } catch (GameDef.ExpressionError err) {
         warning ("failed to evaluate value of '%s' for '%s': %s", entry.key, id, err.message);
       }

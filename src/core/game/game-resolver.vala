@@ -113,7 +113,7 @@ class GameResolver : Object {
                 break;
             }
           } catch (GameDef.ExpressionParserError parser_err) {
-            throw new IOError.INVALID_DATA ("failed to parse expression at '%s' (group 'Match'): %s", key, parser_err.message);
+            throw new IOError.INVALID_DATA ("failed to parse expression at '%s' (group '%s'): %s", key, MATCH_GROUP, parser_err.message);
           }
         }
 
@@ -125,9 +125,15 @@ class GameResolver : Object {
 
             try {
               var parser = new GameDef.ExpressionParser (val);
-              game.inf[key] = parser.parse ();
+              var expr = parser.parse ();
+
+              if (!(expr is GameDef.EvaluatableExpression)) {
+                throw new IOError.INVALID_DATA ("expression at '%s' (group '%s') has to be evaluatable expression", key, INFO_GROUP);
+              }
+
+              game.inf[key] = expr as GameDef.EvaluatableExpression;
             } catch (GameDef.ExpressionParserError parser_err) {
-              throw new IOError.INVALID_DATA ("failed to parse expression at '%s' (group 'Info'): %s", key, parser_err.message);
+              throw new IOError.INVALID_DATA ("failed to parse expression at '%s' (group '%s'): %s", key, INFO_GROUP, parser_err.message);
             }
           }
         }
