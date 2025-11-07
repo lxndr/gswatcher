@@ -23,6 +23,7 @@ class Game {
   public string protocol;
   public uint16 port;
   public int16 qport_diff;
+  public int weight;
   public Gee.Map<string, GameDef.Expression> inf_matches = new Gee.HashMap<string, GameDef.Expression> ();
   public Gee.Map<string, GameDef.EvaluatableExpression> inf = new Gee.HashMap<string, GameDef.EvaluatableExpression> ();
   public Gee.List<PlayerField> pfields = new Gee.ArrayList<PlayerField> ();
@@ -32,12 +33,6 @@ class Game {
   public Game (string id, string protocol) {
     this.id = id;
     this.protocol = protocol;
-  }
-
-  public int weight {
-    get {
-      return inf_matches.size;
-    }
   }
 
   public bool matches (string protocol_id, Gee.Map<string, string> details) {
