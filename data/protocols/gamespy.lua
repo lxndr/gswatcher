@@ -108,6 +108,7 @@ function process(data)
     error("invalid response: invalid queryid")
   end
 
+  ---@type Packet
   local pak = {
     reqid = tonumber(reqid),
     number = tonumber(fragment),

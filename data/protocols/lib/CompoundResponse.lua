@@ -20,12 +20,12 @@ local Object = require("lib/classic")
 ---@field reqid integer
 ---@field number integer
 ---@field data Buffer|Dictionary
----@field total integer
+---@field total? integer
 
 ---@class (exact) CompoundResponse: Object
----@field reqid integer|nil
+---@field reqid integer
 ---@field packets (Buffer|Dictionary)[]
----@field total integer|nil
+---@field total? integer
 local CompoundResponse = Object:extend()
 
 ---@param request_id? integer
@@ -49,7 +49,11 @@ function CompoundResponse:add_packet(packet)
   assert(math.type(number) == "integer" and number >= 0, "number is not a positive integer")
 
   if reqid ~= self.reqid then
-    return
+    if not self.reqid then
+      self.reqid = reqid
+    else
+      return
+    end
   end
 
   if total ~= nil then
