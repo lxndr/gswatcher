@@ -43,7 +43,7 @@ local PacketType = {
   RESPONSE_VALUE = 0,
 }
 
----@class Packet
+---@class SourcePacket
 ---@field id integer
 ---@field type PacketType
 ---@field body string
@@ -96,7 +96,7 @@ function send_command(cmd, params)
 end
 
 ---@param buf string
----@return Packet
+---@return SourcePacket
 local function parse_packet(buf)
   local r = DataReader(buf)
 
@@ -108,7 +108,7 @@ local function parse_packet(buf)
   }
 end
 
----@param pak Packet
+---@param pak SourcePacket
 local function process_auth_response(pak)
   if pak.id == requestId then
     authentication_state = AuthenticationState.AUTHORIZED
@@ -120,7 +120,7 @@ local function process_auth_response(pak)
   end
 end
 
----@param pak Packet
+---@param pak SourcePacket
 local function process_response(pak)
   if pak.id == requestId then
     if authentication_state == AuthenticationState.AUTHORIZED then
