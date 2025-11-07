@@ -50,7 +50,6 @@
 | Nerf Arena Blast                  | nab       | gamespy  |           |            |
 | Neverwinter Nights                | nwn       | gamespy2 |           |            |
 | Nitro Family                      | nf        | gamespy  |           |            |
-| No One Lives Forever              | nolf      | gamespy  |           |            |
 | No One Lives Forever 2            | nolf2     | gamespy  |           |            |
 | Operation Flashpoint              | ofp       | gamespy2 |           |            |
 | Operation Flashpoint: Resistance  | ofpr      | gamespy  |           |            |
