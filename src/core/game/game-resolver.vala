@@ -106,6 +106,7 @@ class GameResolver : Object {
 
           try {
             var parser = new GameDef.ExpressionParser (value);
+            game.weight += value.length;
 
             switch (key1) {
               case "inf":
