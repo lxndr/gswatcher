@@ -284,7 +284,7 @@ jobs:
                 format('gswatcher_{0}+{1}.pr{2}.appimage.{3}.build{4}', env.APP_VERSION, matrix.image, github.event.number, matrix.arch, github.run_number)) ||
                 format('gswatcher_{0}+{1}.appimage.{2}.build{3}', env.APP_VERSION, matrix.image, matrix.arch, github.run_number)
             }}
-          path: ${{ env.OUTDIR }}
+          path: gswatcher-${{ env.APP_VERSION }}-${{ matrix.arch }}.AppImage
 
   release:
     runs-on: ubuntu-24.04
