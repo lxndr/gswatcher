@@ -161,6 +161,24 @@ class MapKeywordExpression : FunctionExpression {
   }
 }
 
+class ToMarkdownExpression : FunctionExpression {
+  public ToMarkdownExpression (Gee.List<EvaluatableExpression> args) {
+    base ("mapKeyword", args);
+  }
+
+  public override string eval (ExpressionContext ctx) throws ExpressionError {
+    var input = eval_arg (ctx, 0);
+    var transformation_type = eval_arg (ctx, 1);
+
+    switch (transformation_type) {
+      case "quake-color-code":
+        return input;
+      default:
+        return input;
+    }
+  }
+}
+
 public class OrExpression : Expression, LogicalExpression {
   private Gee.List<EvaluatableExpression> expressions;
 

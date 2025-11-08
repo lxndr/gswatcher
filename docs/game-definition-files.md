@@ -76,10 +76,24 @@ The `[Player]` section defines how player list fields are displayed:
 
 ```ini
 [Player]
-Player = player,string,main
+Name = toMarkdown(2, player)|string|main
+Score = score|number
+Ping = ping|number
 ```
 
-Format: `Display Name = field_name,field_type,optional_main_indicator`
+Format: `Display Name = field_name|field_type|optional_main_indicator`
+
+The Player section supports expressions, allowing for dynamic data transformation similar to the `[Info]` section. This enables complex player data processing and formatting.
+
+#### Field Types
+
+- `string`: Text field
+- `number`: Numeric field
+- `duration`: Duration field (time duration in seconds, automatically formatted as HH:MM:SS)
+
+#### Main Indicator
+
+The third field (optional) indicates if this is the main player field for display purposes. Only one player field should be marked as `main`.
 
 ### [Extra] Section
 
@@ -273,3 +287,34 @@ game-mode = mapKeyword(inf["keywords"], ",", "Modes", "")
 [Modes]
 competitive = Competitive
 ```
+
+### Game with Advanced Player Section (Call of Duty)
+
+```ini
+[Game]
+id = cod
+protocol = quake3
+port = 28960
+
+[Match]
+inf.gamename = "main"
+
+[Info]
+game-name = "Call of Duty"
+game-mode = inf["g_gametype"]
+server-name = toMarkdown(inf["g_gametype"], "quake-color-code")
+
+[Player]
+Name = toMarkdown(2, "quake-color-code")|string|main
+Score = 0|number
+Ping = 1|number
+
+[Extra]
+release-year = 2003
+```
+
+This example shows:
+1. Updated Player section format using pipe separators
+2. Expression support in Player section (`toMarkdown()` function)
+3. Main field indicator (`main`)
+4. Different field types (`string`, `number`)

@@ -102,9 +102,10 @@ class PlayerList : Widget {
     var label = (Label) listitem.child;
 
     player.change.connect(() => {
+      var str_val = player.get (field.field);
+
       switch (field.kind) {
         case PlayerFieldType.DURATION:
-          var str_val = player.get (field.field);
           double val = 0;
 
           if (str_val == null) {
@@ -118,7 +119,7 @@ class PlayerList : Widget {
 
           break;
         default:
-          label.label = player.get (field.field);
+          label.label = str_val;
           break;
       }
     });

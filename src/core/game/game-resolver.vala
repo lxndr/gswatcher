@@ -162,8 +162,9 @@ class GameResolver : Object {
 
   private void load_player_fields (KeyFile kf, ref Game game) throws Error {
     foreach (var key in kf.get_keys (PLAYER_GROUP)) {
-      // title = field;type;main
-      var options = kf.get_string_list (PLAYER_GROUP, key);
+      // title = field|type|main
+      var option_str = kf.get_string (PLAYER_GROUP, key);
+      var options = option_str.split("|");
 
       var field = new PlayerField () {
         field = options[0],
