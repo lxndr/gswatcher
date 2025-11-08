@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gswatcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-07 18:36+0300\n"
+"POT-Creation-Date: 2025-11-08 16:50+0300\n"
 "PO-Revision-Date: 2025-11-02 11:54+0300\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: German <de@li.org>\n"
@@ -17,32 +17,45 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: src/core/geo-location-resolver/maxmind-location-resolver.vala:40
+msgid "failed to find GeoIP database"
+msgstr "GeoIP-Datenbank nicht gefunden"
+
+#: src/core/geo-location-resolver/maxmind-location-resolver.vala:48
+msgid "failed to load GeoIP database"
+msgstr "GeoIP-Datenbank konnte nicht geladen werden"
+
 #: src/core/protocol/lua-utils.vala:107
 #, c-format
 msgid ""
 "failed to retrieve value from Lua table under key '%s': unsupported type '%s'"
 msgstr ""
-"Fehler beim Abrufen des Werts aus Lua-Tabelle mit Schlüssel '%s': nicht unterstützter Typ '%s'"
+"Fehler beim Abrufen des Werts aus Lua-Tabelle mit Schlüssel '%s': nicht "
+"unterstützter Typ '%s'"
 
-#: src/core/client.vala:216
+#: src/core/client.vala:268
 msgid "Connected"
 msgstr "Verbunden"
 
-#: src/core/client.vala:220
+#: src/core/client.vala:272
 msgid "Disconnected"
 msgstr "Getrennt"
 
-#: src/core/client.vala:225
+#: src/core/client.vala:277
 msgid "Authenticated"
 msgstr "Authentifiziert"
 
-#: src/core/geoip-resolver.vala:40
-msgid "failed to find GeoIP database"
-msgstr "GeoIP-Datenbank nicht gefunden"
+#: src/ui/about.vala:73
+msgid "IP to location data provided by MaxMind"
+msgstr "IP-Standortdaten bereitgestellt von MaxMind"
 
-#: src/core/geoip-resolver.vala:48
-msgid "failed to load GeoIP database"
-msgstr "GeoIP-Datenbank konnte nicht geladen werden"
+#: src/ui/about.vala:87 src/ui/about.vala:100
+msgid "IP to location"
+msgstr "IP zu Standort"
+
+#: src/ui/about.vala:113
+msgid "Acknowledgements"
+msgstr "Danksagungen"
 
 #: src/ui/buddy-list.ui:65
 msgctxt "buddy-list"
@@ -133,7 +146,8 @@ msgstr "Server entfernen?"
 #: src/ui/main-window.vala:91
 #, c-format
 msgid "Are you sure you want to remove \"%s\" from the server list?"
-msgstr "Sind Sie sicher, dass Sie \"%s\" aus der Serverliste entfernen möchten?"
+msgstr ""
+"Sind Sie sicher, dass Sie \"%s\" aus der Serverliste entfernen möchten?"
 
 #: src/ui/main-window.vala:111
 #, c-format
@@ -147,7 +161,8 @@ msgstr "Freund entfernen?"
 #: src/ui/main-window.vala:122
 #, c-format
 msgid "Are you sure you want to remove \"%s\" from the buddy list?"
-msgstr "Sind Sie sicher, dass Sie \"%s\" aus der Freundesliste entfernen möchten?"
+msgstr ""
+"Sind Sie sicher, dass Sie \"%s\" aus der Freundesliste entfernen möchten?"
 
 #: src/ui/preferences.ui:33
 msgid "General"
@@ -182,6 +197,7 @@ msgid "Value"
 msgstr "Wert"
 
 #: src/ui/server-info.ui:39
+msgctxt "server-info"
 msgid "Name:"
 msgstr "Name:"
 
@@ -233,7 +249,7 @@ msgstr "ja"
 msgid "no"
 msgstr "nein"
 
-#: src/ui/server-info.vala:69 src/ui/server-list.vala:143
+#: src/ui/server-info.vala:68 src/ui/server-list.vala:148
 msgid "Timed out"
 msgstr "Zeitüberschreitung"
 
@@ -258,7 +274,7 @@ msgstr "Spieler"
 msgid "Ping"
 msgstr "Ping"
 
-#: src/ui/server-list.vala:145 src/ui/utils.vala:98
+#: src/ui/server-list.vala:150 src/ui/utils.vala:98
 msgid "Error"
 msgstr "Fehler"
 
@@ -278,17 +294,17 @@ msgstr "OK"
 msgid "Display version number"
 msgstr "Versionsnummer anzeigen"
 
-#: src/application.vala:64
+#: src/application.vala:63
 #, c-format
 msgid "Failed to initialize GeoIP: %s"
 msgstr "GeoIP-Initialisierung fehlgeschlagen: %s"
 
-#: src/application.vala:132
+#: src/application.vala:131
 #, c-format
 msgid "Player %s has connected"
 msgstr "Spieler %s hat verbunden"
 
-#: src/application.vala:134
+#: src/application.vala:133
 #, c-format
 msgid ""
 "Address: %s\n"
