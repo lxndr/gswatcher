@@ -272,7 +272,7 @@ jobs:
         run: |
           export OUTPUT="gswatcher-${{ env.APP_VERSION }}-${{ matrix.arch }}.AppImage"
           export DEPLOY_GTK_VERSION=4
-          ./linuxdeploy.AppImage --appdir ${{ env.OUTDIR }} --plugin gtk --output appimage --icon-file data/icons/gswatcher.png --desktop-file "${{ env.OUTDIR }}/usr/share/applications/io.github.lxndr.gswatcher.desktop"
+          ./linuxdeploy.AppImage --appdir ${{ env.OUTDIR }} --plugin gtk --output appimage --icon-file "${{ env.OUTDIR }}/usr/share/icons/hicolor/512x512/apps/io.github.lxndr.gswatcher.png" --desktop-file "${{ env.OUTDIR }}/usr/share/applications/io.github.lxndr.gswatcher.desktop"
           ls
 
       - name: Upload AppImage artifacts
