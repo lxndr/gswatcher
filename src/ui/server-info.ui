@@ -36,7 +36,7 @@
               <property name="row">0</property>
             </layout>
             <property name="xalign">0</property>
-            <property name="label" translatable="yes">Name:</property>
+            <property name="label" translatable="yes" context="server-info">Name:</property>
           </object>
         </child>
         <child>

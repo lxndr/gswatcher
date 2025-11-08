@@ -1,12 +1,12 @@
 #
-# Alexander Burobin <alexandrburobin@gmail.com>, 2010-2026.
+# Alexander Burobin <alexandrburobin@gmail.com>, 2010-2025.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: unnamed project\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-04 16:54+0300\n"
-"PO-Revision-Date: 2025-02-07 18:53+0300\n"
+"POT-Creation-Date: 2025-11-08 16:45+0300\n"
+"PO-Revision-Date: 2025-11-08 16:46+0300\n"
 "Last-Translator: Alexander Burobin <alexandrburobin@gmail.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
-"X-Generator: Gtranslator 47.1\n"
+"X-Generator: Gtranslator 49.0\n"
 
 #: src/core/geo-location-resolver/maxmind-location-resolver.vala:40
 msgid "failed to find GeoIP database"
@@ -167,7 +167,7 @@ msgstr "Основные"
 
 #: src/ui/preferences.ui:37
 msgid "Query _interval"
-msgstr "_Частота обновления"
+msgstr "_Интервал запросов"
 
 #: src/ui/preferences.ui:58
 msgid "Local _UDP port"
@@ -194,6 +194,7 @@ msgid "Value"
 msgstr "Значение"
 
 #: src/ui/server-info.ui:39
+msgctxt "server-info"
 msgid "Name:"
 msgstr "Название:"
 
@@ -227,7 +228,7 @@ msgstr "Закрытый:"
 
 #: src/ui/server-info.ui:313
 msgid "Secure:"
-msgstr "Безопастный:"
+msgstr "Безопасный:"
 
 #: src/ui/server-info.ui:346
 msgid "Version:"
@@ -235,7 +236,7 @@ msgstr "Версия:"
 
 #: src/ui/server-info.vala:40
 msgid "n/a"
-msgstr "нет"
+msgstr "н/д"
 
 #: src/ui/server-info.vala:45
 msgid "yes"
@@ -308,11 +309,5 @@ msgid ""
 "Players: %d / %d"
 msgstr ""
 "Адрес: %s\n"
-"Сервеор: %s\n"
+"Сервер: %s\n"
 "Игроки: %d / %d"
-
-#~ msgid "Click here to add new buddy"
-#~ msgstr "Нажмите сюда, чтобы добавить нового друга"
-
-#~ msgid "Click here to add new server"
-#~ msgstr "Нажмите сюда, чтобы добавить новый сервер"
