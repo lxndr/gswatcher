@@ -259,7 +259,7 @@ jobs:
       - name: Setup dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y desktop-file-utils appstream-util imagemagick libfuse2t64
+          sudo apt-get install -y libfuse2t64 libgee-0.8-dev libgtk-4-dev libadwaita-1-dev liblua5.4-dev libgeoip-dev
 
       - name: Get linuxdeploy
         run: |
