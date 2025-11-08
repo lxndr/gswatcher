@@ -27,17 +27,28 @@ namespace Gsw {
   }
 
   public string format_time_duration (int64 microseconds) {
+    var negative = microseconds < 0;
+    microseconds = microseconds.abs ();
+
     var hours = microseconds / TimeSpan.HOUR;
     microseconds -= hours * TimeSpan.HOUR;
     var minutes = microseconds / TimeSpan.MINUTE;
     microseconds -= minutes * TimeSpan.MINUTE;
     var seconds = microseconds / TimeSpan.SECOND;
 
-    if (hours > 0) {
-      return "%lld:%02lld:%02lld".printf (hours, minutes, seconds);
+    var result = "";
+
+    if (negative) {
+      result += "-";
     }
 
-    return "%lld:%02lld".printf (minutes, seconds);
+    if (hours > 0) {
+      result += @"%$(int64.FORMAT):%02$(int64.FORMAT):%02$(int64.FORMAT)".printf (hours, minutes, seconds);
+    } else {
+      result += @"%$(int64.FORMAT):%02$(int64.FORMAT)".printf (minutes, seconds);
+    }
+
+    return result;
   }
 
   public bool settings_nullable_string_getter (Value value, Variant variant, void* user_data) {
