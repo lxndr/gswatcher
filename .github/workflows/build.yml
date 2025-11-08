@@ -271,6 +271,7 @@ jobs:
       - name: Build AppImage
         run: |
           export OUTPUT="gswatcher-${{ env.APP_VERSION }}-${{ matrix.arch }}.AppImage"
+          export DEPLOY_GTK_VERSION=4
           ./linuxdeploy.AppImage --appdir ${{ env.OUTDIR }} --plugin gtk --output appimage --icon-file data/icons/gswatcher.png --desktop-file "${{ env.OUTDIR }}/usr/share/applications/io.github.lxndr.gswatcher.desktop"
           ls
 
