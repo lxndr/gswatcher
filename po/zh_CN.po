@@ -1,305 +1,304 @@
-#
-# Alexander Burobin <alexandrburobin@gmail.com>, 2010-2025.
+# 
+# Mandarin Chinese translation for gswatcher
+# Copyright (C) 2025 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the gswatcher package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: gswatcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-08 16:45+0300\n"
-"PO-Revision-Date: 2025-11-08 16:46+0300\n"
-"Last-Translator: Alexander Burobin <alexandrburobin@gmail.com>\n"
-"Language-Team: Russian\n"
-"Language: ru\n"
+"POT-Creation-Date: 2025-11-08 16:50+0300\n"
+"PO-Revision-Date: 2025-11-08 18:00+0800\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: Chinese\n"
+"Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
-"X-Generator: Gtranslator 49.0\n"
 
 #: src/core/geo-location-resolver/maxmind-location-resolver.vala:40
 msgid "failed to find GeoIP database"
-msgstr "ошибка поиска базы данных GeoIP"
+msgstr "未能找到 GeoIP 数据库"
 
 #: src/core/geo-location-resolver/maxmind-location-resolver.vala:48
 msgid "failed to load GeoIP database"
-msgstr "ошибка загрузки базы данных GeoIP"
+msgstr "加载 GeoIP 数据库失败"
 
 #: src/core/protocol/lua-utils.vala:107
 #, c-format
 msgid ""
 "failed to retrieve value from Lua table under key '%s': unsupported type '%s'"
-msgstr ""
-"ошибка чтения значения Lua таблицы с ключом '%s': тип '%s' не поддерживается"
+msgstr "未能从 Lua 表中获取键 '%s' 的值：不支持的类型 '%s'"
 
 #: src/core/client.vala:268
 msgid "Connected"
-msgstr "Подключен"
+msgstr "已连接"
 
 #: src/core/client.vala:272
 msgid "Disconnected"
-msgstr "Отключен"
+msgstr "已断开连接"
 
 #: src/core/client.vala:277
 msgid "Authenticated"
-msgstr "Авторизован"
+msgstr "已认证"
 
 #: src/ui/about.vala:73
 msgid "IP to location data provided by MaxMind"
-msgstr "Данные геолокации IP предоставлены MaxMind"
+msgstr "IP 位置数据由 MaxMind 提供"
 
 #: src/ui/about.vala:87 src/ui/about.vala:100
 msgid "IP to location"
-msgstr "Определение местоположения по IP"
+msgstr "IP 到位置"
 
 #: src/ui/about.vala:113
 msgid "Acknowledgements"
-msgstr "Благодарности"
+msgstr "致谢"
 
 #: src/ui/buddy-list.ui:65
 msgctxt "buddy-list"
 msgid "Name"
-msgstr "Имя:"
+msgstr "姓名"
 
 #: src/ui/buddy-list.ui:101
 msgid "Notify"
-msgstr "Уведомления"
+msgstr "通知"
 
 #: src/ui/buddy-list.ui:131 src/ui/main-window.ui:45
 msgid "Address"
-msgstr "Адрес"
+msgstr "地址"
 
 #: src/ui/buddy-list.ui:160
 msgid "Last seen"
-msgstr "Был онлайн"
+msgstr "最后上线"
 
 #: src/ui/console-option-list.ui:39
 msgid "Port:"
-msgstr "Порт:"
+msgstr "端口："
 
 #: src/ui/console-option-list.ui:73
 msgid "Password:"
-msgstr "Пароль:"
+msgstr "密码："
 
 #: src/ui/main-window.ui:27
 msgid "_Pause"
-msgstr "_Преостановить"
+msgstr "暂停(_P)"
 
 #: src/ui/main-window.ui:31
 msgid "_About"
-msgstr "_О приложении"
+msgstr "关于(_A)"
 
 #: src/ui/main-window.ui:68 src/ui/main-window.ui:114
 msgid "Add"
-msgstr "Добавить"
+msgstr "添加"
 
 #: src/ui/main-window.ui:92
 msgid "Buddy name"
-msgstr "Имя друга"
+msgstr "好友姓名"
 
 #: src/ui/main-window.ui:149
 msgid "_Add server"
-msgstr "Д_обавить сервер"
+msgstr "添加服务器(_A)"
 
 #: src/ui/main-window.ui:160
 msgid "_Add buddy"
-msgstr "Д_обавить друга"
+msgstr "添加好友(_A)"
 
 #: src/ui/main-window.ui:177
 msgid "Primary menu"
-msgstr "Главное меню"
+msgstr "主菜单"
 
 #: src/ui/main-window.ui:193
 msgid "_Server list"
-msgstr "Список _серверов"
+msgstr "服务器列表(_S)"
 
 #: src/ui/main-window.ui:241
 msgid "_Info"
-msgstr "_Инфо"
+msgstr "信息(_I)"
 
 #: src/ui/main-window.ui:256
 msgid "_Details"
-msgstr "_Детали"
+msgstr "详情(_D)"
 
 #: src/ui/main-window.ui:278
 msgid "_Console"
-msgstr "_Консоль"
+msgstr "控制台(_C)"
 
 #: src/ui/main-window.ui:292
 msgid "_Buddy list"
-msgstr "Список д_рузей"
+msgstr "好友列表(_B)"
 
 #: src/ui/main-window.ui:311
 msgid "_Preferences"
-msgstr "_Настройки"
+msgstr "首选项(_P)"
 
 #: src/ui/main-window.vala:80
 #, c-format
 msgid "\"%s\" is already on your server list."
-msgstr "\"%s\" уже в списке серверов."
+msgstr "“%s”已在您的服务器列表中。"
 
 #: src/ui/main-window.vala:90
 msgid "Remove server?"
-msgstr "Удалить сервер?"
+msgstr "移除服务器？"
 
 #: src/ui/main-window.vala:91
 #, c-format
 msgid "Are you sure you want to remove \"%s\" from the server list?"
-msgstr "Вы уверены, что хотите удалить \"%s\" из списка серверов?"
+msgstr "您确定要从服务器列表中移除“%s”吗？"
 
 #: src/ui/main-window.vala:111
 #, c-format
 msgid "\"%s\" is already on your buddy list."
-msgstr "\"%s\" уже в списке друзей."
+msgstr "“%s”已在您的好友列表中。"
 
 #: src/ui/main-window.vala:121
 msgid "Remove buddy?"
-msgstr "Удалить друга?"
+msgstr "移除好友？"
 
 #: src/ui/main-window.vala:122
 #, c-format
 msgid "Are you sure you want to remove \"%s\" from the buddy list?"
-msgstr "Вы уверены, что хотите удалить \"%s\" из списка друзей?"
+msgstr "您确定要从好友列表中移除“%s”吗？"
 
 #: src/ui/preferences.ui:33
 msgid "General"
-msgstr "Основные"
+msgstr "常规"
 
 #: src/ui/preferences.ui:37
 msgid "Query _interval"
-msgstr "_Интервал запросов"
+msgstr "查询间隔(_I)"
 
 #: src/ui/preferences.ui:58
 msgid "Local _UDP port"
-msgstr "_UDP порт"
+msgstr "本地 UDP 端口(_U)"
 
 #: src/ui/preferences.ui:79
 msgid "Notifications"
-msgstr "Уведомления"
+msgstr "通知"
 
 #: src/ui/preferences.ui:82
 msgid "Enable _notifications"
-msgstr "Включить _уведомления"
+msgstr "启用通知(_N)"
 
 #: src/ui/server-console.ui:79
 msgid "Options"
-msgstr "Настройки"
+msgstr "选项"
 
 #: src/ui/server-details.ui:67
 msgid "Key"
-msgstr "Параметр"
+msgstr "键"
 
 #: src/ui/server-details.ui:97
 msgid "Value"
-msgstr "Значение"
+msgstr "值"
 
 #: src/ui/server-info.ui:39
 msgctxt "server-info"
 msgid "Name:"
-msgstr "Название:"
+msgstr "名称："
 
 #: src/ui/server-info.ui:73
 msgid "Address:"
-msgstr "Адрес:"
+msgstr "地址："
 
 #: src/ui/server-info.ui:106
 msgid "Location:"
-msgstr "Расположение:"
+msgstr "位置："
 
 #: src/ui/server-info.ui:139
 msgid "Game:"
-msgstr "Игра:"
+msgstr "游戏："
 
 #: src/ui/server-info.ui:172
 msgid "Mode:"
-msgstr "Режим:"
+msgstr "模式："
 
 #: src/ui/server-info.ui:205
 msgid "Map:"
-msgstr "Карта:"
+msgstr "地图："
 
 #: src/ui/server-info.ui:238
 msgid "Players:"
-msgstr "Игроки:"
+msgstr "玩家："
 
 #: src/ui/server-info.ui:280
 msgid "Private:"
-msgstr "Закрытый:"
+msgstr "私有："
 
 #: src/ui/server-info.ui:313
 msgid "Secure:"
-msgstr "Безопасный:"
+msgstr "安全："
 
 #: src/ui/server-info.ui:346
 msgid "Version:"
-msgstr "Версия:"
+msgstr "版本："
 
 #: src/ui/server-info.vala:40
 msgid "n/a"
-msgstr "н/д"
+msgstr "不适用"
 
 #: src/ui/server-info.vala:45
 msgid "yes"
-msgstr "да"
+msgstr "是"
 
 #: src/ui/server-info.vala:45
 msgid "no"
-msgstr "нет"
+msgstr "否"
 
 #: src/ui/server-info.vala:68 src/ui/server-list.vala:148
 msgid "Timed out"
-msgstr "Таймаут"
+msgstr "超时"
 
 #: src/ui/server-list.ui:108
 msgctxt "server-list"
 msgid "Name"
-msgstr "Название"
+msgstr "名称"
 
 #: src/ui/server-list.ui:167
 msgid "Game"
-msgstr "Игра"
+msgstr "游戏"
 
 #: src/ui/server-list.ui:225
 msgid "Map"
-msgstr "Карта"
+msgstr "地图"
 
 #: src/ui/server-list.ui:257
 msgid "Players"
-msgstr "Игроки"
+msgstr "玩家"
 
 #: src/ui/server-list.ui:311
 msgid "Ping"
-msgstr "Пинг"
+msgstr "延迟"
 
 #: src/ui/server-list.vala:150 src/ui/utils.vala:98
 msgid "Error"
-msgstr "Ошибка"
+msgstr "错误"
 
 #: src/ui/utils.vala:43
 msgid "Cancel"
-msgstr "Отмена"
+msgstr "取消"
 
 #: src/ui/utils.vala:44
 msgid "Remove"
-msgstr "Удалить"
+msgstr "移除"
 
 #: src/ui/utils.vala:99 src/ui/utils.vala:106
 msgid "OK"
-msgstr "ОК"
+msgstr "确定"
 
 #: src/application.vala:34
 msgid "Display version number"
-msgstr "Показать версию"
+msgstr "显示版本号"
 
 #: src/application.vala:63
 #, c-format
 msgid "Failed to initialize GeoIP: %s"
-msgstr "Ошибка инициализации GeoIP: %s"
+msgstr "初始化 GeoIP 失败：%s"
 
 #: src/application.vala:131
 #, c-format
 msgid "Player %s has connected"
-msgstr "Игрок %s подключился"
+msgstr "玩家 %s 已连接"
 
 #: src/application.vala:133
 #, c-format
@@ -308,6 +307,6 @@ msgid ""
 "Server: %s\n"
 "Players: %d / %d"
 msgstr ""
-"Адрес: %s\n"
-"Сервер: %s\n"
-"Игроки: %d / %d"
+"地址：%s\n"
+"服务器：%s\n"
+"玩家：%d / %d"
