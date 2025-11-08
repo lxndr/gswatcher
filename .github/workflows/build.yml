@@ -180,7 +180,7 @@ jobs:
       - name: Extract build artifacts
         run: |
           ARTIFACT_DIR=$(find temp_artifacts -maxdepth 1 -type d -name "gswatcher_${{ env.APP_VERSION }}+${{ matrix.image }}.*" | head -n 1)
-          mkdir ${{ env.OUTDIR }}
+          mkdir -p ${{ env.OUTDIR }}
           cp -r "$ARTIFACT_DIR"/* ${{ env.OUTDIR }}/
           rm -rf temp_artifacts
 
@@ -232,7 +232,7 @@ jobs:
     needs: build-linux
 
     env:
-      OUTDIR: out
+      OUTDIR: AppDir
 
     steps:
       - name: Checkout
@@ -252,7 +252,7 @@ jobs:
       - name: Extract build artifacts
         run: |
           ARTIFACT_DIR=$(find temp_artifacts -maxdepth 1 -type d -name "gswatcher_${{ env.APP_VERSION }}+${{ matrix.image }}.*" | head -n 1)
-          mkdir ${{ env.OUTDIR }}/usr
+          mkdir -p ${{ env.OUTDIR }}/usr
           cp -r "$ARTIFACT_DIR"/* ${{ env.OUTDIR }}/usr/
           rm -rf temp_artifacts
 
@@ -263,35 +263,16 @@ jobs:
 
       - name: Get linuxdeploy
         run: |
-          if [ "${{ matrix.arch }}" = "aarch64" ]; then
-            wget -c "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-aarch64.AppImage" -O linuxdeploy.AppImage
-          else
-            wget -c "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage" -O linuxdeploy.AppImage
-          fi
+          wget -c "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-${{ matrix.arch }}.AppImage" -O linuxdeploy.AppImage
           chmod +x linuxdeploy.AppImage
-
-      - name: Get linuxdeploy GTK plugin
-        run: |
           wget -c "https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh"
           chmod +x linuxdeploy-plugin-gtk.sh
 
       - name: Build AppImage
         run: |
-          # Create AppDir
-          APPDIR="AppDir"
-          mkdir -p "$APPDIR"/{usr/bin,usr/lib,usr/share}
-
-          # Copy the application from the downloaded artifacts to the AppDir
-          cp -r ${{ env.OUTDIR }}/usr/* "$APPDIR/usr/"
-
-          # Create AppImage
-          ARCH="${{ matrix.arch }}"
           export OUTPUT="gswatcher-${{ env.APP_VERSION }}-${{ matrix.arch }}.AppImage"
-
-          ./linuxdeploy.AppImage --appdir "$APPDIR" --plugin gtk --output appimage --icon-file data/icons/gswatcher.png --desktop-file "$APPDIR/usr/share/applications/io.github.lxndr.gswatcher.desktop"
-
-          mkdir -p ${{ env.OUTDIR }}
-          cp "$OUTPUT" ${{ env.OUTDIR }}/
+          ./linuxdeploy.AppImage --appdir ${{ env.OUTDIR }} --plugin gtk --output appimage --icon-file data/icons/gswatcher.png --desktop-file "${{ env.OUTDIR }}/usr/share/applications/io.github.lxndr.gswatcher.desktop"
+          ls
 
       - name: Upload AppImage artifacts
         uses: actions/upload-artifact@v4
