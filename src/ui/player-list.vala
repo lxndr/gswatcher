@@ -102,25 +102,28 @@ class PlayerList : Widget {
     var label = (Label) listitem.child;
 
     player.change.connect(() => {
-      switch (field.kind) {
-        case PlayerFieldType.DURATION:
-          var str_val = player.get (field.field);
-          double val = 0;
+      var str_val = player.get (field.field);
+      var label_str = "";
 
-          if (str_val == null) {
-            label.label = "";
-          } else if (double.try_parse (str_val, out val, null)) {
-            label.label = format_time_duration ((int64) (val * 1000000));
-          } else {
-            log (Config.LOG_DOMAIN, LEVEL_WARNING, "could not parse double value '%s'", str_val);
-            label.label = "";
-          }
+      if (str_val != null) {
+        switch (field.kind) {
+          case PlayerFieldType.DURATION:
+            double val = 0;
 
-          break;
-        default:
-          label.label = player.get (field.field);
-          break;
+            if (double.try_parse (str_val, out val, null)) {
+              label_str = format_time_duration ((int64) (val * TimeSpan.SECOND));
+            } else {
+              log (Config.LOG_DOMAIN, LEVEL_WARNING, "could not parse double value '%s'", str_val);
+            }
+
+            break;
+          default:
+            label_str = Markup.escape_text (str_val);
+            break;
+        }
       }
+
+      label.label = label_str;
     });
 
     player.change ();

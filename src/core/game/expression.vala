@@ -31,6 +31,10 @@ public abstract class Expression : Object {}
 
 public interface EvaluatableExpression : Expression {
   public abstract string eval (ExpressionContext ctx) throws ExpressionError;
+
+  public virtual bool evals_to_markup () {
+    return false;
+  }
 }
 
 public interface LogicalExpression : Expression {
@@ -98,6 +102,10 @@ abstract class FunctionExpression : Expression, EvaluatableExpression {
       throw new ExpressionError.INVALID_FUNCTION ("failed to evaluate argument %d of '%s()': %s", arg_index, name, err.message);
     }
   }
+
+  public virtual bool evals_to_markup () {
+    return this.args.any_match ((arg) => arg.evals_to_markup ());
+  }
 }
 
 class RegexExpression : FunctionExpression {
@@ -158,6 +166,28 @@ class MapKeywordExpression : FunctionExpression {
         return map[keyword];
 
     return def;
+  }
+}
+
+class ToMarkupExpression : FunctionExpression {
+  public ToMarkupExpression (Gee.List<EvaluatableExpression> args) {
+    base ("toMarkup", args);
+  }
+
+  public override string eval (ExpressionContext ctx) throws ExpressionError {
+    var input = eval_arg (ctx, 0);
+    var transformation_type = eval_arg (ctx, 1);
+
+    switch (transformation_type) {
+      case "quake-color-code":
+        return parse_quake_color_codes (input);
+      default:
+        throw new ExpressionError.INVALID_FUNCTION ("unknown transformation type `%s`", transformation_type);
+    }
+  }
+
+  public override bool evals_to_markup () {
+    return true;
   }
 }
 
