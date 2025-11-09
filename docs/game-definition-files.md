@@ -76,14 +76,10 @@ The `[Player]` section defines how player list fields are displayed:
 
 ```ini
 [Player]
-Name = toMarkup(2, player)|string|main
-Score = score|number
-Ping = ping|number
+Player = player,string,main
 ```
 
-Format: `Display Name = field_name|field_type|optional_main_indicator`
-
-The Player section supports expressions, allowing for dynamic data transformation similar to the `[Info]` section. This enables complex player data processing and formatting.
+Format: `Display Name = field_name,field_type,optional_main_indicator`
 
 #### Field Types
 
@@ -287,34 +283,3 @@ game-mode = mapKeyword(inf["keywords"], ",", "Modes", "")
 [Modes]
 competitive = Competitive
 ```
-
-### Game with Advanced Player Section (Call of Duty)
-
-```ini
-[Game]
-id = cod
-protocol = quake3
-port = 28960
-
-[Match]
-inf.gamename = "main"
-
-[Info]
-game-name = "Call of Duty"
-game-mode = inf["g_gametype"]
-server-name = toMarkup(inf["g_gametype"], "quake-color-code")
-
-[Player]
-Name = toMarkup(2, "quake-color-code")|string|main
-Score = 0|number
-Ping = 1|number
-
-[Extra]
-release-year = 2003
-```
-
-This example shows:
-1. Updated Player section format using pipe separators
-2. Expression support in Player section (`toMarkup()` function)
-3. Main field indicator (`main`)
-4. Different field types (`string`, `number`)

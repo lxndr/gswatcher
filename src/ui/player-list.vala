@@ -83,7 +83,6 @@ class PlayerList : Widget {
 
   private void player_setup (ListItem listitem, PlayerField field) {
     var label = new Label ("");
-    label.use_markup = true;
 
     switch (field.kind) {
       case PlayerFieldType.NUMBER:

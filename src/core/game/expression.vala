@@ -171,7 +171,7 @@ class MapKeywordExpression : FunctionExpression {
 
 class ToMarkupExpression : FunctionExpression {
   public ToMarkupExpression (Gee.List<EvaluatableExpression> args) {
-    base ("mapKeyword", args);
+    base ("toMarkup", args);
   }
 
   public override string eval (ExpressionContext ctx) throws ExpressionError {

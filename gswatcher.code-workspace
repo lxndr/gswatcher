@@ -75,6 +75,7 @@
 			"geoip",
 			"getfield",
 			"getglobal",
+			"getstatus",
 			"getsubtable",
 			"gettop",
 			"globaltable",
