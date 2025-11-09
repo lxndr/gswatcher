@@ -166,6 +166,34 @@ Syntax: `mapKeyword(keywords, delimiter, map_section, default)`
 - `map_section`: Section name to look up values in
 - `default`: Default value if no match is found
 
+#### toMarkup() Function
+
+The `toMarkup()` function transforms input text into markup format, currently supporting Quake-style color codes:
+
+```
+server-name = toMarkup(inf["sv_hostname"], "quake-color-code")
+```
+
+Syntax: `toMarkup(input, transformation_type)`
+- `input`: String to transform
+- `transformation_type`: Type of transformation to apply
+
+##### quake-color-code Transformation
+
+The `quake-color-code` transformation converts Quake-style color codes (using `^` followed by a digit 0-8) into Pango markup with colored text:
+
+- `^0` - Black
+- `^1` - Red
+- `^2` - Green
+- `^3` - Yellow
+- `^4` - Blue
+- `^5` - Cyan
+- `^6` - Magenta
+- `^7` - White
+- `^8` - Orange
+
+This is useful for displaying server names or other text that contains color codes from games that use Quake-style coloring.
+
 ### Or Expression (used only for matching)
 
 Multiple values can be matched using the `or` operator:
