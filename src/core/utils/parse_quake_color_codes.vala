@@ -60,7 +60,7 @@ public string parse_quake_color_codes (string input) {
 private void init_color_regex () {
   if (color_re == null) {
     try {
-      color_re = new Regex ("(\\^[0-8])", OPTIMIZE, DEFAULT);
+      color_re = new Regex ("(\\^[0-8])", OPTIMIZE);
     } catch (Error err) {
       critical ("failed to create regexp: %s", err.message);
     }
