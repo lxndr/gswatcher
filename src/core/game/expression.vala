@@ -161,9 +161,29 @@ class MapKeywordExpression : FunctionExpression {
   }
 }
 
-class ToMarkdownExpression : FunctionExpression {
-  public ToMarkdownExpression (Gee.List<EvaluatableExpression> args) {
+class ToMarkupExpression : FunctionExpression {
+  private Regex color_re;
+  private string[] QUAKE_COLORS;
+
+  public ToMarkupExpression (Gee.List<EvaluatableExpression> args) {
     base ("mapKeyword", args);
+
+    try {
+      color_re = new Regex ("(\\^[0-8])", 0, 0);
+    } catch (RegexError err) {
+      error ("failed to create regexp: %s", err.message);
+    }
+
+    QUAKE_COLORS = {
+      "red",
+      "green",
+      "yellow",
+      "blue",
+      "cyan",
+      "magenta",
+      "white",
+      "orange"
+    };
   }
 
   public override string eval (ExpressionContext ctx) throws ExpressionError {
@@ -172,10 +192,33 @@ class ToMarkdownExpression : FunctionExpression {
 
     switch (transformation_type) {
       case "quake-color-code":
-        return input;
+        return transform_quake_color_code (input);
       default:
-        return input;
+        throw new ExpressionError.INVALID_FUNCTION ("unknown transformation type `%s`", transformation_type);
     }
+  }
+
+  private string transform_quake_color_code (string input) {
+    var result = new StringBuilder ();
+    var parts = color_re.split (input);
+    unowned string? current_color = null;
+
+    foreach (var part in parts) {
+      if (part.length == 2 && part[0] == '^' && part[1] >= '0' && part[1] <= '8') {
+        var code = (int) (part[1] - '0');
+        current_color = QUAKE_COLORS[code];
+      } else {
+        var escaped_text = Markup.escape_text (part);
+
+        if (current_color == null || part.length == 0) {
+          result.append (escaped_text);
+        } else {
+          result.append_printf ("<span color=\"%s\">%s</span>", current_color, escaped_text);
+        }
+      }
+    }
+
+    return result.str;
   }
 }
 

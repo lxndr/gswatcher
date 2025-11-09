@@ -35,7 +35,7 @@ class Game {
     this.protocol = protocol;
   }
 
-  public bool matches (string protocol_id, Gee.Map<string, string> details) {
+  public bool matches (string protocol_id, ServerDetails details) {
     if (protocol != protocol_id)
       return false;
 
@@ -62,7 +62,7 @@ class Game {
     return true;
   }
 
-  public void enhance_sinfo (ServerInfo sinfo, Gee.Map<string, string> details) {
+  public void enhance_sinfo (ServerInfo sinfo, ServerDetails details) {
     var ctx = new GameDef.ExpressionContext ();
     ctx.set ("inf", details);
     ctx.set_all (maps);

@@ -121,6 +121,7 @@
                                   <object class="GtkLabel">
                                     <property name="xalign">0</property>
                                     <property name="hexpand">true</property>
+                                    <property name="use-markup">true</property>
                                     <binding name="label">
                                       <closure type="gchararray" function="format_server_name">
                                         <lookup type="GswServerInfo" name="server_name">

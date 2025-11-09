@@ -76,7 +76,7 @@ The `[Player]` section defines how player list fields are displayed:
 
 ```ini
 [Player]
-Name = toMarkdown(2, player)|string|main
+Name = toMarkup(2, player)|string|main
 Score = score|number
 Ping = ping|number
 ```
@@ -302,10 +302,10 @@ inf.gamename = "main"
 [Info]
 game-name = "Call of Duty"
 game-mode = inf["g_gametype"]
-server-name = toMarkdown(inf["g_gametype"], "quake-color-code")
+server-name = toMarkup(inf["g_gametype"], "quake-color-code")
 
 [Player]
-Name = toMarkdown(2, "quake-color-code")|string|main
+Name = toMarkup(2, "quake-color-code")|string|main
 Score = 0|number
 Ping = 1|number
 
@@ -315,6 +315,6 @@ release-year = 2003
 
 This example shows:
 1. Updated Player section format using pipe separators
-2. Expression support in Player section (`toMarkdown()` function)
+2. Expression support in Player section (`toMarkup()` function)
 3. Main field indicator (`main`)
 4. Different field types (`string`, `number`)

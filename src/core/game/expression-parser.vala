@@ -104,8 +104,8 @@ class ExpressionParser {
         return new RegexExpression (args);
       case "mapKeyword":
         return new MapKeywordExpression (args);
-      case "toMarkdown":
-        return new ToMarkdownExpression (args);
+      case "toMarkup":
+        return new ToMarkupExpression (args);
       default:
         throw new ExpressionParserError.INVALID_TOKEN (
           "failed to parse function: unknown function '%s' at position %u, only supported 'regex' or 'mapKeyword'",
