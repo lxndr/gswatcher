@@ -21,14 +21,14 @@ namespace Gsw {
 Regex color_re;
 
 const string[] COLORS = {
-  "black",
+  "gray20", // black
   "red",
   "green",
-  "yellow",
+  "yellow2",
   "blue",
   "cyan",
   "magenta",
-  "white",
+  "gray80", // white
   "orange"
 };
 
@@ -40,7 +40,7 @@ public string parse_quake_color_codes (string input) {
   unowned string? current_color = null;
 
   foreach (var part in parts) {
-    if (part.length == 2 && part[0] == '^' && part[1] >= '0' && part[1] <= '8') {
+    if (part.length == 2 && color_re.match (part)) {
       var code = (int) (part[1] - '0');
       current_color = COLORS[code];
     } else {
@@ -60,7 +60,7 @@ public string parse_quake_color_codes (string input) {
 private void init_color_regex () {
   if (color_re == null) {
     try {
-      color_re = new Regex ("(\\^[0-8])", 0, 0);
+      color_re = new Regex ("(\\^[0-8])", OPTIMIZE, DEFAULT);
     } catch (Error err) {
       critical ("failed to create regexp: %s", err.message);
     }
