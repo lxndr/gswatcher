@@ -85,6 +85,7 @@ core_sources = files(
   'core/utils/hash_string_map.vala',
   'core/utils/hashable_string_map.vala',
   'core/utils/ttl_cache.vala',
+  'core/utils/parse_quake_color_codes.vala',
   'core/buddy-list.vala',
   'core/buddy.vala',
   'core/client.vala',
