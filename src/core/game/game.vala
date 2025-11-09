@@ -69,9 +69,15 @@ class Game {
 
     foreach (var item in inf) {
       try {
+        var sinfo_key = item.key;
+        var expr = item.value;
+        var evaluated = sinfo_key == "server-name" && expr.evals_to_markup ()
+          ? expr.eval (ctx)
+          : Markup.escape_text (expr.eval (ctx));
+
         var value = Value (typeof (string));
-        value.set_string (item.value.eval (ctx));
-        sinfo.set_property (item.key, value);
+        value.set_string (evaluated);
+        sinfo.set_property (sinfo_key, value);
       } catch (GameDef.ExpressionError err) {
         warning ("failed to evaluate value of '%s' for '%s': %s", item.key, id, err.message);
       }

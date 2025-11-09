@@ -83,6 +83,7 @@ class PlayerList : Widget {
 
   private void player_setup (ListItem listitem, PlayerField field) {
     var label = new Label ("");
+    label.use_markup = true;
 
     switch (field.kind) {
       case PlayerFieldType.NUMBER:
@@ -103,25 +104,27 @@ class PlayerList : Widget {
 
     player.change.connect(() => {
       var str_val = player.get (field.field);
+      var label_str = "";
 
-      switch (field.kind) {
-        case PlayerFieldType.DURATION:
-          double val = 0;
+      if (str_val != null) {
+        switch (field.kind) {
+          case PlayerFieldType.DURATION:
+            double val = 0;
 
-          if (str_val == null) {
-            label.label = "";
-          } else if (double.try_parse (str_val, out val, null)) {
-            label.label = format_time_duration ((int64) (val * 1000000));
-          } else {
-            log (Config.LOG_DOMAIN, LEVEL_WARNING, "could not parse double value '%s'", str_val);
-            label.label = "";
-          }
+            if (double.try_parse (str_val, out val, null)) {
+              label_str = format_time_duration ((int64) (val * TimeSpan.SECOND));
+            } else {
+              log (Config.LOG_DOMAIN, LEVEL_WARNING, "could not parse double value '%s'", str_val);
+            }
 
-          break;
-        default:
-          label.label = str_val;
-          break;
+            break;
+          default:
+            label_str = Markup.escape_text (str_val);
+            break;
+        }
       }
+
+      label.label = label_str;
     });
 
     player.change ();

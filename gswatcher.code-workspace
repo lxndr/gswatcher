@@ -59,6 +59,7 @@
 			"ERRMEM",
 			"ERRRUN",
 			"ERRSYNTAX",
+			"evals",
 			"fname",
 			"fontconfig",
 			"freetype",
