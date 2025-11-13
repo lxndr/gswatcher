@@ -53,6 +53,24 @@
   <translation type="gettext">@app_id@</translation>
 
   <releases>
+    <release version="1.7.4" date="2025-11-14">
+      <description>
+        <p>Maintenance release.</p>
+        <ul>
+          <li>Added ARM64 support.</li>
+          <li>Updated desktop file categories.</li>
+          <li>Improved player count color for dark theme.</li>
+          <li>Made values selectable in server details.</li>
+          <li>Made title coloring for some games (like Call of Duty).</li>
+          <li>Added Killing Floor, Garry's Mod, No One Lives Forever game support.</li>
+          <li>Added German, French and Chinese translations (auto-translated).</li>
+          <li>Fixed source protocol for cases when player list arrives before server info.</li>
+          <li>Fixed split packet gamespy protocol.</li>
+          <li>Fixed negative value duration field in player list.</li>
+        </ul>
+      </description>
+      <url>https://github.com/lxndr/gswatcher/releases/tag/v1.7.4</url>
+    </release>
     <release version="1.7.3" date="2025-11-01">
       <description>
         <p>Maintenance release.</p>
