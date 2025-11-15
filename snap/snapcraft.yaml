@@ -49,7 +49,7 @@ parts:
       - --buildtype=release
       - -Diso-flags-dir-name=iso-flags-png-320x240
     parse-info:
-      - usr/share/metainfo/io.github.lxndr.gswatcher.appdata.xml
+      - usr/share/metainfo/io.github.lxndr.gswatcher.metainfo.xml
     build-packages:
       - imagemagick
       - liblua5.4-dev
