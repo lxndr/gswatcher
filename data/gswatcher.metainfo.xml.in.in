@@ -1,56 +1,103 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component type="desktop">
-  <id>@app_id@.desktop</id>
+<!-- Copyright 2010-2026 Alexander Burobin -->
+<component type="desktop-application">
+  <id>@app_id@</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>AGPL-3.0-or-later</project_license>
-  <developer_name>Alexander Burobin</developer_name>
-  <launchable type="desktop-id">@app_id@.desktop</launchable>
-  <name>@app_name@</name>
+  <name translate="no">@app_name@</name>
   <summary>@app_summary@</summary>
+
+  <developer id="io.github.lxndr">
+    <name translate="no">Alexander Burobin</name>
+  </developer>
+
   <description>
     <p>Game Server Watcher is a simple application that helps you to monitor
        the state of your favorite game servers and control remotely the servers of
        your own. It also has a buddy list and can notify you if a buddy joins any of
        servers.</p>
+    <p xml:lang="ru">Game Server Watcher — это простое приложение, которое помогает вам отслеживать
+       состояние ваших любимых игровых серверов и управлять серверами
+       удалённо. У него также есть список друзей и он может уведомлять вас, если друг зашёл на любой из
+       серверов.</p>
+    <p xml:lang="de">Game Server Watcher ist eine einfache Anwendung, die Ihnen hilft, den Status
+       Ihrer Lieblingsspielserver zu überwachen und Ihre eigenen Server remote zu steuern.
+       Sie hat auch eine Freundesliste und kann Sie benachrichtigen, wenn ein Freund einem der
+       Server beitritt.</p>
+    <p xml:lang="fr">Game Server Watcher est une application simple qui vous aide à surveiller
+       l'état de vos serveurs de jeu préférés et à contrôler à distance vos propres serveurs.
+       Elle possède également une liste de contacts et peut vous notifier si un contact rejoint l'un des
+       serveurs.</p>
+    <p xml:lang="zh_CN">Game Server Watcher 是一个简单的应用程序，可帮助您监控
+       您最喜欢的游戏服务器的状态并远程控制您自己的服务器。
+       它还有一个好友列表，如果好友加入任何服务器，它可以通知您。</p>
     <p>Features:</p>
     <ul>
       <li>Server list</li>
+      <li xml:lang="ru">Список серверов</li>
+      <li xml:lang="de">Serverliste</li>
+      <li xml:lang="fr">Liste des serveurs</li>
+      <li xml:lang="zh_CN">服务器列表</li>
       <li>Buddy list</li>
+      <li xml:lang="ru">Список друзей</li>
+      <li xml:lang="de">Freundesliste</li>
+      <li xml:lang="fr">Liste des contacts</li>
+      <li xml:lang="zh_CN">好友列表</li>
       <li>Notifications when your buddy is on a server</li>
+      <li xml:lang="ru">Уведомления, когда ваш друг на сервере</li>
+      <li xml:lang="de">Benachrichtigungen, wenn Ihr Freund auf einem Server ist</li>
+      <li xml:lang="fr">Notifications lorsque votre contact est sur un serveur</li>
+      <li xml:lang="zh_CN">当您的好友在服务器上时通知</li>
       <li>Multiple query protocols</li>
+      <li xml:lang="ru">Несколько протоколов запросов</li>
+      <li xml:lang="de">Mehrere Abfrageprotokolle</li>
+      <li xml:lang="fr">Plusieurs protocoles de requête</li>
+      <li xml:lang="zh_CN">多种查询协议</li>
       <li>Remote console (Source only)</li>
+      <li xml:lang="ru">Удалённая консоль (только для Source)</li>
+      <li xml:lang="de">Remote-Konsole (nur für Source)</li>
+      <li xml:lang="fr">Console à distance (Source uniquement)</li>
+      <li xml:lang="zh_CN">远程控制台（仅限 Source）</li>
     </ul>
   </description>
 
-  <url type="homepage">@app_homepage@</url>
-  <url type="bugtracker">@app_bugtracker@</url>
+  <launchable type="desktop-id">@app_id@.desktop</launchable>
 
   <branding>
     <color type="primary" scheme_preference="light">#6a5d83</color>
     <color type="primary" scheme_preference="dark">#1a365d</color>
   </branding>
 
-  <supports>
-    <control>pointing</control>
-    <control>keyboard</control>
-  </supports>
+  <url type="homepage">@app_homepage@</url>
+  <url type="bugtracker">@app_bugtracker@</url>
+  <url type="contribute">@app_homepage@</url>
 
   <screenshots>
     <screenshot type="default">
-      <caption>Server list with server info and player list</caption>
       <image>https://raw.githubusercontent.com/lxndr/gswatcher/v@app_version@/docs/screenshots/01.png</image>
+      <caption>Server list with server info and player list</caption>
+      <caption xml:lang="ru">Список серверов с информацией о сервере и списком игроков</caption>
+      <caption xml:lang="de">Serverliste mit Serverinformationen und Spielerliste</caption>
+      <caption xml:lang="fr">Liste des serveurs avec informations et liste des joueurs</caption>
+      <caption xml:lang="zh_CN">带有服务器信息和玩家列表的服务器列表</caption>
     </screenshot>
     <screenshot>
-      <caption>Remote console panel</caption>
       <image>https://raw.githubusercontent.com/lxndr/gswatcher/v@app_version@/docs/screenshots/02.png</image>
+      <caption>Remote console panel</caption>
+      <caption xml:lang="ru">Панель удалённой консоли</caption>
+      <caption xml:lang="de">Remote-Konsole-Panel</caption>
+      <caption xml:lang="fr">Panneau de console à distance</caption>
+      <caption xml:lang="zh_CN">远程控制台面板</caption>
     </screenshot>
     <screenshot>
-      <caption>Buddy list</caption>
       <image>https://raw.githubusercontent.com/lxndr/gswatcher/v@app_version@/docs/screenshots/03.png</image>
+      <caption>Buddy list</caption>
+      <caption xml:lang="ru">Список друзей</caption>
+      <caption xml:lang="de">Freundesliste</caption>
+      <caption xml:lang="fr">Liste des contacts</caption>
+      <caption xml:lang="zh_CN">好友列表</caption>
     </screenshot>
   </screenshots>
-
-  <translation type="gettext">@app_id@</translation>
 
   <releases>
     <release version="1.7.4" date="2025-11-14">
@@ -168,6 +215,13 @@
     </release>
     <release version="1.6.4" date="2023-10-05"/>
   </releases>
+
+  <translation type="gettext">@app_exec@</translation>
+
+  <recommends>
+    <control>keyboard</control>
+    <control>pointing</control>
+  </recommends>
 
   <content_rating type="oars-1.1"/>
 </component>

@@ -25,13 +25,13 @@ if host_machine.system() not in ['windows', 'darwin']
 
   # appstream file
   appstream_file_in = configure_file(
-            input: 'gswatcher.appdata.xml.in.in',
-           output: '@0@.appdata.xml.in'.format(conf_data.get('app_id')),
+            input: 'gswatcher.metainfo.xml.in.in',
+           output: '@0@.metainfo.xml.in'.format(conf_data.get('app_id')),
     configuration: conf_data,
   )
   appstream_file = i18n.merge_file(
           input: appstream_file_in,
-         output: '@0@.appdata.xml'.format(conf_data.get('app_id')),
+         output: '@0@.metainfo.xml'.format(conf_data.get('app_id')),
          po_dir: '../po',
         install: true,
     install_dir: join_paths(get_option('datadir'), 'metainfo')
