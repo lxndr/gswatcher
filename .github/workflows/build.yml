@@ -235,9 +235,29 @@ jobs:
           pattern: gswatcher_*+windows-portable.*
           path: ./artifacts
 
+      - name: Extract version
+        run: |
+          VERSION=$(echo "$GITHUB_REF" | grep -oP 'v\K[0-9]+\.[0-9]+\.[0-9]+')
+          echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Zip portable artifacts with proper naming
+        run: |
+          for dir in ./artifacts/*/; do
+            if [ -d "$dir" ]; then
+              ARTIFACT_NAME=$(basename "$dir")
+
+              if [[ "$ARTIFACT_NAME" =~ windows-portable\.([^\.]+)\.build ]]; then
+                ARCH="${BASH_REMATCH[1]}"
+                ZIP_NAME="gswatcher-v${{ env.APP_VERSION }}-windows-portable-$ARCH.zip"
+                (cd "$dir" && zip -r "../$ZIP_NAME" .)
+                echo "Zipped $dir to $ZIP_NAME"
+              fi
+            fi
+          done
+
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           draft: true
           generate_release_notes: false
-          files: ./artifacts/**
+          files: ./artifacts/*.zip
