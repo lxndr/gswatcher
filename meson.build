@@ -1,5 +1,5 @@
 project('gswatcher', 'c', 'vala',
-        version: '1.7.4',
+        version: '1.7.5',
   meson_version: '>= 0.61.2',
 )
 

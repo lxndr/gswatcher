@@ -99,6 +99,16 @@
   </screenshots>
 
   <releases>
+    <release version="1.7.5" date="2025-11-17">
+      <description>
+        <p>Bug fixes.</p>
+        <ul>
+          <li>Fix empty player list handling for source protocol.</li>
+          <li>Fix flatpak locale packaging.</li>
+        </ul>
+      </description>
+      <url>https://github.com/lxndr/gswatcher/releases/tag/v1.7.5</url>
+    </release>
     <release version="1.7.4" date="2025-11-14">
       <description>
         <p>Maintenance release.</p>
