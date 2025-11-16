@@ -114,6 +114,23 @@ public static int main (string[] args) {
       .run ();
   });
 
+  Test.add_data_func ("/protocols/source/empty_player_list", () => {
+    var sinfo = create_sinfo ();
+    var plist_fields = create_plist_fields ();
+    var plist = create_empty_plist ();
+
+    new ProtocolTestRunner ("../data/protocols/source.lua")
+      // query server info
+      .expect_data (sinfo_request)
+      .response (sinfo_response)
+      // query player list
+      .expect_data (plist_request)
+      .response (empty_plist_response)
+      .expect_sinfo(sinfo)
+      .expect_plist(plist_fields, plist)
+      .run ();
+  });
+
   Test.run ();
   return 0;
 }
@@ -155,6 +172,10 @@ private const uint8[] plist_response = {
   0x2E, 0x4E, 0x2E, 0x57, 0x3C, 0x2D, 0x2D, 0x2D, 0x2D, 0x00, 0x0E, 0x00, 0x00, 0x00, 0xB4, 0x97,
   0x00, 0x44, 0x02, 0x4B, 0x69, 0x6C, 0x6C, 0x65, 0x72, 0x20, 0x21, 0x21, 0x21, 0x00, 0x05, 0x00,
   0x00, 0x00, 0x69, 0x24, 0xD9, 0x43
+};
+
+private const uint8[] empty_plist_response = {
+  0xFF, 0xFF, 0xFF, 0xFF, 0x44, 0x00
 };
 
 private const uint8[] the_ship_sinfo_response = {
@@ -403,6 +424,12 @@ private Gee.List<Player> create_plist () {
   player["score"] = "5";
   player["duration"] = "434.28445434570312";
   plist.add (player);
+
+  return plist;
+}
+
+private Gee.List<Player> create_empty_plist () {
+  var plist = new Gee.ArrayList<Player> ();
 
   return plist;
 }
