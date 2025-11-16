@@ -63,8 +63,8 @@ protocol = {
 
 ---@enum RequestPacketType
 local RequestPacketType = {
-  SERVER_INFO = "T",
-  PLAYER_LIST = "U",
+  SERVER_INFO = "T", -- 0x54
+  PLAYER_LIST = "U", -- 0x55
 }
 
 ---@type Dictionary
@@ -493,7 +493,7 @@ function process(data)
   reader = DataReader(data)
 
   -- Some titles when using the split packet method have been observed erroneously nesting the single message header inside the split payload
-  if reader:i32le() ~= -1 then
+  if response.total > 1 and #reader.buf >= 4 and reader:i32le() ~= -1 then
     reader:skip(-4)
   end
 
