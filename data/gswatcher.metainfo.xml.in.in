@@ -70,7 +70,6 @@
 
   <url type="homepage">@app_homepage@</url>
   <url type="bugtracker">@app_bugtracker@</url>
-  <url type="contribute">@app_homepage@</url>
 
   <screenshots>
     <screenshot type="default">
