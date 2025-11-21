@@ -51,7 +51,7 @@ class ServerList : Widget {
       server_list.on_remove_selected ();
     });
 
-    add_binding_action (Gdk.Key.Delete, NO_MODIFIER_MASK, "remove-selected", null);
+    add_binding_action (Gdk.Key.Delete, 0, "remove-selected", null);
   }
 
   construct {

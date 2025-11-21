@@ -127,6 +127,7 @@
 
             <child>
               <object class="GtkPopoverMenu" id="context_popover_menu">
+                <property name="has-arrow">False</property>
                 <property name="menu-model">context_menu</property>
               </object>
             </child>
