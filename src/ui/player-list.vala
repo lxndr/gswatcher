@@ -197,12 +197,10 @@ class PlayerList : Widget {
   }
 
   private PlayerField? find_main_field () {
-    for (var i = 0; i < client.plist_fields.n_items; i++) {
-      var item = client.plist_fields.get_item (i);
+    uint main_pos;
 
-      if (item != null && ((PlayerField) item).main) {
-        return (PlayerField) item;
-      }
+    if (client.plist_fields.find_with_equal_func (null, (item) => ((PlayerField) item).main, out main_pos)) {
+      return (PlayerField) client.plist_fields.get_item (main_pos);
     }
 
     return null;
