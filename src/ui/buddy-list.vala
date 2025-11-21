@@ -107,7 +107,7 @@ class BuddyList : Widget {
     var buddy = (Buddy) selection.selected_item;
 
     if (buddy != null)
-      buddy_list.remove (buddy);
+      remove (buddy);
   }
 
   [GtkCallback]
