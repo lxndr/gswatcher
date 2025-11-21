@@ -117,4 +117,63 @@ void show_error_dialog (Gtk.Window? parent, string body) {
 #endif
 }
 
+struct GetColumnViewItemResult {
+  Gtk.Widget row_widget;
+  Object? list_item;
+  uint pos;
+}
+
+// https://discourse.gnome.org/t/gtk4-finding-a-row-data-on-gtkcolumnview/8465/2
+GetColumnViewItemResult? get_column_view_item_for_y (Gtk.ColumnView view, double y) {
+  var child = view.get_first_child ();
+  var header_alloc = Gtk.Allocation ();
+
+  while (child != null) {
+    if (child.get_type ().name () == "GtkColumnViewRowWidget") {
+      child.get_allocation (out header_alloc);
+    }
+
+    if (child.get_type ().name () == "GtkColumnListView") {
+      var result = check_list_widgets (child, (int) y, header_alloc.y + header_alloc.height);
+
+      if (result != null) {
+        result.list_item = view.model.get_item (result.pos);
+        return result;
+      }
+    }
+
+    child = child.get_next_sibling ();
+  }
+
+  return null;
+}
+
+GetColumnViewItemResult? check_list_widgets (Gtk.Widget w, int y, int header_height) {
+	var child = w.get_first_child ();
+	var line_no = -1;
+	var curr_y = header_height;
+
+	while (child != null) {
+		if (child.get_type ().name () == "GtkColumnViewRowWidget") {
+			line_no++;
+
+			var alloc = Gtk.Allocation ();
+      child.get_allocation (out alloc);
+
+			if (y > curr_y && y <= header_height + alloc.height + alloc.y) {
+				return GetColumnViewItemResult () {
+          row_widget = child,
+          pos = line_no
+        };
+			}
+
+			curr_y = header_height + alloc.height + alloc.y;
+		}
+
+		child = child.get_next_sibling ();
+	}
+
+	return null;
+}
+
 }
