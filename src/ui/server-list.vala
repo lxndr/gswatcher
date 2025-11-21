@@ -34,6 +34,9 @@ class ServerList : Widget {
   [GtkChild]
   private unowned ColumnViewColumn name_column;
 
+  [GtkChild]
+  private unowned PopoverMenu context_popover_menu;
+
   signal void remove (Client client);
 
   class construct {
@@ -43,20 +46,12 @@ class ServerList : Widget {
     set_layout_manager_type (typeof (BinLayout));
     set_css_name ("server-list");
 
-    add_binding (
-      Gdk.Key.Delete, 0,
-      (widget, args) => {
-        var server_list = (ServerList) widget;
-        var client = (Client) server_list.selection.selected_item;
-        var server = client?.server;
+    install_action ("remove-selected", null, (widget) => {
+      var server_list = (ServerList) widget;
+      server_list.on_remove_selected ();
+    });
 
-        if (server != null)
-          server_list.remove (client);
-
-        return true;
-      },
-      null
-    );
+    add_binding_action (Gdk.Key.Delete, NO_MODIFIER_MASK, "remove-selected", null);
   }
 
   construct {
@@ -80,6 +75,44 @@ class ServerList : Widget {
   public override void dispose () {
     get_first_child ().unparent ();
     base.dispose ();
+  }
+
+  [GtkCallback]
+  private void on_right_click (int n_press, double x, double y) {
+    activate_context_menu (x, y);
+  }
+
+  [GtkCallback]
+  private void on_long_press (double x, double y) {
+    activate_context_menu (x, y);
+  }
+
+  private void activate_context_menu (double x, double y) {
+    var item_pos = get_column_view_item_for_y (view, y);
+
+    if (item_pos == null) {
+      return;
+    }
+
+    selection.set_selected (item_pos.pos);
+    item_pos.row_widget.focus (TAB_FORWARD);
+
+    var rect = Gdk.Rectangle ();
+    rect.x = (int) x;
+    rect.y = (int) y;
+    rect.width = 1;
+    rect.height = 1;
+
+    context_popover_menu.set_pointing_to (rect);
+    context_popover_menu.popup ();
+  }
+
+  private void on_remove_selected () {
+    var client = (Client) selection.selected_item;
+    var server = client?.server;
+
+    if (server != null)
+      remove (client);
   }
 
   [GtkCallback]

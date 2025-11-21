@@ -19,7 +19,15 @@
 -->
 
 <interface>
-  <requires lib="gtk+" version="4.0"/>
+  <requires lib="gtk+" version="4.6"/>
+
+  <menu id="context_menu">
+    <item>
+      <attribute name="label" translatable="yes">_Remove server</attribute>
+      <attribute name="action">remove-selected</attribute>
+      <attribute name="icon">edit-delete-symbolic</attribute>
+    </item>
+  </menu>
 
   <object class="GtkStringSorter" id="name_column_sorter">
     <property name="ignore_case">1</property>
@@ -93,6 +101,20 @@
     </binding>
 
     <child>
+      <object class="GtkGestureClick" id="gesture_click">
+        <property name="button">3</property>
+        <signal name="pressed" handler="on_right_click" />
+      </object>
+    </child>
+
+    <child>
+      <object class="GtkGestureLongPress" id="gesture_long_press">
+        <property name="touch-only">True</property>
+        <signal name="pressed" handler="on_long_press" />
+      </object>
+    </child>
+
+    <child>
       <object class="GtkScrolledWindow">
         <property name="hscrollbar_policy">never</property>
         <property name="hexpand">true</property>
@@ -102,6 +124,12 @@
           <object class="GtkColumnView" id="view">
             <property name="model">selection</property>
             <property name="reorderable">false</property>
+
+            <child>
+              <object class="GtkPopoverMenu" id="context_popover_menu">
+                <property name="menu-model">context_menu</property>
+              </object>
+            </child>
 
             <child>
               <object class="GtkColumnViewColumn" id="name_column">
