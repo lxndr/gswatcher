@@ -25,7 +25,7 @@
     <item>
       <attribute name="label" translatable="yes">_Remove server</attribute>
       <attribute name="action">remove-selected</attribute>
-      <attribute name="icon">edit-delete-symbolic</attribute>
+      <attribute name="icon">user-trash-symbolic</attribute>
     </item>
   </menu>
 

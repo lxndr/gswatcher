@@ -232,6 +232,7 @@
                                     server_list_ctl
                                   </lookup>
                                 </binding>
+                                <signal name="add" handler="add_buddy" />
                               </object>
                             </child>
                           </object>
