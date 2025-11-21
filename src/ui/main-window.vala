@@ -117,6 +117,11 @@ class MainWindow : Adw.ApplicationWindow {
   }
 
   [GtkCallback]
+  private void add_buddy (string buddy_name) {
+    buddy_list.add (buddy_name);
+  }
+
+  [GtkCallback]
   private void remove_buddy (Buddy buddy) {
     var msg_heading = _("Remove buddy?");
     var msg_body = _("Are you sure you want to remove \"%s\" from the buddy list?").printf (buddy.name);

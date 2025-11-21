@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gswatcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-08 16:45+0300\n"
+"POT-Creation-Date: 2025-11-22 00:54+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -55,20 +55,24 @@ msgstr ""
 msgid "Acknowledgements"
 msgstr ""
 
-#: src/ui/buddy-list.ui:65
+#: src/ui/buddy-list.ui:26
+msgid "_Remove buddy"
+msgstr ""
+
+#: src/ui/buddy-list.ui:94
 msgctxt "buddy-list"
 msgid "Name"
 msgstr ""
 
-#: src/ui/buddy-list.ui:101
+#: src/ui/buddy-list.ui:130
 msgid "Notify"
 msgstr ""
 
-#: src/ui/buddy-list.ui:131 src/ui/main-window.ui:45
+#: src/ui/buddy-list.ui:160 src/ui/main-window.ui:45
 msgid "Address"
 msgstr ""
 
-#: src/ui/buddy-list.ui:160
+#: src/ui/buddy-list.ui:189
 msgid "Last seen"
 msgstr ""
 
@@ -100,7 +104,7 @@ msgstr ""
 msgid "_Add server"
 msgstr ""
 
-#: src/ui/main-window.ui:160
+#: src/ui/main-window.ui:160 src/ui/player-list.ui:26
 msgid "_Add buddy"
 msgstr ""
 
@@ -112,23 +116,23 @@ msgstr ""
 msgid "_Server list"
 msgstr ""
 
-#: src/ui/main-window.ui:241
+#: src/ui/main-window.ui:242
 msgid "_Info"
 msgstr ""
 
-#: src/ui/main-window.ui:256
+#: src/ui/main-window.ui:257
 msgid "_Details"
 msgstr ""
 
-#: src/ui/main-window.ui:278
+#: src/ui/main-window.ui:279
 msgid "_Console"
 msgstr ""
 
-#: src/ui/main-window.ui:292
+#: src/ui/main-window.ui:293
 msgid "_Buddy list"
 msgstr ""
 
-#: src/ui/main-window.ui:311
+#: src/ui/main-window.ui:312
 msgid "_Preferences"
 msgstr ""
 
@@ -151,11 +155,11 @@ msgstr ""
 msgid "\"%s\" is already on your buddy list."
 msgstr ""
 
-#: src/ui/main-window.vala:121
+#: src/ui/main-window.vala:126
 msgid "Remove buddy?"
 msgstr ""
 
-#: src/ui/main-window.vala:122
+#: src/ui/main-window.vala:127
 #, c-format
 msgid "Are you sure you want to remove \"%s\" from the buddy list?"
 msgstr ""
@@ -188,7 +192,7 @@ msgstr ""
 msgid "Key"
 msgstr ""
 
-#: src/ui/server-details.ui:97
+#: src/ui/server-details.ui:98
 msgid "Value"
 msgstr ""
 
@@ -197,39 +201,39 @@ msgctxt "server-info"
 msgid "Name:"
 msgstr ""
 
-#: src/ui/server-info.ui:73
+#: src/ui/server-info.ui:74
 msgid "Address:"
 msgstr ""
 
-#: src/ui/server-info.ui:106
+#: src/ui/server-info.ui:107
 msgid "Location:"
 msgstr ""
 
-#: src/ui/server-info.ui:139
+#: src/ui/server-info.ui:140
 msgid "Game:"
 msgstr ""
 
-#: src/ui/server-info.ui:172
+#: src/ui/server-info.ui:173
 msgid "Mode:"
 msgstr ""
 
-#: src/ui/server-info.ui:205
+#: src/ui/server-info.ui:206
 msgid "Map:"
 msgstr ""
 
-#: src/ui/server-info.ui:238
+#: src/ui/server-info.ui:239
 msgid "Players:"
 msgstr ""
 
-#: src/ui/server-info.ui:280
+#: src/ui/server-info.ui:281
 msgid "Private:"
 msgstr ""
 
-#: src/ui/server-info.ui:313
+#: src/ui/server-info.ui:314
 msgid "Secure:"
 msgstr ""
 
-#: src/ui/server-info.ui:346
+#: src/ui/server-info.ui:347
 msgid "Version:"
 msgstr ""
 
@@ -245,32 +249,36 @@ msgstr ""
 msgid "no"
 msgstr ""
 
-#: src/ui/server-info.vala:68 src/ui/server-list.vala:148
+#: src/ui/server-info.vala:68 src/ui/server-list.vala:181
 msgid "Timed out"
 msgstr ""
 
-#: src/ui/server-list.ui:108
+#: src/ui/server-list.ui:26
+msgid "_Remove server"
+msgstr ""
+
+#: src/ui/server-list.ui:137
 msgctxt "server-list"
 msgid "Name"
 msgstr ""
 
-#: src/ui/server-list.ui:167
+#: src/ui/server-list.ui:197
 msgid "Game"
 msgstr ""
 
-#: src/ui/server-list.ui:225
+#: src/ui/server-list.ui:255
 msgid "Map"
 msgstr ""
 
-#: src/ui/server-list.ui:257
+#: src/ui/server-list.ui:287
 msgid "Players"
 msgstr ""
 
-#: src/ui/server-list.ui:311
+#: src/ui/server-list.ui:341
 msgid "Ping"
 msgstr ""
 
-#: src/ui/server-list.vala:150 src/ui/utils.vala:98
+#: src/ui/server-list.vala:183 src/ui/utils.vala:98
 msgid "Error"
 msgstr ""
 

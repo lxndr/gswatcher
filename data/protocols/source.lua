@@ -275,6 +275,7 @@ local function create_player_fields(inf)
       title = "Name",
       kind = "string",
       field = "name",
+      main = true,
     },
     {
       title = "Score",

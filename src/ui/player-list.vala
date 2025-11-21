@@ -25,10 +25,25 @@ class PlayerList : Widget {
   private Client? _client;
 
   [GtkChild]
+  private unowned SingleSelection selection;
+
+  [GtkChild]
   private unowned ColumnView view;
+
+  [GtkChild]
+  private unowned PopoverMenu context_popover_menu;
+
+  public signal void add (string player_name);
 
   class construct {
     set_layout_manager_type (typeof (BinLayout));
+
+    install_action ("add-selected", null, (widget) => {
+      var player_list = (PlayerList) widget;
+      player_list.on_add_selected ();
+    });
+
+    add_binding_action (Gdk.Key.Insert, 0, "add-selected", null);
   }
 
   public override void dispose () {
@@ -127,6 +142,68 @@ class PlayerList : Widget {
     });
 
     player.change ();
+  }
+
+  [GtkCallback]
+  private void on_right_click (int n_press, double x, double y) {
+    activate_context_menu (x, y);
+  }
+
+  [GtkCallback]
+  private void on_long_press (double x, double y) {
+    activate_context_menu (x, y);
+  }
+
+  private void activate_context_menu (double x, double y) {
+    var item_pos = get_column_view_item_for_y (view, y);
+
+    if (item_pos == null) {
+      return;
+    }
+
+    selection.set_selected (item_pos.pos);
+    item_pos.row_widget.focus (TAB_FORWARD);
+
+    var rect = Gdk.Rectangle ();
+    rect.x = (int) x;
+    rect.y = (int) y;
+    rect.width = 1;
+    rect.height = 1;
+
+    context_popover_menu.set_pointing_to (rect);
+    context_popover_menu.popup ();
+  }
+
+  private void on_add_selected () {
+    var player = (Player) selection.selected_item;
+
+    if (player == null) {
+      return;
+    }
+
+    var main_pfield = find_main_field ();
+
+    if (main_pfield == null) {
+      return;
+    }
+
+    var player_name = player.get (main_pfield.field);
+
+    if (player_name == null) {
+      return;
+    }
+
+    add (player_name);
+  }
+
+  private PlayerField? find_main_field () {
+    uint main_pos;
+
+    if (client.plist_fields.find_with_equal_func (null, (item) => ((PlayerField) item).main, out main_pos)) {
+      return (PlayerField) client.plist_fields.get_item (main_pos);
+    }
+
+    return null;
   }
 }
 
