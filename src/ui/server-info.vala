@@ -46,6 +46,19 @@ class ServerInfo : Widget {
   }
 
   [GtkCallback]
+  private string? format_server_name (string? server_name_markup, string? server_name) {
+    if (server_name_markup != null) {
+      return server_name_markup;
+    }
+
+    if (server_name != null) {
+      return Markup.escape_text (server_name);
+    }
+
+    return null;
+  }
+
+  [GtkCallback]
   private string? format_location (string? ip_address) {
     if (ip_address == null)
       return null;

@@ -132,7 +132,7 @@ class Application : Adw.Application {
 
     var text = _("Address: %s\nServer: %s\nPlayers: %d / %d").printf (
       client.server.address,
-      client.sinfo.server_name,
+      client.sinfo.server_name_clean,
       client.sinfo.num_players,
       client.sinfo.max_players
     );

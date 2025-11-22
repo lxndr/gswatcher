@@ -173,6 +173,7 @@ public class Client : Object {
     this.sinfo.game_name = sinfo.game_name;
     this.sinfo.game_mode = sinfo.game_mode;
     this.sinfo.server_name = sinfo.server_name;
+    this.sinfo.server_name_markup = sinfo.server_name_markup;
     this.sinfo.server_type = sinfo.server_type;
     this.sinfo.server_os = sinfo.server_os;
     this.sinfo.game_version = sinfo.game_version;
