@@ -99,6 +99,19 @@
   </screenshots>
 
   <releases>
+    <release version="1.8" date="2026-11-22">
+      <description>
+        <ul>
+          <li>Added context menu to remove server</li>
+          <li>Added context menu to add buddy</li>
+          <li>Added context menu to remove buddy</li>
+          <li>Added server-name-markup to Info section of game definition</li>
+          <li>Fixed buddy removal confirmation</li>
+          <li>Fixed server name in notification showing as markup</li>
+        </ul>
+      </description>
+      <url>https://github.com/lxndr/gswatcher/releases/tag/v1.8</url>
+    </release>
     <release version="1.7.5" date="2025-11-17">
       <description>
         <p>Bug fixes.</p>

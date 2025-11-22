@@ -6,5 +6,5 @@ Icon=@app_id@
 Terminal=false
 Type=Application
 Categories=Game;Network;Utility;
-Keywords=game server monitoring;game server status;player tracking;game server admin tool;quake;source;gamespy;all-seeing eye;ase
+Keywords=monitoring;status;tracking;admin;quake;source;gamespy
 StartupNotify=true
