@@ -52,13 +52,22 @@
             <property name="use-markup">true</property>
             <binding name="label">
               <closure type="gchararray" function="na_if_null">
-                <lookup type="GswServerInfo" name="server-name">
-                  <lookup type="GswClient" name="sinfo">
-                    <lookup type="GswUiServerInfo" name="client">
-                      GswUiServerInfo
+                <closure type="gchararray" function="format_server_name">
+                  <lookup type="GswServerInfo" name="server-name-markup">
+                    <lookup type="GswClient" name="sinfo">
+                      <lookup type="GswUiServerInfo" name="client">
+                        GswUiServerInfo
+                      </lookup>
                     </lookup>
                   </lookup>
-                </lookup>
+                  <lookup type="GswServerInfo" name="server-name">
+                    <lookup type="GswClient" name="sinfo">
+                      <lookup type="GswUiServerInfo" name="client">
+                        GswUiServerInfo
+                      </lookup>
+                    </lookup>
+                  </lookup>
+                </closure>
               </closure>
             </binding>
           </object>

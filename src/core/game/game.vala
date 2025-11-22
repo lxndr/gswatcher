@@ -71,9 +71,7 @@ class Game {
       try {
         var sinfo_key = item.key;
         var expr = item.value;
-        var evaluated = sinfo_key == "server-name" && expr.evals_to_markup ()
-          ? expr.eval (ctx)
-          : Markup.escape_text (expr.eval (ctx));
+        var evaluated = expr.eval (ctx);
 
         var value = Value (typeof (string));
         value.set_string (evaluated);

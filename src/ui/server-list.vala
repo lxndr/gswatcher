@@ -116,8 +116,16 @@ class ServerList : Widget {
   }
 
   [GtkCallback]
-  private string format_server_name (string? server_name, string address) {
-    return (server_name == null || server_name.length == 0) ? address : server_name;
+  private string format_server_name (string? server_name_markup, string? server_name, string address) {
+    if (server_name_markup != null) {
+      return server_name_markup;
+    }
+
+    if (server_name != null) {
+      return Markup.escape_text (server_name);
+    }
+
+    return address;
   }
 
   [GtkCallback]

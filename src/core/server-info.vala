@@ -17,9 +17,11 @@
 */
 
 namespace Gsw {
+using GLib;
 
 public class ServerInfo : Object {
   public string? server_name { get; set; }
+  public string? server_name_markup { get; set; }
   public string? server_type { get; set; }
   public string? server_os { get; set; }
   public string? game_id { get; set; }
@@ -31,6 +33,16 @@ public class ServerInfo : Object {
   public int max_players { get; set; default = -1; }
   public bool @private { get; set; }
   public bool secure { get; set; }
+
+  public string? server_name_clean {
+    owned get {
+      if (server_name_markup != null) {
+        return strip_pango_markup (server_name_markup);
+      }
+
+      return server_name;
+    }
+  }
 }
 
 }

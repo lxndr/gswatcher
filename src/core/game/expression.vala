@@ -31,10 +31,6 @@ public abstract class Expression : Object {}
 
 public interface EvaluatableExpression : Expression {
   public abstract string eval (ExpressionContext ctx) throws ExpressionError;
-
-  public virtual bool evals_to_markup () {
-    return false;
-  }
 }
 
 public interface LogicalExpression : Expression {
@@ -101,10 +97,6 @@ abstract class FunctionExpression : Expression, EvaluatableExpression {
     } catch (ExpressionError err) {
       throw new ExpressionError.INVALID_FUNCTION ("failed to evaluate argument %d of '%s()': %s", arg_index, name, err.message);
     }
-  }
-
-  public virtual bool evals_to_markup () {
-    return this.args.any_match ((arg) => arg.evals_to_markup ());
   }
 }
 
@@ -184,10 +176,6 @@ class ToMarkupExpression : FunctionExpression {
       default:
         throw new ExpressionError.INVALID_FUNCTION ("unknown transformation type `%s`", transformation_type);
     }
-  }
-
-  public override bool evals_to_markup () {
-    return true;
   }
 }
 

@@ -33,7 +33,10 @@
     <property name="ignore_case">1</property>
     <property name="expression">
       <closure type="gchararray" function="format_server_name">
-        <lookup type="GswServerInfo" name="server_name">
+        <lookup type="GswServerInfo" name="server-name-markup">
+          <lookup type="GswClient" name="sinfo" />
+        </lookup>
+        <lookup type="GswServerInfo" name="server-name">
           <lookup type="GswClient" name="sinfo" />
         </lookup>
         <lookup type="GswServer" name="address">
