@@ -69,7 +69,7 @@ class BuddyList : Widget {
   }
 
   protected override void dispose () {
-    get_first_child ().unparent ();
+    remove_all_children (this);
     base.dispose ();
   }
 

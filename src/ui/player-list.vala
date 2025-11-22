@@ -47,7 +47,7 @@ class PlayerList : Widget {
   }
 
   public override void dispose () {
-    get_first_child ().unparent ();
+    remove_all_children (this);
     base.dispose ();
   }
 

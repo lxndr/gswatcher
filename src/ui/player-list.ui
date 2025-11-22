@@ -67,6 +67,13 @@
     </child>
 
     <child>
+      <object class="GtkPopoverMenu" id="context_popover_menu">
+        <property name="has-arrow">False</property>
+        <property name="menu-model">context_menu</property>
+      </object>
+    </child>
+
+    <child>
       <object class="GtkScrolledWindow">
         <property name="hscrollbar_policy">never</property>
         <property name="hexpand">true</property>
@@ -76,13 +83,6 @@
           <object class="GtkColumnView" id="view">
             <property name="model">selection</property>
             <property name="reorderable">false</property>
-
-            <child>
-              <object class="GtkPopoverMenu" id="context_popover_menu">
-                <property name="has-arrow">False</property>
-                <property name="menu-model">context_menu</property>
-              </object>
-            </child>
           </object>
         </child>
       </object>
