@@ -54,8 +54,18 @@ class Application : Adw.Application {
   public override void activate () {
     if (main_window == null) {
       main_window = new Ui.MainWindow (this, server_list, buddy_list);
-      main_window.show ();
       add_window (main_window);
+
+      main_window.close_request.connect (() => {
+        if (preferences != null && preferences.get_boolean ("work-in-background")) {
+          main_window.hide ();
+          return true;
+        }
+
+        return false;
+      });
+
+      main_window.show ();
 
       var location_resolver = new MaxMindLocationResolver ();
 
@@ -63,6 +73,8 @@ class Application : Adw.Application {
         var msg = _("Failed to initialize GeoIP: %s").printf (location_resolver.init_error.message);
         show_error_dialog (main_window, msg);
       }
+    } else {
+      main_window.present ();
     }
   }
 

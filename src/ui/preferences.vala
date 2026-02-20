@@ -45,6 +45,9 @@ namespace Gsw.Ui {
     [GtkChild]
     private unowned Switch enable_notifications;
 
+    [GtkChild]
+    private unowned Switch work_in_background;
+
     class construct {
       set_layout_manager_type (typeof (BinLayout));
       set_css_name ("preferences");
@@ -87,6 +90,9 @@ namespace Gsw.Ui {
 
       // enable notifications
       settings.bind ("enable-notifications", enable_notifications, "active", DEFAULT);
+
+      // work in background
+      settings.bind ("work-in-background", work_in_background, "active", DEFAULT);
     }
 
     protected override void dispose () {

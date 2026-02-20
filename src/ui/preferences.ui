@@ -55,6 +55,18 @@
 
             <child>
               <object class="AdwActionRow">
+                <property name="title" translatable="yes">Work in _background</property>
+                <property name="use-underline">true</property>
+                <child>
+                  <object class="GtkSwitch" id="work_in_background">
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+
+            <child>
+              <object class="AdwActionRow">
                 <property name="title" translatable="yes">Local _UDP port</property>
                 <property name="use-underline">true</property>
                 <child>

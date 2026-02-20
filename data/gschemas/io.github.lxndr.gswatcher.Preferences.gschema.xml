@@ -16,5 +16,9 @@
       <default>true</default>
       <summary>Enable buddy notifications</summary>
     </key>
+    <key name="work-in-background" type="b">
+      <default>false</default>
+      <summary>Keep running in background when window is closed</summary>
+    </key>
   </schema>
 </schemalist>
