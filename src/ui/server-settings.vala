@@ -20,26 +20,18 @@ using Gtk;
 
 namespace Gsw.Ui {
 
-[GtkTemplate (ui = "/io/github/lxndr/gswatcher/ui/console-option-list.ui")]
-class ConsoleOptionList : Popover {
+[GtkTemplate (ui = "/io/github/lxndr/gswatcher/ui/server-settings.ui")]
+class ServerSettings : Widget {
   public Client? client { get; set; }
 
-  [GtkChild]
-  private unowned Adjustment port_entry;
-
-  [GtkChild]
-  private unowned Entry password_entry;
-
-  public signal void values_changed (uint16 port, string password);
-
-  [GtkCallback]
-  private void on_password_activated () {
-    popdown ();
+  class construct {
+    set_layout_manager_type (typeof (BinLayout));
   }
 
-  [GtkCallback]
-  private void on_closed () {
-    values_changed ((uint16) port_entry.value, password_entry.text);
+  protected override void dispose () {
+    get_first_child ().unparent ();
+    dispose_template (typeof (ServerSettings));
+    base.dispose ();
   }
 }
 

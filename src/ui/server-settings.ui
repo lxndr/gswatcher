@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Game Server Watcher
+  Copyright (C) 2010-2026 Alexander Burobin
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<interface>
+  <requires lib="gtk+" version="4.0"/>
+
+  <template class="GswUiServerSettings" parent="GtkWidget">
+    <property name="hexpand">true</property>
+
+    <child>
+      <object class="GtkScrolledWindow">
+        <property name="hscrollbar_policy">never</property>
+        <property name="hexpand">true</property>
+        <property name="hexpand-set">true</property>
+
+        <child>
+          <object class="GtkGrid">
+            <property name="column-spacing">12</property>
+            <property name="row-spacing">6</property>
+            <property name="margin-top">24</property>
+            <property name="margin-end">12</property>
+            <property name="margin-start">12</property>
+            <property name="margin-top">24</property>
+
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">Remote Console</property>
+                <property name="xalign">0</property>
+                <property name="hexpand">true</property>
+                <style>
+                  <class name="heading" />
+                  <class name="h4" />
+                </style>
+                <layout>
+                  <property name="column">0</property>
+                  <property name="row">0</property>
+                  <property name="column-span">2</property>
+                </layout>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">Port:</property>
+                <property name="xalign">1</property>
+                <property name="valign">center</property>
+                <layout>
+                  <property name="column">0</property>
+                  <property name="row">1</property>
+                </layout>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkSpinButton" id="console_port_spin">
+                <property name="valign">center</property>
+                <property name="numeric">true</property>
+                <property name="digits">0</property>
+                <property name="width-chars">8</property>
+                <property name="adjustment">
+                  <object class="GtkAdjustment">
+                    <property name="lower">0</property>
+                    <property name="upper">65535</property>
+                    <property name="step-increment">1</property>
+                  </object>
+                </property>
+                <binding name="value">
+                  <lookup type="GswClient" name="console-port">
+                    <lookup type="GswUiServerSettings" name="client">
+                      GswUiServerSettings
+                    </lookup>
+                  </lookup>
+                </binding>
+                <layout>
+                  <property name="column">1</property>
+                  <property name="row">1</property>
+                </layout>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">Password:</property>
+                <property name="xalign">1</property>
+                <property name="valign">center</property>
+                <layout>
+                  <property name="column">0</property>
+                  <property name="row">2</property>
+                </layout>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkEntry" id="console_password_entry">
+                <property name="valign">center</property>
+                <property name="width-chars">30</property>
+                <property name="input-hints">GTK_INPUT_HINT_NO_SPELLCHECK | GTK_INPUT_HINT_PRIVATE</property>
+                <property name="input-purpose">GTK_INPUT_PURPOSE_PASSWORD</property>
+                <property name="visibility">False</property>
+                <binding name="text">
+                  <lookup type="GswClient" name="console-password">
+                    <lookup type="GswUiServerSettings" name="client">
+                      GswUiServerSettings
+                    </lookup>
+                  </lookup>
+                </binding>
+                <layout>
+                  <property name="column">1</property>
+                  <property name="row">2</property>
+                </layout>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>
