@@ -30,7 +30,6 @@ class ServerSettings : Widget {
 
   protected override void dispose () {
     get_first_child ().unparent ();
-    dispose_template (typeof (ServerSettings));
     base.dispose ();
   }
 }
