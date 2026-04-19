@@ -42,6 +42,15 @@ class MainWindow : Adw.ApplicationWindow {
   [GtkChild]
   private unowned Entry add_buddy_name_entry;
 
+  [GtkChild]
+  private unowned Paned main_paned;
+
+  construct {
+    // https://gitlab.gnome.org/GNOME/gtk/-/issues/5500
+    main_paned.shrink_start_child = false;
+    main_paned.shrink_end_child = false;
+  }
+
   class construct {
     typeof (Ui.ServerList).ensure ();
     typeof (Ui.ServerInfo).ensure ();
