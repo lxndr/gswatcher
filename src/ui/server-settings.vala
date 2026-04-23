@@ -31,6 +31,15 @@ class ServerSettings : Widget {
   [GtkChild]
   private unowned Entry console_password_entry;
 
+  [GtkChild]
+  private unowned Switch notify_server_online_switch;
+
+  [GtkChild]
+  private unowned Switch notify_server_offline_switch;
+
+  [GtkChild]
+  private unowned Switch notify_player_slot_available_switch;
+
   class construct {
     set_layout_manager_type (typeof (BinLayout));
   }
@@ -58,8 +67,11 @@ class ServerSettings : Widget {
 
       if (_client != null) {
         bindings.add_all_array ({
-          _client.bind_property ("console-port", console_port_spin, "value", BIDIRECTIONAL),
-          _client.bind_property ("console-password", console_password_entry, "text", BIDIRECTIONAL),
+          _client.bind_property ("console-port", console_port_spin, "value", BIDIRECTIONAL | SYNC_CREATE),
+          _client.bind_property ("console-password", console_password_entry, "text", BIDIRECTIONAL | SYNC_CREATE),
+          _client.bind_property ("notify-server-online", notify_server_online_switch, "active", BIDIRECTIONAL | SYNC_CREATE),
+          _client.bind_property ("notify-server-offline", notify_server_offline_switch, "active", BIDIRECTIONAL | SYNC_CREATE),
+          _client.bind_property ("notify-player-slot-available", notify_player_slot_available_switch, "active", BIDIRECTIONAL | SYNC_CREATE),
         });
       }
     }

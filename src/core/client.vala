@@ -46,6 +46,11 @@ public class Client : Object {
   public Gtk.TextBuffer? console_log_buffer { get; private set; }
   public Gee.ArrayList<string>? console_command_history { get; set; }
 
+  // notifications
+  public bool notify_server_online { get; set; default = true; }
+  public bool notify_server_offline { get; set; default = true; }
+  public bool notify_player_slot_available { get; set; default = true; }
+
   class construct {
     console_log_buffer_tag_table = new Gtk.TextTagTable ();
 
