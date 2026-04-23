@@ -22,7 +22,14 @@ namespace Gsw.Ui {
 
 [GtkTemplate (ui = "/io/github/lxndr/gswatcher/ui/server-settings.ui")]
 class ServerSettings : Widget {
-  public Client? client { get; set; }
+  private Client? _client;
+  private Gee.List<Binding> bindings = new Gee.ArrayList<Binding> ();
+
+  [GtkChild]
+  private unowned SpinButton console_port_spin;
+
+  [GtkChild]
+  private unowned Entry console_password_entry;
 
   class construct {
     set_layout_manager_type (typeof (BinLayout));
@@ -31,6 +38,31 @@ class ServerSettings : Widget {
   protected override void dispose () {
     get_first_child ().unparent ();
     base.dispose ();
+  }
+
+  public Client? client {
+    get {
+      return _client;
+    }
+
+    set {
+      if (_client != null) {
+        foreach (var binding in bindings) {
+          binding.unbind ();
+        }
+
+        bindings.clear ();
+      }
+
+      _client = value;
+
+      if (_client != null) {
+        bindings.add_all_array ({
+          _client.bind_property ("console-port", console_port_spin, "value", BIDIRECTIONAL),
+          _client.bind_property ("console-password", console_password_entry, "text", BIDIRECTIONAL),
+        });
+      }
+    }
   }
 }
 
