@@ -39,6 +39,9 @@ class PersistentServerList : ServerList {
     server_settings.bind ("server-name", client.sinfo, "server-name", DEFAULT | GET_NO_CHANGES);
     server_settings.bind ("console-port", client, "console-port", DEFAULT);
     server_settings.bind ("console-password", client, "console-password", DEFAULT);
+    server_settings.bind ("notify-server-online", client, "notify-server-online", DEFAULT);
+    server_settings.bind ("notify-server-offline", client, "notify-server-offline", DEFAULT);
+    server_settings.bind ("notify-player-slot-available", client, "notify-player-slot-available", DEFAULT);
 
     server_settings.bind_with_mapping (
       "console-command-history",

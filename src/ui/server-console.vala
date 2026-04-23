@@ -30,9 +30,6 @@ class ServerConsole : Widget {
   [GtkChild]
   private unowned Entry entry;
 
-  [GtkChild]
-  private unowned Popover options_popover;
-
   private Gee.BidirIterator<string>? history_iter;
 
   public Client? client {
@@ -65,8 +62,6 @@ class ServerConsole : Widget {
   }
 
   class construct {
-    typeof (ConsoleOptionList).ensure ();
-
     set_layout_manager_type (typeof (BinLayout));
   }
 
@@ -147,14 +142,6 @@ class ServerConsole : Widget {
     entry.text = history_iter.get ();
     entry.set_position ((int) entry.text_length);
     return true;
-  }
-
-  [GtkCallback]
-  private void on_options_values_changed (uint16 port, string password) {
-    client.console_port = port;
-    client.console_password = password;
-    options_popover.popdown ();
-    entry.grab_focus ();
   }
 
   private void scroll_to_bottom () {

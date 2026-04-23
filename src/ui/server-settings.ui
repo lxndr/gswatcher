@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Game Server Watcher
+  Copyright (C) 2010-2026 Alexander Burobin
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<interface>
+  <requires lib="gtk+" version="4.0"/>
+
+  <template class="GswUiServerSettings" parent="GtkWidget">
+    <child>
+      <object class="GtkScrolledWindow">
+        <property name="hscrollbar_policy">never</property>
+        <property name="hexpand">true</property>
+        <property name="hexpand-set">true</property>
+
+        <child>
+          <object class="AdwClamp">
+            <property name="maximum_size">600</property>
+
+            <child>
+              <object class="GtkGrid">
+                <property name="column-spacing">12</property>
+                <property name="row-spacing">6</property>
+                <property name="margin-top">12</property>
+                <property name="margin-end">12</property>
+                <property name="margin-start">12</property>
+                <property name="margin-top">12</property>
+
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">Remote Console</property>
+                    <property name="xalign">0</property>
+                    <property name="hexpand">true</property>
+                    <property name="hexpand-set">true</property>
+                    <style>
+                      <class name="heading" />
+                      <class name="h4" />
+                    </style>
+                    <layout>
+                      <property name="column">0</property>
+                      <property name="row">0</property>
+                      <property name="column-span">2</property>
+                    </layout>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">P_ort:</property>
+                    <property name="use-underline">True</property>
+                    <property name="mnemonic-widget">console_port_spin</property>
+                    <property name="xalign">1</property>
+                    <binding name="sensitive">
+                      <lookup type="GswClient" name="is_console_supported">
+                        <lookup type="GswUiServerSettings" name="client">
+                          GswUiServerSettings
+                        </lookup>
+                      </lookup>
+                    </binding>
+                    <layout>
+                      <property name="column">0</property>
+                      <property name="row">1</property>
+                    </layout>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkSpinButton" id="console_port_spin">
+                    <property name="numeric">true</property>
+                    <property name="digits">0</property>
+                    <property name="adjustment">
+                      <object class="GtkAdjustment">
+                        <property name="lower">0</property>
+                        <property name="upper">65535</property>
+                        <property name="step-increment">1</property>
+                      </object>
+                    </property>
+                    <binding name="sensitive">
+                      <lookup type="GswClient" name="is_console_supported">
+                        <lookup type="GswUiServerSettings" name="client">
+                          GswUiServerSettings
+                        </lookup>
+                      </lookup>
+                    </binding>
+                    <layout>
+                      <property name="column">1</property>
+                      <property name="row">1</property>
+                    </layout>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">Pass_word:</property>
+                    <property name="use-underline">True</property>
+                    <property name="mnemonic-widget">console_password_entry</property>
+                    <property name="xalign">1</property>
+                    <binding name="sensitive">
+                      <lookup type="GswClient" name="is_console_supported">
+                        <lookup type="GswUiServerSettings" name="client">
+                          GswUiServerSettings
+                        </lookup>
+                      </lookup>
+                    </binding>
+                    <layout>
+                      <property name="column">0</property>
+                      <property name="row">2</property>
+                    </layout>
+                   </object>
+                </child>
+
+                <child>
+                  <object class="GtkEntry" id="console_password_entry">
+                    <property name="input-hints">GTK_INPUT_HINT_NO_SPELLCHECK | GTK_INPUT_HINT_PRIVATE</property>
+                    <property name="input-purpose">GTK_INPUT_PURPOSE_PASSWORD</property>
+                    <property name="visibility">False</property>
+                    <binding name="sensitive">
+                      <lookup type="GswClient" name="is_console_supported">
+                        <lookup type="GswUiServerSettings" name="client">
+                          GswUiServerSettings
+                        </lookup>
+                      </lookup>
+                    </binding>
+                    <layout>
+                      <property name="column">1</property>
+                      <property name="row">2</property>
+                    </layout>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">Notifications</property>
+                    <property name="xalign">0</property>
+                    <property name="hexpand">true</property>
+                    <property name="hexpand-set">true</property>
+                    <style>
+                      <class name="heading" />
+                      <class name="h4" />
+                    </style>
+                    <layout>
+                      <property name="column">0</property>
+                      <property name="row">3</property>
+                      <property name="column-span">2</property>
+                    </layout>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">_Server goes online:</property>
+                    <property name="use-underline">True</property>
+                    <property name="mnemonic-widget">notify_server_online_switch</property>
+                    <property name="xalign">1</property>
+                    <layout>
+                      <property name="column">0</property>
+                      <property name="row">5</property>
+                    </layout>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkSwitch" id="notify_server_online_switch">
+                    <property name="halign">start</property>
+                    <layout>
+                      <property name="column">1</property>
+                      <property name="row">5</property>
+                    </layout>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">_Server goes offline:</property>
+                    <property name="use-underline">True</property>
+                    <property name="mnemonic-widget">notify_server_offline_switch</property>
+                    <property name="xalign">1</property>
+                    <layout>
+                      <property name="column">0</property>
+                      <property name="row">6</property>
+                    </layout>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkSwitch" id="notify_server_offline_switch">
+                    <property name="halign">start</property>
+                    <layout>
+                      <property name="column">1</property>
+                      <property name="row">6</property>
+                    </layout>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">_Player slot is available:</property>
+                    <property name="use-underline">True</property>
+                    <property name="mnemonic-widget">notify_player_slot_available_switch</property>
+                    <property name="xalign">1</property>
+                    <layout>
+                      <property name="column">0</property>
+                      <property name="row">7</property>
+                    </layout>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkSwitch" id="notify_player_slot_available_switch">
+                    <property name="halign">start</property>
+                    <layout>
+                      <property name="column">1</property>
+                      <property name="row">7</property>
+                    </layout>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

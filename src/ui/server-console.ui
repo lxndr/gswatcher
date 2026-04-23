@@ -71,24 +71,8 @@
                     <signal name="key-pressed" handler="entry_key_pressed"/>
                   </object>
                 </child>
-              </object>
-            </child>
-
-            <child>
-              <object class="GtkMenuButton">
-                <property name="label" translatable="yes">Options</property>
-                <property name="popover">
-                  <object class="GswUiConsoleOptionList" id="options_popover">
-                    <binding name="client">
-                      <lookup type="GswUiServerConsole" name="client">
-                        GswUiServerConsole
-                      </lookup>
-                    </binding>
-                    <signal name="values_changed" handler="on_options_values_changed"/>
-                  </object>
-                </property>
-              </object>
-            </child>
+</object>
+              </child>
           </object>
         </child>
       </object>

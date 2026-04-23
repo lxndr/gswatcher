@@ -58,14 +58,14 @@ class Application : Adw.Application {
 
       main_window.close_request.connect (() => {
         if (preferences != null && preferences.get_boolean ("work-in-background")) {
-          main_window.hide ();
+          main_window.present ();
           return true;
         }
 
         return false;
       });
 
-      main_window.show ();
+      main_window.present ();
 
       var location_resolver = new MaxMindLocationResolver ();
 
