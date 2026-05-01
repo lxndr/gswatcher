@@ -71,8 +71,8 @@
                     <signal name="key-pressed" handler="entry_key_pressed"/>
                   </object>
                 </child>
-</object>
-              </child>
+              </object>
+            </child>
           </object>
         </child>
       </object>
