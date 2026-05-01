@@ -31,6 +31,7 @@ public class Querier : Object {
   public Server server { get; construct; }
   public QueryProtocol protocol { get; construct; }
   public NetTransport transport { get; construct; }
+  public bool online { get; protected set; default = false; }
   public int64 ping { get; protected set; default = -1; }
   public Error? error { get; protected set; }
 
@@ -135,6 +136,7 @@ public class Querier : Object {
 
     details_update (details);
     sinfo_update (sinfo);
+    online = true;
   }
 
   private void on_plist_updated (Gee.List<PlayerField> default_pfields, Gee.ArrayList<Player> plist) {
@@ -150,8 +152,12 @@ public class Querier : Object {
 
   private void on_error () {
     if (error != null) {
-      if (error.code != QuerierError.TIMEOUT)
+      if (error.code == QuerierError.TIMEOUT) {
+        online = false;
+      } else {
         log (Config.LOG_DOMAIN, LEVEL_DEBUG, error.message);
+      }
+
       stop_timeout_timer ();
       stop_ping_timer ();
       ping = -1;

@@ -27,9 +27,6 @@ class ServerConsole : Widget {
   [GtkChild]
   private unowned TextView text_view;
 
-  [GtkChild]
-  private unowned Entry entry;
-
   private Gee.BidirIterator<string>? history_iter;
 
   public Client? client {

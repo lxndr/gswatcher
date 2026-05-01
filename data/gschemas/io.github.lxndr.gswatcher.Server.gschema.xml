@@ -28,15 +28,15 @@
       <summary>Remote console command history</summary>
     </key>
     <key name="notify-server-online" type="b">
-      <default>true</default>
+      <default>false</default>
       <summary>Notify when server goes online</summary>
     </key>
     <key name="notify-server-offline" type="b">
-      <default>true</default>
+      <default>false</default>
       <summary>Notify when server goes offline</summary>
     </key>
     <key name="notify-player-slot-available" type="b">
-      <default>true</default>
+      <default>false</default>
       <summary>Notify when player slot is available</summary>
     </key>
   </schema>
