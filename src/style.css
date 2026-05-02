@@ -16,6 +16,21 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+server-list #favorite_cell {
+  opacity: 0;
+  color: var(--accent-slate);
+  padding: 4px;
+}
+
+server-list #favorite_cell:not(.favorite-active):hover {
+  opacity: 0.5;
+}
+
+server-list #favorite_cell.favorite-active {
+  opacity: 1;
+  color: var(--accent-red);
+}
+
 server-list #country_flag {
   -gtk-icon-transform: scale(1.4);
 }

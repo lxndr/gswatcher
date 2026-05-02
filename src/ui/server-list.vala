@@ -115,6 +115,17 @@ class ServerList : Widget {
       remove (client);
   }
 
+
+  [GtkCallback]
+  [CCode (array_length = false)]
+  public string[]? format_favorite_css_classes (bool favorite) {
+    if (!favorite) {
+      return null;
+    }
+
+    return { "favorite-active" };
+  }
+
   [GtkCallback]
   private string format_server_name (string? server_name_markup, string? server_name, string address) {
     if (server_name_markup != null) {

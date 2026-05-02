@@ -136,6 +136,38 @@
             <property name="reorderable">false</property>
 
             <child>
+              <object class="GtkColumnViewColumn">
+                <property name="factory">
+                  <object class="GtkBuilderListItemFactory">
+                    <property name="bytes">
+                      <![CDATA[
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <interface>
+                          <template class="GtkListItem">
+                            <property name="child">
+                              <object class="GtkImage">
+                                <property name="name">favorite_cell</property>
+                                <property name="icon-size">GTK_ICON_SIZE_NORMAL</property>
+                                <property name="icon-name">emblem-favorite-symbolic</property>
+                                <binding name="css-classes">
+                                  <closure type="GStrv" function="format_favorite_css_classes">
+                                    <lookup type="GswClient" name="favorite">
+                                      <lookup name="item">GtkListItem</lookup>
+                                    </lookup>
+                                  </closure>
+                                </binding>
+                              </object>
+                            </property>
+                          </template>
+                        </interface>
+                      ]]>
+                    </property>
+                  </object>
+                </property>
+              </object>
+            </child>
+
+            <child>
               <object class="GtkColumnViewColumn" id="name_column">
                 <property name="title" translatable="yes" context="server-list">Name</property>
                 <property name="sorter">name_column_sorter</property>
