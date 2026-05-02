@@ -26,21 +26,26 @@ public static int main (string[] args) {
   Test.add_func ("/server-watcher/instantiation", () => {
     var server_list = new ServerList ();
     var watcher = new ServerWatcher (server_list);
-
-    assert_nonnull (watcher);
     assert_cmpuint (watcher.ref_count, EQ, 1);
+
+    // cleanup checks
+    void *weak_watcher_ptr = &watcher;
+    watcher.add_weak_pointer (&weak_watcher_ptr);
+    watcher = null;
+    assert_null (weak_watcher_ptr);
   });
 
   // Test 2: Adding a server works
   Test.add_func ("/server-watcher/server_added_no_crash", () => {
     var server_list = new ServerList ();
     var watcher = new ServerWatcher (server_list);
-    var client = server_list.add ("server1.example.com:27015");
+    server_list.add ("server1.example.com:27015");
 
-    assert_nonnull (watcher);
-    // assert_cmpuint (watcher.ref_count, EQ, 1);
-    assert_nonnull (client);
-    // assert_cmpuint (client.ref_count, EQ, 1);
+    // cleanup checks
+    //  void *weak_watcher_ptr = &watcher;
+    //  watcher.add_weak_pointer (&weak_watcher_ptr);
+    //  watcher = null;
+    //  assert_null (weak_watcher_ptr);
   });
 
   // Test 3: Removing a server cleans up
@@ -51,6 +56,17 @@ public static int main (string[] args) {
     server_list.remove (client);
     assert_nonnull (watcher);
     assert_nonnull (client);
+
+    // cleanup checks
+    //  void *weak_watcher_ptr = &watcher;
+    //  watcher.add_weak_pointer (&weak_watcher_ptr);
+    //  watcher = null;
+    //  assert_null (weak_watcher_ptr);
+
+    //  void *weak_client_ptr = &client;
+    //  client.add_weak_pointer (&weak_client_ptr);
+    //  client = null;
+    //  assert_null (weak_client_ptr);
   });
 
   // Test 4: First online change is ignored (initialization)

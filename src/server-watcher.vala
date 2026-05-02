@@ -124,7 +124,7 @@ public class ServerWatcher : Object {
       disconnect_all_client_signals (client, record);
     }
   }
-
+  
   private void disconnect_all_client_signals (Client client, ServerWatcherRecord record) {
     client.disconnect (record.online_change_handler_id);
     client.sinfo.disconnect (record.num_players_handler_id);
