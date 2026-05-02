@@ -56,6 +56,7 @@ class MainWindow : Adw.ApplicationWindow {
     typeof (Ui.ServerInfo).ensure ();
     typeof (Ui.ServerConsole).ensure ();
     typeof (Ui.ServerDetails).ensure ();
+    typeof (Ui.ServerSettings).ensure ();
     typeof (Ui.BuddyList).ensure ();
     typeof (Ui.PlayerList).ensure ();
     typeof (Ui.Preferences).ensure ();

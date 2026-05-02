@@ -46,3 +46,12 @@ test('core/utils/ttl_cache', executable(
   'test-ttl_cache.vala',
   dependencies : dependencies,
 ))
+
+test('server-watcher', executable(
+  'test-server-watcher',
+  core_sources,
+  test_core_sources,
+  meson.project_source_root() / 'src' / 'server-watcher.vala',
+  'test-server-watcher.vala',
+  dependencies : dependencies,
+))

@@ -99,8 +99,9 @@
   </screenshots>
 
   <releases>
-    <release version="1.8" date="2026-11-22">
+    <release version="1.8" date="2026-04-01">
       <description>
+        <p>TODO More features.</p>
         <ul>
           <li>Added context menu to remove server</li>
           <li>Added context menu to add buddy</li>

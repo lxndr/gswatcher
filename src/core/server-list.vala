@@ -54,8 +54,8 @@ public class ServerList : Object, ListModel {
     var idx = list.index_of (client);
 
     if (idx > -1) {
-      list.remove_at (idx);
       items_changed (idx, 1, 0);
+      list.remove_at (idx);
     }
   }
 

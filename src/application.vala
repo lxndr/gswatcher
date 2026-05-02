@@ -24,6 +24,7 @@ class Application : Adw.Application {
   private UdpTransportManager udp_transport_manager = UdpTransportManager.get_instance ();
   private QuerierManager querier_manager = QuerierManager.get_instance ();
   private PersistentServerList server_list;
+  private ServerWatcher server_watcher;
   private BuddyList buddy_list;
   private BuddyWatcher buddy_watcher;
   private Settings preferences;
@@ -58,14 +59,14 @@ class Application : Adw.Application {
 
       main_window.close_request.connect (() => {
         if (preferences != null && preferences.get_boolean ("work-in-background")) {
-          main_window.hide ();
+          main_window.present ();
           return true;
         }
 
         return false;
       });
 
-      main_window.show ();
+      main_window.present ();
 
       var location_resolver = new MaxMindLocationResolver ();
 
@@ -98,6 +99,10 @@ class Application : Adw.Application {
 
     // servers
     server_list = new PersistentServerList ();
+    server_watcher = new ServerWatcher (server_list);
+    server_watcher.online.connect (on_server_online);
+    server_watcher.offline.connect (on_server_offline);
+    server_watcher.player_slot_available.connect (on_player_slot_available);
 
     // protocols
     register_protocols.begin ((obj, res) => {
@@ -152,6 +157,48 @@ class Application : Adw.Application {
     var n = new Notification (title);
     n.set_body (text);
     send_notification (null, n);
+  }
+
+  private void on_server_online (Client client) {
+      if (!(preferences.get_boolean ("enable-notifications") && client.notify_server_online))
+        return;
+
+      var title = _("Server %s is online").printf (client.sinfo.server_name_clean);
+      var text = _("Address: %s").printf (
+        client.server.address
+      );
+
+      var n = new Notification (title);
+      n.set_body (text);
+      send_notification (null, n);
+  }
+
+  private void on_server_offline (Client client) {
+      if (!(preferences.get_boolean ("enable-notifications") && client.notify_server_offline))
+        return;
+
+      var title = _("Server %s is offline").printf (client.sinfo.server_name_clean);
+      var text = _("Address: %s").printf (client.server.address);
+
+      var n = new Notification (title);
+      n.set_body (text);
+      send_notification (null, n);
+  }
+
+  private void on_player_slot_available (Client client) {
+      if (!(preferences.get_boolean ("enable-notifications") && client.notify_player_slot_available))
+        return;
+
+      var title = _("A player slot is now available on %s").printf (client.sinfo.server_name_clean);
+      var text = _("Address: %s\nPlayers: %d / %d").printf (
+        client.server.address,
+        client.sinfo.num_players,
+        client.sinfo.max_players
+      );
+
+      var n = new Notification (title);
+      n.set_body (text);
+      send_notification (null, n);
   }
 
   private async void register_protocols () {

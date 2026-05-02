@@ -29,7 +29,7 @@ class BuddyWatcher : Object {
   construct {
     buddy_list.items_changed.connect ((pos, removed, added) => {
       for (var idx = pos; idx < pos + added; idx++)
-        on_buddy_added (buddy_list[pos]);
+        on_buddy_added (buddy_list[idx]);
     });
 
     update_timer = Timeout.add (update_interval, on_timer_tick);

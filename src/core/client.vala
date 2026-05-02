@@ -31,6 +31,7 @@ public class Client : Object {
   // query
   private Querier? _querier;
   private Gee.List<Binding> querier_bindings = new Gee.ArrayList<Binding> ();
+  public bool online { get; protected set; default = false; }
   public Error? error { get; protected set; }
   public int64 ping { get; protected set; default = -1; }
   public ServerDetailsList details { get; construct set; }
@@ -45,6 +46,11 @@ public class Client : Object {
   public ConsoleClient? _console_client;
   public Gtk.TextBuffer? console_log_buffer { get; private set; }
   public Gee.ArrayList<string>? console_command_history { get; set; }
+
+   // notifications
+  public bool notify_server_online { get; set; default = false; }
+  public bool notify_server_offline { get; set; default = false; }
+  public bool notify_player_slot_available { get; set; default = false; }
 
   class construct {
     console_log_buffer_tag_table = new Gtk.TextTagTable ();
@@ -108,6 +114,7 @@ public class Client : Object {
         querier_bindings.add_all_array ({
           querier.bind_property ("ping", this, "ping", DEFAULT | SYNC_CREATE),
           querier.bind_property ("error", this, "error", DEFAULT | SYNC_CREATE),
+          querier.bind_property ("online", this, "online", DEFAULT | SYNC_CREATE),
         });
       }
     }

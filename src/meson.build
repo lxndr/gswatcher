@@ -112,13 +112,13 @@ core_sources += configure_file(
 ui_sources = files(
   'ui/about.vala',
   'ui/buddy-list.vala',
-  'ui/console-option-list.vala',
   'ui/main-window.vala',
   'ui/player-list.vala',
   'ui/preferences.vala',
   'ui/server-console.vala',
   'ui/server-details.vala',
   'ui/server-info.vala',
+  'ui/server-settings.vala',
   'ui/server-list.vala',
   'ui/utils.vala',
 )
@@ -131,12 +131,13 @@ sources += files(
   'buddy-watcher.vala',
   'persistent-buddy-list.vala',
   'persistent-server-list.vala',
+  'server-watcher.vala',
   'utils.vala',
 )
 
 sources += gnome.compile_resources(
-    'resources',
-    'gswatcher.gresource.xml',
+  'resources',
+  'gswatcher.gresource.xml',
 )
 
 if host_machine.system() == 'windows'

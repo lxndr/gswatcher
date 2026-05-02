@@ -280,6 +280,21 @@
                             <property name="use-underline">True</property>
                           </object>
                         </child>
+                        <child>
+                          <object class="GswUiServerSettings" id="server_settings">
+                            <binding name="client">
+                              <lookup type="GswUiServerList" name="selected">
+                                server_list_ctl
+                              </lookup>
+                            </binding>
+                          </object>
+                        </child>
+                        <child type="tab">
+                          <object class="GtkLabel">
+                            <property name="label" translatable="yes">_Settings</property>
+                            <property name="use-underline">True</property>
+                          </object>
+                        </child>
                       </object>
                     </child>
                   </object>
