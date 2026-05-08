@@ -29,6 +29,9 @@ class ServerList : Widget {
   private unowned SingleSelection selection;
 
   [GtkChild]
+  private unowned SortListModel sort_model;
+
+  [GtkChild]
   private unowned ColumnView view;
 
   [GtkChild]
@@ -37,7 +40,12 @@ class ServerList : Widget {
   [GtkChild]
   private unowned PopoverMenu context_popover_menu;
 
+  [GtkChild]
+  private unowned MultiSorter favorite_first_multi_sorter;
+
   signal void remove (Client client);
+
+  private CustomSorter favorite_first_sorter;
 
   class construct {
     typeof (Gsw.Querier).ensure ();
@@ -56,6 +64,25 @@ class ServerList : Widget {
 
   construct {
     view.sort_by_column (name_column, SortType.ASCENDING);
+
+    favorite_first_sorter = new CustomSorter ((a, b) => {
+      var ca = a as Client;
+      var cb = b as Client;
+
+      if (ca == null || cb == null) {
+        return Ordering.EQUAL;
+      }
+
+      if (ca.favorite == cb.favorite) {
+        return Ordering.EQUAL;
+      }
+
+      // Favorites must always be on top, regardless of current column sorting.
+      return ca.favorite ? Ordering.SMALLER : Ordering.LARGER;
+    });
+
+    favorite_first_multi_sorter.append (favorite_first_sorter);
+    favorite_first_multi_sorter.append (view.sorter);
 
     selection.items_changed.connect ((position, removed, added) => {
       if (view != null) {

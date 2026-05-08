@@ -77,15 +77,15 @@
     </property>
   </object>
 
+  <object class="GtkMultiSorter" id="favorite_first_multi_sorter" />
+
   <object class="GtkSortListModel" id="sort_model">
     <binding name="model">
       <lookup type="GswUiServerList" name="client_list">
         GswUiServerList
       </lookup>
     </binding>
-    <binding name="sorter">
-      <lookup type="GtkColumnView" name="sorter">view</lookup>
-    </binding>
+    <property name="sorter">favorite_first_multi_sorter</property>
   </object>
 
   <object class="GtkSingleSelection" id="selection">
