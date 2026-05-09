@@ -77,15 +77,15 @@
     </property>
   </object>
 
+  <object class="GtkMultiSorter" id="favorite_first_multi_sorter" />
+
   <object class="GtkSortListModel" id="sort_model">
     <binding name="model">
       <lookup type="GswUiServerList" name="client_list">
         GswUiServerList
       </lookup>
     </binding>
-    <binding name="sorter">
-      <lookup type="GtkColumnView" name="sorter">view</lookup>
-    </binding>
+    <property name="sorter">favorite_first_multi_sorter</property>
   </object>
 
   <object class="GtkSingleSelection" id="selection">
@@ -134,6 +134,44 @@
           <object class="GtkColumnView" id="view">
             <property name="model">selection</property>
             <property name="reorderable">false</property>
+
+            <child>
+              <object class="GtkColumnViewColumn">
+                <property name="factory">
+                  <object class="GtkBuilderListItemFactory">
+                    <property name="bytes">
+                      <![CDATA[
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <interface>
+                          <template class="GtkListItem">
+                            <property name="child">
+                              <object class="GtkButton">
+                                <property name="has-frame">False</property>
+                                <property name="name">favorite_button</property>
+                                <signal name="clicked" handler="on_favorite_button_clicked" />
+                                <child>
+                                  <object class="GtkImage">
+                                    <property name="icon-size">GTK_ICON_SIZE_NORMAL</property>
+                                    <property name="icon-name">emblem-favorite-symbolic</property>
+                                    <binding name="css-classes">
+                                      <closure type="GStrv" function="format_favorite_css_classes">
+                                        <lookup type="GswClient" name="favorite">
+                                          <lookup name="item">GtkListItem</lookup>
+                                        </lookup>
+                                      </closure>
+                                    </binding>
+                                  </object>
+                                </child>
+                              </object>
+                            </property>
+                          </template>
+                        </interface>
+                      ]]>
+                    </property>
+                  </object>
+                </property>
+              </object>
+            </child>
 
             <child>
               <object class="GtkColumnViewColumn" id="name_column">

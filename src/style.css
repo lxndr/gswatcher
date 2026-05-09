@@ -16,6 +16,24 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+server-list #favorite_button {
+  padding: 0;
+}
+
+server-list #favorite_button image {
+  opacity: 0;
+  color: var(--accent-slate);
+}
+
+server-list #favorite_button:hover image:not(.favorite-active) {
+  opacity: 0.5;
+}
+
+server-list #favorite_button image.favorite-active {
+  opacity: 1;
+  color: var(--accent-red);
+}
+
 server-list #country_flag {
   -gtk-icon-transform: scale(1.4);
 }
