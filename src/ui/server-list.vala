@@ -29,9 +29,6 @@ class ServerList : Widget {
   private unowned SingleSelection selection;
 
   [GtkChild]
-  private unowned SortListModel sort_model;
-
-  [GtkChild]
   private unowned ColumnView view;
 
   [GtkChild]
@@ -45,8 +42,6 @@ class ServerList : Widget {
 
   signal void remove (Client client);
 
-  private CustomSorter favorite_first_sorter;
-
   class construct {
     typeof (Gsw.Querier).ensure ();
     typeof (Gsw.ServerInfo).ensure ();
@@ -55,7 +50,7 @@ class ServerList : Widget {
     set_css_name ("server-list");
 
     install_action ("remove-selected", null, (widget) => {
-      var server_list = (ServerList) widget;
+      var server_list = widget as ServerList;
       server_list.on_remove_selected ();
     });
 
@@ -64,44 +59,30 @@ class ServerList : Widget {
 
   construct {
     view.sort_by_column (name_column, SortType.ASCENDING);
+    selection.items_changed.connect (on_items_changed);
 
-    favorite_first_sorter = new CustomSorter ((a, b) => {
-      var ca = a as Client;
-      var cb = b as Client;
-
-      if (ca == null || cb == null) {
-        return Ordering.EQUAL;
-      }
-
-      if (ca.favorite == cb.favorite) {
-        return Ordering.EQUAL;
-      }
-
-      // Favorites must always be on top, regardless of current column sorting.
-      return ca.favorite ? Ordering.SMALLER : Ordering.LARGER;
-    });
-
+    var favorite_first_sorter = new CustomSorter ((CompareDataFunc) favorite_first_sorter_fn);
     favorite_first_multi_sorter.append (favorite_first_sorter);
     favorite_first_multi_sorter.append (view.sorter);
-
-    selection.items_changed.connect ((position, removed, added) => {
-      if (view != null) {
-        if (added > 0) {
-#if GSW_GTK_4_12_SUPPORTED
-          view.scroll_to (position, null, SELECT | FOCUS, null);
-#endif
-          view.grab_focus ();
-        }
-
-        if (removed > 0)
-          view.grab_focus ();
-      }
-    });
   }
 
   public override void dispose () {
     remove_all_children (this);
     base.dispose ();
+  }
+
+  private void on_items_changed (uint position, uint removed, uint added) {
+    if (view != null) {
+      if (added > 0) {
+#if GSW_GTK_4_12_SUPPORTED
+        view.scroll_to (position, null, SELECT | FOCUS, null);
+#endif
+        view.grab_focus ();
+      }
+
+      if (removed > 0)
+        view.grab_focus ();
+    }
   }
 
   [GtkCallback]
@@ -124,24 +105,31 @@ class ServerList : Widget {
     selection.set_selected (item_pos.pos);
     item_pos.row_widget.focus (TAB_FORWARD);
 
-    var rect = Gdk.Rectangle ();
-    rect.x = (int) x;
-    rect.y = (int) y;
-    rect.width = 1;
-    rect.height = 1;
+    var rect = Gdk.Rectangle () {
+      x = (int) x,
+      y = (int) y,
+      width = 1,
+      height = 1,
+    };
 
     context_popover_menu.set_pointing_to (rect);
     context_popover_menu.popup ();
   }
 
   private void on_remove_selected () {
-    var client = (Client) selection.selected_item;
+    var client = selection.selected_item as Client;
     var server = client?.server;
 
     if (server != null)
       remove (client);
   }
 
+  [GtkCallback]
+  public void on_favorite_button_clicked (Button btn) {
+    var list_item = this as ListItem;
+    var client = list_item.item as Client;
+    client.favorite = !client.favorite;
+  }
 
   [GtkCallback]
   [CCode (array_length = false)]
@@ -243,6 +231,14 @@ class ServerList : Widget {
       return null;
     return { "error" };
   }
+}
+
+private Ordering favorite_first_sorter_fn (Client a, Client b) {
+  if (a.favorite == b.favorite) {
+    return Ordering.EQUAL;
+  }
+
+  return a.favorite ? Ordering.SMALLER : Ordering.LARGER;
 }
 
 }

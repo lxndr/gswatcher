@@ -145,17 +145,23 @@
                         <interface>
                           <template class="GtkListItem">
                             <property name="child">
-                              <object class="GtkImage">
-                                <property name="name">favorite_cell</property>
-                                <property name="icon-size">GTK_ICON_SIZE_NORMAL</property>
-                                <property name="icon-name">emblem-favorite-symbolic</property>
-                                <binding name="css-classes">
-                                  <closure type="GStrv" function="format_favorite_css_classes">
-                                    <lookup type="GswClient" name="favorite">
-                                      <lookup name="item">GtkListItem</lookup>
-                                    </lookup>
-                                  </closure>
-                                </binding>
+                              <object class="GtkButton">
+                                <property name="has-frame">False</property>
+                                <property name="name">favorite_button</property>
+                                <signal name="clicked" handler="on_favorite_button_clicked" />
+                                <child>
+                                  <object class="GtkImage">
+                                    <property name="icon-size">GTK_ICON_SIZE_NORMAL</property>
+                                    <property name="icon-name">emblem-favorite-symbolic</property>
+                                    <binding name="css-classes">
+                                      <closure type="GStrv" function="format_favorite_css_classes">
+                                        <lookup type="GswClient" name="favorite">
+                                          <lookup name="item">GtkListItem</lookup>
+                                        </lookup>
+                                      </closure>
+                                    </binding>
+                                  </object>
+                                </child>
                               </object>
                             </property>
                           </template>

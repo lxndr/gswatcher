@@ -16,17 +16,20 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-server-list #favorite_cell {
-  opacity: 0;
-  color: var(--accent-slate);
-  padding: 4px;
+server-list #favorite_button {
+  padding: 0;
 }
 
-server-list #favorite_cell:not(.favorite-active):hover {
+server-list #favorite_button image {
+  opacity: 0;
+  color: var(--accent-slate);
+}
+
+server-list #favorite_button:hover image:not(.favorite-active) {
   opacity: 0.5;
 }
 
-server-list #favorite_cell.favorite-active {
+server-list #favorite_button image.favorite-active {
   opacity: 1;
   color: var(--accent-red);
 }
