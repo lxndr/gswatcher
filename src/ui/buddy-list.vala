@@ -52,25 +52,29 @@ class BuddyList : Widget {
 
   construct {
     view.sort_by_column (name_column, SortType.ASCENDING);
-
-    selection.items_changed.connect ((position, removed, added) => {
-      if (view != null) {
-        if (added > 0) {
-#if GSW_GTK_4_12_SUPPORTED
-          view.scroll_to (position, null, SELECT | FOCUS, null);
-#endif
-          view.grab_focus ();
-        }
-
-        if (removed > 0)
-          view.grab_focus ();
-      }
-    });
+    selection.items_changed.connect (on_items_changed);
   }
 
   protected override void dispose () {
-    remove_all_children (this);
+    selection.items_changed.disconnect (on_items_changed);
+#if GSW_GTK_4_8_SUPPORTED
+    dispose_template (typeof (BuddyList));
+#endif
+    unparent_all_children (this);
     base.dispose ();
+  }
+
+  private void on_items_changed (uint position, uint removed, uint added) {
+    if (added > 0) {
+#if GSW_GTK_4_12_SUPPORTED
+      view.scroll_to (position, null, SELECT | FOCUS, null);
+#endif
+      view.grab_focus ();
+    }
+
+    if (removed > 0) {
+      view.grab_focus ();
+    }
   }
 
   [GtkCallback]

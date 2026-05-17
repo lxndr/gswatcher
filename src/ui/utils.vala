@@ -176,7 +176,7 @@ GetColumnViewItemResult? check_list_widgets (Gtk.Widget w, int y, int header_hei
 	return null;
 }
 
-void remove_all_children (Gtk.Widget parent) {
+void unparent_all_children (Gtk.Widget parent) {
   var child = parent.get_first_child ();
 
   while (child != null) {

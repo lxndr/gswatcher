@@ -26,6 +26,13 @@ add_project_arguments(
     language: 'c',
 )
 
+if gtk4_dep_version.version_compare('>=4.8')
+  add_project_arguments(
+    '-D', 'GSW_GTK_4_8_SUPPORTED',
+    language: 'vala',
+  )
+endif
+
 if gtk4_dep_version.version_compare('>=4.12')
   add_project_arguments(
     '-D', 'GSW_GTK_4_12_SUPPORTED',
@@ -61,47 +68,7 @@ if libadwaita_dep_version.version_compare('>=1.6.0')
   )
 endif
 
-core_sources = files(
-  'core/game/expression-parser.vala',
-  'core/game/expression.vala',
-  'core/game/game-resolver.vala',
-  'core/game/game.vala',
-  'core/geo-location-resolver/maxmind-location-resolver.vala',
-  'core/geo-location-resolver/geo-location-resolver.vala',
-  'core/protocol/console-lua-protocol.vala',
-  'core/protocol/console-protocol.vala',
-  'core/protocol/dummy-lua-protocol.vala',
-  'core/protocol/lua-protocol.vala',
-  'core/protocol/lua-utils.vala',
-  'core/protocol/protocol-registry.vala',
-  'core/protocol/protocol.vala',
-  'core/protocol/query-lua-protocol.vala',
-  'core/protocol/query-protocol.vala',
-  'core/transport/net-transport.vala',
-  'core/transport/tcp-transport.vala',
-  'core/transport/transport-registry.vala',
-  'core/transport/transport.vala',
-  'core/transport/udp-transport-manager.vala',
-  'core/transport/udp-transport.vala',
-  'core/utils/hash_string_map.vala',
-  'core/utils/hashable_string_map.vala',
-  'core/utils/parse_quake_color_codes.vala',
-  'core/utils/strip_pango_markup.vala',
-  'core/utils/ttl_cache.vala',
-  'core/buddy-list.vala',
-  'core/buddy.vala',
-  'core/client.vala',
-  'core/console-client.vala',
-  'core/player-list.vala',
-  'core/querier-manager.vala',
-  'core/querier.vala',
-  'core/server-details-list.vala',
-  'core/server-details.vala',
-  'core/server-info.vala',
-  'core/server-list.vala',
-  'core/server.vala',
-  'core/utils.vala',
-)
+subdir('core')
 
 core_sources += configure_file(
   input: 'config.vala.in',

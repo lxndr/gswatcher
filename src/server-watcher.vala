@@ -44,15 +44,8 @@ public class ServerWatcher : Object {
   construct {
     server_records = new Gee.HashMap<Client, ServerWatcherRecord?> ();
 
-    client_list.items_changed.connect ((pos, removed, added) => {
-      for (var idx = pos; idx < pos + removed; idx++) {
-        on_server_removed (client_list[idx]);
-      }
-
-      for (var idx = pos; idx < pos + added; idx++) {
-        on_server_added (client_list[idx]);
-      }
-    });
+    client_list.added.connect (on_server_added);
+    client_list.removed.connect (on_server_removed);
   }
 
   public ServerWatcher (ServerList client_list) {

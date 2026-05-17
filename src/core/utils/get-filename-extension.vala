@@ -16,16 +16,16 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-namespace Gsw.Config {
-  public const string APPID = "@app_id@";
-  public const string APPNAME = "@app_name@";
-  public const string PRGNAME = "@app_exec@";
-  public const string VERSION = "@app_version@";
-  public const string HOMEPAGE = "@app_homepage@";
-  public const string ISSUES = "@app_bugtracker@";
-  public const string LOCALE_DIR = "@locale_dir@";
-  public const string GETTEXT_PACKAGE = "@app_exec@";
-  public const string VALA_VERSION = "@vala_version@";
-  public const string ISO_FLAGS_DIR_NAME = "@iso_flags_dir_name@";
-  public const string GAME_ICON_EXT = "@game_icon_ext@";
+namespace Gsw {
+
+public string? get_filename_extension(File file) {
+  var fname = file.get_basename ();
+  var ext_pos = fname.last_index_of_char ('.');
+
+  if (ext_pos == -1)
+    return null;
+
+  return fname.substring (ext_pos + 1, -1);
+}
+
 }

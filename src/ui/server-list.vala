@@ -67,21 +67,24 @@ class ServerList : Widget {
   }
 
   public override void dispose () {
-    remove_all_children (this);
+    selection.items_changed.disconnect (on_items_changed);
+#if GSW_GTK_4_8_SUPPORTED
+    dispose_template (typeof (ServerList));
+#endif
+    unparent_all_children (this);
     base.dispose ();
   }
 
   private void on_items_changed (uint position, uint removed, uint added) {
-    if (view != null) {
-      if (added > 0) {
+    if (added > 0) {
 #if GSW_GTK_4_12_SUPPORTED
-        view.scroll_to (position, null, SELECT | FOCUS, null);
+      view.scroll_to (position, null, SELECT | FOCUS, null);
 #endif
-        view.grab_focus ();
-      }
+      view.grab_focus ();
+    }
 
-      if (removed > 0)
-        view.grab_focus ();
+    if (removed > 0) {
+      view.grab_focus ();
     }
   }
 

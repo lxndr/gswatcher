@@ -27,11 +27,7 @@ class BuddyWatcher : Object {
   public signal void online (Buddy buddy, Client client);
 
   construct {
-    buddy_list.items_changed.connect ((pos, removed, added) => {
-      for (var idx = pos; idx < pos + added; idx++)
-        on_buddy_added (buddy_list[idx]);
-    });
-
+    buddy_list.added.connect (on_buddy_added);
     update_timer = Timeout.add (update_interval, on_timer_tick);
   }
 

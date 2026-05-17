@@ -28,40 +28,55 @@ public class ServerDetailsEntry : Object {
 }
 
 public class ServerDetailsList : Object, ListModel {
-  private Gee.List<ServerDetailsEntry> list = new Gee.ArrayList<ServerDetailsEntry> ();
+  private Gee.List<ServerDetailsEntry> _list = new Gee.ArrayList<ServerDetailsEntry> ();
 
-  public Object? get_item (uint position) {
-    return list.get ((int) position);
-  }
-
-  public Type get_item_type () {
-    return typeof (ServerDetailsEntry);
-  }
-
-  public uint get_n_items () {
-    return (uint) list.size;
-  }
-
+  /**
+   * Applies the given map of server details to the current list.
+   *
+   * Existing entries will be updated, new entries will be added, and entries that are no longer present in the map will be removed.
+   *
+   * @param map The map of server details to apply.
+   */
   public void apply (Gee.Map<string, string> map) {
-    for (var i = list.size - 1; i >= 0; i--) {
-      var key = list[i].key;
+    for (var i = _list.size - 1; i >= 0; i--) {
+      var key = _list[i].key;
 
       if (!map.has_key (key)) {
-        list.remove_at (i);
+        _list.remove_at (i);
         items_changed (i, 1, 0);
       }
     }
 
     foreach (var item in map) {
-      var detail = list.first_match (it => it.key == item.key);
+      var detail = _list.first_match (it => it.key == item.key);
 
       if (detail == null) {
-        list.add (new ServerDetailsEntry (item.key, item.value));
-        items_changed (list.size, 0, 1);
+        _list.add (new ServerDetailsEntry (item.key, item.value));
+        items_changed (_list.size - 1, 0, 1);
       } else {
         detail.value = item.value;
       }
     }
+  }
+
+  /*
+   * ListModel implementation
+   */
+
+  public Object? get_item (uint position) {
+    if (position >= _list.size) {
+      return null;
+    }
+
+    return _list[(int) position];
+  }
+
+  public Type get_item_type () {
+    return _list.element_type;
+  }
+
+  public uint get_n_items () {
+    return _list.size;
   }
 }
 

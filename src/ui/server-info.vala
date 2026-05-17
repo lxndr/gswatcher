@@ -26,12 +26,21 @@ class ServerInfo : Widget {
 
   class construct {
     typeof (Gsw.ServerInfo).ensure ();
-    set_layout_manager_type (typeof (BinLayout));
+    set_layout_manager_type (typeof (GridLayout));
     set_css_name ("server-info");
   }
 
+  construct {
+    var layout_manager = layout_manager as GridLayout;
+    layout_manager.column_spacing = 8;
+    layout_manager.row_spacing = 4;
+  }
+
   public override void dispose () {
-    get_first_child ().unparent ();
+#if GSW_GTK_4_8_SUPPORTED
+    dispose_template (typeof (ServerInfo));
+#endif
+    unparent_all_children (this);
     base.dispose ();
   }
 

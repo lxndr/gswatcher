@@ -47,7 +47,10 @@ class PlayerList : Widget {
   }
 
   public override void dispose () {
-    remove_all_children (this);
+#if GSW_GTK_4_8_SUPPORTED
+    dispose_template (typeof (PlayerList));
+#endif
+    unparent_all_children (this);
     base.dispose ();
   }
 

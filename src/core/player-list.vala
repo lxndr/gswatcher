@@ -18,41 +18,36 @@
 
 namespace Gsw {
 
-public class Player : Gee.HashMap<string, string> {
-  public signal void change ();
-
-  public override void @set (string key, string value) {
-    if (value != @get (key)) {
-      base.set (key, value);
-    }
-  }
-}
-
+/**
+ * An observable list of players.
+ */
 public class PlayerList : Object, ListModel {
   private Gee.List<Player> _list = new Gee.ArrayList<Player> ();
 
-  public Object? get_item (uint position) {
-    return _list.get ((int) position);
+  /**
+   * Gets the player at the specified index.
+   *
+   * @param index The index of the player to retrieve.
+   * @return The player at the specified index.
+   */
+  public new Player @get (int index) {
+    return _list[index];
   }
 
-  public Type get_item_type () {
-    return typeof (Player);
+  /**
+   * Returns an iterator over the players in the list.
+   *
+   * @return An iterator over the players in the list.
+   */
+  public Gee.Iterator<Player> iterator () {
+    return _list.iterator ();
   }
 
-  public uint get_n_items () {
-    return _list.size;
-  }
-
-  public uint size {
-    get {
-      return get_n_items ();
-    }
-  }
-
-  public new Player get (uint index) {
-    return (Player) get_item (index);
-  }
-
+  /**
+   * Applies the given list of players to the current list, updating existing players and adding or removing players as necessary.
+   *
+   * @param players The list of players to apply to the current list.
+   */
   public void apply (Gee.List<Player> players) {
     var old_size = _list.size;
     var new_size = players.size;
@@ -76,6 +71,26 @@ public class PlayerList : Object, ListModel {
       items_changed (old_size, 0, new_size - old_size);
     }
   }
+
+  /*
+   * ListModel implementation
+   */
+
+  public Object? get_item (uint position) {
+    if (position >= _list.size) {
+      return null;
+    }
+
+    return _list[(int) position];
+  }
+
+  public Type get_item_type () {
+    return _list.element_type;
+  }
+
+  public uint get_n_items () {
+    return _list.size;
+  }  
 }
 
 }

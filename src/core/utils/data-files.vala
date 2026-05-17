@@ -18,57 +18,6 @@
 
 namespace Gsw {
 
-static Regex address_re;
-
-Regex create_address_re () ensures (result != null) {
-  if (address_re == null) {
-    try {
-      address_re = new Regex ("^([a-z0-9\\.\\-]+):(\\d{1,5})(?::(\\d{1,5}))?$", RegexCompileFlags.CASELESS);
-    } catch (Error err) {
-      log (Config.LOG_DOMAIN, LEVEL_CRITICAL, "failed to create Regex: %s", err.message);
-    }
-  }
-
-  return address_re;
-}
-
-public bool parse_address (string address, out string host, out uint16 gport, out uint16 qport) {
-  host = address;
-  gport = 0;
-  qport = 0;
-
-  MatchInfo match_info;
-  var address_re = create_address_re ();
-
-  if (!address_re.match (address, 0, out match_info))
-    return false;
-
-  if (!match_info.matches ())
-    return false;
-
-  var p1 = match_info.fetch (1);
-  var p2 = match_info.fetch (2);
-  var p3 = match_info.fetch (3);
-
-  host = p1;
-  gport = qport = (uint16) uint.parse (p2, 10);
-
-  if (p3 != null && p3.length > 0)
-    qport = (uint16) uint.parse (p3, 10);
-
-  return true;
-}
-
-public string? get_filename_extension(File file) {
-  var fname = file.get_basename ();
-  var ext_pos = fname.last_index_of_char ('.');
-
-  if (ext_pos == -1)
-    return null;
-
-  return fname.substring (ext_pos + 1, -1);
-}
-
 public string? find_file_in_dirs (string path, Gee.List<File> dirs) {
   foreach (var dir in dirs) {
     var filename = Path.build_filename (dir.get_path (), path);

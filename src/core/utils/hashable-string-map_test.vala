@@ -21,7 +21,7 @@ using Gsw;
 int main (string[] args) {
     Test.init (ref args);
     
-    Test.add_func ("/core/utils/hashable_string_map/basic_functionality", () => {
+    Test.add_func ("/core/utils/hashable-string-map/basic_functionality", () => {
         var map = new HashableStringMap ();
         
         // Test initial state
@@ -56,7 +56,7 @@ int main (string[] args) {
         assert (map.is_empty);
     });
     
-    Test.add_func ("/core/utils/hashable_string_map/equality", () => {
+    Test.add_func ("/core/utils/hashable-string-map/equality", () => {
         var map1 = new HashableStringMap ();
         var map2 = new HashableStringMap ();
         
@@ -91,7 +91,7 @@ int main (string[] args) {
         assert (!map2.equal_to (map1));        
     });
     
-    Test.add_func ("/core/utils/hashable_string_map/hash_consistency", () => {
+    Test.add_func ("/core/utils/hashable-string-map/hash_consistency", () => {
         var map = new HashableStringMap ();
         
         // Test that hash is consistent when map hasn't changed
@@ -131,7 +131,7 @@ int main (string[] args) {
         assert (hash_a == hash_c);
     });
     
-    Test.add_func ("/core/utils/hashable_string_map/hash_invalidation", () => {
+    Test.add_func ("/core/utils/hashable-string-map/hash_invalidation", () => {
         var map = new HashableStringMap ();
         map.set ("key1", "value1");
         map.set ("key2", "value2");
@@ -180,7 +180,7 @@ int main (string[] args) {
         assert (new_hash != post_clear_hash);
     });
     
-    Test.add_func ("/core/utils/hashable_string_map/hash_order_independence", () => {
+    Test.add_func ("/core/utils/hashable-string-map/hash_order_independence", () => {
         // Test that the hash algorithm is order-independent for the same content
         var map1 = new HashableStringMap ();
         map1.set ("key1", "value1");
@@ -206,7 +206,7 @@ int main (string[] args) {
         assert (hash1 == hash3);
     });
     
-    Test.add_func ("/core/utils/hashable_string_map/hash_different_content", () => {
+    Test.add_func ("/core/utils/hashable-string-map/hash_different_content", () => {
         var map1 = new HashableStringMap ();
         map1.set ("key1", "value1");
         map1.set ("key2", "value2");

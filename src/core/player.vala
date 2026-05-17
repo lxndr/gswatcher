@@ -16,16 +16,16 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-namespace Gsw.Config {
-  public const string APPID = "@app_id@";
-  public const string APPNAME = "@app_name@";
-  public const string PRGNAME = "@app_exec@";
-  public const string VERSION = "@app_version@";
-  public const string HOMEPAGE = "@app_homepage@";
-  public const string ISSUES = "@app_bugtracker@";
-  public const string LOCALE_DIR = "@locale_dir@";
-  public const string GETTEXT_PACKAGE = "@app_exec@";
-  public const string VALA_VERSION = "@vala_version@";
-  public const string ISO_FLAGS_DIR_NAME = "@iso_flags_dir_name@";
-  public const string GAME_ICON_EXT = "@game_icon_ext@";
+namespace Gsw {
+
+public class Player : Gee.HashMap<string, string> {
+  public signal void change ();
+
+  public override void @set (string key, string value) {
+    if (value != @get (key)) {
+      base.set (key, value);
+    }
+  }
+}
+
 }

@@ -37,6 +37,11 @@ public interface LogicalExpression : Expression {
   public abstract bool eval (ExpressionContext ctx, string value) throws ExpressionError;
 }
 
+/**
+ * An expression that evaluates to a literal string value.
+ *
+ * Example: "hello world"
+ */
 class LiteralExpression : Expression, EvaluatableExpression {
   private string value = "";
 
@@ -49,6 +54,11 @@ class LiteralExpression : Expression, EvaluatableExpression {
   }
 }
 
+/**
+ * An expression that evaluates to a value from a map in the context.
+ *
+ * Example: map["key"]
+ */
 class ValueExpression : Expression, EvaluatableExpression {
   private string map_name;
   private EvaluatableExpression key_expr;
@@ -72,6 +82,11 @@ class ValueExpression : Expression, EvaluatableExpression {
   }
 }
 
+/**
+ * An abstract base class for function expressions.
+ *
+ * Example: fn(<expr1>, <expr2>, ...)
+ */
 abstract class FunctionExpression : Expression, EvaluatableExpression {
   private string name;
   private Gee.List<EvaluatableExpression> args;
@@ -100,6 +115,13 @@ abstract class FunctionExpression : Expression, EvaluatableExpression {
   }
 }
 
+/**
+ * An expression that evaluates to the result of applying a regular expression to an input string.
+ *
+ * The result is the first capture group of the match, or an empty string if there is no match.
+ *
+ * Example: regex(<pattern>, <input>)
+ */
 class RegexExpression : FunctionExpression {
   public RegexExpression (Gee.List<EvaluatableExpression> args) {
     base ("regex", args);
@@ -130,6 +152,14 @@ class RegexExpression : FunctionExpression {
   }
 }
 
+/**
+ * An expression that evaluates to a value from a map in the context, based on a list of keywords.
+ *
+ * The keywords are split by a delimiter and looked up in the map in order. The first match is returned.
+ * If there are no matches, a default value is returned.
+ *
+ * Example: mapKeyword("key1,key2,key3", ",", "map_name", "default_value")
+ */
 class MapKeywordExpression : FunctionExpression {
   public MapKeywordExpression (Gee.List<EvaluatableExpression> args) {
     base ("mapKeyword", args);
@@ -161,6 +191,11 @@ class MapKeywordExpression : FunctionExpression {
   }
 }
 
+/**
+ * An expression that evaluates to a transformed version of an input string, based on a specified transformation type.
+ *
+ * Example: toMarkup(<input>, "quake-color-code")
+ */
 class ToMarkupExpression : FunctionExpression {
   public ToMarkupExpression (Gee.List<EvaluatableExpression> args) {
     base ("toMarkup", args);
@@ -179,6 +214,11 @@ class ToMarkupExpression : FunctionExpression {
   }
 }
 
+/**
+ * An expression that evaluates to true if the input value matches any of the sub-expressions.
+ *
+ * Example: <expr1> or <expr2> or <expr3>
+ */
 public class OrExpression : Expression, LogicalExpression {
   private Gee.List<EvaluatableExpression> expressions;
 

@@ -18,19 +18,35 @@
 
 namespace Gsw.GameDef {
 
-errordomain ExpressionParserError {
-  INVALID_TOKEN
+public errordomain ExpressionParserError {
+  ALREADY_PARSED,
+  INVALID_TOKEN,
 }
 
-class ExpressionParser {
-  private Scanner scanner = new Scanner (null);
+/**
+ * Parses evaluatable expressions from strings.
+ */
+public class ExpressionParser {
+  private Scanner scanner = create_scanner ();
+  private bool parsed = false;
 
   public ExpressionParser (string input) {
-    scanner.config.scan_identifier_1char = true;
     scanner.input_text (input, input.length);
   }
 
+  /**
+   * Parses the input string into an evaluatable expression.
+   *
+   * @return The parsed expression.
+   * @throws ExpressionParserError.ALREADY_PARSED If the expression has already been parsed.
+   * @throws ExpressionParserError.INVALID_TOKEN If the input contains invalid syntax.
+   */
   public Expression parse () throws ExpressionParserError {
+    if (parsed) {
+      throw new ExpressionParserError.ALREADY_PARSED ("expression has already been parsed");
+    }
+
+    parsed = true;
     var expr = parse_expression ();
 
     switch (scanner.peek_next_token ()) {
@@ -230,6 +246,13 @@ class ExpressionParser {
 
     return "";
   }
+}
+
+private Scanner create_scanner () {
+  var scanner = new Scanner (null);
+  var config = scanner.config; // passing `null` to the constructor creates a default config
+  config.scan_identifier_1char = true;
+  return scanner;
 }
 
 }

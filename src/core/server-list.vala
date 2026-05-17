@@ -18,53 +18,119 @@
 
 namespace Gsw {
 
+/**
+ * An observable list of game servers represented as `Client` objects.
+ */
 public class ServerList : Object, ListModel {
-  private Gee.List<Client> list = new Gee.ArrayList<Client> ();
+  private Gee.List<Client> _list = new Gee.ArrayList<Client> ();
 
-  public Object? get_item (uint position) {
-    return list[(int) position];
+  /**
+   * A signal emitted when a client is added to the list.
+   */
+  public signal void added (Client client);
+
+  /**
+   * A signal emitted when a client is removed from the list.
+   */
+  public signal void removed (Client client);
+
+  /**
+   * Gets the client at the specified index.
+   *
+   * @param index The index of the client to retrieve.
+   * @return The client at the specified index.
+   */
+  public new Client @get (int index) {
+    return _list[index];
   }
 
-  public Type get_item_type () {
-    return typeof (Client);
+  /**
+   * Returns an iterator over the clients in the list.
+   *
+   * @return An iterator over the clients in the list.
+   */
+  public Gee.Iterator<Client> iterator () {
+    return _list.iterator ();
   }
 
-  public uint get_n_items () {
-    return list.size;
-  }
-
-  public uint size {
-    get {
-      return get_n_items ();
-    }
-  }
-
-  public new Client get (uint index) {
-    return (Client) get_item (index);
-  }
-
+  /**
+   * Adds a client with the specified address to the list.
+   *
+   * If a client with the same address already exists, it will be returned instead of adding a new one.
+   * The `added` and `items_changed` signals will be emitted if a new client is added to the list.
+   *
+   * @param address The address of the client to add.
+   * @return The added client.
+   */
   public virtual Client add (string address) {
+    var existing_client = find_by_address (address);
+
+    if (existing_client != null) {
+      return existing_client;
+    }
+
     var client = new Client (new Server (address));
-    list.add (client);
-    items_changed (list.size - 1, 0, 1);
+    _list.add (client);
+    items_changed (_list.size - 1, 0, 1);
+    added (client);
     return client;
   }
 
+  /**
+   * Removes the specified client from the list.
+   *
+   * If the client is found and removed, the `removed` and `items_changed` signals will be emitted.
+   *
+   * @param client The client to remove.
+   */
   public virtual void remove (Client client) {
-    var idx = list.index_of (client);
+    var idx = _list.index_of (client);
 
     if (idx > -1) {
+      _list.remove_at (idx);
       items_changed (idx, 1, 0);
-      list.remove_at (idx);
+      removed (client);
     }
   }
 
-  public Client? find_by_name (string address) {
-    return list.first_match (client => client.server.address == address);
+  /**
+   * Finds a client in the list by its server address.
+   *
+   * @param address The server address to search for.
+   * @return The client with the specified server address, or `null` if no such client exists.
+   */
+  public Client? find_by_address (string address) {
+    return _list.first_match (client => client.server.address == address);
   }
 
+  /**
+   * Checks if a client with the specified server address exists in the list.
+   *
+   * @param address The server address to check for.
+   * @return `true` if a client with the specified server address exists, `false` otherwise.
+   */
   public bool exists (string address) {
-    return find_by_name (address) != null;
+    return find_by_address (address) != null;
+  }
+
+  /*
+   * ListModel implementation
+   */
+
+  public Object? get_item (uint position) {
+    if (position >= _list.size) {
+      return null;
+    }
+
+    return _list[(int) position];
+  }
+
+  public Type get_item_type () {
+    return _list.element_type;
+  }
+
+  public uint get_n_items () {
+    return _list.size;
   }
 }
 
