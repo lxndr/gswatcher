@@ -81,6 +81,7 @@ ui_sources = files(
   'ui/buddy-list.vala',
   'ui/main-window.vala',
   'ui/player-list.vala',
+  'ui/player-list-sorter.vala',
   'ui/preferences.vala',
   'ui/server-console.vala',
   'ui/server-details.vala',

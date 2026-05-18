@@ -94,7 +94,7 @@ class PlayerList : Widget {
     factory.bind.connect ((factory, listitem) => player_bind (listitem as ListItem, field));
 
     var col = new ColumnViewColumn (field.title, factory);
-    // TODO: add player list sorting
+    col.sorter = new PlayerListSorter (field);
     col.expand = expand;
     return col;
   }
