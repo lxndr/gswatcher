@@ -22,6 +22,28 @@ using Gee;
 public static int main (string[] args) {
   Test.init (ref args);
 
+  Test.add_func ("/core/ServerList/get()", () => {
+    var list = new ServerList ();
+    var client1 = list.add ("localhost:27015");
+    var client2 = list.add ("localhost:27016");
+
+    assert (list.get (0) == client1);
+    assert (list.get (1) == client2);
+  });
+
+  Test.add_func ("/core/ServerList/iterator()", () => {
+    var list = new ServerList ();
+    var client1 = list.add ("localhost:27015");
+    var client2 = list.add ("localhost:27016");
+
+    var iterator = list.iterator ();
+    assert_true (iterator.next ());
+    assert (iterator.get () == client1);
+    assert_true (iterator.next ());
+    assert (iterator.get () == client2);
+    assert_false (iterator.next ());
+  });
+
   Test.add_func ("/core/ServerList/add()", () => {
     var list = new ServerList ();
 
@@ -120,19 +142,6 @@ public static int main (string[] args) {
     list.remove (client);
 
     assert_cmpuint (list.get_n_items (), EQ, 0);
-  });
-
-  Test.add_func ("/core/ServerList/iterator()", () => {
-    var list = new ServerList ();
-    var client1 = list.add ("localhost:27015");
-    var client2 = list.add ("localhost:27016");
-
-    var iterator = list.iterator ();
-    assert_true (iterator.next ());
-    assert (iterator.get () == client1);
-    assert_true (iterator.next ());
-    assert (iterator.get () == client2);
-    assert_false (iterator.next ());
   });
 
   Test.add_func ("/core/ServerList/find_by_address()", () => {

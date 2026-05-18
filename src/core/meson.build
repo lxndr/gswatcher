@@ -76,3 +76,10 @@ test('core/server-list', executable(
   'server-list_test.vala',
   dependencies : dependencies,
 ))
+
+test('core/buddy-list', executable(
+  'buddy-list_test',
+  core_sources,
+  'buddy-list_test.vala',
+  dependencies : dependencies,
+))
