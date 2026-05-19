@@ -19,7 +19,7 @@
 namespace Gsw {
 
   public string get_runtime_gtk_version () {
-    return "%u.%02u.%02u".printf (Gtk.get_major_version (), Gtk.get_minor_version (), Gtk.get_minor_version ());
+    return "%u.%02u.%02u".printf (Gtk.get_major_version (), Gtk.get_minor_version (), Gtk.get_micro_version ());
   }
 
   public string get_buildtime_gtk_version () {
