@@ -6,14 +6,5 @@
 	],
 	"settings": {
 		"C_Cpp.default.configurationProvider": "mesonbuild.mesonbuild"
-	},
-	"extensions": {
-		"recommendations": [
-			"ms-vscode.cpptools",
-			"streetsidesoftware.code-spell-checker",
-			"sumneko.lua",
-			"mesonbuild.mesonbuild",
-			"prince781.vala"
-		]
 	}
 }

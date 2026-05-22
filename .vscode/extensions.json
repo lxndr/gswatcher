@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+        "vadimcn.vscode-lldb",
+        "prince781.vala",
+        "mesonbuild.mesonbuild",
+        "sumneko.lua"
+    ]
+}
