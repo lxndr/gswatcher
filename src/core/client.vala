@@ -315,6 +315,9 @@ public class Client : Object {
     if (console_client == null)
       setup_console_client ();
 
+    if (console_client == null)
+      return;
+
     log_to_console (cmd, "cmd");
     console_client.exec_command (cmd);
 

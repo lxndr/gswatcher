@@ -101,18 +101,29 @@ class GameResolver : Object {
         foreach (var key in kf.get_keys (MATCH_GROUP)) {
           var value = kf.get_string (MATCH_GROUP, key);
           var parts = key.split (".", 2);
+
+          if (parts.length < 2)
+            throw new IOError.INVALID_DATA ("invalid match key '%s' (group '%s'): expected 'inf.<field>'", key, MATCH_GROUP);
+
           var key1 = parts[0];
           var key2 = parts[1];
 
+          if (key1 != "inf")
+            throw new IOError.INVALID_DATA ("invalid match key '%s' (group '%s'): expected 'inf.<field>'", key, MATCH_GROUP);
+
           try {
             var parser = new GameDef.ExpressionParser (value);
+            var expr = parser.parse ();
             game.weight += value.length;
 
-            switch (key1) {
-              case "inf":
-                game.inf_matches[key2] = parser.parse ();
-                break;
+            if (!(expr is GameDef.EvaluatableExpression || expr is GameDef.LogicalExpression)) {
+              throw new IOError.INVALID_DATA (
+                "expression at '%s' (group '%s') must be evaluatable or logical expression",
+                key, MATCH_GROUP
+              );
             }
+
+            game.inf_matches[key2] = expr;
           } catch (GameDef.ExpressionParserError parser_err) {
             throw new IOError.INVALID_DATA ("failed to parse expression at '%s' (group '%s'): %s", key, MATCH_GROUP, parser_err.message);
           }
@@ -120,29 +131,26 @@ class GameResolver : Object {
 
         break;
       case INFO_GROUP:
-        if (kf.has_group (INFO_GROUP)) {
-          foreach (var key in kf.get_keys (INFO_GROUP)) {
-            var val = kf.get_string (INFO_GROUP, key);
+        foreach (var key in kf.get_keys (INFO_GROUP)) {
+          var val = kf.get_string (INFO_GROUP, key);
 
-            try {
-              var parser = new GameDef.ExpressionParser (val);
-              var expr = parser.parse ();
+          try {
+            var parser = new GameDef.ExpressionParser (val);
+            var expr = parser.parse ();
 
-              if (!(expr is GameDef.EvaluatableExpression)) {
-                throw new IOError.INVALID_DATA ("expression at '%s' (group '%s') has to be evaluatable expression", key, INFO_GROUP);
-              }
-
-              game.inf[key] = expr as GameDef.EvaluatableExpression;
-            } catch (GameDef.ExpressionParserError parser_err) {
-              throw new IOError.INVALID_DATA ("failed to parse expression at '%s' (group '%s'): %s", key, INFO_GROUP, parser_err.message);
+            if (!(expr is GameDef.EvaluatableExpression)) {
+              throw new IOError.INVALID_DATA ("expression at '%s' (group '%s') has to be evaluatable expression", key, INFO_GROUP);
             }
+
+            game.inf[key] = expr as GameDef.EvaluatableExpression;
+          } catch (GameDef.ExpressionParserError parser_err) {
+            throw new IOError.INVALID_DATA ("failed to parse expression at '%s' (group '%s'): %s", key, INFO_GROUP, parser_err.message);
           }
         }
 
         break;
       case PLAYER_GROUP:
-        if (kf.has_group (PLAYER_GROUP))
-          load_player_fields (kf, ref game);
+        load_player_fields (kf, ref game);
         break;
       case EXTRA_GROUP:
         break;
@@ -155,6 +163,10 @@ class GameResolver : Object {
         game.maps[group] = map;
         break;
       }
+    }
+
+    if (game.inf_matches.size == 0) {
+      throw new IOError.INVALID_DATA ("game '%s' has no match rules", game_id);
     }
 
     return game;

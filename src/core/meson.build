@@ -83,3 +83,10 @@ test('core/buddy-list', executable(
   'buddy-list_test.vala',
   dependencies : dependencies,
 ))
+
+test('core/game', executable(
+  'game_test',
+  core_sources,
+  'game/game_test.vala',
+  dependencies : dependencies,
+))

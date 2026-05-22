@@ -46,16 +46,22 @@ class Game {
       try {
         var expr = entry.value;
         var value = details.get (entry.key);
+        bool matched = false;
 
-        if (expr is GameDef.EvaluatableExpression && value == expr.eval (ctx))
-          return true;
+        if (expr is GameDef.EvaluatableExpression) {
+          matched = value == ((GameDef.EvaluatableExpression) expr).eval (ctx);
+        } else if (expr is GameDef.LogicalExpression) {
+          matched = ((GameDef.LogicalExpression) expr).eval (ctx, value);
+        } else {
+          warning ("invalid expression type for '%s' in '%s': %s", entry.key, id, expr.get_type ().name ());
+          return false;
+        }
 
-        if (expr is GameDef.LogicalExpression && expr.eval (ctx, value))
-          return true;
-
-        return false;
+        if (!matched)
+          return false;
       } catch (GameDef.ExpressionError err) {
         warning ("failed to evaluate value of '%s' for '%s': %s", entry.key, id, err.message);
+        return false;
       }
     }
 
