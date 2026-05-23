@@ -107,6 +107,9 @@ public class Client : Object {
 
     set {
       if (_querier != null) {
+        foreach (var binding in querier_bindings) {
+          binding.unbind ();
+        }
         querier_bindings.clear ();
       }
 
@@ -304,7 +307,7 @@ public class Client : Object {
     console_client = null;
   }
 
-  private void log_to_console (string msg, string? text_tag = null) {
+  private void log_to_console (string msg, string? text_tag = null) ensures (console_log_buffer != null) {
     Gtk.TextIter iter;
     console_log_buffer.get_end_iter (out iter);
     console_log_buffer.insert_with_tags_by_name (ref iter, msg, -1, text_tag);
