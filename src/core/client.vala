@@ -119,7 +119,7 @@ public class Client : Object {
         querier_bindings.add_all_array ({
           querier.bind_property ("ping", this, "ping", DEFAULT | SYNC_CREATE),
           querier.bind_property ("error", this, "error", DEFAULT | SYNC_CREATE),
-          querier.bind_property ("online", this, "online", DEFAULT | SYNC_CREATE),
+          querier.bind_property ("online", this, "online", DEFAULT),
         });
       }
     }
