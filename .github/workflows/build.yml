@@ -270,6 +270,7 @@ jobs:
           export DEPLOY_GTK_VERSION=4
           ./linuxdeploy.AppImage --appdir ${{ env.OUTDIR }} --plugin gtk --output appimage --icon-file "${{ env.OUTDIR }}/usr/share/icons/hicolor/512x512/apps/io.github.lxndr.gswatcher.png" --desktop-file "${{ env.OUTDIR }}/usr/share/applications/io.github.lxndr.gswatcher.desktop"
           chmod +x "${{ env.OUTDIR }}/AppRun"
+          chmod +x "${{ env.OUTDIR }}/AppRun.wrapped"
           chmod +x "${{ env.OUTDIR }}/usr/bin/gswatcher"
 
       - name: Upload AppImage artifacts
