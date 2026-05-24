@@ -253,9 +253,10 @@ jobs:
       - name: Extract build artifacts
         run: |
           ARTIFACT_DIR=$(find temp_artifacts -maxdepth 1 -type d -name "gswatcher_${{ env.APP_VERSION }}+${{ matrix.image }}.*" | head -n 1)
-          mkdir -p ${{ env.OUTDIR }}/usr
-          cp -r "$ARTIFACT_DIR"/* ${{ env.OUTDIR }}/usr/
-          rm -rf temp_artifacts
+          ls -al temp_artifacts
+          # mkdir -p ${{ env.OUTDIR }}/usr
+          # cp -r "$ARTIFACT_DIR"/* ${{ env.OUTDIR }}/usr/
+          # rm -rf temp_artifacts
 
       - name: Setup dependencies
         run: |
