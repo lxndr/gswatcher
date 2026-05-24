@@ -51,7 +51,7 @@ jobs:
       run: cd builddir && DESTDIR=$GITHUB_WORKSPACE/${{ env.OUTDIR }} ninja install
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: >-
           ${{
@@ -120,7 +120,7 @@ jobs:
       run: cd builddir && DESTDIR=$GITHUB_WORKSPACE/${{ env.OUTDIR }} ninja install
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: >-
           ${{
@@ -172,7 +172,7 @@ jobs:
           echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: gswatcher_${{ env.APP_VERSION }}+${{ matrix.image }}.*
           path: temp_artifacts
@@ -210,7 +210,7 @@ jobs:
           glib-compile-schemas.exe ${{ env.OUTDIR }}/share/glib-2.0/schemas
 
       - name: Upload portable artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: >-
             ${{
@@ -244,7 +244,7 @@ jobs:
           echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: gswatcher_${{ env.APP_VERSION }}+${{ matrix.image }}.*
           path: temp_artifacts
@@ -277,7 +277,7 @@ jobs:
           chmod +x "${{ env.OUTDIR }}/AppRun.wrapped"
 
       - name: Upload AppImage artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: >-
             ${{
@@ -298,13 +298,13 @@ jobs:
 
     steps:
       - name: Download Windows portable artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: gswatcher_*+windows-portable.*
           path: ./artifacts
 
       - name: Download AppImage artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: gswatcher_*+*.appimage.*
           path: ./artifacts
