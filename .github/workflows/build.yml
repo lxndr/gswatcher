@@ -21,45 +21,53 @@ jobs:
 
     runs-on: ${{ matrix.image }}
 
-    env:
-      OUTDIR: out
-
     steps:
-    - name: Checkout
-      uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
-    - name: Setup dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y meson ninja-build cmake gettext desktop-file-utils appstream-util valac imagemagick libgee-0.8-dev libgtk-4-dev libadwaita-1-dev liblua5.4-dev libgeoip-dev
+      - name: Setup dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y meson ninja-build cmake gettext desktop-file-utils appstream-util valac imagemagick libgee-0.8-dev libgtk-4-dev libadwaita-1-dev liblua5.4-dev libgeoip-dev
 
-    - name: Extract version
-      run: |
-        VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
-        echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+      - name: Extract version
+        run: |
+          VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
+          echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
 
-    - name: Setup meson project
-      run: meson setup builddir --buildtype=release --prefix=/usr
+      - name: Build
+        run: |
+          meson setup builddir --buildtype=release --prefix=/usr
+          cd builddir && ninja && ninja test
+          DESTDIR=$GITHUB_WORKSPACE/out ninja install
 
-    - name: Compile
-      run: cd builddir && ninja
+      - name: Setup AppImage dependencies
+        if: matrix.image == 'ubuntu-24.04' || matrix.image == 'ubuntu-24.04-arm'
+        run: |
+          sudo apt-get install -y libfuse2t64
+          wget -c "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-${{ matrix.arch }}.AppImage" -O linuxdeploy.AppImage
+          chmod +x linuxdeploy.AppImage
+          wget -c "https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh"
+          chmod +x linuxdeploy-plugin-gtk.sh
 
-    - name: Run tests
-      run: cd builddir && ninja test
+      - name: Build AppImage
+        if: matrix.image == 'ubuntu-24.04' || matrix.image == 'ubuntu-24.04-arm'
+        run: |
+          mkdir -p AppDir/usr
+          cp -a out/usr/. AppDir/usr/
+          chmod +x AppDir/usr/bin/gswatcher
+          export OUTPUT="gswatcher-${{ env.APP_VERSION }}-${{ matrix.arch }}.AppImage"
+          export DEPLOY_GTK_VERSION=4
+          export NO_STRIP=1
+          ./linuxdeploy.AppImage --appdir AppDir --plugin gtk --output appimage \
+            --icon-file AppDir/usr/share/icons/hicolor/512x512/apps/io.github.lxndr.gswatcher.png \
+            --desktop-file AppDir/usr/share/applications/io.github.lxndr.gswatcher.desktop
 
-    - name: Install application
-      run: cd builddir && DESTDIR=$GITHUB_WORKSPACE/${{ env.OUTDIR }} ninja install
-
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: >-
-          ${{
-            (github.event_name == 'pull_request' &&
-              format('gswatcher_{0}+{1}.pr{2}.build{3}', env.APP_VERSION, matrix.image, github.event.number, github.run_number)) ||
-            format('gswatcher_{0}+{1}.build{2}', env.APP_VERSION, matrix.image, github.run_number)
-          }}
-        path: ${{ env.OUTDIR }}/usr
+      - name: Upload AppImage
+        if: matrix.image == 'ubuntu-24.04' || matrix.image == 'ubuntu-24.04-arm'
+        uses: actions/upload-artifact@v7
+        with:
+          name: gswatcher-${{ env.APP_VERSION }}-appimage-${{ matrix.arch }}
+          path: gswatcher-${{ env.APP_VERSION }}-${{ matrix.arch }}.AppImage
 
   build-windows:
     strategy:
@@ -70,23 +78,19 @@ jobs:
 
     runs-on: ${{ matrix.image }}
 
-    env:
-      OUTDIR: out
-
     defaults:
       run:
         shell: msys2 {0}
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
-    - name: Setup dependencies
-      uses: msys2/setup-msys2@v2
-      with:
-        msystem: ${{ matrix.sys }}
-        update: true
-        pacboy: >-
+      - name: Setup dependencies
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.sys }}
+          update: true
+          pacboy: >-
             gcc:p
             gcc-libs:p
             meson:p
@@ -101,69 +105,6 @@ jobs:
             geoip:p
             imagemagick:p
             inkscape:p
-
-    - name: Extract version
-      run: |
-        VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
-        echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
-
-    - name: Setup meson project
-      run: meson setup builddir --buildtype=release
-
-    - name: Compile
-      run: cd builddir && ninja
-
-    - name: Run tests
-      run: cd builddir && ninja test
-
-    - name: Install application
-      run: cd builddir && DESTDIR=$GITHUB_WORKSPACE/${{ env.OUTDIR }} ninja install
-
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: >-
-          ${{
-            (github.event_name == 'pull_request' &&
-              format('gswatcher_{0}+{1}.pr{2}.build{3}', env.APP_VERSION, matrix.image, github.event.number, github.run_number)) ||
-            format('gswatcher_{0}+{1}.build{2}', env.APP_VERSION, matrix.image, github.run_number)
-          }}
-        path: ${{ env.OUTDIR }}/a/_temp/msys64/${{ matrix.sys }} # FIXME: why so complicated?
-
-  create-windows-portable:
-    strategy:
-      matrix:
-        include:
-          - { image: windows-2022,   arch: x86_64,  sys: ucrt64     }
-          - { image: windows-11-arm, arch: aarch64, sys: clangarm64 }
-
-    runs-on: ${{ matrix.image }}
-
-    needs: build-windows
-
-    defaults:
-      run:
-        shell: msys2 {0}
-
-    env:
-      OUTDIR: out
-      ARCH: ${{ matrix.arch }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Setup dependencies
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: ${{ matrix.sys }}
-          update: true
-          pacboy: >-
-            vala:p
-            libgee:p
-            libadwaita:p
-            lua:p
-            geoip:p
             zip:
 
       - name: Extract version
@@ -171,87 +112,81 @@ jobs:
           VERSION=$(grep -oP "version: '\K[0-9]+\.[0-9]+\.[0-9]+" meson.build)
           echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          pattern: gswatcher_${{ env.APP_VERSION }}+${{ matrix.image }}.*
-          path: temp_artifacts
-
-      - name: Extract build artifacts
+      - name: Build
         run: |
-          ARTIFACT_DIR=$(find temp_artifacts -maxdepth 1 -type d -name "gswatcher_${{ env.APP_VERSION }}+${{ matrix.image }}.*" | head -n 1)
-          mkdir ${{ env.OUTDIR }}
-          cp -r "$ARTIFACT_DIR"/* ${{ env.OUTDIR }}/
-          rm -rf temp_artifacts
+          meson setup builddir --buildtype=release
+          ninja -C builddir
+          ninja -C builddir test
+          install_root="$(cygpath -u "$GITHUB_WORKSPACE")/install"
+          DESTDIR="$install_root" ninja -C builddir install
+          rm -rf stage
+          mv "$install_root/a/_temp/msys64/${{ matrix.sys }}" "$GITHUB_WORKSPACE/stage"
+          rm -rf install
 
-      - name: Create distribution
+      - name: Create portable distribution
         run: |
-          ldd ${{ env.OUTDIR }}/bin/gswatcher.exe | grep -o '/.*\.dll' | while read -r dll; do
+          ldd stage/bin/gswatcher.exe | grep -o '/.*\.dll' | while read -r dll; do
             if [[ "$dll" == /${{ matrix.sys }}/bin/* ]]; then
-              cp "$dll" ${{ env.OUTDIR }}/bin/
+              cp "$dll" stage/bin/
             fi
           done
 
-          mkdir -p ${{ env.OUTDIR }}/etc
-          cp /${{ matrix.sys }}/bin/gdbus.exe ${{ env.OUTDIR }}/bin
-          cp -r /${{ matrix.sys }}/etc/fonts ${{ env.OUTDIR }}/etc
-          cp -r /${{ matrix.sys }}/share/fontconfig ${{ env.OUTDIR }}/share
-          cp -r /${{ matrix.sys }}/share/glib-2.0/schemas ${{ env.OUTDIR }}/share/glib-2.0
-          cp -r /${{ matrix.sys }}/share/icons ${{ env.OUTDIR }}/share && rm -r ${{ env.OUTDIR }}/share/icons/Adwaita/cursors
-          cp -r /${{ matrix.sys }}/share/locale ${{ env.OUTDIR }}/share
+          mkdir -p stage/etc
+          cp /${{ matrix.sys }}/bin/gdbus.exe stage/bin
+          cp -r /${{ matrix.sys }}/etc/fonts stage/etc
+          cp -r /${{ matrix.sys }}/share/fontconfig stage/share
+          cp -r /${{ matrix.sys }}/share/glib-2.0/schemas stage/share/glib-2.0
+          cp -r /${{ matrix.sys }}/share/icons stage/share && rm -r stage/share/icons/Adwaita/cursors
+          cp -r /${{ matrix.sys }}/share/locale stage/share
 
-          mkdir -p "${{ env.OUTDIR }}/share/GeoIP"
+          mkdir -p stage/share/GeoIP
           wget -O /tmp/GeoIPCity.dat.gz https://sources.archlinux.org/other/packages/geoip-database/20250129/GeoIPCity.dat.gz
-          gzip -dc /tmp/GeoIPCity.dat.gz > ${{ env.OUTDIR }}/share/GeoIP/GeoIPCity.dat
+          gzip -dc /tmp/GeoIPCity.dat.gz > stage/share/GeoIP/GeoIPCity.dat
 
           wget -O /tmp/flags_1.0.4.tar.xz http://packages.linuxmint.com/pool/main/f/flags/flags_1.0.4.tar.xz
-          tar -xf /tmp/flags_1.0.4.tar.xz -C /tmp && cp -r /tmp/flags/usr/share/iso-flag-png ${{ env.OUTDIR }}/share
+          tar -xf /tmp/flags_1.0.4.tar.xz -C /tmp && cp -r /tmp/flags/usr/share/iso-flag-png stage/share
 
-          glib-compile-schemas.exe ${{ env.OUTDIR }}/share/glib-2.0/schemas
+          glib-compile-schemas.exe stage/share/glib-2.0/schemas
 
-      - name: Upload portable artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload portable distribution
+        uses: actions/upload-artifact@v7
         with:
-          name: >-
-            ${{
-              (github.event_name == 'pull_request' &&
-                format('gswatcher_{0}+windows-portable.{1}.pr{2}.build{3}', env.APP_VERSION, matrix.arch, github.event.number, github.run_number)) ||
-              format('gswatcher_{0}+windows-portable.{1}.build{2}', env.APP_VERSION, matrix.arch, github.run_number)
-            }}
-          path: ${{ env.OUTDIR }}
+          name: gswatcher-${{ env.APP_VERSION }}-windows-portable-${{ matrix.arch }}
+          path: stage
 
   release:
     runs-on: ubuntu-24.04
-
-    needs:
-      - create-windows-portable
-
-    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
+    needs: [build-linux, build-windows]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
 
     steps:
-      - name: Download Windows portable artifacts
-        uses: actions/download-artifact@v4
+      - name: Download artifacts
+        uses: actions/download-artifact@v8
         with:
-          pattern: gswatcher_*+windows-portable.*
-          path: ./artifacts
+          pattern: gswatcher-*
+          path: artifacts
+          merge-multiple: true
 
       - name: Extract version
         run: |
           VERSION=$(echo "$GITHUB_REF" | grep -oP 'v\K[0-9]+\.[0-9]+\.[0-9]+')
           echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Zip portable artifacts with proper naming
+      - name: Prepare release artifacts
         run: |
-          for dir in ./artifacts/*/; do
-            if [ -d "$dir" ]; then
-              ARTIFACT_NAME=$(basename "$dir")
+          for dir in artifacts/*/; do
+            [ -d "$dir" ] || continue
+            name=$(basename "$dir")
 
-              if [[ "$ARTIFACT_NAME" =~ windows-portable\.([^\.]+)\.build ]]; then
-                ARCH="${BASH_REMATCH[1]}"
-                ZIP_NAME="gswatcher-v${{ env.APP_VERSION }}-windows-portable-$ARCH.zip"
-                (cd "$dir" && zip -r "../$ZIP_NAME" .)
-                echo "Zipped $dir to $ZIP_NAME"
-              fi
+            if [[ "$name" =~ -windows-portable-(x86_64|aarch64)$ ]]; then
+              arch="${BASH_REMATCH[1]}"
+              (cd "$dir" && zip -r "../gswatcher-v${{ env.APP_VERSION }}-windows-portable-$arch.zip" .)
+              rm -rf "$dir"
+            elif [[ "$name" =~ -appimage-(x86_64|aarch64)$ ]]; then
+              arch="${BASH_REMATCH[1]}"
+              appimage=$(find "$dir" -name '*.AppImage' -print -quit)
+              [ -n "$appimage" ] && cp "$appimage" "artifacts/gswatcher-v${{ env.APP_VERSION }}-$arch.AppImage"
+              rm -rf "$dir"
             fi
           done
 
@@ -260,4 +195,6 @@ jobs:
         with:
           draft: true
           generate_release_notes: false
-          files: ./artifacts/*.zip
+          files: |
+            artifacts/*.zip
+            artifacts/*.AppImage
