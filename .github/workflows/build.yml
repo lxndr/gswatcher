@@ -257,10 +257,6 @@ jobs:
             cp -a "${artifact_root}/." ${{ env.OUTDIR }}/usr/
           fi
           chmod +x "${{ env.OUTDIR }}/usr/bin/gswatcher"
-          # #region agent log
-          mkdir -p "$GITHUB_WORKSPACE/.cursor"
-          printf '%s\n' "{\"sessionId\":\"4bcf49\",\"hypothesisId\":\"B\",\"location\":\"build.yml:extract\",\"message\":\"gswatcher mode after extract\",\"data\":{\"mode\":\"$(stat -c '%a' "${{ env.OUTDIR }}/usr/bin/gswatcher")\"},\"timestamp\":$(date +%s%3N)}" >> "$GITHUB_WORKSPACE/.cursor/debug-4bcf49.log"
-          # #endregion
 
       - name: Setup dependencies
         run: |
@@ -280,17 +276,7 @@ jobs:
           export DEPLOY_GTK_VERSION=4
           export NO_STRIP=1
           chmod +x "${{ env.OUTDIR }}/usr/bin/gswatcher"
-          # #region agent log
-          mkdir -p "$GITHUB_WORKSPACE/.cursor"
-          printf '%s\n' "{\"sessionId\":\"4bcf49\",\"hypothesisId\":\"A\",\"location\":\"build.yml:pre-pack\",\"message\":\"AppDir modes before appimage\",\"data\":{\"gswatcher\":\"$(stat -c '%a' "${{ env.OUTDIR }}/usr/bin/gswatcher")\",\"AppRun.wrapped\":\"$(stat -c '%a' "${{ env.OUTDIR }}/AppRun.wrapped" 2>/dev/null || echo missing)\"},\"timestamp\":$(date +%s%3N)}" >> "$GITHUB_WORKSPACE/.cursor/debug-4bcf49.log"
-          # #endregion
           ./linuxdeploy.AppImage --appdir ${{ env.OUTDIR }} --plugin gtk --output appimage --icon-file "${{ env.OUTDIR }}/usr/share/icons/hicolor/512x512/apps/io.github.lxndr.gswatcher.png" --desktop-file "${{ env.OUTDIR }}/usr/share/applications/io.github.lxndr.gswatcher.desktop"
-          rm -rf squashfs-root
-          ./"$OUTPUT" --appimage-extract
-          # #region agent log
-          printf '%s\n' "{\"sessionId\":\"4bcf49\",\"hypothesisId\":\"A\",\"location\":\"build.yml:post-pack\",\"message\":\"squashfs modes inside AppImage\",\"data\":{\"gswatcher\":\"$(stat -c '%a' squashfs-root/usr/bin/gswatcher)\",\"AppRun\":\"$(stat -c '%a' squashfs-root/AppRun)\",\"AppRun.wrapped\":\"$(stat -c '%a' squashfs-root/AppRun.wrapped)\"},\"timestamp\":$(date +%s%3N)}" >> "$GITHUB_WORKSPACE/.cursor/debug-4bcf49.log"
-          # #endregion
-          rm -rf squashfs-root
 
       - name: Upload AppImage artifacts
         uses: actions/upload-artifact@v7
