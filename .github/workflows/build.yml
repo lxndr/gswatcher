@@ -116,9 +116,11 @@ jobs:
         run: |
           meson setup builddir --buildtype=release
           cd builddir && ninja && ninja test
-          DESTDIR=$GITHUB_WORKSPACE/out ninja install
-          mkdir -p stage
-          cp -a out/a/_temp/msys64/${{ matrix.sys }}/. stage/
+          INSTALL_ROOT="$(cygpath -u "$GITHUB_WORKSPACE")/install"
+          DESTDIR="$INSTALL_ROOT" ninja install
+          rm -rf stage
+          mv "$INSTALL_ROOT/${{ matrix.sys }}" stage
+          rm -rf install
 
       - name: Create portable distribution
         run: |
