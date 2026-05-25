@@ -41,7 +41,6 @@ jobs:
           DESTDIR=$GITHUB_WORKSPACE/out ninja install
 
       - name: Setup AppImage dependencies
-        if: matrix.image == 'ubuntu-24.04' || matrix.image == 'ubuntu-24.04-arm'
         run: |
           sudo apt-get install -y libfuse2t64
           wget -c "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-${{ matrix.arch }}.AppImage" -O linuxdeploy.AppImage
