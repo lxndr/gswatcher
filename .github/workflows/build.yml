@@ -50,7 +50,6 @@ jobs:
           chmod +x linuxdeploy-plugin-gtk.sh
 
       - name: Build AppImage
-        if: matrix.image == 'ubuntu-24.04' || matrix.image == 'ubuntu-24.04-arm'
         run: |
           mkdir -p AppDir/usr
           cp -a out/usr/. AppDir/usr/
@@ -63,7 +62,6 @@ jobs:
             --desktop-file AppDir/usr/share/applications/io.github.lxndr.gswatcher.desktop
 
       - name: Upload AppImage
-        if: matrix.image == 'ubuntu-24.04' || matrix.image == 'ubuntu-24.04-arm'
         uses: actions/upload-artifact@v7
         with:
           name: gswatcher-${{ env.APP_VERSION }}-appimage-${{ matrix.arch }}
