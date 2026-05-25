@@ -114,39 +114,12 @@ jobs:
 
       - name: Build
         run: |
-          # #region agent log
-          source "$GITHUB_WORKSPACE/scripts/ci-debug-log.sh"
-          # #endregion
           meson setup builddir --buildtype=release
           cd builddir && ninja && ninja test
-          INSTALL_ROOT="$(cygpath -u "$GITHUB_WORKSPACE")/install"
-          # #region agent log
-          ci_debug_log "A" "paths before install" "{\"GITHUB_WORKSPACE\":\"$GITHUB_WORKSPACE\",\"INSTALL_ROOT\":\"$INSTALL_ROOT\",\"matrix_sys\":\"${{ matrix.sys }}\"}"
-          # #endregion
-          DESTDIR="$INSTALL_ROOT" ninja install
-          # #region agent log
-          ci_debug_log "B" "install tree sample" "{\"entries\":\"$(find "$INSTALL_ROOT" -maxdepth 6 2>/dev/null | head -30 | tr '\n' ';')\"}"
-          # #endregion
-          exe_path="$(find "$INSTALL_ROOT" -path '*/bin/gswatcher.exe' 2>/dev/null | head -1)"
-          # #region agent log
-          ci_debug_log "D" "resolved gswatcher.exe path" "{\"exe_path\":\"${exe_path:-}\"}"
-          ci_debug_log "E" "flat vs nested exists" "$(printf '{"flat":"%s","nested":"%s","flat_exists":%s,"nested_exists":%s}' \
-            "$INSTALL_ROOT/${{ matrix.sys }}" \
-            "$INSTALL_ROOT/a/_temp/msys64/${{ matrix.sys }}" \
-            "$([ -d "$INSTALL_ROOT/${{ matrix.sys }}" ] && echo true || echo false)" \
-            "$([ -d "$INSTALL_ROOT/a/_temp/msys64/${{ matrix.sys }}" ] && echo true || echo false)")"
-          # #endregion
-          if [ -z "$exe_path" ]; then
-            echo "gswatcher.exe not found under $INSTALL_ROOT"
-            find "$INSTALL_ROOT" | head -50
-            exit 1
-          fi
-          prefix_root="${exe_path%/bin/gswatcher.exe}"
+          install_root="$(cygpath -u "$GITHUB_WORKSPACE")/install"
+          DESTDIR="$install_root" ninja install
           rm -rf stage
-          mv "$prefix_root" stage
-          # #region agent log
-          ci_debug_log "F" "staged install tree" "{\"prefix_root\":\"$prefix_root\",\"stage_bin\":\"$(ls -1 stage/bin/gswatcher.exe 2>/dev/null || echo missing)\"}"
-          # #endregion
+          mv "$install_root/a/_temp/msys64/${{ matrix.sys }}" stage
           rm -rf install
 
       - name: Create portable distribution
@@ -173,14 +146,6 @@ jobs:
           tar -xf /tmp/flags_1.0.4.tar.xz -C /tmp && cp -r /tmp/flags/usr/share/iso-flag-png stage/share
 
           glib-compile-schemas.exe stage/share/glib-2.0/schemas
-
-      - name: Upload debug log
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: debug-log-${{ matrix.sys }}-${{ github.run_id }}
-          path: .cursor/debug-cdb5c2.log
-          if-no-files-found: ignore
 
       - name: Upload portable distribution
         uses: actions/upload-artifact@v7
