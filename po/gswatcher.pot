@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gswatcher\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-22 00:54+0300\n"
+"POT-Creation-Date: 2026-06-13 02:08+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,15 +31,15 @@ msgid ""
 "failed to retrieve value from Lua table under key '%s': unsupported type '%s'"
 msgstr ""
 
-#: src/core/client.vala:268
+#: src/core/client.vala:281
 msgid "Connected"
 msgstr ""
 
-#: src/core/client.vala:272
+#: src/core/client.vala:285
 msgid "Disconnected"
 msgstr ""
 
-#: src/core/client.vala:277
+#: src/core/client.vala:290
 msgid "Authenticated"
 msgstr ""
 
@@ -74,14 +74,6 @@ msgstr ""
 
 #: src/ui/buddy-list.ui:189
 msgid "Last seen"
-msgstr ""
-
-#: src/ui/console-option-list.ui:39
-msgid "Port:"
-msgstr ""
-
-#: src/ui/console-option-list.ui:73
-msgid "Password:"
 msgstr ""
 
 #: src/ui/main-window.ui:27
@@ -128,38 +120,42 @@ msgstr ""
 msgid "_Console"
 msgstr ""
 
-#: src/ui/main-window.ui:293
+#: src/ui/main-window.ui:294
+msgid "_Settings"
+msgstr ""
+
+#: src/ui/main-window.ui:308
 msgid "_Buddy list"
 msgstr ""
 
-#: src/ui/main-window.ui:312
+#: src/ui/main-window.ui:327
 msgid "_Preferences"
 msgstr ""
 
-#: src/ui/main-window.vala:80
+#: src/ui/main-window.vala:90
 #, c-format
 msgid "\"%s\" is already on your server list."
 msgstr ""
 
-#: src/ui/main-window.vala:90
+#: src/ui/main-window.vala:100
 msgid "Remove server?"
 msgstr ""
 
-#: src/ui/main-window.vala:91
+#: src/ui/main-window.vala:101
 #, c-format
 msgid "Are you sure you want to remove \"%s\" from the server list?"
 msgstr ""
 
-#: src/ui/main-window.vala:111
+#: src/ui/main-window.vala:121
 #, c-format
 msgid "\"%s\" is already on your buddy list."
 msgstr ""
 
-#: src/ui/main-window.vala:126
+#: src/ui/main-window.vala:136
 msgid "Remove buddy?"
 msgstr ""
 
-#: src/ui/main-window.vala:127
+#: src/ui/main-window.vala:137
 #, c-format
 msgid "Are you sure you want to remove \"%s\" from the buddy list?"
 msgstr ""
@@ -173,19 +169,19 @@ msgid "Query _interval"
 msgstr ""
 
 #: src/ui/preferences.ui:58
+msgid "Work in _background"
+msgstr ""
+
+#: src/ui/preferences.ui:70
 msgid "Local _UDP port"
 msgstr ""
 
-#: src/ui/preferences.ui:79
+#: src/ui/preferences.ui:91 src/ui/server-settings.ui:148
 msgid "Notifications"
 msgstr ""
 
-#: src/ui/preferences.ui:82
+#: src/ui/preferences.ui:94
 msgid "Enable _notifications"
-msgstr ""
-
-#: src/ui/server-console.ui:79
-msgid "Options"
 msgstr ""
 
 #: src/ui/server-details.ui:67
@@ -196,60 +192,60 @@ msgstr ""
 msgid "Value"
 msgstr ""
 
-#: src/ui/server-info.ui:39
+#: src/ui/server-info.ui:34
 msgctxt "server-info"
 msgid "Name:"
 msgstr ""
 
-#: src/ui/server-info.ui:74
+#: src/ui/server-info.ui:78
 msgid "Address:"
 msgstr ""
 
-#: src/ui/server-info.ui:107
+#: src/ui/server-info.ui:111
 msgid "Location:"
 msgstr ""
 
-#: src/ui/server-info.ui:140
+#: src/ui/server-info.ui:144
 msgid "Game:"
 msgstr ""
 
-#: src/ui/server-info.ui:173
+#: src/ui/server-info.ui:177
 msgid "Mode:"
 msgstr ""
 
-#: src/ui/server-info.ui:206
+#: src/ui/server-info.ui:210
 msgid "Map:"
 msgstr ""
 
-#: src/ui/server-info.ui:239
+#: src/ui/server-info.ui:243
 msgid "Players:"
 msgstr ""
 
-#: src/ui/server-info.ui:281
+#: src/ui/server-info.ui:285
 msgid "Private:"
 msgstr ""
 
-#: src/ui/server-info.ui:314
+#: src/ui/server-info.ui:318
 msgid "Secure:"
 msgstr ""
 
-#: src/ui/server-info.ui:347
+#: src/ui/server-info.ui:351
 msgid "Version:"
 msgstr ""
 
-#: src/ui/server-info.vala:40
+#: src/ui/server-info.vala:49
 msgid "n/a"
 msgstr ""
 
-#: src/ui/server-info.vala:45
+#: src/ui/server-info.vala:54
 msgid "yes"
 msgstr ""
 
-#: src/ui/server-info.vala:45
+#: src/ui/server-info.vala:54
 msgid "no"
 msgstr ""
 
-#: src/ui/server-info.vala:68 src/ui/server-list.vala:181
+#: src/ui/server-info.vala:90 src/ui/server-list.vala:218
 msgid "Timed out"
 msgstr ""
 
@@ -257,29 +253,53 @@ msgstr ""
 msgid "_Remove server"
 msgstr ""
 
-#: src/ui/server-list.ui:137
+#: src/ui/server-list.ui:178
 msgctxt "server-list"
 msgid "Name"
 msgstr ""
 
-#: src/ui/server-list.ui:197
+#: src/ui/server-list.ui:243
 msgid "Game"
 msgstr ""
 
-#: src/ui/server-list.ui:255
+#: src/ui/server-list.ui:301
 msgid "Map"
 msgstr ""
 
-#: src/ui/server-list.ui:287
+#: src/ui/server-list.ui:333
 msgid "Players"
 msgstr ""
 
-#: src/ui/server-list.ui:341
+#: src/ui/server-list.ui:387
 msgid "Ping"
 msgstr ""
 
-#: src/ui/server-list.vala:183 src/ui/utils.vala:98
+#: src/ui/server-list.vala:220 src/ui/utils.vala:98
 msgid "Error"
+msgstr ""
+
+#: src/ui/server-settings.ui:46
+msgid "Remote Console"
+msgstr ""
+
+#: src/ui/server-settings.ui:64
+msgid "P_ort:"
+msgstr ""
+
+#: src/ui/server-settings.ui:109
+msgid "Pass_word:"
+msgstr ""
+
+#: src/ui/server-settings.ui:166
+msgid "_Server goes online:"
+msgstr ""
+
+#: src/ui/server-settings.ui:189
+msgid "_Server goes offline:"
+msgstr ""
+
+#: src/ui/server-settings.ui:212
+msgid "_Player slot is available:"
 msgstr ""
 
 #: src/ui/utils.vala:43
@@ -294,24 +314,51 @@ msgstr ""
 msgid "OK"
 msgstr ""
 
-#: src/application.vala:34
+#: src/application.vala:35
 msgid "Display version number"
 msgstr ""
 
-#: src/application.vala:63
+#: src/application.vala:74
 #, c-format
 msgid "Failed to initialize GeoIP: %s"
 msgstr ""
 
-#: src/application.vala:131
+#: src/application.vala:148
 #, c-format
 msgid "Player %s has connected"
 msgstr ""
 
-#: src/application.vala:133
+#: src/application.vala:150
 #, c-format
 msgid ""
 "Address: %s\n"
 "Server: %s\n"
+"Players: %d / %d"
+msgstr ""
+
+#: src/application.vala:166
+#, c-format
+msgid "Server %s is online"
+msgstr ""
+
+#: src/application.vala:167 src/application.vala:181
+#, c-format
+msgid "Address: %s"
+msgstr ""
+
+#: src/application.vala:180
+#, c-format
+msgid "Server %s is offline"
+msgstr ""
+
+#: src/application.vala:192
+#, c-format
+msgid "A player slot is now available on %s"
+msgstr ""
+
+#: src/application.vala:193
+#, c-format
+msgid ""
+"Address: %s\n"
 "Players: %d / %d"
 msgstr ""
