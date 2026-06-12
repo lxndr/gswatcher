@@ -25,6 +25,8 @@ public abstract class NetTransport : Transport {
 
   protected Cancellable cancellable = new Cancellable ();
 
+  public abstract void connect ();
+
   ~NetTransport () {
     if (cancellable != null && !cancellable.is_cancelled ())
       cancellable.cancel ();

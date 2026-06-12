@@ -35,6 +35,9 @@ gsw = {
   ---@param data string
   send = function (data) end,
 
+  ---@param message string
+  log = function (message) end,
+
   ---@param details Dictionary
   ---@param sinfo Dictionary
   sinfo = function (details, sinfo) end,

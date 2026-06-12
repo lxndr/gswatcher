@@ -13,7 +13,7 @@ servers.
 * Buddy list
 * Notifications when your buddy is on a server
 * Multiple query protocols
-* Remote console (Source Engine only)
+* Remote console (Source Engine and Telnet)
 
 ## For users
 

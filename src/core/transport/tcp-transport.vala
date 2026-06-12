@@ -22,6 +22,7 @@ class TcpTransport : NetTransport {
   private Socket? socket;
   private SocketSource? socket_source;
   private ByteArray output_buffer = new ByteArray ();
+  private bool connection_pending = false;
 
   public TcpTransport (string host, uint16 port) {
     Object (host : host, port : port);
@@ -31,11 +32,20 @@ class TcpTransport : NetTransport {
     close_socket ();
   }
 
+  public override void connect () {
+    if (socket != null)
+      return;
+
+    connection_pending = true;
+    start_connection ();
+  }
+
   private void resolve_address () {
     resolve.begin ((obj, res) => {
       try {
         resolve.end (res);
-        flush ();
+        start_connection ();
+        try_send ();
       } catch (Error err) {
         on_error (err);
       }
@@ -72,6 +82,9 @@ class TcpTransport : NetTransport {
     } catch (Error err) {
       log (Config.LOG_DOMAIN, LEVEL_ERROR, err.message);
     }
+
+    socket = null;
+    connection_pending = false;
   }
 
   private void setup_socket_source (IOCondition condition) {
@@ -92,21 +105,26 @@ class TcpTransport : NetTransport {
     }
   }
 
-  public override void send (uint8[] data) {
-    output_buffer.append (data);
-    flush ();
+  private void start_connection () {
+    if (socket != null)
+      return;
+
+    if (!is_resolved) {
+      resolve_address ();
+    } else {
+      open_socket ();
+    }
   }
 
-  private void flush () {
-    if (output_buffer.len > 0) {
-      if (!is_resolved) {
-        resolve_address ();
-      } else if (socket == null) {
-        open_socket ();
-      } else {
-        send_pending_data ();
-      }
-    }
+  private void try_send () {
+    if (socket != null && output_buffer.len > 0)
+      send_pending_data ();
+  }
+
+  public override void send (uint8[] data) {
+    output_buffer.append (data);
+    start_connection ();
+    try_send ();
   }
 
   private bool on_socket_event (Socket socket, IOCondition cond) {
@@ -119,9 +137,10 @@ class TcpTransport : NetTransport {
 
       if (OUT in cond) {
         if (socket.check_connect_result ()) {
+          connection_pending = false;
           connected ();
           setup_socket_source (IN);
-          flush ();
+          try_send ();
           return Source.REMOVE;
         }
       }

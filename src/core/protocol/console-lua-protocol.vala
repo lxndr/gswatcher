@@ -25,9 +25,21 @@ public class ConsoleLuaProtocol : LuaProtocol, ConsoleProtocol {
   }
 
   private static int lua_response (LuaEx vm) {
-    var proto = (ConsoleLuaProtocol) LuaProtocol.get_this_pointer (vm);
+    var proto = LuaProtocol.get_this_pointer (vm) as ConsoleLuaProtocol;
     var resp = vm.l_check_string (1);
     proto.enqueue_callback (() => proto.response (resp));
+    return 0;
+  }
+
+  private static int lua_authenticated (LuaEx vm) {
+    var proto = LuaProtocol.get_this_pointer (vm) as ConsoleLuaProtocol;
+    proto.enqueue_callback (() => proto.authenticated ());
+    return 0;
+  }
+
+  private static int lua_log (LuaEx vm) {
+    var msg = vm.l_check_string (1);
+    log (Config.LOG_DOMAIN, LEVEL_DEBUG, "console: %s", msg);
     return 0;
   }
 
@@ -35,11 +47,25 @@ public class ConsoleLuaProtocol : LuaProtocol, ConsoleProtocol {
     base.register_globals ();
 
     Lua.Reg[] funcs = {
-      { "response", (Lua.CFunction) lua_response },
+      { "response",      (Lua.CFunction) lua_response },
+      { "authenticated", (Lua.CFunction) lua_authenticated },
+      { "log",           (Lua.CFunction) lua_log },
       { null },
     };
 
     register_gsw_functions (funcs);
+  }
+
+  public void on_connected () throws Error {
+    var type = vm.get_global ("on_connected");
+
+    if (type != FUNCTION) {
+      vm.pop (1);
+      return;
+    }
+
+    vm.pop (1);
+    new GlobalRoutine (vm, "on_connected").exec ();
   }
 
   public void send_command (string command, Gee.Map<string, string> options) throws Error {

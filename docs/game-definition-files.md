@@ -44,7 +44,7 @@ The `[Features]` section defines additional features available for the game:
 console = source-console
 ```
 
-- `console`: Specifies the console protocol to use for server administration
+- `console`: Specifies the console protocol to use for server administration (`source-console` for Source Engine RCON, `telnet` for line-based Telnet)
 
 ### [Match] Section
 

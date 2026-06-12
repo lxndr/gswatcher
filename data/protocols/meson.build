@@ -11,8 +11,9 @@ install_data(
     'gamespy4.lua',
     'quake2.lua',
     'quake3.lua',
-    'source-console.lua',
     'source.lua',
+    'source-console.lua',
+    'telnet-console.lua',
   ),
   install_dir: protocols_dir,
 )

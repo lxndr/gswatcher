@@ -44,9 +44,11 @@ public class ConsoleClient : Object {
     protocol.data_send.connect (send_data);
     protocol.response.connect (on_response);
 
+    var console_protocol = (ConsoleProtocol) protocol;
+    console_protocol.authenticated.connect (() => authenticated ());
+
     transport = TransportRegistry.get_instance ().create_net_transport (protocol.info.transport, host, port);
-    transport.connected.connect (() => connected ());
-    transport.authenticated.connect (() => authenticated ());
+    transport.connected.connect (on_transport_connected);
     transport.disconnected.connect (() => disconnected ());
     transport.data_received.connect (on_data_received);
     transport.error.connect (on_transport_error);
@@ -67,12 +69,28 @@ public class ConsoleClient : Object {
 
   public void exec_command (string command) {
     try {
+      transport.connect ();
+
       var options = new Gee.HashMap<string, string> ();
       options.set ("password", password);
       protocol.send_command (command, options);
       start_timeout_timer ();
     } catch (Error err) {
       on_error (new ConsoleError.PROCESSING ("failed to send command '%s': %s", command, err.message));
+    }
+  }
+
+  private void on_transport_connected () {
+    connected ();
+
+    if (protocol is ConsoleLuaProtocol) {
+      var lua_protocol = (ConsoleLuaProtocol) protocol;
+
+      try {
+        lua_protocol.on_connected ();
+      } catch (Error err) {
+        on_error (new ConsoleError.PROCESSING ("failed to handle connection: %s", err.message));
+      }
     }
   }
 

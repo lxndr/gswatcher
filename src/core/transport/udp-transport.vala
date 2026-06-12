@@ -34,6 +34,9 @@ class UdpTransport : NetTransport {
     manager.unregister (this);
   }
 
+  public override void connect () {
+  }
+
   private void resolve_address () {
     resolve.begin ((obj, res) => {
       try {

@@ -20,6 +20,7 @@ namespace Gsw {
 
 public interface ConsoleProtocol : Protocol {
   public signal void response (string message);
+  public signal void authenticated ();
 
   public abstract void send_command (string command, Gee.Map<string, string> options) throws Error;
 }
