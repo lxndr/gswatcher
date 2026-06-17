@@ -70,6 +70,13 @@ test('core/utils/ttl-cache', executable(
   dependencies : dependencies,
 ))
 
+test('core/protocol/lua-protocol', executable(
+  'lua-protocol_test',
+  core_sources,
+  'protocol/lua-protocol_test.vala',
+  dependencies : dependencies,
+))
+
 test('core/server-list', executable(
   'server-list_test',
   core_sources,

@@ -28,8 +28,10 @@ public abstract class LuaProtocol : Object, Initable, Protocol {
 
   protected LuaEx vm = new LuaEx ();
   private Gee.List<Source> callback_sources = new Gee.LinkedList<Source>();
+  private Gee.List<File> module_dirs = new Gee.ArrayList<File> ();
 
   private static string THIS_PROTOCOL_POINTER_KEY = "__thisProtocolPointer";
+  private static string REQUIRE_CACHE_KEY = "__gswRequireCache";
 
   protected abstract void process_response (uint8[] data) throws Error;
 
@@ -52,44 +54,45 @@ public abstract class LuaProtocol : Object, Initable, Protocol {
     return 0;
   }
 
+  private static int lua_require (LuaEx vm) {
+    var proto = get_this_pointer (vm);
+    var module_name = vm.l_check_string (1);
+    return proto.require_module (module_name);
+  }
+
   public bool init (Cancellable? cancellable = null) throws Error {
-    // base library
-    vm.l_requiref ("base", Lua.open_base, false);
-    vm.pop (1);
-
-    // package library
-    // TODO: disable c libraries
-    var patterns = new Gee.ArrayList<string> ();
-    var dirs = get_app_data_dirs ("protocols", "GSW_PROTOCOLS_DIR");
-    foreach (var dir in dirs) patterns.add (Path.build_filename (dir.get_path (), "?.lua"));
-    var path = string.joinv (";", patterns.to_array ());
-
-    vm.l_requiref ("package", Lua.open_package, false);
-    vm.push_string (path);
-    vm.set_field (-2, "path");
-    vm.pop (1);
-
-    // string library
-    vm.l_requiref ("string", Lua.open_string, true);
-    vm.pop (1);
-
-    // math library
-    vm.l_requiref ("math", Lua.open_math, true);
-    vm.pop (1);
-
-    // table library
-    vm.l_requiref ("table", Lua.open_table, true);
-    vm.pop (1);
-
-    // debug library
-    vm.l_requiref ("debug", Lua.open_debug, true);
-    vm.pop (1);
-
-    //
+    configure_sandbox ();
     register_globals ();
     vm.load_script (script_path);
     info = fetch_info ();
     return true;
+  }
+
+  private void configure_sandbox () {
+    vm.l_requiref ("base", Lua.open_base, false);
+    vm.pop (1);
+
+    vm.unset_global ("dofile");
+    vm.unset_global ("loadfile");
+    vm.unset_global ("load");
+    vm.unset_global ("collectgarbage");
+
+    vm.l_requiref ("string", Lua.open_string, true);
+    vm.pop (1);
+    vm.unset_field_global_table ("string", "dump");
+
+    vm.l_requiref ("math", Lua.open_math, true);
+    vm.pop (1);
+
+    vm.l_requiref ("table", Lua.open_table, true);
+    vm.pop (1);
+
+    module_dirs = get_app_data_dirs ("protocols", "GSW_PROTOCOLS_DIR");
+    vm.new_table ();
+    vm.set_field (Lua.PseudoIndex.REGISTRY, REQUIRE_CACHE_KEY);
+
+    vm.push_cfunction ((Lua.CFunction) lua_require);
+    vm.set_global ("require");
   }
 
   protected virtual void register_globals () {
@@ -105,6 +108,116 @@ public abstract class LuaProtocol : Object, Initable, Protocol {
     };
 
     register_gsw_functions (funcs);
+  }
+
+  private int require_module (string module_name) {
+    var initial_top = vm.get_top ();
+    var relative_path = module_name_to_path (module_name);
+
+    if (relative_path == null) {
+      vm.set_top (initial_top);
+      vm.push_string ("invalid module name '%s'".printf (module_name));
+      return vm.error ();
+    }
+
+    vm.get_field (Lua.PseudoIndex.REGISTRY, REQUIRE_CACHE_KEY);
+    var cache_idx = vm.absindex (-1);
+
+    var cached_type = vm.get_field (cache_idx, module_name);
+
+    if (cached_type != Lua.Type.NIL && cached_type != Lua.Type.NONE) {
+      vm.remove (-2);
+      return 1;
+    }
+
+    vm.pop (1);
+
+    var module_path = find_file_in_dirs (relative_path, module_dirs);
+
+    if (module_path == null) {
+      vm.set_top (initial_top);
+      vm.push_string ("module '%s' not found".printf (module_name));
+      return vm.error ();
+    }
+
+    vm.push_boolean (true);
+    vm.set_field (cache_idx, module_name);
+
+    var status = vm.l_load_file (module_path);
+
+    if (status != Lua.Status.OK) {
+      var message = vm.to_string (-1).make_valid ();
+      clear_module_cache (cache_idx, module_name);
+      vm.set_top (initial_top);
+      vm.push_string ("failed to load module '%s': %s".printf (module_name, message));
+      return vm.error ();
+    }
+
+    status = vm.pcall (0, 1, 0);
+
+    if (status != Lua.Status.OK) {
+      var message = vm.to_string (-1).make_valid ();
+      clear_module_cache (cache_idx, module_name);
+      vm.set_top (initial_top);
+      vm.push_string ("failed to load module '%s': %s".printf (module_name, message));
+      return vm.error ();
+    }
+
+    if (vm.is_nil (-1)) {
+      vm.pop (1);
+      vm.push_boolean (true);
+    }
+
+    vm.push_value (-1);
+    vm.set_field (cache_idx, module_name);
+    vm.remove (-2);
+
+    return 1;
+  }
+
+  private void clear_module_cache (int cache_idx, string module_name) {
+    vm.push_nil ();
+    vm.set_field (cache_idx, module_name);
+  }
+
+  private string? module_name_to_path (string module_name) {
+    if (module_name == "" || Path.is_absolute (module_name) || module_name.index_of_char ('\\') >= 0)
+      return null;
+
+    var parts = module_name.replace (".", "/").split ("/");
+    string? relative_path = null;
+
+    foreach (var part in parts) {
+      if (!is_safe_module_path_part (part))
+        return null;
+
+      relative_path = (relative_path == null)
+        ? part
+        : Path.build_filename (relative_path, part);
+    }
+
+    if (relative_path == null)
+      return null;
+
+    return @"$relative_path.lua";
+  }
+
+  private bool is_safe_module_path_part (string part) {
+    if (part == "" || part == "." || part == "..")
+      return false;
+
+    for (var i = 0; i < part.length; i++) {
+      var c = part[i];
+
+      if (!((c >= 'A' && c <= 'Z') ||
+            (c >= 'a' && c <= 'z') ||
+            (c >= '0' && c <= '9') ||
+            c == '_' || c == '-')) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   protected void register_gsw_functions (Lua.Reg[] funcs) {

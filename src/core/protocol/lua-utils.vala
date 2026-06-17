@@ -32,8 +32,42 @@ public class LuaEx : Lua {
   }
 
   public void load_script (string filepath) throws GLib.Error {
-    if (l_do_file (filepath) != Status.OK)
-      throw new LuaError.SCRIPT ("failed to load script '%s': %s", filepath, to_string (-1));
+    var initial_top = get_top ();
+    push_error_handler ();
+
+    var status = l_load_file (filepath);
+
+    if (status != Status.OK) {
+      var message = to_string (-1).make_valid ();
+      set_top (initial_top);
+      throw new LuaError.SCRIPT ("failed to load script '%s': %s", filepath, message);
+    }
+
+    status = pcall (0, 0, initial_top + 1);
+
+    if (status != Status.OK) {
+      var message = to_string (-1).make_valid ();
+      set_top (initial_top);
+      throw new LuaError.SCRIPT ("failed to load script '%s': %s", filepath, message);
+    }
+
+    set_top (initial_top);
+  }
+
+  public void unset_global (string name) {
+    push_nil ();
+    set_global (name);
+  }
+
+  public void unset_field_global_table (string table_name, string field_name) {
+    var type = get_global (table_name);
+
+    if (type == Lua.Type.TABLE) {
+      push_nil ();
+      set_field (-2, field_name);
+    }
+
+    pop (1);
   }
 
   public void print_stack () {

@@ -73,7 +73,7 @@ public class Lua {
   [CCode (cname = "luaL_newstate")]
   public Lua ();
 
-  public Type absindex (int index);
+  public int absindex (int index);
   [CCode (cname = "lua_getfield")]
   public Type get_field (int index, string k);
   [CCode (cname = "lua_tonumber")]
@@ -105,6 +105,8 @@ public class Lua {
   public int get_top ();
   [CCode (cname = "lua_settop")]
   public void set_top (int index);
+  [CCode (cname = "lua_remove")]
+  public void remove (int index);
 
   /**
    * Pops n elements from the stack.
@@ -115,8 +117,12 @@ public class Lua {
   public Number version ();
   [CCode (cname = "lua_pushnil")]
   public void push_nil ();
+  [CCode (cname = "lua_pushboolean")]
+  public void push_boolean (bool b);
   [CCode (cname = "lua_pushcfunction")]
   public void push_cfunction (CFunction fn);
+  [CCode (cname = "lua_pushvalue")]
+  public void push_value (int index);
   [CCode (cname = "lua_pushstring")]
   public void push_string (string s);
   [CCode (cname = "lua_pushinteger")]
