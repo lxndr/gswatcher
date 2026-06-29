@@ -12,6 +12,7 @@ install_data(
     'quake2.lua',
     'quake3.lua',
     'source-console.lua',
+    'telnet-console.lua',
     'source.lua',
   ),
   install_dir: protocols_dir,

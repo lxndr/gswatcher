@@ -11,6 +11,7 @@ test_core_sources = files(
   'lib/is-plist-fields-equal.vala',
   'lib/is-string-map-equal.vala',
   'lib/protocol-test-runner.vala',
+  'lib/console-protocol-test-runner.vala',
 )
 
 subdir('protocols')

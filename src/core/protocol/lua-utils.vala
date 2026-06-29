@@ -160,9 +160,22 @@ public class LuaEx : Lua {
         var str = to_string (-1).make_valid ();
         var pspec = object_class.find_property (key);
 
+        if (pspec == null) {
+          log (Config.LOG_DOMAIN, LEVEL_WARNING, _("failed to set property '%s': property not found on %s"), key, object.get_type ().name ());
+          pop (1);
+          continue;
+        }
+
         if (pspec.value_type.is_enum ()) {
           var enumc = (EnumClass) pspec.value_type.class_ref ();
           var val = enumc.get_value_by_nick (str);
+
+          if (val == null) {
+            log (Config.LOG_DOMAIN, LEVEL_WARNING, _("failed to set property '%s': invalid enum value '%s'"), key, str);
+            pop (1);
+            continue;
+          }
+
           object.set (key, val.value);
         } else {
           object.set (key, str);
