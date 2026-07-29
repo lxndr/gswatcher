@@ -21,7 +21,12 @@ using Gsw;
 void add_match_rule (Game game, string key, string pattern) {
   try {
     var parser = new GameDef.ExpressionParser (pattern);
-    game.inf_matches[key] = parser.parse ();
+    var expr = parser.parse ();
+
+    if (expr is GameDef.MatchExpression)
+      game.inf_matches[key] = expr as GameDef.MatchExpression;
+    else
+      game.inf_matches[key] = new GameDef.EqualsExpression (expr as GameDef.EvaluatableExpression);
   } catch (Error err) {
     assert_no_error (err);
   }

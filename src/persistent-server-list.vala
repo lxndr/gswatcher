@@ -24,6 +24,16 @@ class PersistentServerList : ServerList {
 
   private SettingsBackend settings_backend;
 
+  public PersistentServerList (QuerierManager querier_manager, ProtocolRegistry protocol_registry, TransportRegistry transport_registry, GameDb game_db, GeoLocationResolver location_resolver) {
+    Object (
+      querier_manager : querier_manager,
+      protocol_registry : protocol_registry,
+      transport_registry : transport_registry,
+      game_db : game_db,
+      location_resolver : location_resolver
+    );
+  }
+
   construct {
     config_file = Path.build_filename (Environment.get_user_config_dir (), "gswatcher", "servers.ini");
     settings_backend = SettingsBackend.keyfile_settings_backend_new (config_file, root_path, null);

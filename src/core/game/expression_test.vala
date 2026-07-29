@@ -39,9 +39,10 @@ public static int main (string[] args) {
     { name: "map_unknown_key",  pattern: "map[\"unknownKey\"]",                                     result: null,           error: new GameDef.ExpressionError.INVALID_MAP ("key 'unknownKey' does not exist in map 'map'")                                                                          },
     { name: "regexp_fn",        pattern: "regex(\"user (\\\\d)\", \"user 1\")",                     result: "1",            error: null                                                                                                                                                              },
     { name: "mapKeyword_fn",    pattern: "mapKeyword(\"key,two,three\", \",\", \"map\", \"Four\")", result: "map value",    error: null                                                                                                                                                              },
-    { name: "fn_unknown",       pattern: "unknownFn()",                                             result: null,           error: new GameDef.ExpressionParserError.INVALID_TOKEN ("failed to parse function: unknown function 'unknownFn' at position 11, only supported 'regex' or 'mapKeyword'") },
+    { name: "fn_unknown",       pattern: "unknownFn()",                                             result: null,           error: new GameDef.ExpressionParserError.INVALID_FUNCTION ("failed to parse function: unknown function 'unknownFn' at position 11, supported functions: regex, mapKeyword, toMarkup") },
     { name: "fn_malformed",     pattern: "regex(\"user (\\\\d)\",",                                 result: null,           error: new GameDef.ExpressionParserError.INVALID_TOKEN ("invalid token at position 19, expected string, integer, float or identifier")                                   },
-    { name: "fn_missing_arg",   pattern: "regex(\"user\")",                                         result: null,           error: new GameDef.ExpressionError.INVALID_FUNCTION ("failed to evaluate argument 1 of 'regex()': missing argument 1")                                                   },
+    { name: "fn_missing_arg",   pattern: "regex(\"user\")",                                         result: null,           error: new GameDef.ExpressionParserError.INVALID_FUNCTION ("regex() expects 2 arguments, got 1")                                                                         },
+    { name: "fn_no_args",       pattern: "regex()",                                                 result: null,           error: new GameDef.ExpressionParserError.INVALID_FUNCTION ("regex() expects 2 arguments, got 0")                                                                         },
     { name: "or_expr_one",      pattern: "\"one\" or \"two\"",                                      result: "one",          error: null                                                                                                                                                              },
     { name: "or_expr_two",      pattern: "\"one\" or \"two\"",                                      result: "two",          error: null                                                                                                                                                              },
     { name: "or_expr_three",    pattern: "\"one\" or \"two\" or 3",                                 result: "3",            error: null                                                                                                                                                              },
@@ -52,7 +53,7 @@ public static int main (string[] args) {
   ctx["map"]["key"] = "map value";
 
   foreach (unowned var row in CORRECT_TABLE) {
-    Test.add_data_func (@"/core/utils/game_def_expression/$(row.name)", () => {
+    Test.add_data_func (@"/core/game/expression/$(row.name)", () => {
       try {
         var parser = new GameDef.ExpressionParser (row.pattern);
         var expression = parser.parse ();
@@ -62,8 +63,8 @@ public static int main (string[] args) {
           assert_cmpstr (value, EQ, row.result);
         }
 
-        if (expression is GameDef.LogicalExpression) {
-          var result = expression.eval (ctx, row.result);
+        if (expression is GameDef.MatchExpression) {
+          var result = ((GameDef.MatchExpression) expression).matches (ctx, row.result);
           assert_true (result);
         }
       } catch (Error error) {
@@ -76,6 +77,17 @@ public static int main (string[] args) {
       }
     });
   }
+
+  Test.add_func ("/core/game/expression/regex_invalid_literal_pattern", () => {
+    try {
+      GameDef.parse ("regex(\"[\", \"input\")");
+      assert_not_reached ();
+    } catch (GameDef.ExpressionParserError error) {
+      assert_cmpint (error.code, EQ, GameDef.ExpressionParserError.INVALID_FUNCTION);
+    } catch (Error error) {
+      assert_no_error (error);
+    }
+  });
 
   Test.run ();
   return 0;

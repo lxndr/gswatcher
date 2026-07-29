@@ -33,10 +33,6 @@ public interface EvaluatableExpression : Expression {
   public abstract string eval (ExpressionContext ctx) throws ExpressionError;
 }
 
-public interface LogicalExpression : Expression {
-  public abstract bool eval (ExpressionContext ctx, string value) throws ExpressionError;
-}
-
 /**
  * An expression that evaluates to a literal string value.
  *
@@ -123,18 +119,41 @@ abstract class FunctionExpression : Expression, EvaluatableExpression {
  * Example: regex(<pattern>, <input>)
  */
 class RegexExpression : FunctionExpression {
-  public RegexExpression (Gee.List<EvaluatableExpression> args) {
+  private Regex? compiled_regex;
+
+  public RegexExpression (Gee.List<EvaluatableExpression> args) throws ExpressionParserError {
     base ("regex", args);
+
+    if (args.size != 2) {
+      throw new ExpressionParserError.INVALID_FUNCTION (
+        "regex() expects 2 arguments, got %d", args.size
+      );
+    }
+
+    if (args[0] is LiteralExpression) {
+      string pattern;
+
+      try {
+        pattern = args[0].eval (new ExpressionContext ());
+      } catch (ExpressionError err) {
+        throw new ExpressionParserError.INVALID_FUNCTION ("failed to evaluate regex pattern: %s", err.message);
+      }
+
+      try {
+        compiled_regex = new Regex (pattern);
+      } catch (RegexError err) {
+        throw new ExpressionParserError.INVALID_FUNCTION ("invalid regex pattern /%s/: %s", pattern, err.message);
+      }
+    }
   }
 
   public override string eval (ExpressionContext ctx) throws ExpressionError {
-    var pattern = eval_arg (ctx, 0);
     var input = eval_arg (ctx, 1);
-    var regex = create_regex (pattern, input);
+    var regex = compiled_regex ?? create_regex (eval_arg (ctx, 0));
     return match_regex (regex, input);
   }
 
-  private Regex create_regex (string pattern, string input) throws ExpressionError {
+  private Regex create_regex (string pattern) throws ExpressionError {
     try {
       return new Regex (pattern);
     } catch (RegexError err) {
@@ -215,26 +234,30 @@ class ToMarkupExpression : FunctionExpression {
 }
 
 /**
- * An expression that evaluates to true if the input value matches any of the sub-expressions.
- *
- * Example: <expr1> or <expr2> or <expr3>
+ * The single source of truth for expression functions available in game
+ * definitions.
  */
-public class OrExpression : Expression, LogicalExpression {
-  private Gee.List<EvaluatableExpression> expressions;
+namespace Functions {
 
-  public OrExpression (Gee.List<EvaluatableExpression> expressions) {
-    this.expressions = expressions;
-  }
+  public const string[] NAMES = { "regex", "mapKeyword", "toMarkup" };
 
-  public bool eval (ExpressionContext ctx, string value) throws ExpressionError {
-    foreach (var expr in expressions) {
-      if (value == expr.eval (ctx)) {
-        return true;
-      }
+  /**
+   * Creates a function expression by name, or returns null if the name
+   * is not a registered function.
+   */
+  public EvaluatableExpression? create (string name, Gee.List<EvaluatableExpression> args) throws ExpressionParserError {
+    switch (name) {
+      case "regex":
+        return new RegexExpression (args);
+      case "mapKeyword":
+        return new MapKeywordExpression (args);
+      case "toMarkup":
+        return new ToMarkupExpression (args);
+      default:
+        return null;
     }
-
-    return false;
   }
+
 }
 
 }

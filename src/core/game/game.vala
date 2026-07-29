@@ -18,13 +18,39 @@
 
 namespace Gsw {
 
-class Game {
+/**
+ * Match specificity of a game definition, counted by rule kind.
+ * Compared lexicographically: exact literal rules always outrank
+ * or-alternative rules, which always outrank pattern rules.
+ */
+public struct Specificity {
+  public int exact;
+  public int alternatives;
+  public int patterns;
+
+  public int compare (Specificity other) {
+    if (exact != other.exact)
+      return exact - other.exact;
+
+    if (alternatives != other.alternatives)
+      return alternatives - other.alternatives;
+
+    return patterns - other.patterns;
+  }
+
+  public string to_string () {
+    return "(%d,%d,%d)".printf (exact, alternatives, patterns);
+  }
+}
+
+public class Game {
   public string id;
   public string protocol;
+  public bool is_generic;
   public uint16 port;
   public int16 qport_diff;
-  public int weight;
-  public Gee.Map<string, GameDef.Expression> inf_matches = new Gee.HashMap<string, GameDef.Expression> ();
+  public Specificity specificity;
+  public Gee.Map<string, GameDef.MatchExpression> inf_matches = new Gee.HashMap<string, GameDef.MatchExpression> ();
   public Gee.Map<string, GameDef.EvaluatableExpression> inf = new Gee.HashMap<string, GameDef.EvaluatableExpression> ();
   public Gee.List<PlayerField> pfields = new Gee.ArrayList<PlayerField> ();
   public Gee.Map<ProtocolFeature, string> features = new Gee.HashMap<ProtocolFeature, string> ();
@@ -44,20 +70,12 @@ class Game {
 
     foreach (var entry in inf_matches.entries) {
       try {
-        var expr = entry.value;
         var value = details.get (entry.key);
-        bool matched = false;
 
-        if (expr is GameDef.EvaluatableExpression) {
-          matched = value == ((GameDef.EvaluatableExpression) expr).eval (ctx);
-        } else if (expr is GameDef.LogicalExpression) {
-          matched = ((GameDef.LogicalExpression) expr).eval (ctx, value);
-        } else {
-          warning ("invalid expression type for '%s' in '%s': %s", entry.key, id, expr.get_type ().name ());
+        if (value == null)
           return false;
-        }
 
-        if (!matched)
+        if (!entry.value.matches (ctx, value))
           return false;
       } catch (GameDef.ExpressionError err) {
         warning ("failed to evaluate value of '%s' for '%s': %s", entry.key, id, err.message);

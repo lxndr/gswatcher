@@ -158,18 +158,11 @@ class ServerList : Widget {
   }
 
   [GtkCallback]
-  private string? format_country_icon (string? ip_address) {
-    if (ip_address == null)
+  private string? format_country_icon (string? country_code) {
+    if (country_code == null || country_code.length == 0)
       return null;
 
-    var geoip_resolver = MaxMindLocationResolver.get_instance ();
-    var country_code = geoip_resolver.country_code_by_ip (ip_address).ascii_down ();
-
-    if (country_code == null) {
-      return null;
-    }
-
-    return find_file_in_data_dirs (@"$(Config.ISO_FLAGS_DIR_NAME)/$(country_code).png");
+    return find_file_in_data_dirs (@"$(Config.ISO_FLAGS_DIR_NAME)/$(country_code.ascii_down ()).png");
   }
 
   [GtkCallback]

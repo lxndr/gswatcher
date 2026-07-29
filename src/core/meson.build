@@ -1,7 +1,9 @@
 core_sources = files(
   'game/expression-parser.vala',
   'game/expression.vala',
-  'game/game-resolver.vala',
+  'game/match-expression.vala',
+  'game/game-def-loader.vala',
+  'game/game-db.vala',
   'game/game.vala',
   'geo-location-resolver/maxmind-location-resolver.vala',
   'geo-location-resolver/geo-location-resolver.vala',
@@ -95,5 +97,26 @@ test('core/game', executable(
   'game_test',
   core_sources,
   'game/game_test.vala',
+  dependencies : dependencies,
+))
+
+test('core/game/def-loader', executable(
+  'game-def-loader_test',
+  core_sources,
+  'game/game-def-loader_test.vala',
+  dependencies : dependencies,
+))
+
+test('core/game/db', executable(
+  'game-db_test',
+  core_sources,
+  'game/game-db_test.vala',
+  dependencies : dependencies,
+))
+
+test('core/game/expression', executable(
+  'expression_test',
+  core_sources,
+  'game/expression_test.vala',
   dependencies : dependencies,
 ))

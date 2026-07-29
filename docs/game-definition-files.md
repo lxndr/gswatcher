@@ -58,6 +58,12 @@ inf.game = "Counter-Strike 2"
 
 These rules match against server response data to determine if a server belongs to this game. The `inf` prefix refers to server information fields returned by the query protocol.
 
+### Generic Game Definitions
+
+A definition **without** a `[Match]` section is the *generic* definition for its protocol. At most one generic definition per protocol is allowed. Shipped generics follow the naming convention `generic-<protocol>.ini`.
+
+When a server is resolved, the generic definition for its protocol always applies first as a base layer: its `[Info]` expressions, player fields, features, and default port. If a specific game also matches, its values override the generic's per `[Info]` key, its `[Player]` table (as a whole) replaces the generic's if present, and its id becomes the server's `game-id`. If no specific game matches, the server is identified as the generic game. Expressions always evaluate against their own file's custom map sections only.
+
 ### [Info] Section
 
 The `[Info]` section defines how to transform and display server information:
@@ -212,12 +218,18 @@ When multiple game definitions could potentially match the same server, Game Ser
 
 1. **Protocol Matching**: First, the system filters games that use the same protocol as the server response
 2. **Rule Matching**: For each game definition, all `[Match]` rules are evaluated against the server's response data
-3. **Weight Calculation**: Each game definition is assigned a weight based on the complexity and length of its matching rules
-4. **Priority Selection**: The game with the highest weight is selected
+3. **Specificity Calculation**: Each game definition gets a specificity tuple based on the kinds of its matching rules
+4. **Priority Selection**: The game with the highest specificity is selected
 
-### Weight System
+### Specificity System
 
-The weight of a game definition is calculated based on the length of expression strings in `[Match]` rules.
+Each game definition gets a specificity tuple `(exact, alternatives, patterns)` counting its `[Match]` rules by kind:
+
+- **exact** — rules comparing a field to a literal value (`inf.appid = 730`)
+- **alternatives** — rules using `or` between literal values
+- **patterns** — rules using functions such as `regex()` or non-literal expressions
+
+Tuples are compared left to right: a definition with more exact rules always outranks one with fewer, regardless of the other counts. If two matching definitions have identical specificity, a warning is logged and the definition with the lexicographically smaller id is selected.
 
 ## Examples
 

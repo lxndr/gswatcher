@@ -18,7 +18,6 @@
 
 namespace Gsw {
 
-[SingleInstance]
 class UdpTransportManager : Object {
   private uint16 _local_port = 27100;
   private Socket socket;
@@ -38,10 +37,6 @@ class UdpTransportManager : Object {
     } catch (Error err) {
       error (err);
     }
-  }
-
-  public static UdpTransportManager get_instance () {
-    return new UdpTransportManager ();
   }
 
   public uint16 local_port {

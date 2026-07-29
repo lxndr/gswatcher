@@ -21,11 +21,18 @@ namespace Gsw {
 private static Gtk.TextTagTable console_log_buffer_tag_table;
 
 public class Client : Object {
-  private QuerierManager querier_manager = QuerierManager.get_instance ();
+  public QuerierManager querier_manager { get; construct; }
+  public ProtocolRegistry protocol_registry { get; construct; }
+  public TransportRegistry transport_registry { get; construct; }
+  public GameDb game_db { get; construct; }
+  public GeoLocationResolver location_resolver { get; construct; }
+
   private Gee.List<Querier> tmp_queriers = new Gee.ArrayList<Querier> ();
 
   public Server server { get; construct set; }
   public string? ip_address { get; protected set; }
+  public string? country_code { get; protected set; }
+  public string? location { get; protected set; }
   public string? protocol_id { get; protected set; }
 
   // query
@@ -79,13 +86,21 @@ public class Client : Object {
     notify["console-port"].connect(on_console_options_changed);
     notify["console-password"].connect(on_console_options_changed);
 
-    var game_resolver = GameResolver.get_instance ();
-    game_resolver.notify["ready"].connect(on_game_resolver_ready_change);
-    on_game_resolver_ready_change ();
+    game_db.ensure_loaded.begin ((obj, res) => {
+      game_db.ensure_loaded.end (res);
+      activate ();
+    });
   }
 
-  public Client (Server server) {
-    Object (server : server);
+  public Client (Server server, QuerierManager querier_manager, ProtocolRegistry protocol_registry, TransportRegistry transport_registry, GameDb game_db, GeoLocationResolver location_resolver) {
+    Object (
+      server : server,
+      querier_manager : querier_manager,
+      protocol_registry : protocol_registry,
+      transport_registry : transport_registry,
+      game_db : game_db,
+      location_resolver : location_resolver
+    );
   }
 
   ~Client () {
@@ -95,9 +110,6 @@ public class Client : Object {
 
     querier = null;
     console_client = null;
-
-    var game_resolver = GameResolver.get_instance ();
-    game_resolver.notify["ready"].disconnect (on_game_resolver_ready_change);
   }
 
   private Querier? querier {
@@ -143,22 +155,13 @@ public class Client : Object {
     querier = null;
     tmp_queriers.clear ();
 
-    foreach (var protocol_desc in ProtocolRegistry.get_instance ().list_by_feature (QUERY)) {
+    foreach (var protocol_desc in protocol_registry.list_by_feature (QUERY)) {
       try {
         var tmp_querier = setup_querier (server, protocol_desc.id);
         tmp_queriers.add (tmp_querier);
       } catch (Error err) {
         log (Config.LOG_DOMAIN, LEVEL_ERROR, "failed to create querier for protocol '%s': %s", protocol_desc.id, err.message);
       }
-    }
-  }
-
-  private void on_game_resolver_ready_change () {
-    var resolver = GameResolver.get_instance ();
-
-    if (resolver.ready) {
-      resolver.notify.disconnect (on_game_resolver_ready_change);
-      activate ();
     }
   }
 
@@ -174,6 +177,12 @@ public class Client : Object {
 
   private void on_address_resolve (string address) {
     ip_address = address;
+
+    var code = location_resolver.country_code_by_ip (address);
+    country_code = (code == null || code.length == 0) ? null : code;
+
+    var loc = location_resolver.location_by_ip (address);
+    location = (loc == null || loc.length == 0) ? null : loc;
   }
 
   private void on_details_update (Gee.Map<string, string> details) {
@@ -247,11 +256,10 @@ public class Client : Object {
   }
 
   private void setup_console_feature () {
-    var game_resolver = GameResolver.get_instance ();
     var game_id = sinfo.game_id;
 
-    var console_protocol = (game_resolver.ready && game_id != null && game_id.length > 0)
-      ? GameResolver.get_instance ().get_feature_protocol (game_id, CONSOLE)
+    var console_protocol = (game_id != null && game_id.length > 0)
+      ? game_db.get_feature_protocol (game_id, CONSOLE)
       : null;
 
     if (console_protocol == null) {
@@ -267,11 +275,16 @@ public class Client : Object {
   }
 
   private void setup_console_client () {
-    var console_protocol = GameResolver.get_instance ().get_feature_protocol (sinfo.game_id, CONSOLE);
+    var console_protocol = game_db.get_feature_protocol (sinfo.game_id, CONSOLE);
 
     try {
-      var proto = (ConsoleProtocol) ProtocolRegistry.get_instance ().create (console_protocol);
-      console_client = new ConsoleClient (server.host, console_port, console_password, proto);
+      var proto = (ConsoleProtocol) protocol_registry.create (console_protocol);
+      var transport = transport_registry.create_net_transport (proto.info.transport, server.host, console_port);
+
+      if (transport == null)
+        return;
+
+      console_client = new ConsoleClient (server.host, console_port, console_password, proto, transport);
     } catch (Error err) {
       log (Config.LOG_DOMAIN, LEVEL_ERROR, "failed to create protocol '%s': %s", console_protocol, err.message);
     }

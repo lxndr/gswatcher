@@ -220,7 +220,7 @@
                                     <property name="icon-size">GTK_ICON_SIZE_NORMAL</property>
                                     <binding name="file">
                                       <closure type="gchararray" function="format_country_icon">
-                                        <lookup type="GswClient" name="ip_address">
+                                        <lookup type="GswClient" name="country_code">
                                           <lookup name="item">GtkListItem</lookup>
                                         </lookup>
                                       </closure>

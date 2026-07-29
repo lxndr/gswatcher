@@ -16,14 +16,6 @@ test_core_sources = files(
 
 subdir('protocols')
 
-test('core/utils/game_def_expression', executable(
-  'test-game_def_expression',
-  core_sources,
-  test_core_sources,
-  'test-game_def_expression.vala',
-  dependencies : dependencies,
-))
-
 test('server-watcher', executable(
   'test-server-watcher',
   core_sources,

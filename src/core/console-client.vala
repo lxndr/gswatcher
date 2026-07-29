@@ -44,7 +44,6 @@ public class ConsoleClient : Object {
     protocol.data_send.connect (send_data);
     protocol.response.connect (on_response);
 
-    transport = TransportRegistry.get_instance ().create_net_transport (protocol.info.transport, host, port);
     transport.connected.connect (() => connected ());
     transport.authenticated.connect (() => authenticated ());
     transport.disconnected.connect (() => disconnected ());
@@ -52,12 +51,13 @@ public class ConsoleClient : Object {
     transport.error.connect (on_transport_error);
   }
 
-  public ConsoleClient (string host, uint16 port, string password, ConsoleProtocol protocol) {
+  public ConsoleClient (string host, uint16 port, string password, ConsoleProtocol protocol, NetTransport transport) {
     Object (
       host : host,
       port : port,
       password : password,
-      protocol : protocol
+      protocol : protocol,
+      transport : transport
     );
   }
 

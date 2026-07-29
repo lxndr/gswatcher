@@ -19,15 +19,15 @@
 namespace Gsw {
 
 class UdpTransport : NetTransport {
-  private UdpTransportManager manager = UdpTransportManager.get_instance ();
+  public UdpTransportManager manager { get; construct; }
   private uint8[]? output_message;
 
   construct {
     manager.register (this);
   }
 
-  public UdpTransport (string host, uint16 port) {
-    Object (host : host, port : port);
+  public UdpTransport (UdpTransportManager manager, string host, uint16 port) {
+    Object (manager : manager, host : host, port : port);
   }
 
   ~UdpTransport () {

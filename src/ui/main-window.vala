@@ -45,10 +45,15 @@ class MainWindow : Adw.ApplicationWindow {
   [GtkChild]
   private unowned Paned main_paned;
 
+  [GtkChild]
+  private unowned Ui.ServerList server_list_ctl;
+
   construct {
     // https://gitlab.gnome.org/GNOME/gtk/-/issues/5500
     main_paned.shrink_start_child = false;
     main_paned.shrink_end_child = false;
+
+    server_list_ctl.client_list = client_list;
   }
 
   class construct {

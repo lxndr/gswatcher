@@ -18,15 +18,10 @@
 
 namespace Gsw {
 
-[SingleInstance]
 public class MaxMindLocationResolver : Object, GeoLocationResolver {
   private GeoIP? geoip;
 
   public Error? init_error;
-
-  public static MaxMindLocationResolver get_instance () {
-    return new MaxMindLocationResolver ();
-  }
 
   construct {
     lock (geoip) {

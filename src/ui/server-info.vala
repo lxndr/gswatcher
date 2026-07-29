@@ -68,15 +68,6 @@ class ServerInfo : Widget {
   }
 
   [GtkCallback]
-  private string? format_location (string? ip_address) {
-    if (ip_address == null)
-      return null;
-
-    var geoip_resolver = MaxMindLocationResolver.get_instance ();
-    return geoip_resolver.location_by_ip (ip_address);
-  }
-
-  [GtkCallback]
   private string? format_players (int num, int max) {
     return format_num_players (num, max);
   }

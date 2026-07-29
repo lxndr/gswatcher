@@ -19,10 +19,12 @@
 namespace Gsw {
 
 class Application : Adw.Application {
-  private ProtocolRegistry protocol_registry = ProtocolRegistry.get_instance ();
-  private TransportRegistry transport_registry = TransportRegistry.get_instance ();
-  private UdpTransportManager udp_transport_manager = UdpTransportManager.get_instance ();
-  private QuerierManager querier_manager = QuerierManager.get_instance ();
+  private ProtocolRegistry protocol_registry = new ProtocolRegistry ();
+  private TransportRegistry transport_registry = new TransportRegistry ();
+  private UdpTransportManager udp_transport_manager = new UdpTransportManager ();
+  private GameDb game_db = new GameDb ();
+  private QuerierManager querier_manager;
+  private MaxMindLocationResolver location_resolver;
   private PersistentServerList server_list;
   private ServerWatcher server_watcher;
   private BuddyList buddy_list;
@@ -68,8 +70,6 @@ class Application : Adw.Application {
 
       main_window.present ();
 
-      var location_resolver = new MaxMindLocationResolver ();
-
       if (location_resolver.init_error != null) {
         var msg = _("Failed to initialize GeoIP: %s").printf (location_resolver.init_error.message);
         show_error_dialog (main_window, msg);
@@ -88,17 +88,20 @@ class Application : Adw.Application {
     });
 
     // transports
-    transport_registry.register (new TransportDesc () {
-      id = "udp",
-      class_type = typeof (UdpTransport)
-    });
-    transport_registry.register (new TransportDesc () {
-      id = "tcp",
-      class_type = typeof (TcpTransport)
-    });
+    transport_registry.register (new TransportDesc ("udp", (host, port) => new UdpTransport (udp_transport_manager, host, port)));
+    transport_registry.register (new TransportDesc ("tcp", (host, port) => new TcpTransport (host, port)));
+
+    // games
+    game_db.load.begin ();
+
+    // queriers
+    querier_manager = new QuerierManager (protocol_registry, transport_registry, game_db);
+
+    // geoip
+    location_resolver = new MaxMindLocationResolver ();
 
     // servers
-    server_list = new PersistentServerList ();
+    server_list = new PersistentServerList (querier_manager, protocol_registry, transport_registry, game_db, location_resolver);
     server_watcher = new ServerWatcher (server_list);
     server_watcher.online.connect (on_server_online);
     server_watcher.offline.connect (on_server_offline);

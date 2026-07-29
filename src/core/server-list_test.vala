@@ -19,11 +19,32 @@
 using Gsw;
 using Gee;
 
+private class NullLocationResolver : Object, GeoLocationResolver {
+  public string? country_code_by_ip (string ip_address) {
+    return null;
+  }
+
+  public string? location_by_ip (string ip_address) {
+    return null;
+  }
+}
+
+ServerList make_server_list () {
+  var protocol_registry = new ProtocolRegistry ();
+  var transport_registry = new TransportRegistry ();
+  var game_db = new GameDb ();
+  game_db.finish_loading ();
+
+  var querier_manager = new QuerierManager (protocol_registry, transport_registry, game_db);
+
+  return new ServerList (querier_manager, protocol_registry, transport_registry, game_db, new NullLocationResolver ());
+}
+
 public static int main (string[] args) {
   Test.init (ref args);
 
   Test.add_func ("/core/ServerList/get()", () => {
-    var list = new ServerList ();
+    var list = make_server_list ();
     var client1 = list.add ("localhost:27015");
     var client2 = list.add ("localhost:27016");
 
@@ -32,7 +53,7 @@ public static int main (string[] args) {
   });
 
   Test.add_func ("/core/ServerList/iterator()", () => {
-    var list = new ServerList ();
+    var list = make_server_list ();
     var client1 = list.add ("localhost:27015");
     var client2 = list.add ("localhost:27016");
 
@@ -45,7 +66,7 @@ public static int main (string[] args) {
   });
 
   Test.add_func ("/core/ServerList/add()", () => {
-    var list = new ServerList ();
+    var list = make_server_list ();
 
     list.items_changed.connect ((pos, removed, added) => {
       assert_cmpuint (list.get_n_items (), EQ, 1);
@@ -73,7 +94,7 @@ public static int main (string[] args) {
   });
 
   Test.add_func ("/core/ServerList/add()/duplicate", () => {
-    var list = new ServerList ();
+    var list = make_server_list ();
     var client1 = list.add ("localhost:27015");
 
     list.items_changed.connect ((pos, removed, added) => {
@@ -96,7 +117,7 @@ public static int main (string[] args) {
   });
 
   Test.add_func ("/core/ServerList/remove()", () => {
-    var list = new ServerList ();
+    var list = make_server_list ();
     var client = list.add ("localhost:27015");
 
     list.items_changed.connect ((pos, removed, added) => {
@@ -124,8 +145,8 @@ public static int main (string[] args) {
   });
 
   Test.add_func ("/core/ServerList/remove()/not_found", () => {
-    var list = new ServerList ();
-    var client = new Client (new Server ("localhost:27015"));
+    var list = make_server_list ();
+    var client = new Client (new Server ("localhost:27015"), list.querier_manager, list.protocol_registry, list.transport_registry, list.game_db, list.location_resolver);
 
     list.items_changed.connect ((pos, removed, added) => {
       assert_not_reached ();
@@ -145,7 +166,7 @@ public static int main (string[] args) {
   });
 
   Test.add_func ("/core/ServerList/find_by_address()", () => {
-    var list = new ServerList ();
+    var list = make_server_list ();
     var client1 = list.add ("localhost:27015");
     var client2 = list.add ("localhost:27016");
 
@@ -159,7 +180,7 @@ public static int main (string[] args) {
   });
 
   Test.add_func ("/core/ServerList/find_by_address()/not_found", () => {
-    var list = new ServerList ();
+    var list = make_server_list ();
     list.add ("localhost:27015");
 
     var found_client = list.find_by_address ("localhost:27016");
@@ -167,14 +188,14 @@ public static int main (string[] args) {
   });
 
   Test.add_func ("/core/ServerList/exists()", () => {
-    var list = new ServerList ();
+    var list = make_server_list ();
     list.add ("localhost:27015");
 
     assert_true (list.exists ("localhost:27015"));
   });
 
   Test.add_func ("/core/ServerList/exists()/not_found", () => {
-    var list = new ServerList ();
+    var list = make_server_list ();
     list.add ("localhost:27015");
 
     assert_false (list.exists ("localhost:27016"));
@@ -183,12 +204,12 @@ public static int main (string[] args) {
   /* ListModel implementation tests */
 
   Test.add_func ("/core/ServerList/get_item_type()", () => {
-    var list = new ServerList ();
+    var list = make_server_list ();
     assert (list.get_item_type () == typeof (Client));
   });
 
   Test.add_func ("/core/ServerList/get_n_items()", () => {
-    var list = new ServerList ();
+    var list = make_server_list ();
     assert_cmpuint (list.get_n_items (), EQ, 0);
 
     list.add ("localhost:27015");
@@ -199,7 +220,7 @@ public static int main (string[] args) {
   });
 
   Test.add_func ("/core/ServerList/get_item()", () => {
-    var list = new ServerList ();
+    var list = make_server_list ();
     var client1 = list.add ("localhost:27015");
     var client2 = list.add ("localhost:27016");
 
@@ -209,7 +230,7 @@ public static int main (string[] args) {
   });
 
   Test.add_func ("/core/ServerList/items_changed/addition", () => {
-    var list = new ServerList ();
+    var list = make_server_list ();
 
     list.items_changed.connect ((pos, removed, added) => {
       assert_cmpuint (list.get_n_items (), EQ, 1);
@@ -222,7 +243,7 @@ public static int main (string[] args) {
   });
 
   Test.add_func ("/core/ServerList/items_changed/removal", () => {
-    var list = new ServerList ();
+    var list = make_server_list ();
     var client = list.add ("localhost:27015");
 
     list.items_changed.connect ((pos, removed, added) => {

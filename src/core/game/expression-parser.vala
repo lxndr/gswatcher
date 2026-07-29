@@ -21,6 +21,7 @@ namespace Gsw.GameDef {
 public errordomain ExpressionParserError {
   ALREADY_PARSED,
   INVALID_TOKEN,
+  INVALID_FUNCTION,
 }
 
 /**
@@ -40,6 +41,7 @@ public class ExpressionParser {
    * @return The parsed expression.
    * @throws ExpressionParserError.ALREADY_PARSED If the expression has already been parsed.
    * @throws ExpressionParserError.INVALID_TOKEN If the input contains invalid syntax.
+   * @throws ExpressionParserError.INVALID_FUNCTION If a function name or its arguments are invalid.
    */
   public Expression parse () throws ExpressionParserError {
     if (parsed) {
@@ -114,20 +116,16 @@ public class ExpressionParser {
 
   private EvaluatableExpression parse_function (string name) throws ExpressionParserError {
     var args = parse_function_args ();
+    var expr = Functions.create (name, args);
 
-    switch (name) {
-      case "regex":
-        return new RegexExpression (args);
-      case "mapKeyword":
-        return new MapKeywordExpression (args);
-      case "toMarkup":
-        return new ToMarkupExpression (args);
-      default:
-        throw new ExpressionParserError.INVALID_TOKEN (
-          "failed to parse function: unknown function '%s' at position %u, only supported 'regex' or 'mapKeyword'",
-          name, scanner.position
-        );
+    if (expr == null) {
+      throw new ExpressionParserError.INVALID_FUNCTION (
+        "failed to parse function: unknown function '%s' at position %u, supported functions: %s",
+        name, scanner.position, string.joinv (", ", Functions.NAMES)
+      );
     }
+
+    return expr;
   }
 
   private Gee.List<EvaluatableExpression> parse_function_args () throws ExpressionParserError {
@@ -253,6 +251,11 @@ private Scanner create_scanner () {
   var config = scanner.config; // passing `null` to the constructor creates a default config
   config.scan_identifier_1char = true;
   return scanner;
+}
+
+public Expression parse (string input) throws ExpressionParserError {
+  var parser = new ExpressionParser (input);
+  return parser.parse ();
 }
 
 }

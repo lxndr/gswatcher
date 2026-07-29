@@ -24,13 +24,8 @@ public class ProtocolDesc : ProtocolInfo {
   public Value[] class_values;
 }
 
-[SingleInstance]
 public class ProtocolRegistry : Object {
   private Gee.Map<string, ProtocolDesc> protocols = new Gee.HashMap<string, ProtocolDesc> ();
-
-  public static ProtocolRegistry get_instance () {
-    return new ProtocolRegistry ();
-  }
 
   public Gee.Collection<ProtocolDesc> list () {
     return protocols.values.read_only_view;

@@ -31,12 +31,12 @@ public class Querier : Object {
   public Server server { get; construct; }
   public QueryProtocol protocol { get; construct; }
   public NetTransport transport { get; construct; }
+  public GameDb game_db { get; construct; }
   public bool online { get; protected set; default = false; }
   public int64 ping { get; protected set; default = -1; }
   public Error? error { get; protected set; }
 
-  private GameResolver game_resolver = GameResolver.get_instance ();
-  private bool query_pending;
+  private bool query_in_flight;
   private int64 query_time;
   private uint timeout_id;
   private string? game_id;
@@ -55,19 +55,18 @@ public class Querier : Object {
     protocol.sinfo_update.connect (on_sinfo_updated);
     protocol.plist_update.connect (on_plist_updated);
 
-    transport = TransportRegistry.get_instance ().create_net_transport (protocol.info.transport, server.host, server.qport);
     transport.resolved.connect (on_address_resolved);
     transport.data_received.connect (on_data_received);
-
-    game_resolver.notify["ready"].connect (handle_pending_query);
 
     query ();
   }
 
-  public Querier (Server server, QueryProtocol protocol) {
+  public Querier (Server server, QueryProtocol protocol, NetTransport transport, GameDb game_db) {
     Object (
       server : server,
-      protocol : protocol
+      protocol : protocol,
+      transport : transport,
+      game_db : game_db
     );
   }
 
@@ -80,20 +79,27 @@ public class Querier : Object {
     protocol.plist_update.disconnect (on_plist_updated);
     transport.resolved.disconnect (on_address_resolved);
     transport.data_received.disconnect (on_data_received);
-    game_resolver.notify["ready"].disconnect (handle_pending_query);
   }
 
   public void query () {
-    try {
-      if (!game_resolver.ready) {
-        query_pending = true;
-        return;
-      }
+    if (query_in_flight)
+      return;
 
+    query_in_flight = true;
+
+    query_async.begin ((obj, res) => {
+      query_async.end (res);
+      query_in_flight = false;
+    });
+  }
+
+  private async void query_async () {
+    yield game_db.ensure_loaded ();
+
+    try {
       start_timeout_timer ();
       start_ping_timer ();
       protocol.query ();
-      query_pending = false;
     } catch (Error err) {
       error = new QuerierError.QUERYING ("failed to query %s:%d: %s", server.host, server.qport, err.message);
     }
@@ -102,11 +108,6 @@ public class Querier : Object {
   private void send_data (uint8[] data) {
     transport.send (data);
     log (Config.LOG_DOMAIN, LEVEL_DEBUG, "sent data to %s:%u: length = %ld", server.host, server.qport, data.length);
-  }
-
-  private void handle_pending_query () {
-    if (query_pending && game_resolver.ready)
-      query ();
   }
 
   private void on_address_resolved (string address) {
@@ -129,7 +130,7 @@ public class Querier : Object {
 
   private void on_sinfo_updated (ServerDetails details, ServerInfo sinfo) {
     stop_timeout_timer ();
-    game_resolver.resolve (protocol.info.id, sinfo, details);
+    game_db.resolve (protocol.info.id, sinfo, details);
 
     if (game_id == null)
       game_id = sinfo.game_id;
@@ -141,7 +142,7 @@ public class Querier : Object {
 
   private void on_plist_updated (Gee.List<PlayerField> default_pfields, Gee.ArrayList<Player> plist) {
     if (!plist_fields_resolved) {
-      var game_pfields = game_resolver.get_plist_fields (game_id);
+      var game_pfields = game_db.get_plist_fields (game_id);
       var new_pfields = (game_pfields != null && game_pfields.size > 0) ? game_pfields : default_pfields;
       plist_fields_update (new_pfields);
       plist_fields_resolved = true;
@@ -161,7 +162,6 @@ public class Querier : Object {
       stop_timeout_timer ();
       stop_ping_timer ();
       ping = -1;
-      query_pending = false;
     }
   }
 

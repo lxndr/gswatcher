@@ -42,7 +42,6 @@ namespace Gsw.Ui {
 
     foreach (var transport in transports) {
       sysinfo += "\t%s\n".printf (transport.id);
-      sysinfo += "\t\tClass: %s\n".printf (transport.class_type.name ());
     }
 
     sysinfo += "\nRegistered protocols:\n";

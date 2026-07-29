@@ -20,16 +20,22 @@ using Gee;
 
 namespace Gsw {
 
-[SingleInstance]
 public class QuerierManager : Object {
   public uint update_interval { get; set; default = 5000; }
   public bool paused { get; set; }
+  public GameDb game_db { get; construct; }
+  public ProtocolRegistry protocol_registry { get; construct; }
+  public TransportRegistry transport_registry { get; construct; }
 
   private uint timer_source;
   private Collection<unowned Querier> queriers;
 
-  public static QuerierManager get_instance () {
-    return new QuerierManager ();
+  public QuerierManager (ProtocolRegistry protocol_registry, TransportRegistry transport_registry, GameDb game_db) {
+    Object (
+      protocol_registry : protocol_registry,
+      transport_registry : transport_registry,
+      game_db : game_db
+    );
   }
 
   construct {
@@ -41,9 +47,10 @@ public class QuerierManager : Object {
   }
 
   public Querier create_querier (Server server, string protocol_id) throws Error {
-    var protocol = ProtocolRegistry.get_instance ().create (protocol_id);
+    var protocol = protocol_registry.create (protocol_id);
+    var transport = transport_registry.create_net_transport (protocol.info.transport, server.host, server.qport);
 
-    var querier = new Querier (server, (QueryProtocol) protocol);
+    var querier = new Querier (server, (QueryProtocol) protocol, transport, game_db);
     querier.weak_ref ((WeakNotify) remove_querier);
     queriers.add (querier);
 

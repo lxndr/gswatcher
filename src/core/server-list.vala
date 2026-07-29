@@ -22,7 +22,23 @@ namespace Gsw {
  * An observable list of game servers represented as `Client` objects.
  */
 public class ServerList : Object, ListModel {
+  public QuerierManager querier_manager { get; construct; }
+  public ProtocolRegistry protocol_registry { get; construct; }
+  public TransportRegistry transport_registry { get; construct; }
+  public GameDb game_db { get; construct; }
+  public GeoLocationResolver location_resolver { get; construct; }
+
   private Gee.List<Client> _list = new Gee.ArrayList<Client> ();
+
+  public ServerList (QuerierManager querier_manager, ProtocolRegistry protocol_registry, TransportRegistry transport_registry, GameDb game_db, GeoLocationResolver location_resolver) {
+    Object (
+      querier_manager : querier_manager,
+      protocol_registry : protocol_registry,
+      transport_registry : transport_registry,
+      game_db : game_db,
+      location_resolver : location_resolver
+    );
+  }
 
   /**
    * A signal emitted when a client is added to the list.
@@ -69,7 +85,7 @@ public class ServerList : Object, ListModel {
       return existing_client;
     }
 
-    var client = new Client (new Server (address));
+    var client = new Client (new Server (address), querier_manager, protocol_registry, transport_registry, game_db, location_resolver);
     _list.add (client);
     items_changed (_list.size - 1, 0, 1);
     added (client);

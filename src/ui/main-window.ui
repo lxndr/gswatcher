@@ -201,11 +201,6 @@
                     <property name="position">350</property>
                     <child>
                       <object class="GswUiServerList" id="server_list_ctl">
-                        <binding name="client-list">
-                          <lookup type="GswUiMainWindow" name="client_list">
-                            GswUiMainWindow
-                          </lookup>
-                        </binding>
                         <signal name="remove" handler="remove_server" />
                       </object>
                     </child>
@@ -217,7 +212,7 @@
                             <property name="orientation">GTK_ORIENTATION_HORIZONTAL</property>
                             <property name="homogeneous">true</property>
                             <child>
-                              <object class="GswUiServerInfo">
+                              <object class="GswUiServerInfo" id="server_info_ctl">
                                 <binding name="client">
                                   <lookup type="GswUiServerList" name="selected">
                                     server_list_ctl

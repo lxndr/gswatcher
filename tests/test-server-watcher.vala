@@ -19,12 +19,33 @@
 using Gsw;
 using Gee;
 
+private class NullLocationResolver : Object, GeoLocationResolver {
+  public string? country_code_by_ip (string ip_address) {
+    return null;
+  }
+
+  public string? location_by_ip (string ip_address) {
+    return null;
+  }
+}
+
+ServerList make_server_list () {
+  var protocol_registry = new ProtocolRegistry ();
+  var transport_registry = new TransportRegistry ();
+  var game_db = new GameDb ();
+  game_db.finish_loading ();
+
+  var querier_manager = new QuerierManager (protocol_registry, transport_registry, game_db);
+
+  return new ServerList (querier_manager, protocol_registry, transport_registry, game_db, new NullLocationResolver ());
+}
+
 public static int main (string[] args) {
   Test.init (ref args);
 
   // Test 1: ServerWatcher instantiation
   Test.add_func ("/server-watcher/instantiation", () => {
-    var server_list = new ServerList ();
+    var server_list = make_server_list ();
     var watcher = new ServerWatcher (server_list);
     assert_cmpuint (watcher.ref_count, EQ, 1);
 
@@ -37,7 +58,7 @@ public static int main (string[] args) {
 
   // Test 2: Adding a server works
   Test.add_func ("/server-watcher/server_added_no_crash", () => {
-    var server_list = new ServerList ();
+    var server_list = make_server_list ();
     var watcher = new ServerWatcher (server_list);
     server_list.add ("server1.example.com:27015");
 
@@ -50,7 +71,7 @@ public static int main (string[] args) {
 
   // Test 3: Removing a server cleans up
   Test.add_func ("/server-watcher/server_removed_no_crash", () => {
-    var server_list = new ServerList ();
+    var server_list = make_server_list ();
     var watcher = new ServerWatcher (server_list);
     var client = server_list.add ("server1.example.com:27015");
     server_list.remove (client);
@@ -71,7 +92,7 @@ public static int main (string[] args) {
 
   // Test 4: First online change is ignored (initialization)
   Test.add_func ("/server-watcher/first_online_change_skipped", () => {
-    var server_list = new ServerList ();
+    var server_list = make_server_list ();
     var watcher = new ServerWatcher (server_list);
     var client = server_list.add ("server1.example.com:27015");
 
@@ -88,7 +109,7 @@ public static int main (string[] args) {
 
   // Test 5: Subsequent transition to online should emit signal
   Test.add_func ("/server-watcher/online_signal_emitted", () => {
-    var server_list = new ServerList ();
+    var server_list = make_server_list ();
     var watcher = new ServerWatcher (server_list);
     var client = server_list.add ("server1.example.com:27015");
 
@@ -104,7 +125,7 @@ public static int main (string[] args) {
 
   // Test 6: Transition to offline emits signal
   Test.add_func ("/server-watcher/offline_signal_emitted", () => {
-    var server_list = new ServerList ();
+    var server_list = make_server_list ();
     var watcher = new ServerWatcher (server_list);
     var client = server_list.add ("server1.example.com:27015");
 
@@ -119,7 +140,7 @@ public static int main (string[] args) {
 
   // Test 7: Player slot available signal emitted when slot opens
   Test.add_func ("/server-watcher/player_slot_available_emitted", () => {
-    var server_list = new ServerList ();
+    var server_list = make_server_list ();
     var watcher = new ServerWatcher (server_list);
     var client = server_list.add ("server1.example.com:27015");
 
@@ -142,7 +163,7 @@ public static int main (string[] args) {
 
   // Test 8: No signal when slots already available
   Test.add_func ("/server-watcher/no_signal_when_slots_already_available", () => {
-    var server_list = new ServerList ();
+    var server_list = make_server_list ();
     var watcher = new ServerWatcher (server_list);
     var client = server_list.add ("server1.example.com:27015");
 
@@ -162,7 +183,7 @@ public static int main (string[] args) {
 
   // Test 9: Multiple clients tracked independently
   Test.add_func ("/server-watcher/multiple_clients_independent", () => {
-    var server_list = new ServerList ();
+    var server_list = make_server_list ();
     var watcher = new ServerWatcher (server_list);
     var client1 = server_list.add ("server1.example.com:27015");
     var client2 = server_list.add ("server2.example.com:27015");
@@ -179,7 +200,7 @@ public static int main (string[] args) {
 
   // Test 10: No signal after client removal
   Test.add_func ("/server-watcher/no_signal_after_removal", () => {
-    var server_list = new ServerList ();
+    var server_list = make_server_list ();
     var watcher = new ServerWatcher (server_list);
     var client = server_list.add ("server1.example.com:27015");
 
@@ -202,7 +223,7 @@ public static int main (string[] args) {
 
   // Test 11: Slot signal cycles: full -> available -> full -> available
   Test.add_func ("/server-watcher/slot_available_cycles", () => {
-    var server_list = new ServerList ();
+    var server_list = make_server_list ();
     var watcher = new ServerWatcher (server_list);
     var client = server_list.add ("server1.example.com:27015");
 
@@ -226,7 +247,7 @@ public static int main (string[] args) {
 
   // Test 12: Destructor with multiple clients does not crash
   Test.add_func ("/server-watcher/destructor_with_multiple_clients", () => {
-    var server_list = new ServerList ();
+    var server_list = make_server_list ();
     var watcher = new ServerWatcher (server_list);
     server_list.add ("server1.example.com:27015");
     server_list.add ("server2.example.com:27015");
@@ -237,7 +258,7 @@ public static int main (string[] args) {
 
   // Test 13: Re-adding a client resets online_state_init
   Test.add_func ("/server-watcher/online_state_init_resets_on_readd", () => {
-    var server_list = new ServerList ();
+    var server_list = make_server_list ();
     var watcher = new ServerWatcher (server_list);
 
     bool first_emit = false;
@@ -261,7 +282,7 @@ public static int main (string[] args) {
 
   // Test 14: Slot signal when going from full to available with different max
   Test.add_func ("/server-watcher/slot_signal_full_to_available", () => {
-    var server_list = new ServerList ();
+    var server_list = make_server_list ();
     var watcher = new ServerWatcher (server_list);
     var client = server_list.add ("server1.example.com:27015");
 
@@ -278,7 +299,7 @@ public static int main (string[] args) {
 
   // Test 15: Changing max_players opens a slot and triggers signal
   Test.add_func ("/server-watcher/slot_signal_max_players_change", () => {
-    var server_list = new ServerList ();
+    var server_list = make_server_list ();
     var watcher = new ServerWatcher (server_list);
     var client = server_list.add ("server1.example.com:27015");
 
